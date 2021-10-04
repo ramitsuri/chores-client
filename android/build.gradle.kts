@@ -1,0 +1,82 @@
+plugins {
+    id("com.android.application")
+    kotlin("android")
+    kotlin("kapt")
+    id("kotlin-android")
+    id("kotlinx-serialization")
+    id("androidx.navigation.safeargs.kotlin")
+    id("dagger.hilt.android.plugin")
+}
+
+dependencies {
+    implementation("junit:junit:4.12")
+    val fragmentVersion = "1.3.6"
+
+    implementation(project(":shared"))
+
+    // Material
+    implementation("com.google.android.material:material:1.4.0")
+
+    // Ktor
+    implementation("io.ktor:ktor-client-android:1.5.0")
+    implementation("io.ktor:ktor-client-serialization:1.5.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.2")
+    implementation("io.ktor:ktor-client-logging-jvm:1.6.3")
+
+    // App Compat
+    implementation("androidx.appcompat:appcompat:1.3.1")
+
+    // Constraint Layout
+    implementation("androidx.constraintlayout:constraintlayout:2.1.0")
+
+
+    // Dagger - Hilt
+    implementation ("com.google.dagger:hilt-android:2.37")
+    kapt ("com.google.dagger:hilt-android-compiler:2.37")
+    implementation ("androidx.hilt:hilt-lifecycle-viewmodel:1.0.0-alpha03")
+    kapt ("androidx.hilt:hilt-compiler:1.0.0")
+
+    // Fragment
+    implementation("androidx.fragment:fragment-ktx:$fragmentVersion")
+    debugImplementation("androidx.fragment:fragment-testing:$fragmentVersion")
+
+    // Navigation Component
+    implementation ("androidx.navigation:navigation-fragment-ktx:2.3.5")
+    implementation ("androidx.navigation:navigation-ui-ktx:2.3.5")
+
+    // Support
+    implementation("androidx.legacy:legacy-support-v4:1.0.0")
+
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:1.1.5")
+}
+
+kapt {
+    correctErrorTypes = true
+}
+
+android {
+    compileSdk = 30
+    defaultConfig {
+        applicationId = "com.ramitsuri.choresclient.android"
+        minSdk = 23
+        targetSdk = 30
+        versionCode = 2
+        versionName = "1.0"
+    }
+    buildTypes {
+        getByName("release") {
+            isMinifyEnabled = false
+        }
+    }
+    compileOptions {
+        isCoreLibraryDesugaringEnabled = true
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+    buildFeatures {
+        viewBinding = true
+    }
+}

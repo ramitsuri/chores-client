@@ -1,0 +1,11 @@
+<resources>
+    <!-- Assignments -->
+    <string name="assignment_due">Due %1$s</string>
+    <string name="assignment_assigned">Assigned to %1$s</string>
+    <string name="assignment_repeats">Repeats in %1$s</string>
+    <string name="assignment_repeats_does_not_repeat">Repeats in %1$s</string>
+    <string name="assignment_mark_in_progress">In Progress</string>
+    <string name="assignment_mark_todo">To Do</string>
+    <string name="assignment_mark_completed">Mark Completed</string>
+
+</resources>
