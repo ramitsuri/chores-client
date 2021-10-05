@@ -1,12 +1,16 @@
 package com.ramitsuri.choresclient.android.di
 
+import android.content.Context
 import android.util.Log
 import com.ramitsuri.choresclient.android.Base
+import com.ramitsuri.choresclient.android.notification.NotificationHandler
+import com.ramitsuri.choresclient.android.notification.SystemNotificationHandler
 import com.ramitsuri.choresclient.android.utils.DefaultDispatchers
 import com.ramitsuri.choresclient.android.utils.DispatcherProvider
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.android.Android
@@ -71,4 +75,9 @@ class AppModule {
     @Singleton
     @Provides
     fun provideBaseApiUrl() = Base.API_BASE_URL
+
+    @Singleton
+    @Provides
+    fun provideNotificationHandler(@ApplicationContext context: Context): NotificationHandler =
+        SystemNotificationHandler(context)
 }

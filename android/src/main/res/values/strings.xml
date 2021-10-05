@@ -8,4 +8,7 @@
     <string name="assignment_mark_todo">To Do</string>
     <string name="assignment_mark_completed">Mark Completed</string>
 
+    <string name="notification_title">Title</string>
+    <string name="notification_message">You have a pending task</string>
+
 </resources>
