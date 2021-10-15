@@ -1,5 +1,6 @@
 package com.ramitsuri.choresclient.android.repositories
 
+import com.ramitsuri.choresclient.android.data.TaskAssignmentDataSource
 import com.ramitsuri.choresclient.android.model.ProgressStatus
 import com.ramitsuri.choresclient.android.model.Result
 import com.ramitsuri.choresclient.android.model.TaskAssignment
@@ -13,9 +14,13 @@ import javax.inject.Inject
 
 class TaskAssignmentsRepository @Inject constructor(
     private val api: TaskAssignmentsApi,
+    private val dataSource: TaskAssignmentDataSource,
     private val dispatcherProvider: DispatcherProvider
 ) {
-    suspend fun getTaskAssignments(): Result<List<TaskAssignment>> {
+    suspend fun getTaskAssignments(getLocal: Boolean = false): Result<List<TaskAssignment>> {
+        if (getLocal) {
+            return Result.Success(dataSource.getTaskAssignments())
+        }
         return withContext(dispatcherProvider.io) {
             val result = try {
                 api.getTaskAssignments()
@@ -26,7 +31,9 @@ class TaskAssignmentsRepository @Inject constructor(
             if (result == null) {
                 Result.Failure(ViewError.NETWORK)
             } else {
-                Result.Success(result.receive())
+                val taskAssignments: List<TaskAssignment> = result.receive()
+                dataSource.saveTaskAssignments(taskAssignments)
+                Result.Success(dataSource.getTaskAssignments())
             }
         }
     }

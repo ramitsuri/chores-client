@@ -9,7 +9,6 @@ plugins {
 }
 
 dependencies {
-    implementation("junit:junit:4.12")
     val fragmentVersion = "1.3.6"
 
     implementation(project(":shared"))
@@ -29,25 +28,36 @@ dependencies {
     // Constraint Layout
     implementation("androidx.constraintlayout:constraintlayout:2.1.0")
 
-
     // Dagger - Hilt
-    implementation ("com.google.dagger:hilt-android:2.37")
-    kapt ("com.google.dagger:hilt-android-compiler:2.37")
-    implementation ("androidx.hilt:hilt-lifecycle-viewmodel:1.0.0-alpha03")
-    kapt ("androidx.hilt:hilt-compiler:1.0.0")
+    implementation("com.google.dagger:hilt-android:2.37")
+    kapt("com.google.dagger:hilt-android-compiler:2.37")
+    implementation("androidx.hilt:hilt-lifecycle-viewmodel:1.0.0-alpha03")
+    kapt("androidx.hilt:hilt-compiler:1.0.0")
 
     // Fragment
     implementation("androidx.fragment:fragment-ktx:$fragmentVersion")
     debugImplementation("androidx.fragment:fragment-testing:$fragmentVersion")
 
     // Navigation Component
-    implementation ("androidx.navigation:navigation-fragment-ktx:2.3.5")
-    implementation ("androidx.navigation:navigation-ui-ktx:2.3.5")
+    implementation("androidx.navigation:navigation-fragment-ktx:2.3.5")
+    implementation("androidx.navigation:navigation-ui-ktx:2.3.5")
+
+    // Room
+    implementation("androidx.room:room-runtime:2.3.0")
+    implementation("androidx.room:room-ktx:2.3.0")
+    kapt("androidx.room:room-compiler:2.3.0")
 
     // Support
     implementation("androidx.legacy:legacy-support-v4:1.0.0")
 
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:1.1.5")
+
+    // Testing
+    testImplementation("junit:junit:4.12")
+    androidTestImplementation("junit:junit:4.12")
+    androidTestImplementation("androidx.test.ext:junit-ktx:1.1.3")
+    androidTestImplementation("androidx.test:runner:1.4.0")
+    androidTestImplementation("androidx.test:rules:1.4.0")
 }
 
 kapt {
@@ -62,6 +72,13 @@ android {
         targetSdk = 30
         versionCode = 2
         versionName = "1.0"
+
+        kapt {
+            arguments {
+                arg("room.schemaLocation", "$projectDir/schemas")
+            }
+        }
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         getByName("release") {

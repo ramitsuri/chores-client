@@ -1,5 +1,6 @@
 package com.ramitsuri.choresclient.android.model
 
+import com.ramitsuri.choresclient.android.data.TaskEntity
 import kotlinx.serialization.Serializable
 import java.time.Instant
 
@@ -18,4 +19,17 @@ data class Task(
     val rotateMember: Boolean,
     @Serializable(with = InstantSerializer::class)
     val createdDate: Instant
-)
+) {
+    constructor(taskEntity: TaskEntity): this(
+        taskEntity.id,
+        taskEntity.name,
+        taskEntity.description,
+        taskEntity.dueDateTime,
+        taskEntity.repeatValue,
+        taskEntity.repeatUnit,
+        taskEntity.houseId,
+        taskEntity.memberId,
+        taskEntity.rotateMember,
+        taskEntity.createdDate
+    )
+}

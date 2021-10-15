@@ -12,11 +12,11 @@ class SystemNotificationHandler(context: Context): NotificationHandler {
     private val notificationManager =
         context.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager
 
-    override fun createChannels(channelInfos: List<NotificationChannelInfo>) {
+    override fun createChannels(channels: List<NotificationChannelInfo>) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
             return
         }
-        for (channelInfo in channelInfos) {
+        for (channelInfo in channels) {
             notificationManager?.createNotificationChannel(channelInfo.toPlatformChannel())
         }
     }

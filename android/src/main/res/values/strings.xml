@@ -1,4 +1,9 @@
 <resources>
+    <!-- Common -->
+    <string name="app_name">Chores</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+
     <!-- Assignments -->
     <string name="assignment_due">Due %1$s</string>
     <string name="assignment_assigned">Assigned to %1$s</string>
@@ -7,8 +12,17 @@
     <string name="assignment_mark_in_progress">In Progress</string>
     <string name="assignment_mark_todo">To Do</string>
     <string name="assignment_mark_completed">Mark Completed</string>
+    <string name="assignment_miscellaneous">Miscellaneous</string>
 
-    <string name="notification_title">Title</string>
-    <string name="notification_message">You have a pending task</string>
+    <!-- Notifications -->
+    <string name="notification_reminders_id">Reminders</string>
+    <string name="notification_reminders_name">Reminders</string>
+    <string name="notification_reminders_description">Notifications to remind you about due tasks</string>
+    <string name="notification_reminder_title">Task due</string>
+    <string name="notification_reminder_message">You have due task(s). Open the app to check</string>
+
+    <!-- Miscellaneous -->
+    <string name="miscellaneous_set_user_id">Set User Id</string>
+    <string name="miscellaneous_user_id_alert_title">Enter User Id</string>
 
 </resources>

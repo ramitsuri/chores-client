@@ -1,29 +1,28 @@
-package com.ramitsuri.choresclient.android.ui.assigments
+package com.ramitsuri.choresclient.android.ui.miscellaneous
 
 import android.util.Log
 import android.view.LayoutInflater
+import android.widget.EditText
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.viewModels
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewbinding.ViewBinding
 import com.ramitsuri.choresclient.android.R
-import com.ramitsuri.choresclient.android.databinding.FragmentAssignmentsBinding
+import com.ramitsuri.choresclient.android.databinding.FragmentMiscellaneousBinding
 import com.ramitsuri.choresclient.android.extensions.setVisibility
-import com.ramitsuri.choresclient.android.model.TaskAssignment
 import com.ramitsuri.choresclient.android.model.ViewState
 import com.ramitsuri.choresclient.android.ui.BaseFragment
+import com.ramitsuri.choresclient.android.ui.assigments.AssignmentsAdapter
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class AssignmentsFragment: BaseFragment<FragmentAssignmentsBinding>() {
-
-    private val viewModel: AssignmentsViewModel by viewModels()
-    private val adapter = AssignmentsAdapter(listOf()) {taskAssignment, clickType ->
-        onItemClickListener(taskAssignment, clickType)
+class MiscellaneousFragment: BaseFragment<FragmentMiscellaneousBinding>() {
+    private val viewModel: MiscellaneousViewModel by viewModels()
+    private val adapter = AssignmentsAdapter(listOf()) {_, _ ->
     }
 
     override val bindingInflater: (LayoutInflater) -> ViewBinding
-        get() = FragmentAssignmentsBinding::inflate
+        get() = FragmentMiscellaneousBinding::inflate
 
     override fun setupViews() {
         binding.listAssignments.adapter = adapter
@@ -52,24 +51,24 @@ class AssignmentsFragment: BaseFragment<FragmentAssignmentsBinding>() {
             }
         }
 
-        binding.btnMisc.setOnClickListener {
-            findNavController().navigate(R.id.action_assignmentsFragment_to_miscellaneousFragment)
+        binding.btnSetUserId.setOnClickListener {
+            showUserIdAlert()
         }
     }
 
-    private fun onItemClickListener(taskAssignment: TaskAssignment, clickType: ClickType) {
-        viewModel.changeStateRequested(taskAssignment, clickType)
+    private fun showUserIdAlert() {
+        val alert = AlertDialog.Builder(requireActivity())
+        alert.setTitle(R.string.miscellaneous_user_id_alert_title)
+        val editText = EditText(requireActivity())
+        alert.setView(editText)
+        alert.setPositiveButton(R.string.ok) {_, _ ->
+            viewModel.userIdSet(editText.text.toString())
+        }
+        alert.setNegativeButton(R.string.cancel, null)
+        alert.show()
     }
 
     private fun log(message: String) {
-        Log.d("AssignmentsFragment", message)
-    }
-
-    companion object {
-
-        fun newInstance() =
-            AssignmentsFragment().apply {
-
-            }
+        Log.d("MiscellaneousFragment", message)
     }
 }

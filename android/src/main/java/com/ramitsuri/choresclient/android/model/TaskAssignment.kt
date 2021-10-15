@@ -1,5 +1,6 @@
 package com.ramitsuri.choresclient.android.model
 
+import com.ramitsuri.choresclient.android.data.TaskAssignmentEntity
 import kotlinx.serialization.Serializable
 import java.time.Instant
 
@@ -18,7 +19,18 @@ data class TaskAssignment(
     val createdDate: Instant,
     @Serializable(with = CreateTypeSerializer::class)
     val createType: CreateType
-)
+) {
+    constructor(taskAssignmentEntity: TaskAssignmentEntity, member: Member, task: Task): this(
+        taskAssignmentEntity.id,
+        taskAssignmentEntity.progressStatus,
+        taskAssignmentEntity.progressStatusDate,
+        task,
+        member,
+        taskAssignmentEntity.dueDateTime,
+        taskAssignmentEntity.createdDate,
+        taskAssignmentEntity.createType
+    )
+}
 
 @Serializable
 data class TaskAssignmentDto(
