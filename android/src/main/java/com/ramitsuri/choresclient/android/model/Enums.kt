@@ -45,7 +45,8 @@ enum class RepeatUnit(val key: Int) {
     WEEK(2),
     MONTH(3),
     HOUR(4),
-    YEAR(5);
+    YEAR(5),
+    ON_COMPLETE(6);
 
     companion object {
         fun fromKey(key: Int): RepeatUnit {

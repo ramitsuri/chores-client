@@ -7,6 +7,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.PrimaryKey
 import androidx.room.Query
+import androidx.room.Transaction
 import com.ramitsuri.choresclient.android.model.CreateType
 import com.ramitsuri.choresclient.android.model.ProgressStatus
 import com.ramitsuri.choresclient.android.model.TaskAssignment
@@ -44,13 +45,22 @@ class TaskAssignmentEntity(
 }
 
 @Dao
-interface TaskAssignmentDao {
+abstract class TaskAssignmentDao {
     @Query("SELECT * FROM TaskAssignments")
-    suspend fun getAll(): List<TaskAssignmentEntity>
+    abstract suspend fun getAll(): List<TaskAssignmentEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(taskAssignmentEntity: TaskAssignmentEntity)
+    abstract suspend fun insert(taskAssignmentEntity: TaskAssignmentEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(taskAssignmentEntities: List<TaskAssignmentEntity>)
+    abstract suspend fun insert(taskAssignmentEntities: List<TaskAssignmentEntity>)
+
+    @Query("DELETE FROM TaskAssignments")
+    abstract suspend fun delete()
+
+    @Transaction
+    open suspend fun clearAndInsert(taskAssignmentEntities: List<TaskAssignmentEntity>) {
+        delete()
+        insert(taskAssignmentEntities)
+    }
 }

@@ -12,13 +12,13 @@ class TaskAssignmentDataSource @Inject constructor(
 ) {
     suspend fun saveTaskAssignments(assignments: List<TaskAssignment>) {
         val members = assignments.map {MemberEntity(it.member)}
-        memberDao.insert(members)
+        memberDao.clearAndInsert(members)
 
         val tasks = assignments.map {TaskEntity(it.task)}
-        taskDao.insert(tasks)
+        taskDao.clearAndInsert(tasks)
 
         val taskAssignments = assignments.map {TaskAssignmentEntity(it)}
-        taskAssignmentDao.insert(taskAssignments)
+        taskAssignmentDao.clearAndInsert(taskAssignments)
     }
 
     suspend fun getTaskAssignments(): List<TaskAssignment> {

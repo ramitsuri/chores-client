@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="text">#ffffff</color>
     <color name="green">#087f23</color>
+    <color name="green_text_on_color">#75e900</color>
     <color name="yellow">#fff176</color>
-    <color name="orange">#ff9800</color>
+    <color name="orange">#f47100</color>
 </resources>

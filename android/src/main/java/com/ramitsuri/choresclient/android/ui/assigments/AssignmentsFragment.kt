@@ -32,19 +32,16 @@ class AssignmentsFragment: BaseFragment<FragmentAssignmentsBinding>() {
             when (viewState) {
                 is ViewState.Loading -> {
                     log("Loading")
-                    binding.listAssignments.setVisibility(false)
-                    binding.progress.setVisibility(true)
+                    onLoading(true)
                 }
                 is ViewState.Error -> {
                     log("Error: ${viewState.error}")
-                    binding.listAssignments.setVisibility(true)
-                    binding.progress.setVisibility(false)
+                    onLoading(false)
                 }
 
                 is ViewState.Success -> {
                     adapter.update(viewState.data)
-                    binding.listAssignments.setVisibility(true)
-                    binding.progress.setVisibility(false)
+                    onLoading(false)
                 }
                 is ViewState.Reload -> {
                     viewModel.fetchAssignments()
@@ -55,10 +52,22 @@ class AssignmentsFragment: BaseFragment<FragmentAssignmentsBinding>() {
         binding.btnMisc.setOnClickListener {
             findNavController().navigate(R.id.action_assignmentsFragment_to_miscellaneousFragment)
         }
+
+        binding.btnRefresh.setOnClickListener {
+            viewModel.fetchAssignments()
+        }
     }
 
     private fun onItemClickListener(taskAssignment: TaskAssignment, clickType: ClickType) {
         viewModel.changeStateRequested(taskAssignment, clickType)
+    }
+
+    private fun onLoading(loading: Boolean) {
+        val showContent = !loading
+        binding.listAssignments.setVisibility(showContent)
+        binding.btnRefresh.setVisibility(showContent)
+        binding.btnMisc.setVisibility(showContent)
+        binding.progress.setVisibility(loading)
     }
 
     private fun log(message: String) {

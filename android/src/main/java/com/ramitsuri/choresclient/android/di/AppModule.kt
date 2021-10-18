@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import androidx.room.Room
 import com.ramitsuri.choresclient.android.Base
+import com.ramitsuri.choresclient.android.BuildConfig
 import com.ramitsuri.choresclient.android.data.AppDatabase
 import com.ramitsuri.choresclient.android.data.MemberDao
 import com.ramitsuri.choresclient.android.data.ReminderAssignmentDao
@@ -87,7 +88,7 @@ class AppModule {
 
     @Singleton
     @Provides
-    fun provideBaseApiUrl() = Base.API_BASE_URL
+    fun provideBaseApiUrl() = if (BuildConfig.DEBUG) Base.API_BASE_URL_DEBUG else Base.API_BASE_URL
 
     @Singleton
     @Provides

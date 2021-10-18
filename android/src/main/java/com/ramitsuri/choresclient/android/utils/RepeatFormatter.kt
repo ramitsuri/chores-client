@@ -5,7 +5,7 @@ import com.ramitsuri.choresclient.android.R
 import com.ramitsuri.choresclient.android.model.RepeatUnit
 
 fun Context.formatRepeatUnit(repeatValue: Int, repeatUnit: RepeatUnit): String {
-    if (repeatValue == 0) {
+    if (repeatValue == 0 && repeatUnit != RepeatUnit.ON_COMPLETE && repeatUnit != RepeatUnit.NONE) {
         return getString(R.string.assignment_repeats_does_not_repeat)
     }
     return when (repeatUnit) {
@@ -42,6 +42,9 @@ fun Context.formatRepeatUnit(repeatValue: Int, repeatUnit: RepeatUnit): String {
                 repeatValue,
                 repeatValue
             )
+        }
+        RepeatUnit.ON_COMPLETE -> {
+            getString(R.string.assignment_repeats_on_complete)
         }
     }
 }

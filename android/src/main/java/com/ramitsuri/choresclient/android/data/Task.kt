@@ -2,11 +2,13 @@ package com.ramitsuri.choresclient.android.data
 
 import androidx.room.ColumnInfo
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Entity
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.PrimaryKey
 import androidx.room.Query
+import androidx.room.Transaction
 import com.ramitsuri.choresclient.android.model.RepeatUnit
 import com.ramitsuri.choresclient.android.model.Task
 import java.time.Instant
@@ -49,13 +51,22 @@ class TaskEntity(
 }
 
 @Dao
-interface TaskDao {
+abstract class TaskDao {
     @Query("SELECT * FROM Tasks WHERE id = :id")
-    suspend fun get(id: String): TaskEntity?
+    abstract suspend fun get(id: String): TaskEntity?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(taskEntity: TaskEntity)
+    abstract suspend fun insert(taskEntity: TaskEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(taskEntities: List<TaskEntity>)
+    abstract suspend fun insert(taskEntities: List<TaskEntity>)
+
+    @Query("DELETE FROM Tasks")
+    abstract suspend fun delete()
+
+    @Transaction
+    open suspend fun clearAndInsert(taskEntities: List<TaskEntity>) {
+        delete()
+        insert(taskEntities)
+    }
 }

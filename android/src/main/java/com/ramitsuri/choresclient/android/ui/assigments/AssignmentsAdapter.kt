@@ -3,6 +3,7 @@ package com.ramitsuri.choresclient.android.ui.assigments
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.annotation.StringRes
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.ramitsuri.choresclient.android.R
 import com.ramitsuri.choresclient.android.databinding.AssignmentItemBinding
@@ -70,20 +71,26 @@ class AssignmentsAdapter(
         }
 
         fun bind(taskAssignment: TaskAssignment) {
+            binding.container.setCardBackgroundColor(
+                if (taskAssignment.progressStatus == ProgressStatus.TODO) {
+                    ContextCompat.getColor(binding.root.context, R.color.orange)
+                } else {
+                    ContextCompat.getColor(binding.root.context, R.color.green)
+                }
+            )
             binding.textTitle.text = taskAssignment.task.name
             binding.textAssignedTo.text = getString(
                 R.string.assignment_assigned, taskAssignment.member.name
             )
+
+            binding.textDueDateTime.setVisibility(taskAssignment.task.repeatUnit != RepeatUnit.ON_COMPLETE)
             binding.textDueDateTime.text = getString(
                 R.string.assignment_due, formatInstant(taskAssignment.dueDateTime, Instant.now())
             )
 
             binding.textRepeats.setVisibility(taskAssignment.task.repeatUnit != RepeatUnit.NONE)
-            binding.textRepeats.text = getString(
-                R.string.assignment_repeats, getRepeatsString(
-                    taskAssignment.task.repeatValue, taskAssignment.task.repeatUnit
-                )
-            )
+            binding.textRepeats.text =
+                getRepeatsString(taskAssignment.task.repeatValue, taskAssignment.task.repeatUnit)
 
 
             when (taskAssignment.progressStatus) {
