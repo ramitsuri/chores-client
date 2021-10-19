@@ -14,13 +14,16 @@
     <string name="assignment_mark_completed">Mark Completed</string>
     <string name="assignment_miscellaneous">Miscellaneous</string>
     <string name="assignment_refresh">Refresh</string>
+    <string name="assignment_filter_all">All</string>
+    <string name="assignment_filter_mine">Assigned to me</string>
+    <string name="assignment_filter_other">Assigned to others</string>
 
     <!-- Notifications -->
     <string name="notification_reminders_id">Reminders</string>
     <string name="notification_reminders_name">Reminders</string>
     <string name="notification_reminders_description">Notifications to remind you about due tasks</string>
-    <string name="notification_reminder_title">Task due</string>
-    <string name="notification_reminder_message">You have due task(s). Open the app to check</string>
+    <string name="notification_reminder_title">Task(s) due</string>
+    <string name="notification_reminder_message">You have task(s) due. Open the app to check</string>
 
     <!-- Miscellaneous -->
     <string name="miscellaneous_set_user_id">Set User Id</string>

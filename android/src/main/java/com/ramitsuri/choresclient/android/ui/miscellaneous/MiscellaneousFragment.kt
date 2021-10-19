@@ -13,6 +13,7 @@ import com.ramitsuri.choresclient.android.extensions.setVisibility
 import com.ramitsuri.choresclient.android.model.ViewState
 import com.ramitsuri.choresclient.android.ui.BaseFragment
 import com.ramitsuri.choresclient.android.ui.assigments.AssignmentsAdapter
+import com.ramitsuri.choresclient.android.ui.assigments.ItemDecorator
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -25,6 +26,11 @@ class MiscellaneousFragment: BaseFragment<FragmentMiscellaneousBinding>() {
         get() = FragmentMiscellaneousBinding::inflate
 
     override fun setupViews() {
+        binding.listAssignments.addItemDecoration(
+            ItemDecorator(
+                resources.getDimensionPixelSize(R.dimen.margin_recycler_view)
+            )
+        )
         binding.listAssignments.adapter = adapter
         binding.listAssignments.layoutManager = LinearLayoutManager(requireContext())
         viewModel.state.observe(viewLifecycleOwner) {viewState ->

@@ -26,6 +26,11 @@ class AssignmentsFragment: BaseFragment<FragmentAssignmentsBinding>() {
         get() = FragmentAssignmentsBinding::inflate
 
     override fun setupViews() {
+        binding.listAssignments.addItemDecoration(
+            ItemDecorator(
+                resources.getDimensionPixelSize(R.dimen.margin_recycler_view)
+            )
+        )
         binding.listAssignments.adapter = adapter
         binding.listAssignments.layoutManager = LinearLayoutManager(requireContext())
         viewModel.state.observe(viewLifecycleOwner) {viewState ->
@@ -56,6 +61,23 @@ class AssignmentsFragment: BaseFragment<FragmentAssignmentsBinding>() {
         binding.btnRefresh.setOnClickListener {
             viewModel.fetchAssignments()
         }
+
+        binding.filterGroup.setOnCheckedChangeListener {group, checkedId ->
+            when (checkedId) {
+                binding.filterAll.id -> {
+                    log("All")
+                    viewModel.filterAll()
+                }
+                binding.filterMine.id -> {
+                    log("Mine")
+                    viewModel.filterMine()
+                }
+                binding.filterOther.id -> {
+                    log("Other")
+                    viewModel.filterExceptMine()
+                }
+            }
+        }
     }
 
     private fun onItemClickListener(taskAssignment: TaskAssignment, clickType: ClickType) {
@@ -64,6 +86,7 @@ class AssignmentsFragment: BaseFragment<FragmentAssignmentsBinding>() {
 
     private fun onLoading(loading: Boolean) {
         val showContent = !loading
+        binding.filterGroup.setVisibility(showContent)
         binding.listAssignments.setVisibility(showContent)
         binding.btnRefresh.setVisibility(showContent)
         binding.btnMisc.setVisibility(showContent)

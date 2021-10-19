@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ramitsuri.choresclient.android.model.ProgressStatus
+import com.ramitsuri.choresclient.android.model.RepeatUnit
 import com.ramitsuri.choresclient.android.model.Result
 import com.ramitsuri.choresclient.android.model.TaskAssignment
 import com.ramitsuri.choresclient.android.model.ViewState
@@ -49,11 +50,34 @@ class AssignmentsViewModel @Inject constructor(
         }
     }
 
+    fun filterAll() {
+        filter(FilterMode.ALL)
+    }
+
+    fun filterMine() {
+        filter(FilterMode.MINE(prefManager.getUserId(null) ?: ""))
+    }
+
+    fun filterExceptMine() {
+        filter(FilterMode.OTHER(prefManager.getUserId(null) ?: ""))
+    }
+
+    private fun filter(filterMode: FilterMode) {
+        viewModelScope.launch(dispatchers.main) {
+            val userId = prefManager.getUserId()
+            val assignmentsResult = repository.filter(filterMode) as Result.Success
+            _state.value =
+                ViewState.Success(getAssignmentsForDisplay(assignmentsResult.data, userId))
+        }
+    }
+
     private fun getAssignmentsForReminders(
         data: List<TaskAssignment>,
         userId: String?
     ): List<TaskAssignment> {
-        return data.filter {it.member.id == userId}
+        return data
+            .filter {it.member.id == userId}
+            .filter {it.task.repeatUnit != RepeatUnit.ON_COMPLETE}
     }
 
     private fun getAssignmentsForDisplay(

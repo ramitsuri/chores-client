@@ -3,6 +3,7 @@ package com.ramitsuri.choresclient.android.data
 import com.ramitsuri.choresclient.android.model.Member
 import com.ramitsuri.choresclient.android.model.Task
 import com.ramitsuri.choresclient.android.model.TaskAssignment
+import com.ramitsuri.choresclient.android.ui.assigments.FilterMode
 import javax.inject.Inject
 
 class TaskAssignmentDataSource @Inject constructor(
@@ -21,9 +22,9 @@ class TaskAssignmentDataSource @Inject constructor(
         taskAssignmentDao.clearAndInsert(taskAssignments)
     }
 
-    suspend fun getTaskAssignments(): List<TaskAssignment> {
+    suspend fun getTaskAssignments(filterMode: FilterMode = FilterMode.ALL): List<TaskAssignment> {
         val assignments = mutableListOf<TaskAssignment>()
-        for (assignmentEntity in taskAssignmentDao.getAll()) {
+        for (assignmentEntity in taskAssignmentDao.get(filterMode)) {
             val memberEntity = memberDao.get(assignmentEntity.memberId)
             val taskEntity = taskDao.get(assignmentEntity.taskId)
             if (memberEntity == null || taskEntity == null) {

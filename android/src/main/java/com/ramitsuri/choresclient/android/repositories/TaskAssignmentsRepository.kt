@@ -6,6 +6,7 @@ import com.ramitsuri.choresclient.android.model.Result
 import com.ramitsuri.choresclient.android.model.TaskAssignment
 import com.ramitsuri.choresclient.android.model.ViewError
 import com.ramitsuri.choresclient.android.network.TaskAssignmentsApi
+import com.ramitsuri.choresclient.android.ui.assigments.FilterMode
 import com.ramitsuri.choresclient.android.utils.DispatcherProvider
 import io.ktor.client.call.receive
 import io.ktor.http.HttpStatusCode
@@ -17,7 +18,9 @@ class TaskAssignmentsRepository @Inject constructor(
     private val dataSource: TaskAssignmentDataSource,
     private val dispatcherProvider: DispatcherProvider
 ) {
-    suspend fun getTaskAssignments(getLocal: Boolean = false): Result<List<TaskAssignment>> {
+    suspend fun getTaskAssignments(
+        getLocal: Boolean = false
+    ): Result<List<TaskAssignment>> {
         if (getLocal) {
             return Result.Success(dataSource.getTaskAssignments())
         }
@@ -36,6 +39,10 @@ class TaskAssignmentsRepository @Inject constructor(
                 Result.Success(dataSource.getTaskAssignments())
             }
         }
+    }
+
+    suspend fun filter(filterMode: FilterMode = FilterMode.ALL): Result<List<TaskAssignment>> {
+        return Result.Success(dataSource.getTaskAssignments(filterMode))
     }
 
     suspend fun getTaskAssignment(id: String): Result<TaskAssignment> {

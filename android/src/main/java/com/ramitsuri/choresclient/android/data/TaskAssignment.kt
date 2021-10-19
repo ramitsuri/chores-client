@@ -11,6 +11,7 @@ import androidx.room.Transaction
 import com.ramitsuri.choresclient.android.model.CreateType
 import com.ramitsuri.choresclient.android.model.ProgressStatus
 import com.ramitsuri.choresclient.android.model.TaskAssignment
+import com.ramitsuri.choresclient.android.ui.assigments.FilterMode
 import java.time.Instant
 
 @Entity(tableName = "TaskAssignments")
@@ -49,6 +50,12 @@ abstract class TaskAssignmentDao {
     @Query("SELECT * FROM TaskAssignments")
     abstract suspend fun getAll(): List<TaskAssignmentEntity>
 
+    @Query("SELECT * FROM TaskAssignments WHERE memberId = :memberId")
+    abstract suspend fun getForMember(memberId: String): List<TaskAssignmentEntity>
+
+    @Query("SELECT * FROM TaskAssignments WHERE memberId != :memberId")
+    abstract suspend fun getForExceptMember(memberId: String): List<TaskAssignmentEntity>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun insert(taskAssignmentEntity: TaskAssignmentEntity)
 
@@ -57,6 +64,24 @@ abstract class TaskAssignmentDao {
 
     @Query("DELETE FROM TaskAssignments")
     abstract suspend fun delete()
+
+    @Transaction
+    open suspend fun get(filterMode: FilterMode): List<TaskAssignmentEntity> {
+        return when (filterMode) {
+            is FilterMode.NONE -> {
+                listOf()
+            }
+            is FilterMode.ALL -> {
+                getAll()
+            }
+            is FilterMode.MINE -> {
+                getForMember(filterMode.memberId)
+            }
+            is FilterMode.OTHER -> {
+                getForExceptMember(filterMode.ownUserId)
+            }
+        }
+    }
 
     @Transaction
     open suspend fun clearAndInsert(taskAssignmentEntities: List<TaskAssignmentEntity>) {
