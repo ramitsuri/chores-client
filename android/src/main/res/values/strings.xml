@@ -12,7 +12,7 @@
     <string name="assignment_mark_in_progress">In Progress</string>
     <string name="assignment_mark_todo">To Do</string>
     <string name="assignment_mark_completed">Mark Completed</string>
-    <string name="assignment_miscellaneous">Miscellaneous</string>
+    <string name="assignment_miscellaneous">Setup</string>
     <string name="assignment_refresh">Refresh</string>
     <string name="assignment_filter_all">All</string>
     <string name="assignment_filter_mine">Assigned to me</string>
