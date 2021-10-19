@@ -15,6 +15,7 @@ import com.ramitsuri.choresclient.android.utils.DispatcherProvider
 import com.ramitsuri.choresclient.android.utils.PrefManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import java.util.*
 import javax.inject.Inject
 
 @HiltViewModel
@@ -93,6 +94,11 @@ class AssignmentsViewModel @Inject constructor(
     }
 
     fun changeStateRequested(taskAssignment: TaskAssignment, clickType: ClickType) {
+        try {
+            UUID.fromString(prefManager.getUserId()) ?: return
+        } catch (e: Exception) {
+            return
+        }
         val newProgressStatus = when (taskAssignment.progressStatus) {
             ProgressStatus.TODO -> {
                 when (clickType) {
