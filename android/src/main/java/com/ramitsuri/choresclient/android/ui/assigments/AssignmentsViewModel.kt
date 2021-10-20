@@ -78,6 +78,7 @@ class AssignmentsViewModel @Inject constructor(
     ): List<TaskAssignment> {
         return data
             .filter {it.member.id == userId}
+            .filter {it.progressStatus == ProgressStatus.TODO}
             .filter {it.task.repeatUnit != RepeatUnit.ON_COMPLETE}
     }
 
