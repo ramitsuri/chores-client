@@ -1,6 +1,5 @@
 package com.ramitsuri.choresclient.android.ui.assigments
 
-import android.util.Log
 import android.view.LayoutInflater
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -13,6 +12,7 @@ import com.ramitsuri.choresclient.android.model.TaskAssignment
 import com.ramitsuri.choresclient.android.model.ViewState
 import com.ramitsuri.choresclient.android.ui.BaseFragment
 import dagger.hilt.android.AndroidEntryPoint
+import timber.log.Timber
 
 @AndroidEntryPoint
 class AssignmentsFragment: BaseFragment<FragmentAssignmentsBinding>() {
@@ -94,7 +94,7 @@ class AssignmentsFragment: BaseFragment<FragmentAssignmentsBinding>() {
     }
 
     private fun log(message: String) {
-        Log.d("AssignmentsFragment", message)
+        Timber.d(message)
     }
 
     companion object {

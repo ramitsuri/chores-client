@@ -1,7 +1,6 @@
 package com.ramitsuri.choresclient.android.di
 
 import android.content.Context
-import android.util.Log
 import androidx.room.Room
 import com.ramitsuri.choresclient.android.Base
 import com.ramitsuri.choresclient.android.BuildConfig
@@ -39,6 +38,7 @@ import io.ktor.client.request.header
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import kotlinx.serialization.json.Json
+import timber.log.Timber
 import javax.inject.Singleton
 
 @Module
@@ -65,7 +65,8 @@ class AppModule {
         install(Logging) {
             logger = object: Logger {
                 override fun log(message: String) {
-                    Log.v("Logger Ktor =>", message)
+                    Timber.tag("Logger Ktor =>")
+                    Timber.v(message)
                 }
             }
             level = LogLevel.ALL
@@ -73,7 +74,8 @@ class AppModule {
 
         install(ResponseObserver) {
             onResponse {response ->
-                Log.d("HTTP status:", "${response.status.value}")
+                Timber.tag("HTTP status:")
+                Timber.d("${response.status.value}")
             }
         }
 

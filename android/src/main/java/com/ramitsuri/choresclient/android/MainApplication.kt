@@ -5,6 +5,7 @@ import com.ramitsuri.choresclient.android.notification.Importance
 import com.ramitsuri.choresclient.android.notification.NotificationChannelInfo
 import com.ramitsuri.choresclient.android.notification.NotificationHandler
 import dagger.hilt.android.HiltAndroidApp
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltAndroidApp
@@ -15,6 +16,7 @@ class MainApplication: Application() {
 
     override fun onCreate() {
         super.onCreate()
+        Timber.plant(Timber.DebugTree())
 
         notificationHandler.createChannels(
             listOf(

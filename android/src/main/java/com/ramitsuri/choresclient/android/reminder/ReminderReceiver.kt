@@ -3,24 +3,23 @@ package com.ramitsuri.choresclient.android.reminder
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import com.ramitsuri.choresclient.android.R
 import com.ramitsuri.choresclient.android.notification.NotificationHandler
 import com.ramitsuri.choresclient.android.notification.NotificationInfo
 import com.ramitsuri.choresclient.android.notification.Priority
 import dagger.hilt.android.AndroidEntryPoint
+import timber.log.Timber
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class ReminderReceiver: BroadcastReceiver() {
-    private val TAG = "ReminderReceiver"
-
     @Inject
     lateinit var notificationHandler: NotificationHandler
 
     override fun onReceive(context: Context?, intent: Intent?) {
-        Log.d(TAG, "Received reminder intent")
-
+        if (intent != null) {
+            Timber.d("Received reminder intent with Action: ${intent.action}")
+        }
         if (context != null) {
             notificationHandler.buildAndShow(
                 NotificationInfo(

@@ -52,6 +52,9 @@ dependencies {
 
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:1.1.5")
 
+    // Logging
+    implementation ("com.jakewharton.timber:timber:4.7.1")
+
     // Testing
     testImplementation("junit:junit:4.12")
     androidTestImplementation("junit:junit:4.12")

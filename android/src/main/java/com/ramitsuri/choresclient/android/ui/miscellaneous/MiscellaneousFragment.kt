@@ -1,6 +1,5 @@
 package com.ramitsuri.choresclient.android.ui.miscellaneous
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
@@ -15,6 +14,7 @@ import com.ramitsuri.choresclient.android.ui.BaseFragment
 import com.ramitsuri.choresclient.android.ui.assigments.AssignmentsAdapter
 import com.ramitsuri.choresclient.android.ui.assigments.ItemDecorator
 import dagger.hilt.android.AndroidEntryPoint
+import timber.log.Timber
 
 @AndroidEntryPoint
 class MiscellaneousFragment: BaseFragment<FragmentMiscellaneousBinding>() {
@@ -75,6 +75,6 @@ class MiscellaneousFragment: BaseFragment<FragmentMiscellaneousBinding>() {
     }
 
     private fun log(message: String) {
-        Log.d("MiscellaneousFragment", message)
+        Timber.d(message)
     }
 }
