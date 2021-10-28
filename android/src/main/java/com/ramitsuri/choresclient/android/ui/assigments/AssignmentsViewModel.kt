@@ -4,48 +4,48 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ramitsuri.choresclient.android.model.AssignmentsViewState
 import com.ramitsuri.choresclient.android.model.ProgressStatus
-import com.ramitsuri.choresclient.android.model.RepeatUnit
 import com.ramitsuri.choresclient.android.model.Result
 import com.ramitsuri.choresclient.android.model.TaskAssignment
 import com.ramitsuri.choresclient.android.model.ViewState
-import com.ramitsuri.choresclient.android.notification.ReminderScheduler
 import com.ramitsuri.choresclient.android.repositories.TaskAssignmentsRepository
 import com.ramitsuri.choresclient.android.utils.DispatcherProvider
 import com.ramitsuri.choresclient.android.utils.PrefManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import java.util.*
 import javax.inject.Inject
 
 @HiltViewModel
 class AssignmentsViewModel @Inject constructor(
     private val repository: TaskAssignmentsRepository,
-    private val reminderScheduler: ReminderScheduler,
     private val prefManager: PrefManager,
     private val dispatchers: DispatcherProvider
 ): ViewModel() {
 
-    private val _state = MutableLiveData<ViewState<List<TaskAssignment>>>(ViewState.Reload)
-    val state: LiveData<ViewState<List<TaskAssignment>>> = _state
+    private val _state = MutableLiveData<ViewState<AssignmentsViewState>>(ViewState.Reload)
+    val state: LiveData<ViewState<AssignmentsViewState>> = _state
 
-    fun fetchAssignments() {
+    fun fetchAssignments(getLocal: Boolean = false) {
+        val isWorkerRunning = prefManager.isWorkerRunning()
+        val shouldGetLocal = getLocal || isWorkerRunning
+        Timber.d("Will get local: $shouldGetLocal - getLocal($getLocal) || workerRunning($isWorkerRunning)")
         _state.value = ViewState.Loading
         viewModelScope.launch(dispatchers.main) {
-            val assignmentsResult = repository.getTaskAssignments()
+            val assignmentsResult = repository.getTaskAssignments(shouldGetLocal)
             _state.value = when (assignmentsResult) {
                 is Result.Failure -> {
                     ViewState.Error(assignmentsResult.error)
                 }
                 is Result.Success -> {
                     val userId = prefManager.getUserId()
-                    reminderScheduler.addReminders(
-                        getAssignmentsForReminders(
-                            assignmentsResult.data,
-                            userId
-                        )
+                    val assignmentsState = AssignmentsViewState(
+                        getAssignmentsForDisplay(assignmentsResult.data, userId),
+                        FilterMode.ALL
                     )
-                    ViewState.Success(getAssignmentsForDisplay(assignmentsResult.data, userId))
+                    ViewState.Success(assignmentsState)
                 }
             }
         }
@@ -67,19 +67,12 @@ class AssignmentsViewModel @Inject constructor(
         viewModelScope.launch(dispatchers.main) {
             val userId = prefManager.getUserId()
             val assignmentsResult = repository.filter(filterMode) as Result.Success
-            _state.value =
-                ViewState.Success(getAssignmentsForDisplay(assignmentsResult.data, userId))
+            val assignmentsState = AssignmentsViewState(
+                getAssignmentsForDisplay(assignmentsResult.data, userId),
+                filterMode
+            )
+            _state.value = ViewState.Success(assignmentsState)
         }
-    }
-
-    private fun getAssignmentsForReminders(
-        data: List<TaskAssignment>,
-        userId: String?
-    ): List<TaskAssignment> {
-        return data
-            .filter {it.member.id == userId}
-            .filter {it.progressStatus == ProgressStatus.TODO}
-            .filter {it.task.repeatUnit != RepeatUnit.ON_COMPLETE}
     }
 
     private fun getAssignmentsForDisplay(
@@ -120,8 +113,7 @@ class AssignmentsViewModel @Inject constructor(
         }
         _state.value = ViewState.Loading
         viewModelScope.launch {
-            val result =
-                repository.saveTaskAssignments(taskAssignment.id, newProgressStatus)
+            val result = repository.updateTaskAssignment(taskAssignment.id, newProgressStatus)
             _state.value = when (result) {
                 is Result.Failure -> {
                     ViewState.Error(result.error)

@@ -7,6 +7,7 @@ import com.ramitsuri.choresclient.android.utils.DispatcherProvider
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.time.Instant
+import java.time.ZonedDateTime
 
 class ReminderScheduler(
     private val reminderAssignmentDao: ReminderAssignmentDao,
@@ -26,6 +27,7 @@ class ReminderScheduler(
         assignments.addAll(taskAssignments)
         running = true
         check()
+        scheduleReminders()
         running = false
     }
 
@@ -42,12 +44,7 @@ class ReminderScheduler(
 
                 if (existingReminderAssignment == null) {
                     log("Existing null, adding new")
-                    val reminderAssignment =
-                        reminderAssignmentDao.insert(assignment.id, newTime)
-                    if (reminderAssignment != null) {
-                        alarmHandler.schedule(reminderAssignment)
-                        log("Scheduled $reminderAssignment")
-                    }
+                    reminderAssignmentDao.insert(assignment.id, newTime)
                 } else {
                     log("Exists")
                     val oldTime = existingReminderAssignment.time
@@ -60,11 +57,7 @@ class ReminderScheduler(
                         )
                         if (updateResult.oldTimeNoLongerExists) {
                             log("Old time no longer exists")
-                            alarmHandler.cancel(existingReminderAssignment)
-                        }
-                        if (updateResult.reminderAssignment != null) {
-                            alarmHandler.schedule(updateResult.reminderAssignment)
-                            log("Scheduled ${updateResult.reminderAssignment}")
+                            alarmHandler.cancel(existingReminderAssignment.requestCode)
                         }
                     }
                 }
@@ -72,6 +65,24 @@ class ReminderScheduler(
             }
         }
         log("Done")
+    }
+
+    private suspend fun scheduleReminders() {
+        // Schedule only reminders from one hour in the past. We don't want to be showing reminders
+        // for assignments that are already way back in the past
+        val now = ZonedDateTime.now().minusHours(1).toInstant().toEpochMilli()
+        withContext(dispatchers.io) {
+            val requestCodeTimeAssociations = reminderAssignmentDao.getRequestCodeTimeAssociations()
+            for (requestCodeTimeAssociation in requestCodeTimeAssociations) {
+                if (requestCodeTimeAssociation.time < now) {
+                    continue
+                }
+                alarmHandler.schedule(
+                    requestCodeTimeAssociation.requestCode,
+                    requestCodeTimeAssociation.time
+                )
+            }
+        }
     }
 
     private fun log(message: String) {

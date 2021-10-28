@@ -55,10 +55,15 @@ dependencies {
     // Logging
     implementation ("com.jakewharton.timber:timber:4.7.1")
 
+    // Work
+    val workVersion = "2.7.0"
+    implementation ("androidx.work:work-runtime-ktx:$workVersion")
+    implementation ("androidx.hilt:hilt-work:1.0.0")
+
     // Testing
-    testImplementation("junit:junit:4.12")
-    androidTestImplementation("junit:junit:4.12")
-    androidTestImplementation("androidx.test.ext:junit-ktx:1.1.3")
+    testImplementation("junit:junit:4.13.2")
+    androidTestImplementation("junit:junit:4.13.2")
+    androidTestImplementation("androidx.test.ext:junit-ktx:1.1.4-alpha03")
     androidTestImplementation("androidx.test:runner:1.4.0")
     androidTestImplementation("androidx.test:rules:1.4.0")
 }
@@ -68,11 +73,11 @@ kapt {
 }
 
 android {
-    compileSdk = 30
+    compileSdk = 31
     defaultConfig {
         applicationId = "com.ramitsuri.choresclient.android"
         minSdk = 23
-        targetSdk = 30
+        targetSdk = 31
         versionCode = 9
         versionName = "1.7"
 

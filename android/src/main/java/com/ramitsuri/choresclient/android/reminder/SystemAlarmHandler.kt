@@ -9,26 +9,26 @@ import com.ramitsuri.choresclient.android.data.ReminderAssignment
 class SystemAlarmHandler(context: Context): AlarmHandler {
     private val context = context.applicationContext
 
-    override fun schedule(reminder: ReminderAssignment) {
+    override fun schedule(requestCode: Int, time: Long) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager
         alarmManager?.setExactAndAllowWhileIdle(
             AlarmManager.RTC_WAKEUP,
-            reminder.time,
-            generatePendingIntent(reminder)
+            time,
+            generatePendingIntent(requestCode)
         )
     }
 
-    override fun cancel(reminder: ReminderAssignment) {
+    override fun cancel(requestCode: Int) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager
-        alarmManager?.cancel(generatePendingIntent(reminder))
+        alarmManager?.cancel(generatePendingIntent(requestCode))
     }
 
-    private fun generatePendingIntent(reminder: ReminderAssignment): PendingIntent {
+    private fun generatePendingIntent(requestCode: Int): PendingIntent {
         val intent = Intent(context, ReminderReceiver::class.java)
-        intent.action = "REMINDER_CODE=${reminder.requestCode}"
+        intent.action = "REMINDER_CODE=${requestCode}"
         return PendingIntent.getBroadcast(
             context,
-            reminder.requestCode,
+            requestCode,
             intent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )

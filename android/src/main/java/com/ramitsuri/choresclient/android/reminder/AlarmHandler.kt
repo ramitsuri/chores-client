@@ -1,10 +1,8 @@
 package com.ramitsuri.choresclient.android.reminder
 
-import com.ramitsuri.choresclient.android.data.ReminderAssignment
-
 interface AlarmHandler {
 
-    fun schedule(reminder: ReminderAssignment)
+    fun schedule(requestCode: Int, time: Long)
 
-    fun cancel(reminder: ReminderAssignment)
+    fun cancel(requestCode: Int)
 }

@@ -61,7 +61,7 @@ class TaskAssignmentsRepository @Inject constructor(
         }
     }
 
-    suspend fun saveTaskAssignments(
+    suspend fun updateTaskAssignment(
         id: String,
         progressStatus: ProgressStatus
     ): Result<Boolean> {

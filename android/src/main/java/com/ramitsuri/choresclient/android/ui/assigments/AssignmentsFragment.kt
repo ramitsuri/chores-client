@@ -45,11 +45,26 @@ class AssignmentsFragment: BaseFragment<FragmentAssignmentsBinding>() {
                 }
 
                 is ViewState.Success -> {
-                    adapter.update(viewState.data)
+                    adapter.update(viewState.data.assignments)
+                    binding.filterGroup.setOnCheckedChangeListener(null)
+                    when (viewState.data.selectedFilter) {
+                        is FilterMode.ALL -> {
+                            binding.filterAll.isChecked = true
+                        }
+                        is FilterMode.OTHER -> {
+                            binding.filterOther.isChecked = true
+                        }
+                        is FilterMode.MINE -> {
+                            binding.filterMine.isChecked = true
+                        }
+                        is FilterMode.NONE -> {
+                            binding.filterAll.isChecked = true
+                        }
+                    }
                     onLoading(false)
                 }
                 is ViewState.Reload -> {
-                    viewModel.fetchAssignments()
+                    viewModel.fetchAssignments(true)
                 }
             }
         }
@@ -59,9 +74,12 @@ class AssignmentsFragment: BaseFragment<FragmentAssignmentsBinding>() {
         }
 
         binding.btnRefresh.setOnClickListener {
-            viewModel.fetchAssignments()
+            viewModel.fetchAssignments(false)
         }
+        setupFilters()
+    }
 
+    private fun setupFilters() {
         binding.filterGroup.setOnCheckedChangeListener {group, checkedId ->
             when (checkedId) {
                 binding.filterAll.id -> {
@@ -95,13 +113,5 @@ class AssignmentsFragment: BaseFragment<FragmentAssignmentsBinding>() {
 
     private fun log(message: String) {
         Timber.d(message)
-    }
-
-    companion object {
-
-        fun newInstance() =
-            AssignmentsFragment().apply {
-
-            }
     }
 }
