@@ -22,7 +22,10 @@ class TaskAssignmentsRepository @Inject constructor(
         getLocal: Boolean = false
     ): Result<List<TaskAssignment>> {
         if (getLocal) {
-            return Result.Success(dataSource.getTaskAssignments())
+            val localAssignments = dataSource.getTaskAssignments()
+            if (localAssignments.isNotEmpty()) {
+                return Result.Success(localAssignments)
+            }
         }
         return withContext(dispatcherProvider.io) {
             val result = try {

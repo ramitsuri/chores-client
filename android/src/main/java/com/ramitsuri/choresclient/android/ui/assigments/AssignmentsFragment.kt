@@ -61,6 +61,7 @@ class AssignmentsFragment: BaseFragment<FragmentAssignmentsBinding>() {
                             binding.filterAll.isChecked = true
                         }
                     }
+                    setupFilters()
                     onLoading(false)
                 }
                 is ViewState.Reload -> {

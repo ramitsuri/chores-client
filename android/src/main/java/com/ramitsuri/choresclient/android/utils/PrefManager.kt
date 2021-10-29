@@ -4,7 +4,7 @@ import com.ramitsuri.choresclient.android.keyvaluestore.KeyValueStore
 
 class PrefManager(private val keyValueStore: KeyValueStore) {
 
-    val runningLock = Any()
+    private val runningLock = Any()
 
     fun setUserId(userId: String) {
         keyValueStore.put(USER_ID, userId)
