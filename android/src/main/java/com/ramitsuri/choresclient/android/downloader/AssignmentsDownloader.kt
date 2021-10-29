@@ -31,8 +31,13 @@ class AssignmentsDownloader @AssistedInject constructor(
             return Result.failure()
         }
         prefManager.setWorkerRunning(true)
-        repository.getTaskAssignments()
-        prefManager.setWorkerRunning(false)
+        try {
+            repository.getTaskAssignments()
+        } catch (e: Exception) {
+            Timber.e(e)
+        } finally {
+            prefManager.setWorkerRunning(false)
+        }
         Timber.d("Run complete")
         return Result.success()
     }

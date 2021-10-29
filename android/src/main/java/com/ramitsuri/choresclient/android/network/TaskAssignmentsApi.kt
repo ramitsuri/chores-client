@@ -20,7 +20,7 @@ class TaskAssignmentsApi @Inject constructor(
         return client.get("$baseUrl/task-assignments/$id")
     }
 
-    suspend fun saveTaskAssignment(
+    suspend fun updateTaskAssignment(
         id: String,
         progressStatus: ProgressStatus
     ): HttpResponse {

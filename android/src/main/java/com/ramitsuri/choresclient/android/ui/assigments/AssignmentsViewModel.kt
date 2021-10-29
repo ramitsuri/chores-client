@@ -27,6 +27,7 @@ class AssignmentsViewModel @Inject constructor(
 
     private val _state = MutableLiveData<ViewState<AssignmentsViewState>>(ViewState.Reload)
     val state: LiveData<ViewState<AssignmentsViewState>> = _state
+    private var filterMode: FilterMode = FilterMode.ALL
 
     fun fetchAssignments(getLocal: Boolean = false) {
         val isWorkerRunning = prefManager.isWorkerRunning()
@@ -52,18 +53,21 @@ class AssignmentsViewModel @Inject constructor(
     }
 
     fun filterAll() {
-        filter(FilterMode.ALL)
+        filterMode = FilterMode.ALL
+        filter()
     }
 
     fun filterMine() {
-        filter(FilterMode.MINE(prefManager.getUserId(null) ?: ""))
+        filterMode = FilterMode.MINE(prefManager.getUserId(null) ?: "")
+        filter()
     }
 
     fun filterExceptMine() {
-        filter(FilterMode.OTHER(prefManager.getUserId(null) ?: ""))
+        filterMode = FilterMode.OTHER(prefManager.getUserId(null) ?: "")
+        filter()
     }
 
-    private fun filter(filterMode: FilterMode) {
+    private fun filter() {
         viewModelScope.launch(dispatchers.main) {
             val userId = prefManager.getUserId()
             val assignmentsResult = repository.filter(filterMode) as Result.Success
@@ -113,13 +117,13 @@ class AssignmentsViewModel @Inject constructor(
         }
         _state.value = ViewState.Loading
         viewModelScope.launch {
-            val result = repository.updateTaskAssignment(taskAssignment.id, newProgressStatus)
-            _state.value = when (result) {
+            when (val result =
+                repository.updateTaskAssignment(taskAssignment.id, newProgressStatus)) {
                 is Result.Failure -> {
-                    ViewState.Error(result.error)
+                    _state.value = ViewState.Error(result.error)
                 }
                 is Result.Success -> {
-                    ViewState.Reload
+                    filter()
                 }
             }
         }

@@ -70,12 +70,14 @@ class TaskAssignmentsRepository @Inject constructor(
     ): Result<Boolean> {
         return withContext(dispatcherProvider.io) {
             val result = try {
-                api.saveTaskAssignment(id, progressStatus)
+                api.updateTaskAssignment(id, progressStatus)
             } catch (e: Exception) {
                 null
             }
 
             if (result?.status == HttpStatusCode.OK) {
+                val taskAssignment: TaskAssignment = result.receive()
+                dataSource.saveTaskAssignment(taskAssignment)
                 Result.Success(true)
             } else {
                 Result.Failure(ViewError.NETWORK)

@@ -37,15 +37,20 @@ class ReminderSchedulerWorker @AssistedInject constructor(
             return Result.failure()
         }
         prefManager.setWorkerRunning(true)
-        withContext(Dispatchers.IO) {
-            val assignments = repository.getTaskAssignments(true)
-            if (assignments is com.ramitsuri.choresclient.android.model.Result.Success) {
-                val assignmentsForUser =
-                    getAssignmentsForReminders(assignments.data, prefManager.getUserId())
-                reminderScheduler.addReminders(assignmentsForUser)
+        try {
+            withContext(Dispatchers.IO) {
+                val assignments = repository.getTaskAssignments(true)
+                if (assignments is com.ramitsuri.choresclient.android.model.Result.Success) {
+                    val assignmentsForUser =
+                        getAssignmentsForReminders(assignments.data, prefManager.getUserId())
+                    reminderScheduler.addReminders(assignmentsForUser)
+                }
             }
+        } catch (e: Exception) {
+            Timber.e(e)
+        } finally {
+            prefManager.setWorkerRunning(false)
         }
-        prefManager.setWorkerRunning(false)
         Timber.d("Run complete")
         return Result.success()
     }

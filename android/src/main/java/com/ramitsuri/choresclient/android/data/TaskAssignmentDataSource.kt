@@ -22,6 +22,17 @@ class TaskAssignmentDataSource @Inject constructor(
         taskAssignmentDao.clearAndInsert(taskAssignments)
     }
 
+    suspend fun saveTaskAssignment(assignment: TaskAssignment) {
+        val member = MemberEntity(assignment.member)
+        memberDao.insert(member)
+
+        val task = TaskEntity(assignment.task)
+        taskDao.insert(task)
+
+        val taskAssignment = TaskAssignmentEntity(assignment)
+        taskAssignmentDao.insert(taskAssignment)
+    }
+
     suspend fun getTaskAssignments(filterMode: FilterMode = FilterMode.ALL): List<TaskAssignment> {
         val assignments = mutableListOf<TaskAssignment>()
         for (assignmentEntity in taskAssignmentDao.get(filterMode)) {
