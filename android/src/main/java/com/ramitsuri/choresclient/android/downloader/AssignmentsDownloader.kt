@@ -44,7 +44,7 @@ class AssignmentsDownloader @AssistedInject constructor(
 
     companion object {
         private const val WORK_TAG = "AssignmentsDownloader"
-        private const val REPEAT_HOURS: Long = 6
+        private const val REPEAT_HOURS: Long = 24
 
         fun enqueuePeriodic(context: Context) {
             val constraints = Constraints.Builder()
@@ -61,7 +61,7 @@ class AssignmentsDownloader @AssistedInject constructor(
                 .getInstance(context)
                 .enqueueUniquePeriodicWork(
                     WORK_TAG,
-                    ExistingPeriodicWorkPolicy.KEEP,
+                    ExistingPeriodicWorkPolicy.REPLACE,
                     builder.build()
                 )
         }
