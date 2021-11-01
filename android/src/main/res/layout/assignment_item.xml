@@ -3,10 +3,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/container"
+    style="?attr/materialCardViewFilledStyle"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    app:cardBackgroundColor="@color/orange"
-    app:cardCornerRadius="8dp">
+    android:layout_height="wrap_content">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -15,67 +14,38 @@
 
         <TextView
             android:id="@+id/textTitle"
+            style="@style/TextAppearance.Material3.HeadlineSmall"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
-            android:padding="8dp"
-            android:textColor="@color/text"
-            android:textStyle="bold"
+            android:padding="4dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="Clean toilet" />
 
         <TextView
-            android:id="@+id/textDueDateTime"
+            android:id="@+id/textRepeats"
+            style="@style/TextAppearance.Material3.BodySmall"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
             android:padding="2dp"
-            android:textColor="@color/text"
-            android:textSize="12sp"
-            app:layout_constraintEnd_toStartOf="@id/textAssignedTo"
+            app:layout_constraintEnd_toEndOf="@id/textTitle"
             app:layout_constraintHorizontal_chainStyle="spread_inside"
             app:layout_constraintStart_toStartOf="@id/textTitle"
             app:layout_constraintTop_toBottomOf="@id/textTitle"
-            tools:text="Due 7 Sep, 3pm" />
-
-        <TextView
-            android:id="@+id/textAssignedTo"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
-            android:padding="2dp"
-            android:textColor="@color/text"
-            android:textSize="12sp"
-            app:layout_constraintEnd_toStartOf="@id/textRepeats"
-            app:layout_constraintStart_toEndOf="@id/textDueDateTime"
-            app:layout_constraintTop_toTopOf="@id/textDueDateTime"
-            tools:text="Assigned to you" />
-
-        <TextView
-            android:id="@+id/textRepeats"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
-            android:padding="2dp"
-            android:textColor="@color/text"
-            android:textSize="12sp"
-            app:layout_constraintEnd_toEndOf="@id/textTitle"
-            app:layout_constraintStart_toEndOf="@id/textAssignedTo"
-            app:layout_constraintTop_toTopOf="@id/textDueDateTime"
             tools:text="Repeats in 12 hours" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnChangeState"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
+            style="@style/Widget.Material3.Button"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:textColor="@color/green_text_on_color"
+            android:layout_marginTop="4dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/textAssignedTo"
+            app:layout_constraintTop_toBottomOf="@id/textRepeats"
             tools:text="@string/assignment_mark_in_progress" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

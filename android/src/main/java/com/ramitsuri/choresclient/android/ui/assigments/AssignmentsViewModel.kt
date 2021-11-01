@@ -8,10 +8,12 @@ import com.ramitsuri.choresclient.android.model.AssignmentsViewState
 import com.ramitsuri.choresclient.android.model.ProgressStatus
 import com.ramitsuri.choresclient.android.model.Result
 import com.ramitsuri.choresclient.android.model.TaskAssignment
+import com.ramitsuri.choresclient.android.model.TaskAssignmentWrapper
 import com.ramitsuri.choresclient.android.model.ViewState
 import com.ramitsuri.choresclient.android.repositories.TaskAssignmentsRepository
 import com.ramitsuri.choresclient.android.utils.DispatcherProvider
 import com.ramitsuri.choresclient.android.utils.PrefManager
+import com.ramitsuri.choresclient.android.utils.getDay
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -27,7 +29,16 @@ class AssignmentsViewModel @Inject constructor(
 
     private val _state = MutableLiveData<ViewState<AssignmentsViewState>>(ViewState.Reload)
     val state: LiveData<ViewState<AssignmentsViewState>> = _state
-    private var filterMode: FilterMode = FilterMode.ALL
+    private var filterMode: FilterMode
+    private val userId = prefManager.getUserId() ?: ""
+
+    init {
+        filterMode = if (userId.isNotEmpty()) {
+            FilterMode.MINE(userId)
+        } else {
+            FilterMode.OTHER("")
+        }
+    }
 
     fun fetchAssignments(getLocal: Boolean = false) {
         val isWorkerRunning = prefManager.isWorkerRunning()
@@ -35,44 +46,32 @@ class AssignmentsViewModel @Inject constructor(
         Timber.d("Will get local: $shouldGetLocal - getLocal($getLocal) || workerRunning($isWorkerRunning)")
         _state.value = ViewState.Loading
         viewModelScope.launch(dispatchers.main) {
-            val assignmentsResult = repository.getTaskAssignments(shouldGetLocal)
-            _state.value = when (assignmentsResult) {
+            when (val assignmentsResult = repository.getTaskAssignments(shouldGetLocal)) {
                 is Result.Failure -> {
-                    ViewState.Error(assignmentsResult.error)
+                    _state.value = ViewState.Error(assignmentsResult.error)
                 }
                 is Result.Success -> {
-                    val userId = prefManager.getUserId()
-                    val assignmentsState = AssignmentsViewState(
-                        getAssignmentsForDisplay(assignmentsResult.data, userId),
-                        FilterMode.ALL
-                    )
-                    ViewState.Success(assignmentsState)
+                    filter()
                 }
             }
         }
     }
 
-    fun filterAll() {
-        filterMode = FilterMode.ALL
-        filter()
-    }
-
     fun filterMine() {
-        filterMode = FilterMode.MINE(prefManager.getUserId(null) ?: "")
+        filterMode = FilterMode.MINE(userId)
         filter()
     }
 
     fun filterExceptMine() {
-        filterMode = FilterMode.OTHER(prefManager.getUserId(null) ?: "")
+        filterMode = FilterMode.OTHER(userId)
         filter()
     }
 
     private fun filter() {
         viewModelScope.launch(dispatchers.main) {
-            val userId = prefManager.getUserId()
             val assignmentsResult = repository.filter(filterMode) as Result.Success
             val assignmentsState = AssignmentsViewState(
-                getAssignmentsForDisplay(assignmentsResult.data, userId),
+                getAssignmentsForDisplay(assignmentsResult.data),
                 filterMode
             )
             _state.value = ViewState.Success(assignmentsState)
@@ -80,20 +79,25 @@ class AssignmentsViewModel @Inject constructor(
     }
 
     private fun getAssignmentsForDisplay(
-        data: List<TaskAssignment>,
-        userId: String?
-    ): List<TaskAssignment> {
+        data: List<TaskAssignment>
+    ): List<TaskAssignmentWrapper> {
         val todo = data.filter {it.progressStatus == ProgressStatus.TODO}
-        val forMember = todo.filter {it.member.id == userId}
-            .sortedWith(compareBy({it.member.name}, {it.dueDateTime}))
-        val forOthers = todo.filter {it.member.id != userId}
-            .sortedWith(compareBy({it.member.name}, {it.dueDateTime}))
-        return forMember.plus(forOthers)
+            .sortedBy {it.dueDateTime}
+            .groupBy {getDay(it.dueDateTime)}
+
+        val result = mutableListOf<TaskAssignmentWrapper>()
+        for ((date, assignmentsForDate) in todo) {
+            result.add(TaskAssignmentWrapper(headerView = date))
+            for (assignment in assignmentsForDate) {
+                result.add(TaskAssignmentWrapper(itemView = assignment))
+            }
+        }
+        return result
     }
 
     fun changeStateRequested(taskAssignment: TaskAssignment, clickType: ClickType) {
         try {
-            UUID.fromString(prefManager.getUserId()) ?: return
+            UUID.fromString(userId) ?: return
         } catch (e: Exception) {
             return
         }

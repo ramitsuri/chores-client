@@ -3,6 +3,7 @@ package com.ramitsuri.choresclient.android
 import android.app.Application
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
+import com.google.android.material.color.DynamicColors
 import com.ramitsuri.choresclient.android.downloader.AssignmentsDownloader
 import com.ramitsuri.choresclient.android.notification.Importance
 import com.ramitsuri.choresclient.android.notification.NotificationChannelInfo
@@ -23,6 +24,7 @@ class MainApplication: Application(), Configuration.Provider {
 
     override fun onCreate() {
         super.onCreate()
+        DynamicColors.applyToActivitiesIfAvailable(this)
         Timber.plant(Timber.DebugTree())
 
         createNotificationChannels()

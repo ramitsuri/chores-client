@@ -1,27 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <plurals name="assignment_repeats_hours">
-        <item quantity="one">Repeats in %d hour</item>
-        <item quantity="other">Repeats in %d hours</item>
+        <item quantity="one">Repeats every hour</item>
+        <item quantity="other">Repeats every %d hours</item>
     </plurals>
 
     <plurals name="assignment_repeats_days">
-        <item quantity="one">Repeats in %d day</item>
-        <item quantity="other">Repeats in %d days</item>
+        <item quantity="one">Repeats every day</item>
+        <item quantity="other">Repeats every %d days</item>
     </plurals>
 
     <plurals name="assignment_repeats_weeks">
-        <item quantity="one">Repeats in %d week</item>
-        <item quantity="other">Repeats in %d weeks</item>
+        <item quantity="one">Repeats every week</item>
+        <item quantity="other">Repeats every %d weeks</item>
     </plurals>
 
     <plurals name="assignment_repeats_months">
-        <item quantity="one">Repeats in %d month</item>
-        <item quantity="other">Repeats in %d months</item>
+        <item quantity="one">Repeats every month</item>
+        <item quantity="other">Repeats every %d months</item>
     </plurals>
 
     <plurals name="assignment_repeats_years">
-        <item quantity="one">Repeats in %d year</item>
-        <item quantity="other">Repeats in %d years</item>
+        <item quantity="one">Repeats every year</item>
+        <item quantity="other">Repeats every %d years</item>
     </plurals>
 </resources>

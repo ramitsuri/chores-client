@@ -1,56 +1,91 @@
 package com.ramitsuri.choresclient.android.ui.assigments
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.annotation.StringRes
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.ramitsuri.choresclient.android.R
+import com.ramitsuri.choresclient.android.databinding.AssignmentHeaderBinding
 import com.ramitsuri.choresclient.android.databinding.AssignmentItemBinding
 import com.ramitsuri.choresclient.android.extensions.setVisibility
 import com.ramitsuri.choresclient.android.model.ProgressStatus
 import com.ramitsuri.choresclient.android.model.RepeatUnit
 import com.ramitsuri.choresclient.android.model.TaskAssignment
-import com.ramitsuri.choresclient.android.utils.formatInstant
+import com.ramitsuri.choresclient.android.model.TaskAssignmentWrapper
+import com.ramitsuri.choresclient.android.ui.decoration.StickyHeaderItemDecoration
 import com.ramitsuri.choresclient.android.utils.formatRepeatUnit
-import java.time.Instant
 
 class AssignmentsAdapter(
-    items: List<TaskAssignment>,
+    items: List<TaskAssignmentWrapper>,
     private val clickListener: (TaskAssignment, ClickType) -> Unit
 ):
-    RecyclerView.Adapter<AssignmentsAdapter.ViewHolder>() {
-    private val items = mutableListOf<TaskAssignment>()
+    RecyclerView.Adapter<RecyclerView.ViewHolder>(),
+    StickyHeaderItemDecoration.StickyHeaderInterface {
+    private val items = mutableListOf<TaskAssignmentWrapper>()
 
     init {
         this.items.addAll(items)
     }
 
-    fun update(items: List<TaskAssignment>) {
+    fun update(items: List<TaskAssignmentWrapper>) {
         this.items.clear()
         this.items.addAll(items)
         notifyDataSetChanged()
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val itemBinding =
-            AssignmentItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        val viewHolder = ViewHolder(itemBinding) {position, clickType ->
-            clickListener(items[position], clickType)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        return if (viewType == TYPE_HEADER) {
+            val itemBinding =
+                AssignmentHeaderBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+            HeaderViewHolder(itemBinding)
+        } else {
+            val itemBinding =
+                AssignmentItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+            ItemViewHolder(itemBinding) {position, clickType ->
+                items[position].itemView?.let {itemView ->
+                    clickListener(itemView, clickType)
+                }
+            }
         }
-        return viewHolder
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val taskAssignment: TaskAssignment = items[position]
-        holder.bind(taskAssignment)
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        val wrapper = items[position]
+        if (holder is HeaderViewHolder) {
+            wrapper.headerView?.let {
+                holder.bind(it)
+            }
+        } else if (holder is ItemViewHolder) {
+            wrapper.itemView?.let {
+                holder.bind(it)
+            }
+        }
     }
 
     override fun getItemCount(): Int {
         return items.size
     }
 
-    inner class ViewHolder(
+    override fun getItemViewType(position: Int): Int {
+        val wrapper = items[position]
+        return if (wrapper.headerView != null) {
+            TYPE_HEADER
+        } else {
+            TYPE_ITEM
+        }
+    }
+
+    inner class HeaderViewHolder(
+        private val binding: AssignmentHeaderBinding
+    ): RecyclerView.ViewHolder(binding.root) {
+        fun bind(headerView: String) {
+            binding.textTitle.text = headerView
+        }
+    }
+
+    inner class ItemViewHolder(
         private val binding: AssignmentItemBinding,
         clickAtPosition: (Int, ClickType) -> Unit
     ): RecyclerView.ViewHolder(binding.root) {
@@ -71,22 +106,7 @@ class AssignmentsAdapter(
         }
 
         fun bind(taskAssignment: TaskAssignment) {
-            binding.container.setCardBackgroundColor(
-                if (taskAssignment.progressStatus == ProgressStatus.TODO) {
-                    ContextCompat.getColor(binding.root.context, R.color.orange)
-                } else {
-                    ContextCompat.getColor(binding.root.context, R.color.green)
-                }
-            )
             binding.textTitle.text = taskAssignment.task.name
-            binding.textAssignedTo.text = getString(
-                R.string.assignment_assigned, taskAssignment.member.name
-            )
-
-            binding.textDueDateTime.setVisibility(taskAssignment.task.repeatUnit != RepeatUnit.ON_COMPLETE)
-            binding.textDueDateTime.text = getString(
-                R.string.assignment_due, formatInstant(taskAssignment.dueDateTime, Instant.now())
-            )
 
             binding.textRepeats.setVisibility(taskAssignment.task.repeatUnit != RepeatUnit.NONE)
             binding.textRepeats.text =
@@ -114,6 +134,39 @@ class AssignmentsAdapter(
         private fun getRepeatsString(repeatValue: Int, repeatUnit: RepeatUnit): String {
             return binding.root.context.formatRepeatUnit(repeatValue, repeatUnit)
         }
+    }
+
+    override fun getHeaderPositionForItem(itemPosition: Int): Int {
+        var position = itemPosition
+        while (position >= 0) {
+            if (getItemViewType(itemPosition) == TYPE_HEADER) {
+                break
+            }
+            position--
+        }
+        return position
+    }
+
+    override fun isHeader(itemPosition: Int): Boolean {
+        return getItemViewType(itemPosition) == TYPE_HEADER
+    }
+
+    override val headerLayout: Int
+        get() = R.layout.assignment_header
+
+    override fun bindHeaderData(header: View, headerPosition: Int) {
+        if (headerPosition == RecyclerView.NO_POSITION) {
+            return
+        }
+        val wrapper = items[headerPosition]
+        if (wrapper.headerView != null) {
+            header.findViewById<TextView>(R.id.textTitle)?.text = wrapper.headerView
+        }
+    }
+
+    companion object {
+        const val TYPE_ITEM = 0
+        const val TYPE_HEADER = 1
     }
 }
 

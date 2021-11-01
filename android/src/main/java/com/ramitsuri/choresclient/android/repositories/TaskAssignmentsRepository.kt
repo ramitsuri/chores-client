@@ -11,6 +11,7 @@ import com.ramitsuri.choresclient.android.utils.DispatcherProvider
 import io.ktor.client.call.receive
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 import javax.inject.Inject
 
 class TaskAssignmentsRepository @Inject constructor(
@@ -24,6 +25,7 @@ class TaskAssignmentsRepository @Inject constructor(
         if (getLocal) {
             val localAssignments = dataSource.getTaskAssignments()
             if (localAssignments.isNotEmpty()) {
+                Timber.i("Returning local")
                 return Result.Success(localAssignments)
             }
         }
@@ -44,7 +46,7 @@ class TaskAssignmentsRepository @Inject constructor(
         }
     }
 
-    suspend fun filter(filterMode: FilterMode = FilterMode.ALL): Result<List<TaskAssignment>> {
+    suspend fun filter(filterMode: FilterMode): Result<List<TaskAssignment>> {
         return Result.Success(dataSource.getTaskAssignments(filterMode))
     }
 

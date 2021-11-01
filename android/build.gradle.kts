@@ -14,7 +14,7 @@ dependencies {
     implementation(project(":shared"))
 
     // Material
-    implementation("com.google.android.material:material:1.4.0")
+    implementation("com.google.android.material:material:1.5.0-alpha05")
 
     // Ktor
     implementation("io.ktor:ktor-client-android:1.5.0")
@@ -76,7 +76,7 @@ android {
     compileSdk = 31
     defaultConfig {
         applicationId = "com.ramitsuri.choresclient.android"
-        minSdk = 23
+        minSdk = 26
         targetSdk = 31
         versionCode = 14
         versionName = "2.2"

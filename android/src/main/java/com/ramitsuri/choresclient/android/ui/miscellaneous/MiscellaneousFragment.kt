@@ -12,7 +12,8 @@ import com.ramitsuri.choresclient.android.extensions.setVisibility
 import com.ramitsuri.choresclient.android.model.ViewState
 import com.ramitsuri.choresclient.android.ui.BaseFragment
 import com.ramitsuri.choresclient.android.ui.assigments.AssignmentsAdapter
-import com.ramitsuri.choresclient.android.ui.assigments.ItemDecorator
+import com.ramitsuri.choresclient.android.ui.assigments.FilterMode
+import com.ramitsuri.choresclient.android.ui.decoration.ItemDecorator
 import dagger.hilt.android.AndroidEntryPoint
 import timber.log.Timber
 
@@ -37,19 +38,32 @@ class MiscellaneousFragment: BaseFragment<FragmentMiscellaneousBinding>() {
             when (viewState) {
                 is ViewState.Loading -> {
                     log("Loading")
-                    binding.listAssignments.setVisibility(false)
-                    binding.progress.setVisibility(true)
+                    onLoading(true)
                 }
                 is ViewState.Error -> {
                     log("Error: ${viewState.error}")
-                    binding.listAssignments.setVisibility(true)
-                    binding.progress.setVisibility(false)
+                    onLoading(false)
                 }
 
                 is ViewState.Success -> {
-                    adapter.update(viewState.data)
-                    binding.listAssignments.setVisibility(true)
-                    binding.progress.setVisibility(false)
+                    adapter.update(viewState.data.assignments)
+                    binding.filterGroup.setOnCheckedChangeListener(null)
+                    when (viewState.data.selectedFilter) {
+                        is FilterMode.ALL -> {
+                            // Do nothing
+                        }
+                        is FilterMode.OTHER -> {
+                            binding.filterOther.isChecked = true
+                        }
+                        is FilterMode.MINE -> {
+                            binding.filterMine.isChecked = true
+                        }
+                        is FilterMode.NONE -> {
+                            // Do nothing
+                        }
+                    }
+                    setupFilters()
+                    onLoading(false)
                 }
                 is ViewState.Reload -> {
                     viewModel.fetchAssignments()
@@ -60,6 +74,29 @@ class MiscellaneousFragment: BaseFragment<FragmentMiscellaneousBinding>() {
         binding.btnSetUserId.setOnClickListener {
             showUserIdAlert()
         }
+        setupFilters()
+    }
+
+    private fun setupFilters() {
+        binding.filterGroup.setOnCheckedChangeListener {group, checkedId ->
+            when (checkedId) {
+                binding.filterMine.id -> {
+                    log("Mine")
+                    viewModel.filterMine()
+                }
+                binding.filterOther.id -> {
+                    log("Other")
+                    viewModel.filterExceptMine()
+                }
+            }
+        }
+    }
+
+    private fun onLoading(loading: Boolean) {
+        val showContent = !loading
+        binding.filterGroup.setVisibility(showContent)
+        binding.listAssignments.setVisibility(showContent)
+        binding.progress.setVisibility(loading)
     }
 
     private fun showUserIdAlert() {

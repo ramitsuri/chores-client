@@ -1,6 +1,7 @@
 package com.ramitsuri.choresclient.android.ui.assigments
 
 import android.view.LayoutInflater
+import android.widget.PopupMenu
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -11,6 +12,7 @@ import com.ramitsuri.choresclient.android.extensions.setVisibility
 import com.ramitsuri.choresclient.android.model.TaskAssignment
 import com.ramitsuri.choresclient.android.model.ViewState
 import com.ramitsuri.choresclient.android.ui.BaseFragment
+import com.ramitsuri.choresclient.android.ui.decoration.ItemDecorator
 import dagger.hilt.android.AndroidEntryPoint
 import timber.log.Timber
 
@@ -49,7 +51,7 @@ class AssignmentsFragment: BaseFragment<FragmentAssignmentsBinding>() {
                     binding.filterGroup.setOnCheckedChangeListener(null)
                     when (viewState.data.selectedFilter) {
                         is FilterMode.ALL -> {
-                            binding.filterAll.isChecked = true
+                            // Do nothing
                         }
                         is FilterMode.OTHER -> {
                             binding.filterOther.isChecked = true
@@ -58,7 +60,7 @@ class AssignmentsFragment: BaseFragment<FragmentAssignmentsBinding>() {
                             binding.filterMine.isChecked = true
                         }
                         is FilterMode.NONE -> {
-                            binding.filterAll.isChecked = true
+                            // Do nothing
                         }
                     }
                     setupFilters()
@@ -70,23 +72,29 @@ class AssignmentsFragment: BaseFragment<FragmentAssignmentsBinding>() {
             }
         }
 
-        binding.btnMisc.setOnClickListener {
-            findNavController().navigate(R.id.action_assignmentsFragment_to_miscellaneousFragment)
-        }
-
-        binding.btnRefresh.setOnClickListener {
+        binding.swipeRefresh.setOnRefreshListener {
             viewModel.fetchAssignments(false)
         }
+
+        binding.btnMenu.setOnClickListener {
+            val popup = PopupMenu(requireContext(), binding.btnMenu)
+            popup.menuInflater.inflate(R.menu.assignments_menu, popup.menu)
+            popup.setOnMenuItemClickListener {menuItem ->
+                if (menuItem.itemId == R.id.menu_setup) {
+                    findNavController().navigate(R.id.action_assignmentsFragment_to_miscellaneousFragment)
+                    return@setOnMenuItemClickListener true
+                }
+                return@setOnMenuItemClickListener false
+            }
+            popup.show()
+        }
+
         setupFilters()
     }
 
     private fun setupFilters() {
         binding.filterGroup.setOnCheckedChangeListener {group, checkedId ->
             when (checkedId) {
-                binding.filterAll.id -> {
-                    log("All")
-                    viewModel.filterAll()
-                }
                 binding.filterMine.id -> {
                     log("Mine")
                     viewModel.filterMine()
@@ -105,10 +113,10 @@ class AssignmentsFragment: BaseFragment<FragmentAssignmentsBinding>() {
 
     private fun onLoading(loading: Boolean) {
         val showContent = !loading
+        binding.swipeRefresh.isRefreshing = loading
         binding.filterGroup.setVisibility(showContent)
-        binding.listAssignments.setVisibility(showContent)
-        binding.btnRefresh.setVisibility(showContent)
-        binding.btnMisc.setVisibility(showContent)
+        binding.swipeRefresh.setVisibility(showContent)
+        binding.btnMenu.setVisibility(showContent)
         binding.progress.setVisibility(loading)
     }
 

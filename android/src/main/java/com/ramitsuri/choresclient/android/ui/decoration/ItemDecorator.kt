@@ -1,4 +1,4 @@
-package com.ramitsuri.choresclient.android.ui.assigments
+package com.ramitsuri.choresclient.android.ui.decoration
 
 import android.graphics.Rect
 import android.view.View

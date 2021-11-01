@@ -15,6 +15,6 @@ sealed class ViewState<out T> {
 }
 
 data class AssignmentsViewState(
-    val assignments: List<TaskAssignment>,
+    val assignments: List<TaskAssignmentWrapper>,
     val selectedFilter: FilterMode
 )

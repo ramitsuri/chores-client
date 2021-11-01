@@ -11,8 +11,8 @@
         android:id="@+id/filterGroup"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:checkedChip="@id/filterAll"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:checkedChip="@id/filterMine"
+        app:layout_constraintEnd_toStartOf="@id/btnMenu"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:selectionRequired="true"
@@ -20,14 +20,8 @@
         app:singleSelection="true">
 
         <com.google.android.material.chip.Chip
-            android:id="@+id/filterAll"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:checkable="true"
-            android:text="@string/assignment_filter_all" />
-
-        <com.google.android.material.chip.Chip
             android:id="@+id/filterMine"
+            style="@style/Widget.Material3.Chip.Filter"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:checkable="true"
@@ -35,6 +29,7 @@
 
         <com.google.android.material.chip.Chip
             android:id="@+id/filterOther"
+            style="@style/Widget.Material3.Chip.Filter"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:checkable="true"
@@ -42,6 +37,17 @@
 
     </com.google.android.material.chip.ChipGroup>
 
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnMenu"
+        style="@style/Widget.Material3.Button.TextButton.Icon"
+        android:layout_width="48dp"
+        android:layout_height="0dp"
+        android:stateListAnimator="@null"
+        app:icon="@drawable/ic_menu"
+        app:iconGravity="textStart"
+        app:iconPadding="0dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <com.google.android.material.progressindicator.LinearProgressIndicator
         android:id="@+id/progress"
@@ -54,38 +60,22 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/listAssignments"
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipeRefresh"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@id/btnMisc"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/filterGroup"
-        tools:itemCount="10"
-        tools:listitem="@layout/assignment_item"
-        tools:visibility="visible" />
+        tools:visibility="visible">
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnRefresh"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        android:text="@string/assignment_refresh"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/btnMisc"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnMisc"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginVertical="8dp"
-        android:layout_marginEnd="8dp"
-        android:text="@string/assignment_miscellaneous"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/btnRefresh" />
-
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/listAssignments"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:itemCount="10"
+            tools:listitem="@layout/assignment_item" />
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

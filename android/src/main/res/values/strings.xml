@@ -15,8 +15,8 @@
     <string name="assignment_miscellaneous">Setup</string>
     <string name="assignment_refresh">Refresh</string>
     <string name="assignment_filter_all">All</string>
-    <string name="assignment_filter_mine">Assigned to me</string>
-    <string name="assignment_filter_other">Assigned to others</string>
+    <string name="assignment_filter_mine">Mine</string>
+    <string name="assignment_filter_other">Others\'</string>
 
     <!-- Notifications -->
     <string name="notification_reminders_id">Reminders</string>

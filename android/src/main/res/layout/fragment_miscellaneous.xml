@@ -7,6 +7,36 @@
     android:padding="8dp"
     tools:context=".ui.assigments.AssignmentsFragment">
 
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/filterGroup"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:checkedChip="@id/filterMine"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:selectionRequired="true"
+        app:singleLine="true"
+        app:singleSelection="true">
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/filterMine"
+            style="@style/Widget.Material3.Chip.Filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checkable="true"
+            android:text="@string/assignment_filter_mine" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/filterOther"
+            style="@style/Widget.Material3.Chip.Filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checkable="true"
+            android:text="@string/assignment_filter_other" />
+
+    </com.google.android.material.chip.ChipGroup>
+
     <com.google.android.material.progressindicator.LinearProgressIndicator
         android:id="@+id/progress"
         android:layout_width="0dp"
@@ -26,7 +56,7 @@
         app:layout_constraintBottom_toTopOf="@id/btnSetUserId"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/filterGroup"
         tools:itemCount="10"
         tools:listitem="@layout/assignment_item"
         tools:visibility="visible" />
