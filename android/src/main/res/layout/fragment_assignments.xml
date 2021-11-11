@@ -4,13 +4,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="8dp"
     tools:context=".ui.assigments.AssignmentsFragment">
 
     <com.google.android.material.chip.ChipGroup
         android:id="@+id/filterGroup"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_margin="@dimen/margin_medium"
         app:checkedChip="@id/filterMine"
         app:layout_constraintEnd_toStartOf="@id/btnMenu"
         app:layout_constraintStart_toStartOf="parent"
@@ -42,6 +42,7 @@
         style="@style/Widget.Material3.Button.TextButton.Icon"
         android:layout_width="48dp"
         android:layout_height="0dp"
+        android:layout_margin="@dimen/margin_medium"
         android:stateListAnimator="@null"
         app:icon="@drawable/ic_menu"
         app:iconGravity="textStart"
@@ -53,6 +54,7 @@
         android:id="@+id/progress"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_margin="@dimen/margin_medium"
         android:indeterminate="true"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"

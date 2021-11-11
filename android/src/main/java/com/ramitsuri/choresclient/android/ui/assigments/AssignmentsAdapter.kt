@@ -20,7 +20,7 @@ import com.ramitsuri.choresclient.android.utils.formatRepeatUnit
 class AssignmentsAdapter(
     items: List<TaskAssignmentWrapper>,
     private val clickListener: (TaskAssignment, ClickType) -> Unit
-):
+) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>(),
     StickyHeaderItemDecoration.StickyHeaderInterface {
     private val items = mutableListOf<TaskAssignmentWrapper>()
@@ -43,8 +43,8 @@ class AssignmentsAdapter(
         } else {
             val itemBinding =
                 AssignmentItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-            ItemViewHolder(itemBinding) {position, clickType ->
-                items[position].itemView?.let {itemView ->
+            ItemViewHolder(itemBinding) { position, clickType ->
+                items[position].itemView?.let { itemView ->
                     clickListener(itemView, clickType)
                 }
             }
@@ -79,7 +79,7 @@ class AssignmentsAdapter(
 
     inner class HeaderViewHolder(
         private val binding: AssignmentHeaderBinding
-    ): RecyclerView.ViewHolder(binding.root) {
+    ) : RecyclerView.ViewHolder(binding.root) {
         fun bind(headerView: String) {
             binding.textTitle.text = headerView
         }
@@ -88,7 +88,7 @@ class AssignmentsAdapter(
     inner class ItemViewHolder(
         private val binding: AssignmentItemBinding,
         clickAtPosition: (Int, ClickType) -> Unit
-    ): RecyclerView.ViewHolder(binding.root) {
+    ) : RecyclerView.ViewHolder(binding.root) {
 
         init {
             binding.root.setOnClickListener {
@@ -113,13 +113,8 @@ class AssignmentsAdapter(
                 getRepeatsString(taskAssignment.task.repeatValue, taskAssignment.task.repeatUnit)
 
 
-            when (taskAssignment.progressStatus) {
-                ProgressStatus.TODO -> {
-                    binding.btnChangeState.text = getString(R.string.assignment_mark_completed)
-                }
-                else -> {
-                    binding.btnChangeState.setVisibility(false)
-                }
+            if (taskAssignment.progressStatus != ProgressStatus.TODO) {
+                binding.btnChangeState.setVisibility(false)
             }
         }
 
@@ -170,7 +165,7 @@ class AssignmentsAdapter(
     }
 }
 
-fun <T: RecyclerView.ViewHolder> T.whenClicked(clickListener: (position: Int) -> Unit): T {
+fun <T : RecyclerView.ViewHolder> T.whenClicked(clickListener: (position: Int) -> Unit): T {
     itemView.setOnClickListener {
         clickListener.invoke(adapterPosition)
     }

@@ -17,10 +17,10 @@
             style="@style/TextAppearance.Material3.HeadlineSmall"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
+            android:layout_marginStart="@dimen/margin_medium"
             android:padding="4dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintStart_toEndOf="@id/btnChangeState"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="Clean toilet" />
 
@@ -29,8 +29,7 @@
             style="@style/TextAppearance.Material3.BodySmall"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
-            android:padding="2dp"
+            android:paddingHorizontal="4dp"
             app:layout_constraintEnd_toEndOf="@id/textTitle"
             app:layout_constraintHorizontal_chainStyle="spread_inside"
             app:layout_constraintStart_toStartOf="@id/textTitle"
@@ -39,14 +38,16 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnChangeState"
-            style="@style/Widget.Material3.Button"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            app:layout_constraintEnd_toEndOf="parent"
+            style="@style/Widget.Material3.Button.TextButton.Icon"
+            android:layout_width="48dp"
+            android:layout_height="0dp"
+            android:stateListAnimator="@null"
+            app:icon="@drawable/ic_done"
+            app:iconGravity="textStart"
+            app:iconPadding="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/textRepeats"
-            tools:text="@string/assignment_mark_in_progress" />
+            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>

@@ -4,12 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ramitsuri.choresclient.android.model.AssignmentsViewState
-import com.ramitsuri.choresclient.android.model.ProgressStatus
-import com.ramitsuri.choresclient.android.model.Result
-import com.ramitsuri.choresclient.android.model.TaskAssignment
-import com.ramitsuri.choresclient.android.model.TaskAssignmentWrapper
-import com.ramitsuri.choresclient.android.model.ViewState
+import com.ramitsuri.choresclient.android.model.*
 import com.ramitsuri.choresclient.android.repositories.TaskAssignmentsRepository
 import com.ramitsuri.choresclient.android.utils.DispatcherProvider
 import com.ramitsuri.choresclient.android.utils.PrefManager
@@ -25,7 +20,7 @@ class AssignmentsViewModel @Inject constructor(
     private val repository: TaskAssignmentsRepository,
     private val prefManager: PrefManager,
     private val dispatchers: DispatcherProvider
-): ViewModel() {
+) : ViewModel() {
 
     private val _state = MutableLiveData<ViewState<AssignmentsViewState>>(ViewState.Reload)
     val state: LiveData<ViewState<AssignmentsViewState>> = _state
@@ -81,13 +76,17 @@ class AssignmentsViewModel @Inject constructor(
     private fun getAssignmentsForDisplay(
         data: List<TaskAssignment>
     ): List<TaskAssignmentWrapper> {
-        val todo = data.filter {it.progressStatus == ProgressStatus.TODO}
-            .sortedBy {it.dueDateTime}
-            .groupBy {getDay(it.dueDateTime)}
+        val todo = data.filter { it.progressStatus == ProgressStatus.TODO }
+            .sortedBy { it.dueDateTime }
+            .groupBy { getDay(it.dueDateTime) }
 
         val result = mutableListOf<TaskAssignmentWrapper>()
         for ((date, assignmentsForDate) in todo) {
-            result.add(TaskAssignmentWrapper(headerView = date))
+            if (assignmentsForDate.firstOrNull()?.task?.repeatUnit == RepeatUnit.ON_COMPLETE) {
+                result.add(TaskAssignmentWrapper(headerView = "On Completion"))
+            } else {
+                result.add(TaskAssignmentWrapper(headerView = date))
+            }
             for (assignment in assignmentsForDate) {
                 result.add(TaskAssignmentWrapper(itemView = assignment))
             }
