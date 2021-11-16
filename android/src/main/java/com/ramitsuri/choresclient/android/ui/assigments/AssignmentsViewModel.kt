@@ -78,15 +78,17 @@ class AssignmentsViewModel @Inject constructor(
     ): List<TaskAssignmentWrapper> {
         val todo = data.filter { it.progressStatus == ProgressStatus.TODO }
             .sortedBy { it.dueDateTime }
-            .groupBy { getDay(it.dueDateTime) }
+            .groupBy {
+                if (it.task.repeatUnit == RepeatUnit.ON_COMPLETE) {
+                    "On Completion"
+                } else {
+                    getDay(it.dueDateTime)
+                }
+            }
 
         val result = mutableListOf<TaskAssignmentWrapper>()
         for ((date, assignmentsForDate) in todo) {
-            if (assignmentsForDate.firstOrNull()?.task?.repeatUnit == RepeatUnit.ON_COMPLETE) {
-                result.add(TaskAssignmentWrapper(headerView = "On Completion"))
-            } else {
-                result.add(TaskAssignmentWrapper(headerView = date))
-            }
+            result.add(TaskAssignmentWrapper(headerView = date))
             for (assignment in assignmentsForDate) {
                 result.add(TaskAssignmentWrapper(itemView = assignment))
             }
