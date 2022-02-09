@@ -45,10 +45,19 @@ class PrefManager(
         }
     }
 
+    fun setDebugServer(server: String) {
+        keyValueStore.put(DEBUG_SERVER, server)
+    }
+
+    fun getDebugServer(): String {
+        return keyValueStore.get(DEBUG_SERVER, "") ?: ""
+    }
+
     companion object {
         private const val USER_ID = "user_id"
         private const val KEY = "key"
         private const val TOKEN = "token"
         private const val WORKER_RUNNING = "worker_running"
+        private const val DEBUG_SERVER = "debug_server"
     }
 }

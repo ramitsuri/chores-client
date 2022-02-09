@@ -47,4 +47,10 @@ class LoginViewModel @Inject constructor(
             }
         }
     }
+
+    fun setDebugServer(server: String) {
+        prefManager.setDebugServer(server)
+    }
+
+    fun getServer() = prefManager.getDebugServer()
 }

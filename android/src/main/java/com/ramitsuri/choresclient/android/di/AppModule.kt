@@ -103,9 +103,9 @@ class AppModule {
     @Provides
     fun provideDefaultDispatchers(): DispatcherProvider = DefaultDispatchers()
 
-    @Singleton
     @Provides
-    fun provideBaseApiUrl() = if (BuildConfig.DEBUG) Base.API_BASE_URL_DEBUG else Base.API_BASE_URL
+    fun provideBaseApiUrl(prefManager: PrefManager) =
+        if (BuildConfig.DEBUG) prefManager.getDebugServer() else Base.API_BASE_URL
 
     @Singleton
     @Provides
