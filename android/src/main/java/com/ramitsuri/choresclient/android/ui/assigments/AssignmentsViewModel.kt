@@ -76,18 +76,27 @@ class AssignmentsViewModel @Inject constructor(
     private fun getAssignmentsForDisplay(
         data: List<TaskAssignment>
     ): List<TaskAssignmentWrapper> {
+        val onCompletionKey = "On Completion"
         val todo = data.filter { it.progressStatus == ProgressStatus.TODO }
             .sortedBy { it.dueDateTime }
             .groupBy {
                 if (it.task.repeatUnit == RepeatUnit.ON_COMPLETE) {
-                    "On Completion"
+                    onCompletionKey
                 } else {
                     getDay(it.dueDateTime)
                 }
             }
 
+        // Move "On Completion" to top
+        val onCompletion = todo[onCompletionKey]
+        val ordered = if (onCompletion != null) {
+            mapOf(onCompletionKey to onCompletion).plus(todo.minus(onCompletionKey))
+        } else {
+            todo
+        }
+
         val result = mutableListOf<TaskAssignmentWrapper>()
-        for ((date, assignmentsForDate) in todo) {
+        for ((date, assignmentsForDate) in ordered) {
             result.add(TaskAssignmentWrapper(headerView = date))
             for (assignment in assignmentsForDate) {
                 result.add(TaskAssignmentWrapper(itemView = assignment))

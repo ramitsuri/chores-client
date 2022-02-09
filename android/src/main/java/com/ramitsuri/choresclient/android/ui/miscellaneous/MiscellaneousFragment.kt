@@ -1,8 +1,6 @@
 package com.ramitsuri.choresclient.android.ui.miscellaneous
 
 import android.view.LayoutInflater
-import android.widget.EditText
-import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewbinding.ViewBinding
@@ -70,10 +68,6 @@ class MiscellaneousFragment: BaseFragment<FragmentMiscellaneousBinding>() {
                 }
             }
         }
-
-        binding.btnSetUserId.setOnClickListener {
-            showUserIdAlert()
-        }
         setupFilters()
     }
 
@@ -97,18 +91,6 @@ class MiscellaneousFragment: BaseFragment<FragmentMiscellaneousBinding>() {
         binding.filterGroup.setVisibility(showContent)
         binding.listAssignments.setVisibility(showContent)
         binding.progress.setVisibility(loading)
-    }
-
-    private fun showUserIdAlert() {
-        val alert = AlertDialog.Builder(requireActivity())
-        alert.setTitle(R.string.miscellaneous_user_id_alert_title)
-        val editText = EditText(requireActivity())
-        alert.setView(editText)
-        alert.setPositiveButton(R.string.ok) {_, _ ->
-            viewModel.userIdSet(editText.text.toString())
-        }
-        alert.setNegativeButton(R.string.cancel, null)
-        alert.show()
     }
 
     private fun log(message: String) {

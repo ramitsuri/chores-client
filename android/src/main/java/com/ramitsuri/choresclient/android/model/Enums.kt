@@ -37,6 +37,10 @@ enum class CreateType(val key: Int) {
 
 enum class ViewError {
     NETWORK,
+    LOGIN_REQUEST_FAILED,
+    LOGIN_NO_TOKEN,
+    LOGIN_NO_CREDENTIALS,
+    UNAUTHORIZED
 }
 
 enum class RepeatUnit(val key: Int) {

@@ -14,7 +14,7 @@ import timber.log.Timber
 import javax.inject.Inject
 
 @HiltAndroidApp
-class MainApplication: Application(), Configuration.Provider {
+class MainApplication : Application(), Configuration.Provider {
 
     @Inject
     lateinit var notificationHandler: NotificationHandler
@@ -25,7 +25,9 @@ class MainApplication: Application(), Configuration.Provider {
     override fun onCreate() {
         super.onCreate()
         DynamicColors.applyToActivitiesIfAvailable(this)
-        Timber.plant(Timber.DebugTree())
+        if (BuildConfig.DEBUG) {
+            Timber.plant(Timber.DebugTree())
+        }
 
         createNotificationChannels()
         enqueueWorkers()

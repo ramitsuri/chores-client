@@ -2,7 +2,7 @@ package com.ramitsuri.choresclient.android.di
 
 import android.content.Context
 import androidx.room.Room
-import com.ramitsuri.choresclient.android.Base
+import com.ramitsuri.choresclient.android.utils.Base
 import com.ramitsuri.choresclient.android.BuildConfig
 import com.ramitsuri.choresclient.android.data.AppDatabase
 import com.ramitsuri.choresclient.android.data.MemberDao
@@ -11,6 +11,7 @@ import com.ramitsuri.choresclient.android.data.TaskAssignmentDao
 import com.ramitsuri.choresclient.android.data.TaskDao
 import com.ramitsuri.choresclient.android.keyvaluestore.KeyValueStore
 import com.ramitsuri.choresclient.android.keyvaluestore.PrefKeyValueStore
+import com.ramitsuri.choresclient.android.keyvaluestore.SecurePrefKeyValueStore
 import com.ramitsuri.choresclient.android.notification.NotificationHandler
 import com.ramitsuri.choresclient.android.notification.ReminderScheduler
 import com.ramitsuri.choresclient.android.notification.SystemNotificationHandler
@@ -28,6 +29,8 @@ import dagger.hilt.components.SingletonComponent
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.android.Android
 import io.ktor.client.features.DefaultRequest
+import io.ktor.client.features.auth.*
+import io.ktor.client.features.auth.providers.*
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.client.features.json.serializer.KotlinxSerializer
 import io.ktor.client.features.logging.LogLevel
@@ -39,6 +42,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import kotlinx.serialization.json.Json
 import timber.log.Timber
+import javax.inject.Qualifier
 import javax.inject.Singleton
 
 @Module
@@ -47,7 +51,7 @@ class AppModule {
 
     @Singleton
     @Provides
-    fun provideHttpClient() = HttpClient(Android) {
+    fun provideHttpClient(prefManager: PrefManager) = HttpClient(Android) {
 
         install(JsonFeature) {
             serializer = KotlinxSerializer(Json {
@@ -62,8 +66,19 @@ class AppModule {
             }
         }
 
+        install(Auth) {
+            bearer {
+                refreshTokens {
+                    BearerTokens(
+                        accessToken = prefManager.getToken() ?: "",
+                        refreshToken = ""
+                    )
+                }
+            }
+        }
+
         install(Logging) {
-            logger = object: Logger {
+            logger = object : Logger {
                 override fun log(message: String) {
                     Timber.tag("Logger Ktor =>")
                     Timber.v(message)
@@ -73,7 +88,7 @@ class AppModule {
         }
 
         install(ResponseObserver) {
-            onResponse {response ->
+            onResponse { response ->
                 Timber.tag("HTTP status:")
                 Timber.d("${response.status.value}")
             }
@@ -124,16 +139,29 @@ class AppModule {
         }
     }
 
+    @Pref
     @Singleton
     @Provides
     fun provideKeyValueStore(@ApplicationContext context: Context): KeyValueStore {
         return PrefKeyValueStore(context, "com.ramitsuri.choresclient.android.prefs")
     }
 
+    @SecurePref
     @Singleton
     @Provides
-    fun providePrefManager(keyValueStore: KeyValueStore): PrefManager {
-        return PrefManager(keyValueStore)
+    fun provideSecureKeyValueStore(@ApplicationContext context: Context): KeyValueStore {
+        return SecurePrefKeyValueStore(context, "com.ramitsuri.choresclient.android.normal")
+    }
+
+    @Singleton
+    @Provides
+    fun providePrefManager(
+        @Pref
+        keyValueStore: KeyValueStore,
+        @SecurePref
+        securePrefKeyValueStore: KeyValueStore
+    ): PrefManager {
+        return PrefManager(keyValueStore, securePrefKeyValueStore)
     }
 
     @Provides
@@ -156,3 +184,11 @@ class AppModule {
         return database.reminderAssignmentDao()
     }
 }
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class SecurePref
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class Pref

@@ -17,10 +17,11 @@ dependencies {
     implementation("com.google.android.material:material:1.5.0-alpha05")
 
     // Ktor
-    implementation("io.ktor:ktor-client-android:1.5.0")
-    implementation("io.ktor:ktor-client-serialization:1.5.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.2")
+    implementation("io.ktor:ktor-client-android:1.6.7")
+    implementation("io.ktor:ktor-client-serialization:1.6.7")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.0")
     implementation("io.ktor:ktor-client-logging-jvm:1.6.3")
+    implementation ("io.ktor:ktor-client-auth:1.6.7")
 
     // App Compat
     implementation("androidx.appcompat:appcompat:1.3.1")
@@ -33,6 +34,9 @@ dependencies {
     kapt("com.google.dagger:hilt-android-compiler:2.37")
     implementation("androidx.hilt:hilt-lifecycle-viewmodel:1.0.0-alpha03")
     kapt("androidx.hilt:hilt-compiler:1.0.0")
+
+    // Encrypted SharedPrefs
+    implementation ("androidx.security:security-crypto:1.1.0-alpha03")
 
     // Fragment
     implementation("androidx.fragment:fragment-ktx:$fragmentVersion")

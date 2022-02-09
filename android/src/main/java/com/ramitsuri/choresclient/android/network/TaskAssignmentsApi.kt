@@ -13,11 +13,7 @@ class TaskAssignmentsApi @Inject constructor(
     private val baseUrl: String
 ) {
     suspend fun getTaskAssignments(): HttpResponse {
-        return client.get("$baseUrl/task-assignments")
-    }
-
-    suspend fun getTaskAssignment(id: String): HttpResponse {
-        return client.get("$baseUrl/task-assignments/$id")
+        return client.get("$baseUrl/task-assignments/filter?progress=1")
     }
 
     suspend fun updateTaskAssignment(

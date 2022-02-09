@@ -5,6 +5,7 @@ import com.ramitsuri.choresclient.android.data.TaskAssignmentDao
 import com.ramitsuri.choresclient.android.data.TaskAssignmentDataSource
 import com.ramitsuri.choresclient.android.data.TaskDao
 import com.ramitsuri.choresclient.android.network.TaskAssignmentsApi
+import com.ramitsuri.choresclient.android.repositories.LoginRepository
 import com.ramitsuri.choresclient.android.repositories.TaskAssignmentsRepository
 import com.ramitsuri.choresclient.android.utils.DispatcherProvider
 import dagger.Module
@@ -29,8 +30,14 @@ class AssignmentsModule {
 
     @Provides
     fun provideAssignmentsRepository(
+        loginRepository: LoginRepository,
         api: TaskAssignmentsApi,
         taskAssignmentDataSource: TaskAssignmentDataSource,
         dispatcherProvider: DispatcherProvider
-    ) = TaskAssignmentsRepository(api, taskAssignmentDataSource, dispatcherProvider)
+    ) = TaskAssignmentsRepository(
+        loginRepository,
+        api,
+        taskAssignmentDataSource,
+        dispatcherProvider
+    )
 }

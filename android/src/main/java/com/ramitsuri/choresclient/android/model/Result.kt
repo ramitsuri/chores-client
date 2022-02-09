@@ -10,6 +10,7 @@ sealed class Result<out T> {
 sealed class ViewState<out T> {
     object Loading: ViewState<Nothing>()
     object Reload: ViewState<Nothing>()
+    object Login: ViewState<Nothing>()
     data class Success<T>(val data: T): ViewState<T>()
     data class Error(val error: ViewError): ViewState<Nothing>()
 }
@@ -17,4 +18,8 @@ sealed class ViewState<out T> {
 data class AssignmentsViewState(
     val assignments: List<TaskAssignmentWrapper>,
     val selectedFilter: FilterMode
+)
+
+data class LoginViewState(
+    val loggedIn: Boolean
 )

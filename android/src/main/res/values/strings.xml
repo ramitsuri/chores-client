@@ -29,4 +29,9 @@
     <string name="miscellaneous_set_user_id">Set User Id</string>
     <string name="miscellaneous_user_id_alert_title">Enter User Id</string>
 
+    <!-- Login -->
+    <string name="login_button_login">Log In</string>
+    <string name="login_hint_id">Id</string>
+    <string name="login_hint_key">Key</string>
+
 </resources>
