@@ -22,7 +22,7 @@
     <string name="notification_reminders_id">Reminders</string>
     <string name="notification_reminders_name">Reminders</string>
     <string name="notification_reminders_description">Notifications to remind you about due tasks</string>
-    <string name="notification_reminder_title">Task(s) due</string>
+    <string name="notification_reminder_title">Task due</string>
     <string name="notification_reminder_message">You have task(s) due. Open the app to check</string>
 
     <!-- Login -->

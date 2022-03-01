@@ -1,204 +1,179 @@
 package com.ramitsuri.choresclient.android.notification
 
-import com.ramitsuri.choresclient.android.data.ReminderAssignment
-import com.ramitsuri.choresclient.android.data.ReminderAssignmentUpdateResult
-import com.ramitsuri.choresclient.android.model.CreateType
-import com.ramitsuri.choresclient.android.model.Member
-import com.ramitsuri.choresclient.android.model.ProgressStatus
-import com.ramitsuri.choresclient.android.model.RepeatUnit
-import com.ramitsuri.choresclient.android.model.Task
-import com.ramitsuri.choresclient.android.model.TaskAssignment
+import com.ramitsuri.choresclient.android.model.*
 import com.ramitsuri.choresclient.android.testutils.FakeAlarmHandler
-import com.ramitsuri.choresclient.android.testutils.FakeReminderAssignmentDao
+import com.ramitsuri.choresclient.android.testutils.FakeKeyValueStore
+import com.ramitsuri.choresclient.android.testutils.FakeTaskAssignmentsRepository
 import com.ramitsuri.choresclient.android.utils.DefaultDispatchers
-import com.ramitsuri.choresclient.android.utils.getStartPeriodTime
+import com.ramitsuri.choresclient.android.utils.PrefManager
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
+import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 import java.time.Instant
-import java.time.ZonedDateTime
 
 class ReminderSchedulerTest {
     private lateinit var reminderScheduler: ReminderScheduler
-    private lateinit var reminderAssignmentDao: FakeReminderAssignmentDao
+    private lateinit var taskAssignmentsRepository: FakeTaskAssignmentsRepository
     private lateinit var alarmHandler: FakeAlarmHandler
+    private lateinit var prefManager: PrefManager
 
     @Before
     fun setUp() {
-        reminderAssignmentDao = FakeReminderAssignmentDao()
+        taskAssignmentsRepository = FakeTaskAssignmentsRepository()
         alarmHandler = FakeAlarmHandler()
+        prefManager = PrefManager(FakeKeyValueStore(), FakeKeyValueStore())
         reminderScheduler = ReminderScheduler(
-            reminderAssignmentDao,
+            taskAssignmentsRepository,
             alarmHandler,
+            prefManager,
             DefaultDispatchers()
-        ) {
-            dueDateTimeModifier(it)
-        }
+        )
     }
 
     @Test
-    fun testAddNewReminders_shouldAddReminderForDueDateTime_ifAddingNew() {
+    fun testAddReminders_shouldAddReminder_ifDueInFuture() {
         runBlocking {
-            // Arrange
-            val assignments = getAssignments(numberOfAssignments = 1)
-            val scheduledTime = dueDateTimeModifier(assignments[0].dueDateTime).toEpochMilli()
-
-            // Act
-            reminderScheduler.addReminders(assignments)
-
-            // Assert
-            assertEquals(1, alarmHandler.getScheduledTimes().size)
-            assertTrue(alarmHandler.scheduledForTime(scheduledTime))
-        }
-    }
-
-    @Test
-    fun testAddNewReminders_shouldAddOneReminder_ifAddingNewAndAssignmentsHaveSameScheduledDateTime() {
-        runBlocking {
-            // Arrange
-            val baseDueDateTime = ZonedDateTime.now()
-                .withMinute(0)
-                .withSecond(0)
-                .withNano(0)
-            val assignments = getAssignments(
-                numberOfAssignments = 2,
-                baseDueDateTime = baseDueDateTime.toInstant(),
-                padMillis = (2 * 60 * 1000).toLong()
-            )
-            val scheduledTime = dueDateTimeModifier(assignments[0].dueDateTime).toEpochMilli()
-
-            // Act
-            reminderScheduler.addReminders(assignments)
-
-            // Assert
-            assertEquals(1, alarmHandler.getScheduledTimes().size)
-            assertTrue(alarmHandler.scheduledForTime(scheduledTime))
-        }
-    }
-
-    @Test
-    fun testAddNewReminders_shouldAddMultipleReminders_ifAddingNewAndAssignmentsHaveDifferentScheduledDateTime() {
-        runBlocking {
-            // Arrange
-            val baseDueDateTime = ZonedDateTime.now()
-                .withMinute(0)
-                .withSecond(0)
-                .withNano(0)
-            val assignments = getAssignments(
-                numberOfAssignments = 2,
-                baseDueDateTime = baseDueDateTime.toInstant()
-            )
-            val scheduledTime1 = dueDateTimeModifier(assignments[0].dueDateTime).toEpochMilli()
-            val scheduledTime2 = dueDateTimeModifier(assignments[1].dueDateTime).toEpochMilli()
-
-            // Act
-            reminderScheduler.addReminders(assignments)
-
-            // Assert
-            assertEquals(2, alarmHandler.getScheduledTimes().size)
-            assertTrue(alarmHandler.scheduledForTime(scheduledTime1))
-            assertTrue(alarmHandler.scheduledForTime(scheduledTime2))
-        }
-    }
-
-    /**
-     * This test won't work any more because of new logic with scheduling alarms separately from
-     * adding new assignments and use of Fake Dao here not actually inserting anything.
-     */
-    @Test
-    fun testAddNewReminders_shouldCancelOldReminderAndAddNewReminder_ifUpdatingAssignmentWithDifferentTimeAndOldTimeHasNoReminders() {
-        runBlocking {
-            // Arrange
-            val baseDueDateTime = ZonedDateTime.now()
-                .withMinute(0)
-                .withSecond(0)
-                .withNano(0)
-
-            val initialDueDateTime = baseDueDateTime.minusHours(1).toInstant()
-            val newDueDateTime = baseDueDateTime.toInstant()
-            var assignments = getAssignments(
-                numberOfAssignments = 1,
-                baseDueDateTime = initialDueDateTime
-            )
-            reminderScheduler.addReminders(assignments)
-            reminderAssignmentDao.setFakeResult(
-                ReminderAssignmentUpdateResult(
-                    ReminderAssignment(
-                        assignmentId = "1",
-                        time = newDueDateTime.toEpochMilli(),
-                        requestCode = 1
-                    ),
-                    true
+            val assignmentId = "1"
+            val scheduledTime = Instant.now().plusSeconds(30)
+            val memberId = "1"
+            prefManager.setUserId(memberId)
+            taskAssignmentsRepository.setSince(
+                listOf(
+                    getAssignment(
+                        assignmentId,
+                        dueDateTime = scheduledTime
+                    )
                 )
             )
 
-            // Act
-            assignments = getAssignments(
-                numberOfAssignments = 1,
-                baseDueDateTime = newDueDateTime
-            )
-            reminderScheduler.addReminders(assignments)
+            reminderScheduler.addReminders()
 
-            // Assert
-            /*assertEquals(1, alarmHandler.getScheduledTimes().size)
-            assertTrue(alarmHandler.scheduledForTime(newDueDateTime.toEpochMilli()))
-            assertFalse(alarmHandler.scheduledForTime(initialDueDateTime.toEpochMilli()))*/
+            assertEquals(scheduledTime.toEpochMilli(), alarmHandler.get(assignmentId))
         }
     }
 
-    /**
-     * This test won't work any more because of new logic with scheduling alarms separately from
-     * adding new assignments and use of Fake Dao here not actually inserting anything.
-     */
     @Test
-    fun testAddNewReminders_shouldNotCancelOldReminderAndAddNewReminder_ifUpdatingAssignmentWithDifferentTimeAndOldTimeHasReminders() {
+    fun testAddReminders_shouldNotAddReminder_ifDueInPast() {
         runBlocking {
-            // Arrange
-            val baseDueDateTime = ZonedDateTime.now()
-                .withMinute(0)
-                .withSecond(0)
-                .withNano(0)
-
-            val initialDueDateTime = baseDueDateTime.minusHours(1).toInstant()
-            val newDueDateTime = baseDueDateTime.toInstant()
-            var assignments = getAssignments(
-                numberOfAssignments = 2,
-                baseDueDateTime = initialDueDateTime,
-                padDueDateTime = false // Both assignments will have the same due date time
-            )
-            reminderScheduler.addReminders(assignments)
-            reminderAssignmentDao.setFakeResult(
-                ReminderAssignmentUpdateResult(
-                    ReminderAssignment(
-                        assignmentId = "1",
-                        time = newDueDateTime.toEpochMilli(),
-                        requestCode = 1
-                    ),
-                    false
+            val assignmentId = "1"
+            val scheduledTime = Instant.now().minusSeconds(30)
+            val memberId = "1"
+            prefManager.setUserId(memberId)
+            taskAssignmentsRepository.setSince(
+                listOf(
+                    getAssignment(
+                        assignmentId,
+                        dueDateTime = scheduledTime
+                    )
                 )
             )
 
-            // Act
-            assignments = getAssignments(
-                numberOfAssignments = 1,
-                baseDueDateTime = newDueDateTime
-            )
-            reminderScheduler.addReminders(assignments)
+            reminderScheduler.addReminders()
 
-            // Assert
-            /*assertEquals(2, alarmHandler.getScheduledTimes().size)
-            assertTrue(alarmHandler.scheduledForTime(newDueDateTime.toEpochMilli()))
-            assertTrue(alarmHandler.scheduledForTime(initialDueDateTime.toEpochMilli()))*/
+            assertNull(alarmHandler.get(assignmentId))
         }
     }
 
-    private fun dueDateTimeModifier(
-        value: Instant,
-        periodLengthInMinutes: Int = 15
-    ) = getStartPeriodTime(value, periodLengthInMinutes)
+    @Test
+    fun testAddReminders_shouldNotAddReminder_ifCompleted() {
+        runBlocking {
+            val assignmentId = "1"
+            val scheduledTime = Instant.now().plusSeconds(30)
+            val memberId = "1"
+            prefManager.setUserId(memberId)
+            taskAssignmentsRepository.setSince(
+                listOf(
+                    getAssignment(
+                        assignmentId,
+                        dueDateTime = scheduledTime,
+                        progressStatus = ProgressStatus.DONE
+                    )
+                )
+            )
+
+            reminderScheduler.addReminders()
+
+            assertNull(alarmHandler.get(assignmentId))
+        }
+    }
+
+    @Test
+    fun testAddReminders_shouldNotAddReminder_ifProgressUnknown() {
+        runBlocking {
+            val assignmentId = "1"
+            val scheduledTime = Instant.now().plusSeconds(30)
+            val memberId = "1"
+            prefManager.setUserId(memberId)
+            taskAssignmentsRepository.setSince(
+                listOf(
+                    getAssignment(
+                        assignmentId,
+                        dueDateTime = scheduledTime,
+                        progressStatus = ProgressStatus.UNKNOWN
+                    )
+                )
+            )
+
+            reminderScheduler.addReminders()
+
+            assertNull(alarmHandler.get(assignmentId))
+        }
+    }
+
+    @Test
+    fun testAddReminders_shouldNotAddReminder_ifMemberDifferent() {
+        runBlocking {
+            val assignmentId = "1"
+            val scheduledTime = Instant.now().plusSeconds(30)
+            val memberId = "1"
+            prefManager.setUserId("2")
+            taskAssignmentsRepository.setSince(
+                listOf(
+                    getAssignment(
+                        assignmentId,
+                        dueDateTime = scheduledTime,
+                        progressStatus = ProgressStatus.UNKNOWN
+                    )
+                )
+            )
+
+            reminderScheduler.addReminders()
+
+            assertNull(alarmHandler.get(assignmentId))
+        }
+    }
+
+    private fun getAssignment(
+        assignmentId: String,
+        progressStatus: ProgressStatus = ProgressStatus.TODO,
+        dueDateTime: Instant = Instant.now(),
+        memberId: String = "1"
+    ): TaskAssignment {
+        val member = Member(memberId, "member", Instant.now())
+        return TaskAssignment(
+            assignmentId,
+            progressStatus,
+            progressStatusDate = Instant.now(),
+            Task(
+                id = "1",
+                "Name",
+                "Description",
+                Instant.now(),
+                1,
+                RepeatUnit.DAY,
+                "",
+                "",
+                false,
+                Instant.now()
+            ),
+            member,
+            dueDateTime,
+            createdDate = Instant.now(),
+            CreateType.AUTO
+        )
+    }
 
     private fun getAssignments(
         numberOfAssignments: Int,

@@ -13,17 +13,18 @@ import io.ktor.client.features.*
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.withContext
 import timber.log.Timber
+import java.time.Instant
 import javax.inject.Inject
 
-class TaskAssignmentsRepository @Inject constructor(
+class SystemTaskAssignmentsRepository @Inject constructor(
     private val loginRepository: LoginRepository,
     private val api: TaskAssignmentsApi,
     private val dataSource: TaskAssignmentDataSource,
     private val dispatcherProvider: DispatcherProvider
-) {
-    suspend fun getTaskAssignments(
-        getLocal: Boolean = false,
-        retryingOnUnauthorized: Boolean = false
+): TaskAssignmentsRepository {
+    override suspend fun getTaskAssignments(
+        getLocal: Boolean,
+        retryingOnUnauthorized: Boolean
     ): Result<List<TaskAssignment>> {
         if (getLocal) {
             val localAssignments = dataSource.getTaskAssignments()
@@ -69,14 +70,21 @@ class TaskAssignmentsRepository @Inject constructor(
         }
     }
 
-    suspend fun filter(filterMode: FilterMode): Result<List<TaskAssignment>> {
+    /**
+     * Will always return locally saved assignments since the passed due date time
+     */
+    override suspend fun getSince(dueDateTime: Instant): List<TaskAssignment> {
+        return dataSource.getSince(dueDateTime)
+    }
+
+    override suspend fun filter(filterMode: FilterMode): Result<List<TaskAssignment>> {
         return Result.Success(dataSource.getTaskAssignments(filterMode))
     }
 
-    suspend fun updateTaskAssignment(
+    override suspend fun updateTaskAssignment(
         id: String,
         progressStatus: ProgressStatus,
-        retryingOnUnauthorized: Boolean = false
+        retryingOnUnauthorized: Boolean
     ): Result<Boolean> {
         return withContext(dispatcherProvider.io) {
             val result = try {
@@ -110,4 +118,21 @@ class TaskAssignmentsRepository @Inject constructor(
             }
         }
     }
+}
+
+interface TaskAssignmentsRepository {
+    suspend fun getTaskAssignments(
+        getLocal: Boolean = false,
+        retryingOnUnauthorized: Boolean = false
+    ): Result<List<TaskAssignment>>
+
+    suspend fun getSince(dueDateTime: Instant): List<TaskAssignment>
+
+    suspend fun filter(filterMode: FilterMode): Result<List<TaskAssignment>>
+
+    suspend fun updateTaskAssignment(
+        id: String,
+        progressStatus: ProgressStatus,
+        retryingOnUnauthorized: Boolean = false
+    ): Result<Boolean>
 }

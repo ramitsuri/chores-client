@@ -1,26 +1,18 @@
 package com.ramitsuri.choresclient.android.testutils
 
+import com.ramitsuri.choresclient.android.model.TaskAssignment
 import com.ramitsuri.choresclient.android.reminder.AlarmHandler
 
-class FakeAlarmHandler: AlarmHandler {
-    private val alarms = mutableMapOf<Long, Int>() // Time | RequestCode
-    override fun schedule(requestCode: Int, time: Long) {
-        alarms[time] = requestCode
+class FakeAlarmHandler : AlarmHandler {
+    private val alarms = mutableMapOf<String, Long>() // AssignmentId | DueDateTime
+
+    override fun schedule(taskAssignment: TaskAssignment) {
+        alarms[taskAssignment.id] = taskAssignment.dueDateTime.toEpochMilli()
     }
 
-    override fun cancel(requestCode: Int) {
-        val filteredAlarms =
-            alarms.filter {(alarmTime, alarmRequestCode) -> alarmRequestCode == requestCode}
-        for ((key, value) in filteredAlarms) {
-            alarms.remove(key)
-        }
+    override fun cancel(taskAssignment: TaskAssignment) {
+        alarms.remove(taskAssignment.id)
     }
 
-    fun scheduledForTime(time: Long): Boolean {
-        return alarms[time] != null
-    }
-
-    fun getScheduledTimes(): List<Long> {
-        return alarms.keys.toList()
-    }
+    fun get(assignmentId: String): Long? = alarms[assignmentId]
 }

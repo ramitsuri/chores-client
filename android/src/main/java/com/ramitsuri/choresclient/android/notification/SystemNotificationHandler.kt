@@ -28,7 +28,7 @@ class SystemNotificationHandler(context: Context): NotificationHandler {
             setSmallIcon(notificationInfo.iconResId)
             setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             setContentTitle(context.getString(notificationInfo.titleResId))
-            setContentText(context.getString(notificationInfo.bodyResId))
+            setContentText(notificationInfo.body)
             if (notificationInfo.actions != null) {
                 for (action in notificationInfo.actions) {
                     addAction(getAction(action))

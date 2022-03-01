@@ -1,86 +1,59 @@
 package com.ramitsuri.choresclient.android.notification
 
-import com.ramitsuri.choresclient.android.data.ReminderAssignmentDao
-import com.ramitsuri.choresclient.android.model.TaskAssignment
+import com.ramitsuri.choresclient.android.model.ProgressStatus
+import com.ramitsuri.choresclient.android.model.RepeatUnit
 import com.ramitsuri.choresclient.android.reminder.AlarmHandler
+import com.ramitsuri.choresclient.android.repositories.TaskAssignmentsRepository
 import com.ramitsuri.choresclient.android.utils.DispatcherProvider
+import com.ramitsuri.choresclient.android.utils.PrefManager
 import kotlinx.coroutines.withContext
 import timber.log.Timber
-import java.time.Instant
 import java.time.ZonedDateTime
 
 class ReminderScheduler(
-    private val reminderAssignmentDao: ReminderAssignmentDao,
+    private val taskAssignmentsRepository: TaskAssignmentsRepository,
     private val alarmHandler: AlarmHandler,
-    private val dispatchers: DispatcherProvider,
-    private val dueDateTimeToReminderTimeConverter: (Instant) -> Instant
+    private val prefManager: PrefManager,
+    private val dispatchers: DispatcherProvider
 ) {
     private var running = false
-    private val assignments = mutableListOf<TaskAssignment>()
 
-    suspend fun addReminders(taskAssignments: List<TaskAssignment>) {
-        log("Add Reminders, $taskAssignments")
+    suspend fun addReminders() {
+        log("Add Reminders")
         if (running) {
             log("Already running")
             return
         }
-        assignments.addAll(taskAssignments)
         running = true
-        check()
         scheduleReminders()
         running = false
     }
 
-    private suspend fun check() {
-        log("Checking")
-        withContext(dispatchers.default) {
-            val iterator = assignments.iterator()
-            while (iterator.hasNext()) {
-                val assignment = iterator.next()
-                val newTime =
-                    dueDateTimeToReminderTimeConverter(assignment.dueDateTime).toEpochMilli()
-
-                val existingReminderAssignment = reminderAssignmentDao.get(assignment.id)
-
-                if (existingReminderAssignment == null) {
-                    log("Existing null, adding new")
-                    reminderAssignmentDao.insert(assignment.id, newTime)
-                } else {
-                    log("Exists")
-                    val oldTime = existingReminderAssignment.time
-                    if (oldTime != newTime) {
-                        log("Time has changed")
-                        val updateResult = reminderAssignmentDao.updateOrInsert(
-                            assignmentId = assignment.id,
-                            newTime = newTime,
-                            oldTime = oldTime
-                        )
-                        if (updateResult.oldTimeNoLongerExists) {
-                            log("Old time no longer exists")
-                            alarmHandler.cancel(existingReminderAssignment.requestCode)
-                        }
-                    }
-                }
-                iterator.remove()
-            }
-        }
-        log("Done")
-    }
-
     private suspend fun scheduleReminders() {
-        // Schedule only reminders from one hour in the past. We don't want to be showing reminders
-        // for assignments that are already way back in the past
-        val now = ZonedDateTime.now().minusHours(1).toInstant().toEpochMilli()
         withContext(dispatchers.io) {
-            val requestCodeTimeAssociations = reminderAssignmentDao.getRequestCodeTimeAssociations()
-            for (requestCodeTimeAssociation in requestCodeTimeAssociations) {
-                if (requestCodeTimeAssociation.time < now) {
-                    continue
-                }
-                alarmHandler.schedule(
-                    requestCodeTimeAssociation.requestCode,
-                    requestCodeTimeAssociation.time
-                )
+            // Schedule only reminders from one week in the past. We don't want to be showing
+            // reminders for assignments that are already way back in the past
+            val now = ZonedDateTime.now()
+            val sinceDueDateTime = now.minusWeeks(1).toInstant()
+            val assignments = taskAssignmentsRepository.getSince(sinceDueDateTime)
+            val memberId = prefManager.getUserId("")
+
+            val completed = assignments.filter {
+                it.progressStatus == ProgressStatus.DONE ||
+                        it.progressStatus == ProgressStatus.UNKNOWN
+            }
+            completed.forEach { assignment ->
+                alarmHandler.cancel(assignment)
+            }
+
+            val toSchedule = assignments.filter {
+                it.member.id == memberId &&
+                        it.dueDateTime > now.toInstant() &&
+                        it.progressStatus == ProgressStatus.TODO &&
+                        it.task.repeatUnit != RepeatUnit.ON_COMPLETE
+            }
+            toSchedule.forEach { assignment ->
+                alarmHandler.schedule(assignment)
             }
         }
     }

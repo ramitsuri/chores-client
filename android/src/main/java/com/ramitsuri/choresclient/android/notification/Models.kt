@@ -30,7 +30,7 @@ data class NotificationInfo(
     val channelId: String,
     val priority: Priority,
     @StringRes val titleResId: Int,
-    @StringRes val bodyResId: Int,
+    val body: String,
     @DrawableRes val iconResId: Int,
     val actions: List<NotificationActionInfo>? = null
 )

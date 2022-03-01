@@ -8,11 +8,7 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequest
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
-import com.ramitsuri.choresclient.android.model.ProgressStatus
-import com.ramitsuri.choresclient.android.model.RepeatUnit
-import com.ramitsuri.choresclient.android.model.TaskAssignment
 import com.ramitsuri.choresclient.android.notification.ReminderScheduler
-import com.ramitsuri.choresclient.android.repositories.TaskAssignmentsRepository
 import com.ramitsuri.choresclient.android.utils.PrefManager
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
@@ -26,7 +22,6 @@ class ReminderSchedulerWorker @AssistedInject constructor(
     @Assisted context: Context,
     @Assisted workerParameters: WorkerParameters,
     private val reminderScheduler: ReminderScheduler,
-    private val repository: TaskAssignmentsRepository,
     private val prefManager: PrefManager
 ):
     CoroutineWorker(context, workerParameters) {
@@ -39,12 +34,7 @@ class ReminderSchedulerWorker @AssistedInject constructor(
         prefManager.setWorkerRunning(true)
         try {
             withContext(Dispatchers.IO) {
-                val assignments = repository.getTaskAssignments(true)
-                if (assignments is com.ramitsuri.choresclient.android.model.Result.Success) {
-                    val assignmentsForUser =
-                        getAssignmentsForReminders(assignments.data, prefManager.getUserId())
-                    reminderScheduler.addReminders(assignmentsForUser)
-                }
+                    reminderScheduler.addReminders()
             }
         } catch (e: Exception) {
             Timber.e(e)
@@ -53,16 +43,6 @@ class ReminderSchedulerWorker @AssistedInject constructor(
         }
         Timber.d("Run complete")
         return Result.success()
-    }
-
-    private fun getAssignmentsForReminders(
-        data: List<TaskAssignment>,
-        userId: String?
-    ): List<TaskAssignment> {
-        return data
-            .filter {it.member.id == userId}
-            .filter {it.progressStatus == ProgressStatus.TODO}
-            .filter {it.task.repeatUnit != RepeatUnit.ON_COMPLETE}
     }
 
     companion object {

@@ -53,6 +53,9 @@ abstract class TaskAssignmentDao {
     @Query("SELECT * FROM TaskAssignments WHERE memberId = :memberId")
     abstract suspend fun getForMember(memberId: String): List<TaskAssignmentEntity>
 
+    @Query("SELECT * FROM TaskAssignments WHERE dueDateTime >= :time")
+    abstract suspend fun getSince(time: Long): List<TaskAssignmentEntity>
+
     @Query("SELECT * FROM TaskAssignments WHERE memberId != :memberId")
     abstract suspend fun getForExceptMember(memberId: String): List<TaskAssignmentEntity>
 

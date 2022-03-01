@@ -44,44 +44,4 @@ class DateHelperKtTest {
         val expected = "15 Mar, 2020 12:00 PM"
         assertEquals(expected, formatInstant(toFormat, now, zoneId, locale))
     }
-
-    @Test
-    fun getStartPeriodTime_ifPeriodLengthComfortablyBiggerThanMinutesInGivenInstant() {
-        val instant = Instant.parse("2021-01-01T17:04:00.000Z")
-        val expected = Instant.parse("2021-01-01T17:00:00.000Z")
-        assertEquals(
-            expected,
-            getStartPeriodTime(instant, 5)
-        )
-    }
-
-    @Test
-    fun getStartPeriodTime_ifPeriodLengthSameAsMinutesInGivenInstant() {
-        val instant = Instant.parse("2021-01-01T17:04:00.000Z")
-        val expected = Instant.parse("2021-01-01T17:04:00.000Z")
-        assertEquals(
-            expected,
-            getStartPeriodTime(instant, 4)
-        )
-    }
-
-    @Test
-    fun getStartPeriodTime_ifPeriodLengthSlightlySmallerThanMinutesInGivenInstant() {
-        val instant = Instant.parse("2021-01-01T17:04:00.001Z")
-        val expected = Instant.parse("2021-01-01T17:04:00.000Z")
-        assertEquals(
-            expected,
-            getStartPeriodTime(instant, 4)
-        )
-    }
-
-    @Test
-    fun getStartPeriodTime_ifPeriodLengthComfortablySmallerThanMinutesInGivenInstant() {
-        val instant = Instant.parse("2021-01-01T17:03:59.999Z")
-        val expected = Instant.parse("2021-01-01T17:00:00.000Z")
-        assertEquals(
-            expected,
-            getStartPeriodTime(instant, 4)
-        )
-    }
 }

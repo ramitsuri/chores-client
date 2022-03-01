@@ -8,6 +8,7 @@ class PrefManager(
 ) {
 
     private val runningLock = Any()
+    private val notificationIdLock = Any()
 
     fun setUserId(userId: String) {
         keyValueStore.put(USER_ID, userId)
@@ -53,11 +54,24 @@ class PrefManager(
         return keyValueStore.get(DEBUG_SERVER, "") ?: ""
     }
 
+    fun setPreviousNotificationId(id: Int) {
+        synchronized(notificationIdLock) {
+            keyValueStore.put(PREV_NOTIFICATION_ID, id)
+        }
+    }
+
+    fun getPreviousNotificationId(default: Int = 0): Int {
+        synchronized(notificationIdLock) {
+            return keyValueStore.get(PREV_NOTIFICATION_ID, default)
+        }
+    }
+
     companion object {
         private const val USER_ID = "user_id"
         private const val KEY = "key"
         private const val TOKEN = "token"
         private const val WORKER_RUNNING = "worker_running"
         private const val DEBUG_SERVER = "debug_server"
+        private const val PREV_NOTIFICATION_ID = "prev_notification_id"
     }
 }

@@ -6,21 +6,25 @@ import com.ramitsuri.choresclient.android.utils.Base
 import com.ramitsuri.choresclient.android.BuildConfig
 import com.ramitsuri.choresclient.android.data.AppDatabase
 import com.ramitsuri.choresclient.android.data.MemberDao
-import com.ramitsuri.choresclient.android.data.ReminderAssignmentDao
 import com.ramitsuri.choresclient.android.data.TaskAssignmentDao
+import com.ramitsuri.choresclient.android.data.TaskAssignmentDataSource
 import com.ramitsuri.choresclient.android.data.TaskDao
 import com.ramitsuri.choresclient.android.keyvaluestore.KeyValueStore
 import com.ramitsuri.choresclient.android.keyvaluestore.PrefKeyValueStore
 import com.ramitsuri.choresclient.android.keyvaluestore.SecurePrefKeyValueStore
+import com.ramitsuri.choresclient.android.network.TaskAssignmentsApi
 import com.ramitsuri.choresclient.android.notification.NotificationHandler
 import com.ramitsuri.choresclient.android.notification.ReminderScheduler
+import com.ramitsuri.choresclient.android.notification.ShowNotificationWorker
 import com.ramitsuri.choresclient.android.notification.SystemNotificationHandler
 import com.ramitsuri.choresclient.android.reminder.AlarmHandler
 import com.ramitsuri.choresclient.android.reminder.SystemAlarmHandler
+import com.ramitsuri.choresclient.android.repositories.LoginRepository
+import com.ramitsuri.choresclient.android.repositories.SystemTaskAssignmentsRepository
+import com.ramitsuri.choresclient.android.repositories.TaskAssignmentsRepository
 import com.ramitsuri.choresclient.android.utils.DefaultDispatchers
 import com.ramitsuri.choresclient.android.utils.DispatcherProvider
 import com.ramitsuri.choresclient.android.utils.PrefManager
-import com.ramitsuri.choresclient.android.utils.getStartPeriodTime
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -124,19 +128,23 @@ class AppModule {
     @Singleton
     @Provides
     fun provideAlarmHandler(@ApplicationContext context: Context): AlarmHandler {
-        return SystemAlarmHandler(context)
+        return SystemAlarmHandler(ShowNotificationWorker.Companion, context)
     }
 
     @Singleton
     @Provides
     fun provideReminderScheduler(
-        reminderAssignmentDao: ReminderAssignmentDao,
+        taskAssignmentsRepository: TaskAssignmentsRepository,
+        prefManager: PrefManager,
         alarmHandler: AlarmHandler,
         dispatcherProvider: DispatcherProvider
     ): ReminderScheduler {
-        return ReminderScheduler(reminderAssignmentDao, alarmHandler, dispatcherProvider) {
-            getStartPeriodTime(it)
-        }
+        return ReminderScheduler(
+            taskAssignmentsRepository,
+            alarmHandler,
+            prefManager,
+            dispatcherProvider
+        )
     }
 
     @Pref
@@ -180,9 +188,28 @@ class AppModule {
     }
 
     @Provides
-    fun provideRemindersDao(database: AppDatabase): ReminderAssignmentDao {
-        return database.reminderAssignmentDao()
-    }
+    fun provideAssignmentsApi(httpClient: HttpClient, baseUrl: String) =
+        TaskAssignmentsApi(httpClient, baseUrl)
+
+    @Provides
+    fun provideAssignmentsDataSource(
+        taskAssignmentDao: TaskAssignmentDao,
+        memberDao: MemberDao,
+        taskDao: TaskDao
+    ): TaskAssignmentDataSource = TaskAssignmentDataSource(taskAssignmentDao, memberDao, taskDao)
+
+    @Provides
+    fun provideAssignmentsRepository(
+        loginRepository: LoginRepository,
+        api: TaskAssignmentsApi,
+        taskAssignmentDataSource: TaskAssignmentDataSource,
+        dispatcherProvider: DispatcherProvider
+    ): TaskAssignmentsRepository = SystemTaskAssignmentsRepository(
+        loginRepository,
+        api,
+        taskAssignmentDataSource,
+        dispatcherProvider
+    )
 }
 
 @Qualifier
