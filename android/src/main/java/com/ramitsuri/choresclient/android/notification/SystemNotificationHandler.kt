@@ -6,8 +6,9 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
+import com.ramitsuri.choresclient.android.MainActivity
 
-class SystemNotificationHandler(context: Context): NotificationHandler {
+class SystemNotificationHandler(context: Context) : NotificationHandler {
     private val context = context.applicationContext
     private val notificationManager =
         context.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager
@@ -35,7 +36,7 @@ class SystemNotificationHandler(context: Context): NotificationHandler {
                 }
             }
             setAutoCancel(true)
-            //setContentIntent(getTapPendingIntent())
+            setContentIntent(getTapPendingIntent(MainActivity::class.java))
         }
         val notification = builder.build()
         notificationManager?.notify(notificationInfo.id, notification)
