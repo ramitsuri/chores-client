@@ -1,6 +1,12 @@
 package com.ramitsuri.choresclient.android.notification
 
-import com.ramitsuri.choresclient.android.model.*
+import com.ramitsuri.choresclient.android.data.AssignmentAlarm
+import com.ramitsuri.choresclient.android.model.CreateType
+import com.ramitsuri.choresclient.android.model.Member
+import com.ramitsuri.choresclient.android.model.ProgressStatus
+import com.ramitsuri.choresclient.android.model.RepeatUnit
+import com.ramitsuri.choresclient.android.model.Task
+import com.ramitsuri.choresclient.android.model.TaskAssignment
 import com.ramitsuri.choresclient.android.testutils.FakeAlarmHandler
 import com.ramitsuri.choresclient.android.testutils.FakeKeyValueStore
 import com.ramitsuri.choresclient.android.testutils.FakeTaskAssignmentsRepository
@@ -8,9 +14,11 @@ import com.ramitsuri.choresclient.android.utils.DefaultDispatchers
 import com.ramitsuri.choresclient.android.utils.PrefManager
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
+import java.time.Duration
 import java.time.Instant
 
 class ReminderSchedulerTest {
@@ -33,8 +41,66 @@ class ReminderSchedulerTest {
     }
 
     @Test
+    fun testAddReminders_shouldDelete_ifAssignmentStatusCompleted() {
+        runBlocking {
+            // Arrange
+            val assignmentId = "1"
+            val scheduledTime = Instant.now().plusSeconds(30)
+            val memberId = "1"
+            prefManager.setUserId(memberId)
+            taskAssignmentsRepository.setSince(
+                listOf(
+                    getAssignment(
+                        assignmentId,
+                        dueDateTime = scheduledTime,
+                        progressStatus = ProgressStatus.DONE
+                    )
+                )
+            )
+            alarmHandler.schedule(listOf(AssignmentAlarm(assignmentId, scheduledTime, 1, "")))
+
+            // Act
+            reminderScheduler.addReminders()
+
+            // Assert
+            val added = alarmHandler.get(assignmentId)
+            assertNull(added)
+        }
+    }
+
+    @Test
+    fun testAddReminders_shouldDoNothing_ifAssignmentStatusCompletedAndDueMoreThan3WeeksInPast() {
+        runBlocking {
+            // Arrange
+            val assignmentId = "1"
+            val scheduledTime =
+                Instant.now().minusSeconds(Duration.ofDays(22).seconds)// 22 days in seconds
+            val memberId = "1"
+            prefManager.setUserId(memberId)
+            taskAssignmentsRepository.setSince(
+                listOf(
+                    getAssignment(
+                        assignmentId,
+                        dueDateTime = scheduledTime,
+                        progressStatus = ProgressStatus.DONE
+                    )
+                )
+            )
+            alarmHandler.schedule(listOf(AssignmentAlarm(assignmentId, scheduledTime, 1, "")))
+
+            // Act
+            reminderScheduler.addReminders()
+
+            // Assert
+            val added = alarmHandler.get(assignmentId)
+            assertNotNull(added)
+        }
+    }
+
+    @Test
     fun testAddReminders_shouldAddReminder_ifDueInFuture() {
         runBlocking {
+            // Arrange
             val assignmentId = "1"
             val scheduledTime = Instant.now().plusSeconds(30)
             val memberId = "1"
@@ -48,15 +114,20 @@ class ReminderSchedulerTest {
                 )
             )
 
+            // Act
             reminderScheduler.addReminders()
 
-            assertEquals(scheduledTime.toEpochMilli(), alarmHandler.get(assignmentId))
+            // Assert
+            val added = alarmHandler.get(assignmentId)
+            assertNotNull(added)
+            assertEquals(scheduledTime.toEpochMilli(), added?.showAtTime?.toEpochMilli())
         }
     }
 
     @Test
-    fun testAddReminders_shouldNotAddReminder_ifDueInPast() {
+    fun testAddReminders_shouldAddReminder_ifMissed() {
         runBlocking {
+            // Arrange
             val assignmentId = "1"
             val scheduledTime = Instant.now().minusSeconds(30)
             val memberId = "1"
@@ -70,15 +141,56 @@ class ReminderSchedulerTest {
                 )
             )
 
+            // Act
             reminderScheduler.addReminders()
 
-            assertNull(alarmHandler.get(assignmentId))
+            // Assert
+            val added = alarmHandler.get(assignmentId)
+            assertNotNull(added)
+        }
+    }
+
+    @Test
+    fun testAddReminders_shouldNotAddReminder_ifMissedAndLastNotifiedMoreThanADayAgo() {
+        runBlocking {
+            // Arrange
+            val assignmentId = "1"
+            val scheduledTime = Instant.now().minusSeconds(30)
+            val memberId = "1"
+            prefManager.setUserId(memberId)
+            taskAssignmentsRepository.setSince(
+                listOf(
+                    getAssignment(
+                        assignmentId,
+                        dueDateTime = scheduledTime
+                    )
+                )
+            )
+            alarmHandler.schedule(
+                listOf(
+                    AssignmentAlarm(
+                        assignmentId,
+                        scheduledTime.minusSeconds(Duration.ofHours(25).seconds),
+                        100,
+                        ""
+                    )
+                )
+            )
+
+            // Act
+            reminderScheduler.addReminders()
+
+            // Assert
+            val added = alarmHandler.get(assignmentId)
+            assertNotNull(added)
+            assertEquals(100, added?.systemNotificationId)
         }
     }
 
     @Test
     fun testAddReminders_shouldNotAddReminder_ifCompleted() {
         runBlocking {
+            // Arrange
             val assignmentId = "1"
             val scheduledTime = Instant.now().plusSeconds(30)
             val memberId = "1"
@@ -93,8 +205,10 @@ class ReminderSchedulerTest {
                 )
             )
 
+            // Act
             reminderScheduler.addReminders()
 
+            // Assert
             assertNull(alarmHandler.get(assignmentId))
         }
     }
@@ -102,6 +216,7 @@ class ReminderSchedulerTest {
     @Test
     fun testAddReminders_shouldNotAddReminder_ifProgressUnknown() {
         runBlocking {
+            // Arrange
             val assignmentId = "1"
             val scheduledTime = Instant.now().plusSeconds(30)
             val memberId = "1"
@@ -116,8 +231,10 @@ class ReminderSchedulerTest {
                 )
             )
 
+            // Act
             reminderScheduler.addReminders()
 
+            // Assert
             assertNull(alarmHandler.get(assignmentId))
         }
     }
@@ -125,6 +242,7 @@ class ReminderSchedulerTest {
     @Test
     fun testAddReminders_shouldNotAddReminder_ifMemberDifferent() {
         runBlocking {
+            // Arrange
             val assignmentId = "1"
             val scheduledTime = Instant.now().plusSeconds(30)
             val memberId = "1"
@@ -139,8 +257,10 @@ class ReminderSchedulerTest {
                 )
             )
 
+            // Act
             reminderScheduler.addReminders()
 
+            // Assert
             assertNull(alarmHandler.get(assignmentId))
         }
     }
@@ -173,42 +293,5 @@ class ReminderSchedulerTest {
             createdDate = Instant.now(),
             CreateType.AUTO
         )
-    }
-
-    private fun getAssignments(
-        numberOfAssignments: Int,
-        baseDueDateTime: Instant = Instant.now(),
-        padMillis: Long = (15 * 60 * 1000).toLong(),
-        padDueDateTime: Boolean = true
-    ): List<TaskAssignment> {
-        val member = Member("1", "member", Instant.now())
-        val taskAssignments = mutableListOf<TaskAssignment>()
-        repeat(numberOfAssignments) {
-            val index = it + 1
-            taskAssignments.add(
-                TaskAssignment(
-                    id = index.toString(),
-                    ProgressStatus.TODO,
-                    progressStatusDate = Instant.now(),
-                    Task(
-                        id = index.toString(),
-                        "Name",
-                        "Description",
-                        Instant.now(),
-                        1,
-                        RepeatUnit.DAY,
-                        "",
-                        "",
-                        false,
-                        Instant.now()
-                    ),
-                    member,
-                    dueDateTime = if (padDueDateTime) baseDueDateTime.plusMillis(index * padMillis) else baseDueDateTime,
-                    createdDate = Instant.now(),
-                    CreateType.AUTO
-                )
-            )
-        }
-        return taskAssignments
     }
 }

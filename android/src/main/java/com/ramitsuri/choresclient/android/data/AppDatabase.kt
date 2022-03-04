@@ -12,6 +12,7 @@ import androidx.room.migration.AutoMigrationSpec
         TaskAssignmentEntity::class,
         MemberEntity::class,
         TaskEntity::class,
+        AlarmEntity::class
     ],
     version = 2,
     exportSchema = true,
@@ -29,14 +30,15 @@ import androidx.room.migration.AutoMigrationSpec
     RepeatUnitConverter::class,
     InstantConverter::class
 )
-abstract class AppDatabase: RoomDatabase() {
+abstract class AppDatabase : RoomDatabase() {
     abstract fun taskAssignmentDao(): TaskAssignmentDao
     abstract fun memberDao(): MemberDao
     abstract fun taskDao(): TaskDao
+    abstract fun alarmDao(): AlarmDao
 
     @DeleteTable.Entries(
         DeleteTable(tableName = "AssignmentTimeAssociations"),
         DeleteTable(tableName = "RequestCodeTimeAssociations")
     )
-    class Migration1To2: AutoMigrationSpec
+    class Migration1To2 : AutoMigrationSpec
 }

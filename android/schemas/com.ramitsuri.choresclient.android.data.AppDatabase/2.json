@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 2,
-    "identityHash": "6e3346fc8e96ae6f49adff8b51b82f6b",
+    "identityHash": "cc533e638bcaf9455f99532c5651c7f8",
     "entities": [
       {
         "tableName": "TaskAssignments",
@@ -171,12 +171,44 @@
         },
         "indices": [],
         "foreignKeys": []
+      },
+      {
+        "tableName": "Alarms",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`assignmentId` TEXT NOT NULL, `showAtTime` INTEGER NOT NULL, `systemNotificationId` INTEGER NOT NULL, PRIMARY KEY(`assignmentId`))",
+        "fields": [
+          {
+            "fieldPath": "assignmentId",
+            "columnName": "assignmentId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "showAtTime",
+            "columnName": "showAtTime",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "systemNotificationId",
+            "columnName": "systemNotificationId",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "assignmentId"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
       }
     ],
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '6e3346fc8e96ae6f49adff8b51b82f6b')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'cc533e638bcaf9455f99532c5651c7f8')"
     ]
   }
 }

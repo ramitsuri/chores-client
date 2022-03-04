@@ -54,15 +54,11 @@ class PrefManager(
         return keyValueStore.get(DEBUG_SERVER, "") ?: ""
     }
 
-    fun setPreviousNotificationId(id: Int) {
+    fun generateNewNotificationId(): Int {
         synchronized(notificationIdLock) {
-            keyValueStore.put(PREV_NOTIFICATION_ID, id)
-        }
-    }
-
-    fun getPreviousNotificationId(default: Int = 0): Int {
-        synchronized(notificationIdLock) {
-            return keyValueStore.get(PREV_NOTIFICATION_ID, default)
+            val newId = keyValueStore.get(PREV_NOTIFICATION_ID, 0) + 1
+            keyValueStore.put(PREV_NOTIFICATION_ID, newId)
+            return newId
         }
     }
 
