@@ -1,9 +1,12 @@
 package com.ramitsuri.choresclient.android.reminder
 
-import com.ramitsuri.choresclient.android.model.TaskAssignment
+import com.ramitsuri.choresclient.android.data.AlarmEntity
+import com.ramitsuri.choresclient.android.data.AssignmentAlarm
 
 interface AlarmHandler {
-    fun schedule(taskAssignment: TaskAssignment)
+    suspend fun getExisting(): List<AlarmEntity>
 
-    fun cancel(taskAssignment: TaskAssignment)
+    suspend fun schedule(assignmentAlarms: List<AssignmentAlarm>)
+
+    suspend fun cancel(assignmentIds: List<String>)
 }

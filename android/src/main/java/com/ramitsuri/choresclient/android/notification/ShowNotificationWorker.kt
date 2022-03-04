@@ -2,9 +2,15 @@ package com.ramitsuri.choresclient.android.notification
 
 import android.content.Context
 import androidx.hilt.work.HiltWorker
-import androidx.work.*
+import androidx.work.Constraints
+import androidx.work.CoroutineWorker
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequest
+import androidx.work.WorkManager
+import androidx.work.WorkerParameters
+import androidx.work.workDataOf
 import com.ramitsuri.choresclient.android.R
-import com.ramitsuri.choresclient.android.model.TaskAssignment
+import com.ramitsuri.choresclient.android.data.AssignmentAlarm
 import com.ramitsuri.choresclient.android.utils.PrefManager
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
@@ -26,7 +32,13 @@ class ShowNotificationWorker @AssistedInject constructor(
             ?: applicationContext.getString(R.string.notification_reminder_message)
         Timber.d("Showing notification for: $notificationBody")
 
-        val notificationId = prefManager.getPreviousNotificationId() + 1
+        val providedNotificationId = inputData.getInt(NOTIFICATION_ID, -1)
+        val notificationId = if (providedNotificationId == -1) {
+            // Provided Id cannot be used, generate a new one
+            prefManager.generateNewNotificationId()
+        } else {
+            providedNotificationId
+        }
         notificationHandler.buildAndShow(
             NotificationInfo(
                 notificationId,
@@ -37,50 +49,58 @@ class ShowNotificationWorker @AssistedInject constructor(
                 R.drawable.ic_notification
             )
         )
-        prefManager.setPreviousNotificationId(notificationId)
         return Result.success()
     }
 
     companion object {
         private const val WORK_TAG = "ReminderSchedulerWorker"
         private const val NOTIFICATION_BODY = "notification_body"
+        private const val NOTIFICATION_ID = "notification_id"
 
-        fun schedule(context: Context, taskAssignment: TaskAssignment) {
-            val workName = getWorkName(taskAssignment)
-            Timber.d("Schedule $workName")
+        fun schedule(context: Context, assignmentAlarms: List<AssignmentAlarm>) {
+            val workManager = WorkManager.getInstance(context)
+            assignmentAlarms.forEach { assignmentAlarm ->
+                val workName = getWorkName(assignmentAlarm.assignmentId)
+                Timber.d("Schedule $workName")
 
-            val showAt = Duration.between(Instant.now(), taskAssignment.dueDateTime).seconds
-            val inputData = workDataOf(NOTIFICATION_BODY to taskAssignment.task.name)
-
-            val constraints = Constraints.Builder()
-                .setRequiresCharging(false)
-                .build()
-
-            val builder = OneTimeWorkRequest
-                .Builder(ShowNotificationWorker::class.java)
-                .addTag(workName)
-                .setInitialDelay(showAt, TimeUnit.SECONDS)
-                .setInputData(inputData)
-                .setConstraints(constraints)
-
-            WorkManager.getInstance(context)
-                .enqueueUniqueWork(
-                    workName,
-                    ExistingWorkPolicy.KEEP,
-                    builder.build()
+                val showAfter = Duration.between(Instant.now(), assignmentAlarm.showAtTime).seconds
+                val inputData = workDataOf(
+                    NOTIFICATION_BODY to assignmentAlarm.systemNotificationText,
+                    NOTIFICATION_ID to assignmentAlarm.assignmentId
                 )
+
+                val constraints = Constraints.Builder()
+                    .setRequiresCharging(false)
+                    .build()
+
+                val builder = OneTimeWorkRequest
+                    .Builder(ShowNotificationWorker::class.java)
+                    .addTag(workName)
+                    .setInitialDelay(showAfter, TimeUnit.SECONDS)
+                    .setInputData(inputData)
+                    .setConstraints(constraints)
+
+                workManager
+                    .enqueueUniqueWork(
+                        workName,
+                        ExistingWorkPolicy.REPLACE,
+                        builder.build()
+                    )
+            }
         }
 
-       fun cancel(context: Context, taskAssignment: TaskAssignment) {
-            val workName = getWorkName(taskAssignment)
-           Timber.d("Cancel $workName")
+        fun cancel(context: Context, assignmentIds: List<String>) {
+            val workManager = WorkManager.getInstance(context)
+            assignmentIds.forEach { assignmentId ->
+                val workName = getWorkName(assignmentId)
+                Timber.d("Cancel $workName")
 
-            WorkManager.getInstance(context)
-                .cancelUniqueWork(workName)
+                workManager.cancelUniqueWork(workName)
+            }
         }
 
-        private fun getWorkName(taskAssignment: TaskAssignment): String {
-            return WORK_TAG + taskAssignment.id
+        private fun getWorkName(assignmentId: String): String {
+            return WORK_TAG + assignmentId
         }
     }
 }

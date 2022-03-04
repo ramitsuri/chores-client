@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import com.ramitsuri.choresclient.android.utils.Base
 import com.ramitsuri.choresclient.android.BuildConfig
+import com.ramitsuri.choresclient.android.data.AlarmDao
 import com.ramitsuri.choresclient.android.data.AppDatabase
 import com.ramitsuri.choresclient.android.data.MemberDao
 import com.ramitsuri.choresclient.android.data.TaskAssignmentDao
@@ -127,8 +128,11 @@ class AppModule {
 
     @Singleton
     @Provides
-    fun provideAlarmHandler(@ApplicationContext context: Context): AlarmHandler {
-        return SystemAlarmHandler(ShowNotificationWorker.Companion, context)
+    fun provideAlarmHandler(
+        @ApplicationContext context: Context,
+        alarmDao: AlarmDao
+    ): AlarmHandler {
+        return SystemAlarmHandler(ShowNotificationWorker.Companion, alarmDao, context)
     }
 
     @Singleton
@@ -185,6 +189,11 @@ class AppModule {
     @Provides
     fun provideMembersDao(database: AppDatabase): MemberDao {
         return database.memberDao()
+    }
+
+    @Provides
+    fun provideAlarmDao(database: AppDatabase): AlarmDao {
+        return database.alarmDao()
     }
 
     @Provides
