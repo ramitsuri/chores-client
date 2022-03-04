@@ -69,62 +69,6 @@ class ReminderSchedulerTest {
     }
 
     @Test
-    fun testAddReminders_shouldDoNothing_ifAssignmentStatusCompletedAndDueMoreThan3WeeksInPast() {
-        runBlocking {
-            // Arrange
-            val assignmentId = "1"
-            val scheduledTime =
-                Instant.now().minusSeconds(Duration.ofDays(22).seconds)// 22 days in seconds
-            val memberId = "1"
-            prefManager.setUserId(memberId)
-            taskAssignmentsRepository.setSince(
-                listOf(
-                    getAssignment(
-                        assignmentId,
-                        dueDateTime = scheduledTime,
-                        progressStatus = ProgressStatus.DONE
-                    )
-                )
-            )
-            alarmHandler.schedule(listOf(AssignmentAlarm(assignmentId, scheduledTime, 1, "")))
-
-            // Act
-            reminderScheduler.addReminders()
-
-            // Assert
-            val added = alarmHandler.get(assignmentId)
-            assertNotNull(added)
-        }
-    }
-
-    @Test
-    fun testAddReminders_shouldAddReminder_ifDueInFuture() {
-        runBlocking {
-            // Arrange
-            val assignmentId = "1"
-            val scheduledTime = Instant.now().plusSeconds(30)
-            val memberId = "1"
-            prefManager.setUserId(memberId)
-            taskAssignmentsRepository.setSince(
-                listOf(
-                    getAssignment(
-                        assignmentId,
-                        dueDateTime = scheduledTime
-                    )
-                )
-            )
-
-            // Act
-            reminderScheduler.addReminders()
-
-            // Assert
-            val added = alarmHandler.get(assignmentId)
-            assertNotNull(added)
-            assertEquals(scheduledTime.toEpochMilli(), added?.showAtTime?.toEpochMilli())
-        }
-    }
-
-    @Test
     fun testAddReminders_shouldAddReminder_ifMissed() {
         runBlocking {
             // Arrange
