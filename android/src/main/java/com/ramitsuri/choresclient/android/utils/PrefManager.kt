@@ -1,13 +1,18 @@
 package com.ramitsuri.choresclient.android.utils
 
 import com.ramitsuri.choresclient.android.keyvaluestore.KeyValueStore
+import java.util.concurrent.atomic.AtomicBoolean
 
 class PrefManager(
     private val keyValueStore: KeyValueStore,
     private val secureKeyValueStore: KeyValueStore
 ) {
 
-    private val runningLock = Any()
+    init {
+        deleteLegacyPrefs()
+    }
+
+    private var isWorkerRunning = AtomicBoolean(false)
     private val notificationIdLock = Any()
 
     fun setUserId(userId: String) {
@@ -35,15 +40,11 @@ class PrefManager(
     }
 
     fun setWorkerRunning(running: Boolean) {
-        synchronized(runningLock) {
-            keyValueStore.put(WORKER_RUNNING, running)
-        }
+        isWorkerRunning.set(running)
     }
 
-    fun isWorkerRunning(default: Boolean = false): Boolean {
-        synchronized(runningLock) {
-            return keyValueStore.get(WORKER_RUNNING, default)
-        }
+    fun isWorkerRunning(): Boolean {
+        return isWorkerRunning.get()
     }
 
     fun setDebugServer(server: String) {
@@ -62,12 +63,28 @@ class PrefManager(
         }
     }
 
+    private fun deleteLegacyPrefs() {
+        legacyPrefs.forEach { (key, store) ->
+            if (store == KV) {
+                keyValueStore.remove(key)
+            } else if (store == SKV) {
+                secureKeyValueStore.remove(key)
+            }
+        }
+    }
+
     companion object {
         private const val USER_ID = "user_id"
         private const val KEY = "key"
         private const val TOKEN = "token"
-        private const val WORKER_RUNNING = "worker_running"
         private const val DEBUG_SERVER = "debug_server"
         private const val PREV_NOTIFICATION_ID = "prev_notification_id"
+
+        private const val KV = "KV"
+        private const val SKV = "SKV"
+
+        private val legacyPrefs = mapOf(
+            "worker_running" to KV
+        )
     }
 }
