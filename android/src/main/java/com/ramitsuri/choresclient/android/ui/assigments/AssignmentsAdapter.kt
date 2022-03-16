@@ -24,12 +24,14 @@ class AssignmentsAdapter(
     RecyclerView.Adapter<RecyclerView.ViewHolder>(),
     StickyHeaderItemDecoration.StickyHeaderInterface {
     private val items = mutableListOf<TaskAssignmentWrapper>()
+    private var showCompleteButton = false
 
     init {
         this.items.addAll(items)
     }
 
-    fun update(items: List<TaskAssignmentWrapper>) {
+    fun update(items: List<TaskAssignmentWrapper>, showCompleteButton: Boolean) {
+        this.showCompleteButton = showCompleteButton
         this.items.clear()
         this.items.addAll(items)
         notifyDataSetChanged()
@@ -106,6 +108,11 @@ class AssignmentsAdapter(
         }
 
         fun bind(taskAssignment: TaskAssignment) {
+            binding.btnChangeState.visibility = if (showCompleteButton) {
+                View.VISIBLE
+            } else {
+                View.GONE
+            }
             binding.textTitle.text = taskAssignment.task.name
 
             binding.textRepeats.setVisibility(taskAssignment.task.repeatUnit != RepeatUnit.NONE)
