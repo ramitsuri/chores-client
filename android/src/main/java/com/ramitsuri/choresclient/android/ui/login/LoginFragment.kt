@@ -84,11 +84,11 @@ class LoginFragment : BaseFragment<FragmentLoginBinding>() {
             activity.finishAffinity()
             activity.startActivity(intent)
             exitProcess(0)
-            return
         }
         val alert = AlertDialog.Builder(requireActivity())
         alert.setTitle(R.string.login_server_alert_title)
         val editText = EditText(requireActivity())
+        editText.setText(viewModel.getServer())
         alert.setView(editText)
         alert.setPositiveButton(R.string.ok) { _, _ ->
             viewModel.setDebugServer(editText.text.toString())
