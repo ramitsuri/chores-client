@@ -44,7 +44,7 @@ class MiscellaneousFragment: BaseFragment<FragmentMiscellaneousBinding>() {
                 }
 
                 is ViewState.Success -> {
-                    adapter.update(viewState.data.assignments)
+                    adapter.update(viewState.data.assignments, false)
                     binding.filterGroup.setOnCheckedChangeListener(null)
                     when (viewState.data.selectedFilter) {
                         is FilterMode.ALL -> {

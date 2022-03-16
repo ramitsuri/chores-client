@@ -63,8 +63,8 @@ class AssignmentsFragment : BaseFragment<FragmentAssignmentsBinding>() {
                 }
 
                 is ViewState.Success -> {
-                    adapter.update(viewState.data.assignments)
                     binding.filterGroup.setOnCheckedChangeListener(null)
+                    var showCompleteButton = false
                     when (viewState.data.selectedFilter) {
                         is FilterMode.ALL -> {
                             // Do nothing
@@ -74,11 +74,13 @@ class AssignmentsFragment : BaseFragment<FragmentAssignmentsBinding>() {
                         }
                         is FilterMode.MINE -> {
                             binding.filterMine.isChecked = true
+                            showCompleteButton = true
                         }
                         is FilterMode.NONE -> {
                             // Do nothing
                         }
                     }
+                    adapter.update(viewState.data.assignments, showCompleteButton)
                     setupFilters()
                     onLoading(false)
                 }
