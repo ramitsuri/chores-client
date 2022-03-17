@@ -44,6 +44,7 @@
         android:layout_height="0dp"
         android:layout_margin="@dimen/margin_medium"
         android:stateListAnimator="@null"
+        android:visibility="gone"
         app:icon="@drawable/ic_menu"
         app:iconGravity="textStart"
         app:iconPadding="0dp"
