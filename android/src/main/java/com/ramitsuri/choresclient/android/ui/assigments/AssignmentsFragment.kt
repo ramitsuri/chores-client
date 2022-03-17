@@ -6,7 +6,6 @@ import android.widget.PopupMenu
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.viewModels
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewbinding.ViewBinding
 import com.ramitsuri.choresclient.android.R
@@ -101,10 +100,6 @@ class AssignmentsFragment : BaseFragment<FragmentAssignmentsBinding>() {
             val popup = PopupMenu(requireContext(), binding.btnMenu)
             popup.menuInflater.inflate(R.menu.assignments_menu, popup.menu)
             popup.setOnMenuItemClickListener { menuItem ->
-                if (menuItem.itemId == R.id.menu_setup) {
-                    findNavController().navigate(R.id.action_assignmentsFragment_to_miscellaneousFragment)
-                    return@setOnMenuItemClickListener true
-                }
                 return@setOnMenuItemClickListener false
             }
             popup.show()

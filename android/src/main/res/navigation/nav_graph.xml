@@ -20,14 +20,5 @@
         android:name="com.ramitsuri.choresclient.android.ui.assigments.AssignmentsFragment"
         android:label="fragment_assignments"
         tools:layout="@layout/fragment_assignments" >
-        <action
-            android:id="@+id/action_assignmentsFragment_to_miscellaneousFragment"
-            app:destination="@id/miscellaneousFragment" />
     </fragment>
-
-    <fragment
-        android:id="@+id/miscellaneousFragment"
-        android:name="com.ramitsuri.choresclient.android.ui.miscellaneous.MiscellaneousFragment"
-        android:label="fragment_miscellaneous"
-        tools:layout="@layout/fragment_miscellaneous" />
 </navigation>
