@@ -2,7 +2,6 @@ package com.ramitsuri.choresclient.android.di
 
 import android.content.Context
 import androidx.room.Room
-import com.ramitsuri.choresclient.android.utils.Base
 import com.ramitsuri.choresclient.android.BuildConfig
 import com.ramitsuri.choresclient.android.data.AlarmDao
 import com.ramitsuri.choresclient.android.data.AppDatabase
@@ -20,9 +19,9 @@ import com.ramitsuri.choresclient.android.notification.ShowNotificationWorker
 import com.ramitsuri.choresclient.android.notification.SystemNotificationHandler
 import com.ramitsuri.choresclient.android.reminder.AlarmHandler
 import com.ramitsuri.choresclient.android.reminder.SystemAlarmHandler
-import com.ramitsuri.choresclient.android.repositories.LoginRepository
 import com.ramitsuri.choresclient.android.repositories.SystemTaskAssignmentsRepository
 import com.ramitsuri.choresclient.android.repositories.TaskAssignmentsRepository
+import com.ramitsuri.choresclient.android.utils.Base
 import com.ramitsuri.choresclient.android.utils.DefaultDispatchers
 import com.ramitsuri.choresclient.android.utils.DispatcherProvider
 import com.ramitsuri.choresclient.android.utils.PrefManager
@@ -34,8 +33,10 @@ import dagger.hilt.components.SingletonComponent
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.android.Android
 import io.ktor.client.features.DefaultRequest
-import io.ktor.client.features.auth.*
-import io.ktor.client.features.auth.providers.*
+import io.ktor.client.features.auth.Auth
+import io.ktor.client.features.auth.providers.BearerTokens
+import io.ktor.client.features.auth.providers.bearer
+import io.ktor.client.features.defaultRequest
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.client.features.json.serializer.KotlinxSerializer
 import io.ktor.client.features.logging.LogLevel
@@ -45,10 +46,11 @@ import io.ktor.client.features.observer.ResponseObserver
 import io.ktor.client.request.header
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
-import kotlinx.serialization.json.Json
-import timber.log.Timber
+import io.ktor.http.contentType
 import javax.inject.Qualifier
 import javax.inject.Singleton
+import kotlinx.serialization.json.Json
+import timber.log.Timber
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -56,8 +58,24 @@ class AppModule {
 
     @Singleton
     @Provides
-    fun provideHttpClient(prefManager: PrefManager) = HttpClient(Android) {
+    fun provideHttpClient(
+        prefManager: PrefManager,
+        baseUrl: String,
+        dispatcherProvider: DispatcherProvider
+    ) = HttpClient(Android) {
 
+        val tokenClient = HttpClient {
+            install(JsonFeature) {
+                serializer = KotlinxSerializer(Json {
+                    prettyPrint = true
+                    isLenient = true
+                    ignoreUnknownKeys = true
+                })
+            }
+            defaultRequest {
+                contentType(ContentType.Application.Json)
+            }
+        }
         install(JsonFeature) {
             serializer = KotlinxSerializer(Json {
                 prettyPrint = true
@@ -73,7 +91,18 @@ class AppModule {
 
         install(Auth) {
             bearer {
+                loadTokens {
+                    BearerTokens(
+                        accessToken = prefManager.getToken() ?: "",
+                        refreshToken = ""
+                    )
+                }
                 refreshTokens {
+                    Timber.d("Token expired, refreshing")
+                    val module = LoginModule()
+                    val api = module.provideLoginApi(tokenClient, baseUrl)
+                    val repo = module.provideLoginRepository(api, prefManager, dispatcherProvider)
+                    repo.login(prefManager.getUserId() ?: "", prefManager.getKey() ?: "")
                     BearerTokens(
                         accessToken = prefManager.getToken() ?: "",
                         refreshToken = ""
@@ -209,12 +238,10 @@ class AppModule {
 
     @Provides
     fun provideAssignmentsRepository(
-        loginRepository: LoginRepository,
         api: TaskAssignmentsApi,
         taskAssignmentDataSource: TaskAssignmentDataSource,
         dispatcherProvider: DispatcherProvider
     ): TaskAssignmentsRepository = SystemTaskAssignmentsRepository(
-        loginRepository,
         api,
         taskAssignmentDataSource,
         dispatcherProvider

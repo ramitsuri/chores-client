@@ -9,22 +9,19 @@ import com.ramitsuri.choresclient.android.network.TaskAssignmentsApi
 import com.ramitsuri.choresclient.android.ui.assigments.FilterMode
 import com.ramitsuri.choresclient.android.utils.DispatcherProvider
 import io.ktor.client.call.receive
-import io.ktor.client.features.*
 import io.ktor.http.HttpStatusCode
-import kotlinx.coroutines.withContext
-import timber.log.Timber
 import java.time.Instant
 import javax.inject.Inject
+import kotlinx.coroutines.withContext
+import timber.log.Timber
 
 class SystemTaskAssignmentsRepository @Inject constructor(
-    private val loginRepository: LoginRepository,
     private val api: TaskAssignmentsApi,
     private val dataSource: TaskAssignmentDataSource,
     private val dispatcherProvider: DispatcherProvider
-): TaskAssignmentsRepository {
+) : TaskAssignmentsRepository {
     override suspend fun getTaskAssignments(
-        getLocal: Boolean,
-        retryingOnUnauthorized: Boolean
+        getLocal: Boolean
     ): Result<List<TaskAssignment>> {
         if (getLocal) {
             val localAssignments = dataSource.getTaskAssignments()
@@ -36,22 +33,6 @@ class SystemTaskAssignmentsRepository @Inject constructor(
         return withContext(dispatcherProvider.io) {
             val result = try {
                 api.getTaskAssignments()
-            } catch (e: ClientRequestException) {
-                if (retryingOnUnauthorized) { // If this is the second time it's failing due to unauthorized error
-                    Timber.i("Token refresh probably failed, unauthorized again")
-                    return@withContext Result.Failure(ViewError.UNAUTHORIZED)
-                } else {
-                    Timber.i("Attempting to refresh token")
-                    val loginResult = loginRepository.refreshToken()
-                    if (loginResult is Result.Failure) {
-                        return@withContext loginResult
-                    } else {
-                        return@withContext getTaskAssignments(
-                            getLocal = false,
-                            retryingOnUnauthorized = true
-                        )
-                    }
-                }
             } catch (e: Exception) {
                 Timber.i("Caught exception $e")
                 null
@@ -83,25 +64,11 @@ class SystemTaskAssignmentsRepository @Inject constructor(
 
     override suspend fun updateTaskAssignment(
         id: String,
-        progressStatus: ProgressStatus,
-        retryingOnUnauthorized: Boolean
+        progressStatus: ProgressStatus
     ): Result<Boolean> {
         return withContext(dispatcherProvider.io) {
             val result = try {
                 api.updateTaskAssignment(id, progressStatus)
-            } catch (e: ClientRequestException) {
-                if (retryingOnUnauthorized) { // If this is the second time it's failing due to unauthorized error
-                    Timber.i("Token refresh probably failed, unauthorized again")
-                    return@withContext Result.Failure(ViewError.UNAUTHORIZED)
-                } else {
-                    Timber.i("Attempting to refresh token")
-                    val loginResult = loginRepository.refreshToken()
-                    if (loginResult is Result.Failure) {
-                        return@withContext loginResult
-                    } else {
-                        return@withContext updateTaskAssignment(id, progressStatus, true)
-                    }
-                }
             } catch (e: Exception) {
                 null
             }
@@ -122,8 +89,7 @@ class SystemTaskAssignmentsRepository @Inject constructor(
 
 interface TaskAssignmentsRepository {
     suspend fun getTaskAssignments(
-        getLocal: Boolean = false,
-        retryingOnUnauthorized: Boolean = false
+        getLocal: Boolean = false
     ): Result<List<TaskAssignment>>
 
     suspend fun getSince(dueDateTime: Instant): List<TaskAssignment>
@@ -132,7 +98,6 @@ interface TaskAssignmentsRepository {
 
     suspend fun updateTaskAssignment(
         id: String,
-        progressStatus: ProgressStatus,
-        retryingOnUnauthorized: Boolean = false
+        progressStatus: ProgressStatus
     ): Result<Boolean>
 }
