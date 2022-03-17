@@ -6,11 +6,11 @@ import com.ramitsuri.choresclient.android.model.ViewError
 import com.ramitsuri.choresclient.android.network.LoginApi
 import com.ramitsuri.choresclient.android.utils.DispatcherProvider
 import com.ramitsuri.choresclient.android.utils.PrefManager
-import io.ktor.client.call.*
-import io.ktor.http.*
+import io.ktor.client.call.receive
+import io.ktor.http.HttpStatusCode
+import javax.inject.Inject
 import kotlinx.coroutines.withContext
 import timber.log.Timber
-import javax.inject.Inject
 
 class LoginRepository @Inject constructor(
     private val api: LoginApi,
@@ -50,15 +50,5 @@ class LoginRepository @Inject constructor(
                 }
             }
         }
-    }
-
-    suspend fun refreshToken(): Result<Boolean> {
-        val id = prefManager.getUserId()
-        val key = prefManager.getKey()
-        if (id.isNullOrEmpty() || key.isNullOrEmpty()) {
-            Timber.i("Empty Id and Key")
-            return Result.Failure(ViewError.LOGIN_NO_CREDENTIALS)
-        }
-        return login(id, key)
     }
 }
