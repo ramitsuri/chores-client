@@ -4,7 +4,6 @@ import com.ramitsuri.choresclient.android.model.InstantSerializer
 import com.ramitsuri.choresclient.android.model.ProgressStatus
 import com.ramitsuri.choresclient.android.model.ProgressStatusSerializer
 import com.ramitsuri.choresclient.android.model.TaskAssignment
-import com.ramitsuri.choresclient.android.model.TaskAssignmentDto
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.request.put
@@ -19,15 +18,6 @@ class TaskAssignmentsApi @Inject constructor(
 ) {
     suspend fun getTaskAssignments(): HttpResponse {
         return client.get("$baseUrl/task-assignments/filter?progress=1")
-    }
-
-    suspend fun updateTaskAssignment(
-        id: String,
-        progressStatus: ProgressStatus
-    ): HttpResponse {
-        return client.put("$baseUrl/task-assignments/$id") {
-            body = TaskAssignmentDto(progressStatus.key)
-        }
     }
 
     suspend fun updateTaskAssignments(taskAssignments: List<TaskAssignment>): HttpResponse {
