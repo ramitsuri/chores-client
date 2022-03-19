@@ -8,10 +8,7 @@ import com.ramitsuri.choresclient.android.ui.assigments.FilterMode
 import java.time.Instant
 
 class FakeTaskAssignmentsRepository: TaskAssignmentsRepository {
-    override suspend fun getTaskAssignments(
-        getLocal: Boolean,
-        retryingOnUnauthorized: Boolean
-    ): Result<List<TaskAssignment>> {
+    override suspend fun refresh(): Result<List<TaskAssignment>> {
         TODO("Not yet implemented")
     }
 
@@ -22,19 +19,18 @@ class FakeTaskAssignmentsRepository: TaskAssignmentsRepository {
         sinceAssignments.addAll(assignments)
     }
 
-    override suspend fun getSince(dueDateTime: Instant): List<TaskAssignment> {
+    override suspend fun getLocal(sinceDueDateTime: Instant): List<TaskAssignment> {
         return sinceAssignments
     }
 
-    override suspend fun filter(filterMode: FilterMode): Result<List<TaskAssignment>> {
+    override suspend fun getLocal(filterMode: FilterMode): Result<List<TaskAssignment>> {
         TODO("Not yet implemented")
     }
 
     override suspend fun updateTaskAssignment(
-        id: String,
-        progressStatus: ProgressStatus,
-        retryingOnUnauthorized: Boolean
-    ): Result<Boolean> {
+        taskAssignment: TaskAssignment,
+        readyForUpload: Boolean
+    ) {
         TODO("Not yet implemented")
     }
 }
