@@ -20,18 +20,14 @@ class TaskAssignmentDataSource @Inject constructor(
         taskDao.clearAndInsert(tasks)
 
         val taskAssignments = assignments.map { TaskAssignmentEntity(it) }
-        taskAssignmentDao.clearAndInsert(taskAssignments)
+        // Do not do clearAndInsert as there might be local assignments that have been completed
+        // but not uploaded
+        taskAssignmentDao.insert(taskAssignments)
     }
 
-    suspend fun saveTaskAssignment(assignment: TaskAssignment) {
-        val member = MemberEntity(assignment.member)
-        memberDao.insert(member)
-
-        val task = TaskEntity(assignment.task)
-        taskDao.insert(task)
-
-        val taskAssignment = TaskAssignmentEntity(assignment)
-        taskAssignmentDao.insert(taskAssignment)
+    suspend fun update(assignment: TaskAssignment, readyForUpload: Boolean): Int {
+        val taskAssignment = TaskAssignmentEntity(assignment).copy(shouldUpload = readyForUpload)
+        return taskAssignmentDao.update(taskAssignment)
     }
 
     suspend fun getTaskAssignments(filterMode: FilterMode = FilterMode.ALL): List<TaskAssignment> {
@@ -43,6 +39,14 @@ class TaskAssignmentDataSource @Inject constructor(
      */
     suspend fun getSince(dueDateTime: Instant): List<TaskAssignment> {
         return toTaskAssignments(taskAssignmentDao.getSince(dueDateTime.toEpochMilli()))
+    }
+
+    suspend fun getReadyForUpload(): List<TaskAssignment> {
+        return toTaskAssignments(taskAssignmentDao.getForUpload())
+    }
+
+    suspend fun delete(taskAssignmentIds: List<String>) {
+        taskAssignmentDao.delete(taskAssignmentIds)
     }
 
     private suspend fun toTaskAssignments(

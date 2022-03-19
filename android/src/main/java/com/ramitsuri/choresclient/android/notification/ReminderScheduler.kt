@@ -38,7 +38,7 @@ class ReminderScheduler(
             // assignments to far back in the past as they are assumed to be handled by now
             val now = ZonedDateTime.now()
             val sinceDueDateTime = now.minusWeeks(3).toInstant()
-            val assignments = taskAssignmentsRepository.getSince(sinceDueDateTime)
+            val assignments = taskAssignmentsRepository.getLocal(sinceDueDateTime)
             val memberId = prefManager.getUserId() ?: ""
             val existingNotifications = alarmHandler.getExisting()
 

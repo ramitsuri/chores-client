@@ -32,7 +32,7 @@ class AssignmentsDownloader @AssistedInject constructor(
         }
         prefManager.setWorkerRunning(true)
         try {
-            repository.getTaskAssignments()
+            repository.refresh()
         } catch (e: Exception) {
             Timber.e(e)
         } finally {

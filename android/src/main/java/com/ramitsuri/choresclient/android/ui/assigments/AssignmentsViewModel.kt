@@ -4,16 +4,22 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ramitsuri.choresclient.android.model.*
+import com.ramitsuri.choresclient.android.model.AssignmentsViewState
+import com.ramitsuri.choresclient.android.model.ProgressStatus
+import com.ramitsuri.choresclient.android.model.RepeatUnit
+import com.ramitsuri.choresclient.android.model.Result
+import com.ramitsuri.choresclient.android.model.TaskAssignment
+import com.ramitsuri.choresclient.android.model.TaskAssignmentWrapper
+import com.ramitsuri.choresclient.android.model.ViewState
 import com.ramitsuri.choresclient.android.repositories.TaskAssignmentsRepository
 import com.ramitsuri.choresclient.android.utils.DispatcherProvider
 import com.ramitsuri.choresclient.android.utils.PrefManager
 import com.ramitsuri.choresclient.android.utils.getDay
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.time.Instant
+import javax.inject.Inject
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import java.util.*
-import javax.inject.Inject
 
 @HiltViewModel
 class AssignmentsViewModel @Inject constructor(
@@ -37,34 +43,32 @@ class AssignmentsViewModel @Inject constructor(
 
     fun fetchAssignments(getLocal: Boolean = false) {
         val isWorkerRunning = prefManager.isWorkerRunning()
-        val shouldGetLocal = getLocal || isWorkerRunning
-        Timber.d("Will get local: $shouldGetLocal - getLocal($getLocal) || workerRunning($isWorkerRunning)")
+        val shouldRefresh = !(getLocal || isWorkerRunning)
+        Timber.d("Will refresh: $shouldRefresh - getLocal($getLocal) || workerRunning($isWorkerRunning)")
         _state.value = ViewState.Loading
         viewModelScope.launch(dispatchers.main) {
-            when (val assignmentsResult = repository.getTaskAssignments(shouldGetLocal)) {
-                is Result.Failure -> {
-                    _state.value = ViewState.Error(assignmentsResult.error)
-                }
-                is Result.Success -> {
-                    filter()
-                }
+            if (shouldRefresh) {
+                repository.refresh()
+                getLocal()
+            } else {
+                getLocal()
             }
         }
     }
 
     fun filterMine() {
         filterMode = FilterMode.MINE(userId)
-        filter()
+        getLocal()
     }
 
     fun filterExceptMine() {
         filterMode = FilterMode.OTHER(userId)
-        filter()
+        getLocal()
     }
 
-    private fun filter() {
+    private fun getLocal() {
         viewModelScope.launch(dispatchers.main) {
-            val assignmentsResult = repository.filter(filterMode) as Result.Success
+            val assignmentsResult = repository.getLocal(filterMode) as Result.Success
             val assignmentsState = AssignmentsViewState(
                 getAssignmentsForDisplay(assignmentsResult.data),
                 filterMode
@@ -106,11 +110,6 @@ class AssignmentsViewModel @Inject constructor(
     }
 
     fun changeStateRequested(taskAssignment: TaskAssignment, clickType: ClickType) {
-        try {
-            UUID.fromString(userId) ?: return
-        } catch (e: Exception) {
-            return
-        }
         val newProgressStatus = when (taskAssignment.progressStatus) {
             ProgressStatus.TODO -> {
                 when (clickType) {
@@ -118,28 +117,21 @@ class AssignmentsViewModel @Inject constructor(
                         ProgressStatus.DONE
                     }
                     else -> {
-                        ProgressStatus.UNKNOWN
+                        return
                     }
                 }
             }
             else -> {
-                ProgressStatus.UNKNOWN
+                return
             }
         }
-        if (newProgressStatus == ProgressStatus.UNKNOWN) {
-            return
-        }
-        _state.value = ViewState.Loading
+        val updated = taskAssignment.copy(
+            progressStatus = newProgressStatus,
+            progressStatusDate = Instant.now()
+        )
         viewModelScope.launch {
-            when (val result =
-                repository.updateTaskAssignment(taskAssignment.id, newProgressStatus)) {
-                is Result.Failure -> {
-                    _state.value = ViewState.Error(result.error)
-                }
-                is Result.Success -> {
-                    filter()
-                }
-            }
+            repository.updateTaskAssignment(updated, true)
+            getLocal()
         }
     }
 }

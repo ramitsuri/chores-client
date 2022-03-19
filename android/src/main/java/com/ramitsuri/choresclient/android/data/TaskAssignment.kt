@@ -2,12 +2,14 @@ package com.ramitsuri.choresclient.android.data
 
 import androidx.room.ColumnInfo
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Entity
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.PrimaryKey
 import androidx.room.Query
 import androidx.room.Transaction
+import androidx.room.Update
 import com.ramitsuri.choresclient.android.model.CreateType
 import com.ramitsuri.choresclient.android.model.ProgressStatus
 import com.ramitsuri.choresclient.android.model.TaskAssignment
@@ -15,7 +17,7 @@ import com.ramitsuri.choresclient.android.ui.assigments.FilterMode
 import java.time.Instant
 
 @Entity(tableName = "TaskAssignments")
-class TaskAssignmentEntity(
+data class TaskAssignmentEntity(
     @PrimaryKey
     val id: String,
     @ColumnInfo(name = "progressStatus")
@@ -31,9 +33,11 @@ class TaskAssignmentEntity(
     @ColumnInfo(name = "createDate")
     val createdDate: Instant,
     @ColumnInfo(name = "createType")
-    val createType: CreateType
+    val createType: CreateType,
+    @ColumnInfo(name = "shouldUpload")
+    val shouldUpload: Boolean
 ) {
-    constructor(taskAssignment: TaskAssignment): this(
+    constructor(taskAssignment: TaskAssignment) : this(
         taskAssignment.id,
         taskAssignment.progressStatus,
         taskAssignment.progressStatusDate,
@@ -41,7 +45,8 @@ class TaskAssignmentEntity(
         taskAssignment.member.id,
         taskAssignment.dueDateTime,
         taskAssignment.createdDate,
-        taskAssignment.createType
+        taskAssignment.createType,
+        shouldUpload = false
     )
 }
 
@@ -59,14 +64,18 @@ abstract class TaskAssignmentDao {
     @Query("SELECT * FROM TaskAssignments WHERE memberId != :memberId")
     abstract suspend fun getForExceptMember(memberId: String): List<TaskAssignmentEntity>
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    abstract suspend fun insert(taskAssignmentEntity: TaskAssignmentEntity)
+    @Query("SELECT * FROM TaskAssignments WHERE shouldUpload = 1")
+    abstract suspend fun getForUpload(): List<TaskAssignmentEntity>
+
+    @Update
+    abstract suspend fun update(taskAssignmentEntity: TaskAssignmentEntity): Int
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun insert(taskAssignmentEntities: List<TaskAssignmentEntity>)
 
-    @Query("DELETE FROM TaskAssignments")
-    abstract suspend fun delete()
+    @Transaction
+    @Query("DELETE FROM TaskAssignments WHERE id IN (:ids)")
+    abstract suspend fun delete(ids: List<String>)
 
     @Transaction
     open suspend fun get(filterMode: FilterMode): List<TaskAssignmentEntity> {
@@ -84,11 +93,5 @@ abstract class TaskAssignmentDao {
                 getForExceptMember(filterMode.ownUserId)
             }
         }
-    }
-
-    @Transaction
-    open suspend fun clearAndInsert(taskAssignmentEntities: List<TaskAssignmentEntity>) {
-        delete()
-        insert(taskAssignmentEntities)
     }
 }

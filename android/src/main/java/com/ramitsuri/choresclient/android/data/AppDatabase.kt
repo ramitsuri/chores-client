@@ -14,7 +14,7 @@ import androidx.room.migration.AutoMigrationSpec
         TaskEntity::class,
         AlarmEntity::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = true,
     autoMigrations = [
         AutoMigration(
