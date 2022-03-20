@@ -34,6 +34,10 @@ class TaskAssignmentDataSource @Inject constructor(
         return toTaskAssignments(taskAssignmentDao.get(filterMode))
     }
 
+    suspend fun getTaskAssignment(id: String): TaskAssignment? {
+        return toTaskAssignment(taskAssignmentDao.get(id))
+    }
+
     /**
      * Will always return locally saved assignments since the passed due date time
      */
@@ -54,19 +58,28 @@ class TaskAssignmentDataSource @Inject constructor(
     ): List<TaskAssignment> {
         val assignments = mutableListOf<TaskAssignment>()
         taskAssignmentEntities.forEach { assignmentEntity ->
-            val memberEntity = memberDao.get(assignmentEntity.memberId)
-            val taskEntity = taskDao.get(assignmentEntity.taskId)
-            if (memberEntity == null || taskEntity == null) {
-                return@forEach
+            val assignment = toTaskAssignment(assignmentEntity)
+            if (assignment != null) {
+                assignments.add(assignment)
             }
-            assignments.add(
-                TaskAssignment(
-                    assignmentEntity,
-                    Member(memberEntity),
-                    Task(taskEntity)
-                )
-            )
         }
         return assignments
+    }
+
+    private suspend fun toTaskAssignment(assignmentEntity: TaskAssignmentEntity?): TaskAssignment? {
+        if (assignmentEntity == null) {
+            return null
+        }
+        val memberEntity = memberDao.get(assignmentEntity.memberId)
+        val taskEntity = taskDao.get(assignmentEntity.taskId)
+        if (memberEntity == null || taskEntity == null) {
+            return null
+        }
+
+        return TaskAssignment(
+            assignmentEntity,
+            Member(memberEntity),
+            Task(taskEntity)
+        )
     }
 }
