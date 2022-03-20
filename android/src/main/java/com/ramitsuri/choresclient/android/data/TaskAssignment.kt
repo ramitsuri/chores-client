@@ -2,7 +2,6 @@ package com.ramitsuri.choresclient.android.data
 
 import androidx.room.ColumnInfo
 import androidx.room.Dao
-import androidx.room.Delete
 import androidx.room.Entity
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -55,6 +54,9 @@ abstract class TaskAssignmentDao {
     @Query("SELECT * FROM TaskAssignments")
     abstract suspend fun getAll(): List<TaskAssignmentEntity>
 
+    @Query("SELECT * FROM TaskAssignments WHERE progressStatus = 1")
+    abstract suspend fun getTodo(): List<TaskAssignmentEntity>
+
     @Query("SELECT * FROM TaskAssignments WHERE id = :id")
     abstract suspend fun get(id: String): TaskAssignmentEntity?
 
@@ -96,5 +98,15 @@ abstract class TaskAssignmentDao {
                 getForExceptMember(filterMode.ownUserId)
             }
         }
+    }
+
+    @Transaction
+    open suspend fun clearAndInsert(taskAssignmentEntities: List<TaskAssignmentEntity>) {
+        // Delete only incomplete assignments and not completed ones that haven't been uploaded.
+        // Even though it's unlikely to happen that a completed assignment is not uploaded at this
+        // point in the real flow
+        val todo = getTodo()
+        delete(todo.map { it.id })
+        insert(taskAssignmentEntities)
     }
 }
