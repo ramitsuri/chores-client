@@ -31,8 +31,15 @@ class SystemNotificationHandler(context: Context) : NotificationHandler {
             setContentTitle(context.getString(notificationInfo.titleResId))
             setContentText(notificationInfo.body)
             if (notificationInfo.actions != null) {
-                for (action in notificationInfo.actions) {
-                    addAction(getAction(action, notificationInfo.actionExtras))
+                for ((index, action) in notificationInfo.actions.withIndex()) {
+                    addAction(
+                        getAction(
+                            notificationInfo.id,
+                            index,
+                            action,
+                            notificationInfo.actionExtras
+                        )
+                    )
                 }
             }
             setAutoCancel(true)
@@ -47,9 +54,12 @@ class SystemNotificationHandler(context: Context) : NotificationHandler {
     }
 
     private fun getAction(
+        notificationId: Int,
+        actionIndex: Int,
         actionInfo: NotificationActionInfo,
         actionExtras: Map<String, Any>?
     ): NotificationCompat.Action {
+        val actionRequestCode = notificationId * 10 + actionIndex
         val intent = Intent(context, actionInfo.intentReceiverClass)
         intent.action = actionInfo.action
         actionExtras?.forEach { (extraKey, extraValue) ->
@@ -70,7 +80,7 @@ class SystemNotificationHandler(context: Context) : NotificationHandler {
         }
         val pendingIntent = PendingIntent.getBroadcast(
             context,
-            actionInfo.requestCode,
+            actionRequestCode,
             intent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )

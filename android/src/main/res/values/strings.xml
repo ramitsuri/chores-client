@@ -21,8 +21,8 @@
     <string name="notification_reminders_id">Reminders</string>
     <string name="notification_reminders_name">Reminders</string>
     <string name="notification_reminders_description">Notifications to remind you about due tasks</string>
-    <string name="notification_reminder_title">Task due</string>
-    <string name="notification_reminder_message">You have task(s) due. Open the app to check</string>
+    <string name="notification_reminder_title">Chore due</string>
+    <string name="notification_reminder_message">You have a chore due. Open the app to check</string>
     <string name="notification_reminder_action_snooze_six_hours">6 hours</string>
     <string name="notification_reminder_action_snooze_tomorrow">Tomorrow</string>
     <string name="notification_reminder_action_complete">Done</string>
