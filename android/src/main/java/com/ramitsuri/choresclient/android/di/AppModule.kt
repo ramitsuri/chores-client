@@ -49,6 +49,8 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
 import javax.inject.Qualifier
 import javax.inject.Singleton
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.serialization.json.Json
 import timber.log.Timber
 
@@ -246,6 +248,12 @@ class AppModule {
         taskAssignmentDataSource,
         dispatcherProvider
     )
+
+    @Singleton
+    @Provides
+    fun provideLongLivingCoroutineScope(): CoroutineScope {
+        return CoroutineScope(SupervisorJob())
+    }
 }
 
 @Qualifier

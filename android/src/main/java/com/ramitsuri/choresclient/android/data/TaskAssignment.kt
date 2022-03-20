@@ -55,6 +55,9 @@ abstract class TaskAssignmentDao {
     @Query("SELECT * FROM TaskAssignments")
     abstract suspend fun getAll(): List<TaskAssignmentEntity>
 
+    @Query("SELECT * FROM TaskAssignments WHERE id = :id")
+    abstract suspend fun get(id: String): TaskAssignmentEntity?
+
     @Query("SELECT * FROM TaskAssignments WHERE memberId = :memberId")
     abstract suspend fun getForMember(memberId: String): List<TaskAssignmentEntity>
 

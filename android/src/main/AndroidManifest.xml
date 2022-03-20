@@ -35,7 +35,7 @@
             android:exported="false"
             tools:node="merge" />
         <receiver
-            android:name=".reminder.ReminderReceiver"
+            android:name=".notification.AssignmentActionReceiver"
             android:enabled="true"
             android:exported="true" />
         <provider

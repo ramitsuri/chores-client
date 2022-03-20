@@ -47,6 +47,10 @@ class SystemTaskAssignmentsRepository @Inject constructor(
         return Result.Success(localDataSource.getTaskAssignments(filterMode))
     }
 
+    override suspend fun getLocal(id: String): TaskAssignment? {
+        return localDataSource.getTaskAssignment(id)
+    }
+
     override suspend fun updateTaskAssignment(
         taskAssignment: TaskAssignment,
         readyForUpload: Boolean
@@ -105,6 +109,8 @@ interface TaskAssignmentsRepository {
     suspend fun getLocal(sinceDueDateTime: Instant): List<TaskAssignment>
 
     suspend fun getLocal(filterMode: FilterMode): Result<List<TaskAssignment>>
+
+    suspend fun getLocal(id: String): TaskAssignment?
 
     suspend fun updateTaskAssignment(
         taskAssignment: TaskAssignment,

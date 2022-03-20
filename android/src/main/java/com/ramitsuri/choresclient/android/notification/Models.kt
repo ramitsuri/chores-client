@@ -32,7 +32,8 @@ data class NotificationInfo(
     @StringRes val titleResId: Int,
     val body: String,
     @DrawableRes val iconResId: Int,
-    val actions: List<NotificationActionInfo>? = null
+    val actions: List<NotificationActionInfo>? = null,
+    val actionExtras: Map<String, Any>? = null
 )
 
 data class NotificationActionInfo(

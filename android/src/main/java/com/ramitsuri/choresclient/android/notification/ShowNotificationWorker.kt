@@ -11,13 +11,15 @@ import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.ramitsuri.choresclient.android.R
 import com.ramitsuri.choresclient.android.data.AssignmentAlarm
+import com.ramitsuri.choresclient.android.utils.NotificationAction
+import com.ramitsuri.choresclient.android.utils.NotificationActionExtra
 import com.ramitsuri.choresclient.android.utils.PrefManager
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
-import timber.log.Timber
 import java.time.Duration
 import java.time.Instant
 import java.util.concurrent.TimeUnit
+import timber.log.Timber
 
 @HiltWorker
 class ShowNotificationWorker @AssistedInject constructor(
@@ -39,6 +41,7 @@ class ShowNotificationWorker @AssistedInject constructor(
         } else {
             providedNotificationId
         }
+        val assignmentId = inputData.getString(ASSIGNMENT_ID) ?: ""
         notificationHandler.buildAndShow(
             NotificationInfo(
                 notificationId,
@@ -46,7 +49,32 @@ class ShowNotificationWorker @AssistedInject constructor(
                 Priority.HIGH,
                 R.string.notification_reminder_title,
                 notificationBody,
-                R.drawable.ic_notification
+                R.drawable.ic_notification,
+                listOf(
+                    NotificationActionInfo(
+                        NotificationAction.SNOOZE_HOUR.action,
+                        NotificationAction.SNOOZE_HOUR.text,
+                        AssignmentActionReceiver::class.java,
+                        NotificationAction.SNOOZE_HOUR.requestCode
+                    ),
+                    NotificationActionInfo(
+                        NotificationAction.SNOOZE_DAY.action,
+                        NotificationAction.SNOOZE_DAY.text,
+                        AssignmentActionReceiver::class.java,
+                        NotificationAction.SNOOZE_DAY.requestCode
+                    ),
+                    NotificationActionInfo(
+                        NotificationAction.COMPLETE.action,
+                        NotificationAction.COMPLETE.text,
+                        AssignmentActionReceiver::class.java,
+                        NotificationAction.COMPLETE.requestCode
+                    )
+                ),
+                mapOf(
+                    NotificationActionExtra.KEY_ASSIGNMENT_ID to assignmentId,
+                    NotificationActionExtra.KEY_NOTIFICATION_ID to notificationId,
+                    NotificationActionExtra.KEY_NOTIFICATION_TEXT to notificationBody
+                )
             )
         )
         return Result.success()
@@ -56,6 +84,7 @@ class ShowNotificationWorker @AssistedInject constructor(
         private const val WORK_TAG = "ReminderSchedulerWorker"
         private const val NOTIFICATION_BODY = "notification_body"
         private const val NOTIFICATION_ID = "notification_id"
+        private const val ASSIGNMENT_ID = "assignment_id"
 
         fun schedule(context: Context, assignmentAlarms: List<AssignmentAlarm>) {
             val workManager = WorkManager.getInstance(context)
@@ -66,7 +95,8 @@ class ShowNotificationWorker @AssistedInject constructor(
                 val showAfter = Duration.between(Instant.now(), assignmentAlarm.showAtTime).seconds
                 val inputData = workDataOf(
                     NOTIFICATION_BODY to assignmentAlarm.systemNotificationText,
-                    NOTIFICATION_ID to assignmentAlarm.assignmentId
+                    NOTIFICATION_ID to assignmentAlarm.systemNotificationId,
+                    ASSIGNMENT_ID to assignmentAlarm.assignmentId
                 )
 
                 val constraints = Constraints.Builder()
