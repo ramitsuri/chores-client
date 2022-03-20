@@ -1,6 +1,5 @@
 package com.ramitsuri.choresclient.android.testutils
 
-import com.ramitsuri.choresclient.android.model.ProgressStatus
 import com.ramitsuri.choresclient.android.model.Result
 import com.ramitsuri.choresclient.android.model.TaskAssignment
 import com.ramitsuri.choresclient.android.repositories.TaskAssignmentsRepository
@@ -31,6 +30,10 @@ class FakeTaskAssignmentsRepository: TaskAssignmentsRepository {
         taskAssignment: TaskAssignment,
         readyForUpload: Boolean
     ) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getLocal(id: String): TaskAssignment? {
         TODO("Not yet implemented")
     }
 }
