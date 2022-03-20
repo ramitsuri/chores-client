@@ -22,7 +22,7 @@ class TaskAssignmentDataSource @Inject constructor(
         val taskAssignments = assignments.map { TaskAssignmentEntity(it) }
         // Do not do clearAndInsert as there might be local assignments that have been completed
         // but not uploaded
-        taskAssignmentDao.insert(taskAssignments)
+        taskAssignmentDao.clearAndInsert(taskAssignments)
     }
 
     suspend fun update(assignment: TaskAssignment, readyForUpload: Boolean): Int {

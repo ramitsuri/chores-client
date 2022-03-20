@@ -18,6 +18,7 @@ import com.ramitsuri.choresclient.android.utils.getDay
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.Instant
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
@@ -25,7 +26,8 @@ import timber.log.Timber
 class AssignmentsViewModel @Inject constructor(
     private val repository: TaskAssignmentsRepository,
     private val prefManager: PrefManager,
-    private val dispatchers: DispatcherProvider
+    private val dispatchers: DispatcherProvider,
+    private val longLivingCoroutineScope: CoroutineScope
 ) : ViewModel() {
 
     private val _state = MutableLiveData<ViewState<AssignmentsViewState>>(ViewState.Reload)
@@ -46,7 +48,10 @@ class AssignmentsViewModel @Inject constructor(
         val shouldRefresh = !(getLocal || isWorkerRunning)
         Timber.d("Will refresh: $shouldRefresh - getLocal($getLocal) || workerRunning($isWorkerRunning)")
         _state.value = ViewState.Loading
-        viewModelScope.launch(dispatchers.main) {
+        // We want this to be run in long living scope so that the refresh operation isn't cancelled
+        // while assignments have been uiploaded but not deleted locally for example. Or are being
+        // uploaded still
+        longLivingCoroutineScope.launch(dispatchers.main) {
             if (shouldRefresh) {
                 repository.refresh()
                 getLocal()
