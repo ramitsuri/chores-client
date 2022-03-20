@@ -54,20 +54,17 @@ class ShowNotificationWorker @AssistedInject constructor(
                     NotificationActionInfo(
                         NotificationAction.SNOOZE_HOUR.action,
                         NotificationAction.SNOOZE_HOUR.text,
-                        AssignmentActionReceiver::class.java,
-                        NotificationAction.SNOOZE_HOUR.requestCode
+                        AssignmentActionReceiver::class.java
                     ),
                     NotificationActionInfo(
                         NotificationAction.SNOOZE_DAY.action,
                         NotificationAction.SNOOZE_DAY.text,
-                        AssignmentActionReceiver::class.java,
-                        NotificationAction.SNOOZE_DAY.requestCode
+                        AssignmentActionReceiver::class.java
                     ),
                     NotificationActionInfo(
                         NotificationAction.COMPLETE.action,
                         NotificationAction.COMPLETE.text,
-                        AssignmentActionReceiver::class.java,
-                        NotificationAction.COMPLETE.requestCode
+                        AssignmentActionReceiver::class.java
                     )
                 ),
                 mapOf(

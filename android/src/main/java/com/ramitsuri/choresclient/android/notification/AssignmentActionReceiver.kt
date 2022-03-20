@@ -42,7 +42,6 @@ class AssignmentActionReceiver : BroadcastReceiver() {
         val notificationId = intent.getIntExtra(NotificationActionExtra.KEY_NOTIFICATION_ID, -1)
         val notificationText = intent.getStringExtra(NotificationActionExtra.KEY_NOTIFICATION_TEXT)
             ?: requireNotNull(context).getString(R.string.notification_reminder_message)
-        Timber.i("Action: $action, Assignment: $assignmentId, Notification: $notificationId, $notificationText")
         when (action) {
             NotificationAction.SNOOZE_HOUR.action -> {
                 onSnoozeHourRequested(assignmentId, notificationId, notificationText)
@@ -67,6 +66,7 @@ class AssignmentActionReceiver : BroadcastReceiver() {
         notificationId: Int,
         notificationText: String
     ) {
+        Timber.i("Action snooze hour requested for $assignmentId, $notificationId")
         val snoozeBySeconds = Base.SNOOZE_HOUR
         snooze(assignmentId, notificationId, notificationText, snoozeBySeconds)
     }
@@ -76,6 +76,7 @@ class AssignmentActionReceiver : BroadcastReceiver() {
         notificationId: Int,
         notificationText: String
     ) {
+        Timber.i("Action snooze day requested for $assignmentId, $notificationId")
         val snoozeBySeconds = Base.SNOOZE_DAY
         snooze(assignmentId, notificationId, notificationText, snoozeBySeconds)
     }
@@ -98,6 +99,7 @@ class AssignmentActionReceiver : BroadcastReceiver() {
     }
 
     private fun onCompleteRequested(assignmentId: String) {
+        Timber.i("Action complete requested for $assignmentId")
         coroutineScope.launch(dispatcherProvider.io) {
             val assignment = repo.getLocal(assignmentId)
             if (assignment != null) {

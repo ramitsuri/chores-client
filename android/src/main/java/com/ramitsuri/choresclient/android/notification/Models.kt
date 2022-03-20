@@ -39,8 +39,7 @@ data class NotificationInfo(
 data class NotificationActionInfo(
     val action: String,
     @StringRes val textResId: Int,
-    val intentReceiverClass: Class<*>,
-    val requestCode: Int
+    val intentReceiverClass: Class<*>
 )
 
 enum class Importance(private val platformValue: Int) {
