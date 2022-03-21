@@ -29,8 +29,8 @@ data class NotificationInfo(
     val id: Int,
     val channelId: String,
     val priority: Priority,
-    @StringRes val titleResId: Int,
-    val body: String,
+    val title: String,
+    val body: String?,
     @DrawableRes val iconResId: Int,
     val actions: List<NotificationActionInfo>? = null,
     val actionExtras: Map<String, Any>? = null

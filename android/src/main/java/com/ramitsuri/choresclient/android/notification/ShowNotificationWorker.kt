@@ -30,9 +30,9 @@ class ShowNotificationWorker @AssistedInject constructor(
 ) : CoroutineWorker(context, workerParameters) {
 
     override suspend fun doWork(): Result {
-        val notificationBody = inputData.getString(NOTIFICATION_BODY)
-            ?: applicationContext.getString(R.string.notification_reminder_message)
-        Timber.d("Showing notification for: $notificationBody")
+        val notificationTitle = inputData.getString(NOTIFICATION_BODY)
+            ?: applicationContext.getString(R.string.notification_reminder_title)
+        Timber.d("Showing notification for: $notificationTitle")
 
         val providedNotificationId = inputData.getInt(NOTIFICATION_ID, -1)
         val notificationId = if (providedNotificationId == -1) {
@@ -47,8 +47,8 @@ class ShowNotificationWorker @AssistedInject constructor(
                 notificationId,
                 applicationContext.getString(R.string.notification_reminders_id),
                 Priority.HIGH,
-                R.string.notification_reminder_title,
-                notificationBody,
+                notificationTitle,
+                null,
                 R.drawable.ic_notification,
                 listOf(
                     NotificationActionInfo(
@@ -70,7 +70,7 @@ class ShowNotificationWorker @AssistedInject constructor(
                 mapOf(
                     NotificationActionExtra.KEY_ASSIGNMENT_ID to assignmentId,
                     NotificationActionExtra.KEY_NOTIFICATION_ID to notificationId,
-                    NotificationActionExtra.KEY_NOTIFICATION_TEXT to notificationBody
+                    NotificationActionExtra.KEY_NOTIFICATION_TEXT to notificationTitle
                 )
             )
         )
