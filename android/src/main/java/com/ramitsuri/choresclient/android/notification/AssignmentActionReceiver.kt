@@ -41,7 +41,7 @@ class AssignmentActionReceiver : BroadcastReceiver() {
         val assignmentId = intent.getStringExtra(NotificationActionExtra.KEY_ASSIGNMENT_ID) ?: ""
         val notificationId = intent.getIntExtra(NotificationActionExtra.KEY_NOTIFICATION_ID, -1)
         val notificationText = intent.getStringExtra(NotificationActionExtra.KEY_NOTIFICATION_TEXT)
-            ?: requireNotNull(context).getString(R.string.notification_reminder_message)
+            ?: requireNotNull(context).getString(R.string.notification_reminder_title)
         when (action) {
             NotificationAction.SNOOZE_HOUR.action -> {
                 onSnoozeHourRequested(assignmentId, notificationId, notificationText)
