@@ -72,8 +72,8 @@ abstract class TaskAssignmentDao {
     @Query("SELECT * FROM TaskAssignments WHERE shouldUpload = 1")
     abstract suspend fun getForUpload(): List<TaskAssignmentEntity>
 
-    @Update
-    abstract suspend fun update(taskAssignmentEntity: TaskAssignmentEntity): Int
+    @Update(entity = TaskAssignmentEntity::class)
+    abstract suspend fun update(taskAssignmentUpdate: TaskAssignmentUpdate): Int
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun insert(taskAssignmentEntities: List<TaskAssignmentEntity>)
@@ -110,3 +110,10 @@ abstract class TaskAssignmentDao {
         insert(taskAssignmentEntities)
     }
 }
+
+data class TaskAssignmentUpdate(
+    val id: String,
+    val progressStatus: ProgressStatus,
+    val progressStatusDate: Instant,
+    val shouldUpload: Boolean
+)

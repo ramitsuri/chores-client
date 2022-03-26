@@ -1,9 +1,12 @@
 package com.ramitsuri.choresclient.android.model
 
+import android.os.Parcelable
 import com.ramitsuri.choresclient.android.data.TaskAssignmentEntity
-import kotlinx.serialization.Serializable
 import java.time.Instant
+import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
 
+@Parcelize
 @Serializable
 data class TaskAssignment(
     val id: String,
@@ -19,8 +22,8 @@ data class TaskAssignment(
     val createdDate: Instant,
     @Serializable(with = CreateTypeSerializer::class)
     val createType: CreateType
-) {
-    constructor(taskAssignmentEntity: TaskAssignmentEntity, member: Member, task: Task): this(
+) : Parcelable {
+    constructor(taskAssignmentEntity: TaskAssignmentEntity, member: Member, task: Task) : this(
         taskAssignmentEntity.id,
         taskAssignmentEntity.progressStatus,
         taskAssignmentEntity.progressStatusDate,
@@ -31,10 +34,5 @@ data class TaskAssignment(
         taskAssignmentEntity.createType
     )
 }
-
-@Serializable
-data class TaskAssignmentDto(
-    val progressStatus: Int
-)
 
 

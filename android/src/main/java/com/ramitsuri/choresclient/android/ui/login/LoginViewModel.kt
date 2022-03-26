@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ramitsuri.choresclient.android.model.LoginViewState
 import com.ramitsuri.choresclient.android.model.Result
+import com.ramitsuri.choresclient.android.model.ViewEvent
 import com.ramitsuri.choresclient.android.model.ViewState
 import com.ramitsuri.choresclient.android.repositories.LoginRepository
 import com.ramitsuri.choresclient.android.utils.DispatcherProvider
@@ -27,7 +28,7 @@ class LoginViewModel @Inject constructor(
             prefManager.getToken().isNullOrEmpty()
         ) {
             Timber.i("${prefManager.getKey()}, ${prefManager.getUserId()}, ${prefManager.getToken()}")
-            MutableLiveData((ViewState.Login))
+            MutableLiveData((ViewState.Event(ViewEvent.LOGIN)))
         } else {
             MutableLiveData(ViewState.Success(LoginViewState(true)))
         }
@@ -35,7 +36,7 @@ class LoginViewModel @Inject constructor(
     val state: LiveData<ViewState<LoginViewState>> = _state
 
     fun login(id: String, key: String) {
-        _state.value = ViewState.Loading
+        _state.value = ViewState.Event(ViewEvent.LOADING)
         viewModelScope.launch(dispatchers.main) {
             when (val loginResult = repository.login(id, key)) {
                 is Result.Failure -> {

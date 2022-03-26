@@ -22,8 +22,8 @@
     <string name="notification_reminders_name">Reminders</string>
     <string name="notification_reminders_description">Notifications to remind you about due tasks</string>
     <string name="notification_reminder_title">Chore due</string>
-    <string name="notification_reminder_action_snooze_six_hours">6 hours</string>
-    <string name="notification_reminder_action_snooze_tomorrow">Tomorrow</string>
+    <string name="notification_reminder_action_snooze_hours">6 hours</string>
+    <string name="notification_reminder_action_snooze_day">Tomorrow</string>
     <string name="notification_reminder_action_complete">Done</string>
 
     <!-- Login -->
@@ -31,5 +31,11 @@
     <string name="login_hint_id">Id</string>
     <string name="login_hint_key">Key</string>
     <string name="login_server_alert_title">Enter Server URL</string>
+
+
+    <!-- Assignment Details -->
+    <string name="assignment_details_button_done">Done</string>
+    <string name="assignment_details_button_snooze_hours">Remind in 6 hours</string>
+    <string name="assignment_details_button_snooze_day">Remind tomorrow</string>
 
 </resources>

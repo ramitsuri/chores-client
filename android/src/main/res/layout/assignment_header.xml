@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         android:background="@drawable/bg_assignment_header"
         android:padding="@dimen/padding_medium"
-        android:textColor="@android:color/white"
+        android:textColor="@color/header_text"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="Oct 31" />

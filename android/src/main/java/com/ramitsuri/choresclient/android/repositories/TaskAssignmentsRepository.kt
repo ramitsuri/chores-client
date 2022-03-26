@@ -51,13 +51,8 @@ class SystemTaskAssignmentsRepository @Inject constructor(
         return localDataSource.getTaskAssignment(id)
     }
 
-    override suspend fun updateTaskAssignment(
-        taskAssignment: TaskAssignment,
-        readyForUpload: Boolean
-    ) {
-        return withContext(dispatcherProvider.io) {
-            localDataSource.update(taskAssignment, readyForUpload)
-        }
+    override suspend fun markTaskAssignmentDone(taskAssignmentId: String, doneTime: Instant) {
+        localDataSource.markDone(taskAssignmentId, doneTime)
     }
 
     private suspend fun uploadLocal(): List<String> {
@@ -112,8 +107,5 @@ interface TaskAssignmentsRepository {
 
     suspend fun getLocal(id: String): TaskAssignment?
 
-    suspend fun updateTaskAssignment(
-        taskAssignment: TaskAssignment,
-        readyForUpload: Boolean
-    )
+    suspend fun markTaskAssignmentDone(taskAssignmentId: String, doneTime: Instant)
 }

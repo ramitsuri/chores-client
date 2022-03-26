@@ -26,10 +26,7 @@ class FakeTaskAssignmentsRepository: TaskAssignmentsRepository {
         TODO("Not yet implemented")
     }
 
-    override suspend fun updateTaskAssignment(
-        taskAssignment: TaskAssignment,
-        readyForUpload: Boolean
-    ) {
+    override suspend fun markTaskAssignmentDone(taskAssignmentId: String, doneTime: Instant) {
         TODO("Not yet implemented")
     }
 

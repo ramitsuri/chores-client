@@ -9,7 +9,7 @@
         android:id="@+id/loginFragment"
         android:name="com.ramitsuri.choresclient.android.ui.login.LoginFragment"
         android:label="fragment_login"
-        tools:layout="@layout/fragment_login" >
+        tools:layout="@layout/fragment_login">
         <action
             android:id="@+id/action_loginFragment_to_assignmentsFragment"
             app:destination="@id/assignmentsFragment" />
@@ -19,6 +19,25 @@
         android:id="@+id/assignmentsFragment"
         android:name="com.ramitsuri.choresclient.android.ui.assigments.AssignmentsFragment"
         android:label="fragment_assignments"
-        tools:layout="@layout/fragment_assignments" >
+        tools:layout="@layout/fragment_assignments">
+        <action
+            android:id="@+id/action_assignment_details"
+            app:destination="@id/assignmentsDetailsFragment">
+            <argument
+                android:name="taskAssignment"
+                app:argType="com.ramitsuri.choresclient.android.model.TaskAssignment"
+                app:nullable="false" />
+
+        </action>
     </fragment>
+
+    <dialog
+        android:id="@+id/assignmentsDetailsFragment"
+        android:name="com.ramitsuri.choresclient.android.ui.assigments.AssignmentDetailsFragment"
+        tools:layout="@layout/fragment_assignment_details">
+        <argument
+            android:name="taskAssignment"
+            app:argType="com.ramitsuri.choresclient.android.model.TaskAssignment"
+            app:nullable="false" />
+    </dialog>
 </navigation>

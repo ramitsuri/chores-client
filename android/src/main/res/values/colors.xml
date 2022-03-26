@@ -10,6 +10,9 @@
     <color name="yellow">#ffeb3b</color>
     <color name="orange">#ff8d00</color>
 
+    <color name="header_background">@color/material_dynamic_tertiary90</color>
+    <color name="header_text">@color/material_dynamic_tertiary10</color>
+
     <color name="md_theme_light_primary">#286B2A</color>
     <color name="md_theme_light_onPrimary">#FFFFFF</color>
     <color name="md_theme_light_primaryContainer">#ABF5A3</color>

@@ -1,6 +1,7 @@
 package com.ramitsuri.choresclient.android.data
 
 import com.ramitsuri.choresclient.android.model.Member
+import com.ramitsuri.choresclient.android.model.ProgressStatus
 import com.ramitsuri.choresclient.android.model.Task
 import com.ramitsuri.choresclient.android.model.TaskAssignment
 import com.ramitsuri.choresclient.android.ui.assigments.FilterMode
@@ -25,8 +26,13 @@ class TaskAssignmentDataSource @Inject constructor(
         taskAssignmentDao.clearAndInsert(taskAssignments)
     }
 
-    suspend fun update(assignment: TaskAssignment, readyForUpload: Boolean): Int {
-        val taskAssignment = TaskAssignmentEntity(assignment).copy(shouldUpload = readyForUpload)
+    suspend fun markDone(assignmentId: String, doneTime: Instant): Int {
+        val taskAssignment = TaskAssignmentUpdate(
+            assignmentId,
+            ProgressStatus.DONE,
+            doneTime,
+            shouldUpload = true
+        )
         return taskAssignmentDao.update(taskAssignment)
     }
 
