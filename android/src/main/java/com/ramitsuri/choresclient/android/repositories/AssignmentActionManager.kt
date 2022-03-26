@@ -35,11 +35,15 @@ class AssignmentActionManager @Inject constructor(
     }
 
     fun onCompleteRequested(assignmentId: String) {
-        Timber.i("Action complete requested for $assignmentId")
         coroutineScope.launch(dispatcherProvider.io) {
-            alarmHandler.cancel(listOf(assignmentId))
-            taskAssignmentsRepository.markTaskAssignmentDone(assignmentId, Instant.now())
+            onCompleteRequestedSuspend(assignmentId)
         }
+    }
+
+    suspend fun onCompleteRequestedSuspend(assignmentId: String) {
+        Timber.i("Action complete requested for $assignmentId")
+        alarmHandler.cancel(listOf(assignmentId))
+        taskAssignmentsRepository.markTaskAssignmentDone(assignmentId, Instant.now())
     }
 
     private fun snooze(

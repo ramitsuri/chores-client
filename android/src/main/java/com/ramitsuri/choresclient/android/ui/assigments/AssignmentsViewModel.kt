@@ -12,6 +12,7 @@ import com.ramitsuri.choresclient.android.model.TaskAssignment
 import com.ramitsuri.choresclient.android.model.TaskAssignmentWrapper
 import com.ramitsuri.choresclient.android.model.ViewEvent
 import com.ramitsuri.choresclient.android.model.ViewState
+import com.ramitsuri.choresclient.android.repositories.AssignmentActionManager
 import com.ramitsuri.choresclient.android.repositories.TaskAssignmentsRepository
 import com.ramitsuri.choresclient.android.utils.DispatcherProvider
 import com.ramitsuri.choresclient.android.utils.PrefManager
@@ -25,6 +26,7 @@ import timber.log.Timber
 
 @HiltViewModel
 class AssignmentsViewModel @Inject constructor(
+    private val assignmentActionManager: AssignmentActionManager,
     private val repository: TaskAssignmentsRepository,
     private val prefManager: PrefManager,
     private val dispatchers: DispatcherProvider,
@@ -120,8 +122,8 @@ class AssignmentsViewModel @Inject constructor(
         if (taskAssignment.progressStatus != ProgressStatus.TODO) {
             return
         }
-        viewModelScope.launch {
-            repository.markTaskAssignmentDone(taskAssignment.id, Instant.now())
+        longLivingCoroutineScope.launch {
+            assignmentActionManager.onCompleteRequestedSuspend(taskAssignment.id)
             getLocal()
         }
     }

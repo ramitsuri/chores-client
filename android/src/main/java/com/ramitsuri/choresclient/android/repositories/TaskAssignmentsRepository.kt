@@ -56,21 +56,23 @@ class SystemTaskAssignmentsRepository @Inject constructor(
     }
 
     private suspend fun uploadLocal(): List<String> {
-        val readyForUpload = localDataSource.getReadyForUpload()
-        val uploadResult = try {
-            api.updateTaskAssignments(readyForUpload)
-        } catch (e: Exception) {
-            Timber.i("Caught exception $e")
-            null
-        }
-
-        return when (uploadResult?.status) {
-            HttpStatusCode.OK -> {
-                val uploadedTaskAssignmentIds: List<String> = uploadResult.receive()
-                uploadedTaskAssignmentIds
+        return withContext(dispatcherProvider.io) {
+            val readyForUpload = localDataSource.getReadyForUpload()
+            val uploadResult = try {
+                api.updateTaskAssignments(readyForUpload)
+            } catch (e: Exception) {
+                Timber.i("Caught exception $e")
+                null
             }
-            else -> {
-                listOf()
+
+            return@withContext when (uploadResult?.status) {
+                HttpStatusCode.OK -> {
+                    val uploadedTaskAssignmentIds: List<String> = uploadResult.receive()
+                    uploadedTaskAssignmentIds
+                }
+                else -> {
+                    listOf()
+                }
             }
         }
     }
