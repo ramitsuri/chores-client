@@ -11,7 +11,7 @@ import androidx.room.Query
 import java.time.Instant
 
 @Entity(tableName = "Alarms")
-class AlarmEntity(
+data class AlarmEntity(
     @PrimaryKey
     val assignmentId: String,
     @ColumnInfo(name = "showAtTime")
@@ -25,6 +25,9 @@ class AlarmEntity(
 abstract class AlarmDao {
     @Query("SELECT * FROM Alarms")
     abstract suspend fun get(): List<AlarmEntity>
+
+    @Query("SELECT * FROM Alarms WHERE assignmentId = :id")
+    abstract suspend fun get(id: String): AlarmEntity?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun insert(alarmEntities: List<AlarmEntity>)

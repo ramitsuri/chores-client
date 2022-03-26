@@ -1,9 +1,12 @@
 package com.ramitsuri.choresclient.android.model
 
+import android.os.Parcelable
 import com.ramitsuri.choresclient.android.data.TaskEntity
-import kotlinx.serialization.Serializable
 import java.time.Instant
+import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
 
+@Parcelize
 @Serializable
 data class Task(
     val id: String,
@@ -19,8 +22,8 @@ data class Task(
     val rotateMember: Boolean,
     @Serializable(with = InstantSerializer::class)
     val createdDate: Instant
-) {
-    constructor(taskEntity: TaskEntity): this(
+) : Parcelable {
+    constructor(taskEntity: TaskEntity) : this(
         taskEntity.id,
         taskEntity.name,
         taskEntity.description,

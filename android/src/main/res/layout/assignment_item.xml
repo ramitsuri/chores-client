@@ -3,9 +3,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/container"
-    style="?attr/materialCardViewFilledStyle"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:clickable="true">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -38,13 +38,11 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnChangeState"
-            style="@style/Widget.Material3.Button.TextButton.Icon"
+            style="@style/Widget.Material3.Button.TonalButton.Icon"
             android:layout_width="48dp"
             android:layout_height="0dp"
             android:stateListAnimator="@null"
             app:icon="@drawable/ic_done"
-            app:iconGravity="textStart"
-            app:iconPadding="0dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />

@@ -5,13 +5,16 @@ import android.view.LayoutInflater
 import android.widget.PopupMenu
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewbinding.ViewBinding
 import com.ramitsuri.choresclient.android.R
 import com.ramitsuri.choresclient.android.databinding.FragmentAssignmentsBinding
 import com.ramitsuri.choresclient.android.extensions.setVisibility
 import com.ramitsuri.choresclient.android.model.TaskAssignment
+import com.ramitsuri.choresclient.android.model.ViewEvent
 import com.ramitsuri.choresclient.android.model.ViewState
 import com.ramitsuri.choresclient.android.ui.BaseFragment
 import com.ramitsuri.choresclient.android.ui.decoration.ItemDecorator
@@ -52,9 +55,8 @@ class AssignmentsFragment : BaseFragment<FragmentAssignmentsBinding>() {
         binding.listAssignments.layoutManager = LinearLayoutManager(requireContext())
         viewModel.state.observe(viewLifecycleOwner) { viewState ->
             when (viewState) {
-                is ViewState.Loading -> {
-                    log("Loading")
-                    onLoading(true)
+                is ViewState.Event -> {
+                    onViewEvent(viewState.event)
                 }
                 is ViewState.Error -> {
                     log("Error: ${viewState.error}")
@@ -83,12 +85,6 @@ class AssignmentsFragment : BaseFragment<FragmentAssignmentsBinding>() {
                     setupFilters()
                     onLoading(false)
                 }
-                is ViewState.Reload -> {
-                    viewModel.fetchAssignments(true)
-                }
-                is ViewState.Login -> {
-                    log("Should not happen")
-                }
             }
         }
 
@@ -108,6 +104,22 @@ class AssignmentsFragment : BaseFragment<FragmentAssignmentsBinding>() {
         setupFilters()
     }
 
+    private fun onViewEvent(event: ViewEvent) {
+        when (event) {
+            ViewEvent.LOADING -> {
+                log("Loading")
+                onLoading(true)
+            }
+            ViewEvent.LOGIN -> {
+                log("Should not happen")
+            }
+            ViewEvent.RELOAD -> {
+                log("Reload")
+                viewModel.fetchAssignments(true)
+            }
+        }
+    }
+
     private fun setupFilters() {
         binding.filterGroup.setOnCheckedChangeListener { group, checkedId ->
             when (checkedId) {
@@ -124,7 +136,21 @@ class AssignmentsFragment : BaseFragment<FragmentAssignmentsBinding>() {
     }
 
     private fun onItemClickListener(taskAssignment: TaskAssignment, clickType: ClickType) {
-        viewModel.changeStateRequested(taskAssignment, clickType)
+        when (clickType) {
+            ClickType.CHANGE_STATUS -> {
+                viewModel.changeStateRequested(taskAssignment)
+            }
+            ClickType.DETAIL -> {
+                log("Detail requested")
+                setFragmentResultListener(AssignmentDetailsFragment.REQUEST_DONE_STATUS) { _, bundle ->
+                    if (bundle[AssignmentDetailsFragment.BUNDLE_DONE] as? Boolean == true) {
+                        onViewEvent(ViewEvent.RELOAD)
+                    }
+                }
+                val action = AssignmentsFragmentDirections.actionAssignmentDetails(taskAssignment)
+                findNavController().navigate(action)
+            }
+        }
     }
 
     private fun onLoading(loading: Boolean) {

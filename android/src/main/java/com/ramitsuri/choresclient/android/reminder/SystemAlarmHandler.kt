@@ -5,6 +5,7 @@ import com.ramitsuri.choresclient.android.data.AlarmDao
 import com.ramitsuri.choresclient.android.data.AlarmEntity
 import com.ramitsuri.choresclient.android.data.AssignmentAlarm
 import com.ramitsuri.choresclient.android.notification.ShowNotificationWorker
+import java.time.Instant
 
 class SystemAlarmHandler(
     private val showNotificationWorker: ShowNotificationWorker.Companion,
@@ -26,6 +27,26 @@ class SystemAlarmHandler(
                 it.systemNotificationId
             )
         })
+    }
+
+    override suspend fun reschedule(
+        assignmentId: String,
+        showAtTime: Instant,
+        notificationText: String
+    ) {
+        val existing = alarmDao.get(assignmentId) ?: return
+        // Cancel existing notification
+        cancel(listOf(assignmentId))
+        schedule(
+            listOf(
+                AssignmentAlarm(
+                    assignmentId,
+                    showAtTime,
+                    existing.systemNotificationId,
+                    notificationText
+                )
+            )
+        )
     }
 
     override suspend fun cancel(assignmentIds: List<String>) {

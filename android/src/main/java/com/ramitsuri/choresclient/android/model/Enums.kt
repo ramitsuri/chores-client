@@ -38,7 +38,14 @@ enum class CreateType(val key: Int) {
 enum class ViewError {
     NETWORK,
     LOGIN_REQUEST_FAILED,
-    LOGIN_NO_TOKEN
+    LOGIN_NO_TOKEN,
+    TASK_ASSIGNMENT_ARG_NULL
+}
+
+enum class ViewEvent {
+    LOADING,
+    RELOAD,
+    LOGIN
 }
 
 enum class RepeatUnit(val key: Int) {

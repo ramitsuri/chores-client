@@ -19,6 +19,7 @@ import com.ramitsuri.choresclient.android.notification.ShowNotificationWorker
 import com.ramitsuri.choresclient.android.notification.SystemNotificationHandler
 import com.ramitsuri.choresclient.android.reminder.AlarmHandler
 import com.ramitsuri.choresclient.android.reminder.SystemAlarmHandler
+import com.ramitsuri.choresclient.android.repositories.AssignmentActionManager
 import com.ramitsuri.choresclient.android.repositories.SystemTaskAssignmentsRepository
 import com.ramitsuri.choresclient.android.repositories.TaskAssignmentsRepository
 import com.ramitsuri.choresclient.android.utils.Base
@@ -247,6 +248,19 @@ class AppModule {
         api,
         taskAssignmentDataSource,
         dispatcherProvider
+    )
+
+    @Provides
+    fun provideAssignmentsActionManager(
+        coroutineScope: CoroutineScope,
+        dispatcherProvider: DispatcherProvider,
+        taskAssignmentsRepository: TaskAssignmentsRepository,
+        alarmHandler: AlarmHandler
+    ) = AssignmentActionManager(
+        coroutineScope,
+        dispatcherProvider,
+        taskAssignmentsRepository,
+        alarmHandler
     )
 
     @Singleton

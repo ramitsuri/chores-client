@@ -6,12 +6,14 @@ plugins {
     id("kotlinx-serialization")
     id("androidx.navigation.safeargs.kotlin")
     id("dagger.hilt.android.plugin")
+    id ("kotlin-parcelize")
 }
 
 dependencies {
     val fragmentVersion = "1.3.6"
 
     implementation(project(":shared"))
+    implementation ("androidx.core:core-ktx:1.7.0")
 
     // Material
     implementation("com.google.android.material:material:1.5.0-alpha05")

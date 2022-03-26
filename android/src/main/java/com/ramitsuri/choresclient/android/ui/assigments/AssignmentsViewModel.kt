@@ -10,6 +10,7 @@ import com.ramitsuri.choresclient.android.model.RepeatUnit
 import com.ramitsuri.choresclient.android.model.Result
 import com.ramitsuri.choresclient.android.model.TaskAssignment
 import com.ramitsuri.choresclient.android.model.TaskAssignmentWrapper
+import com.ramitsuri.choresclient.android.model.ViewEvent
 import com.ramitsuri.choresclient.android.model.ViewState
 import com.ramitsuri.choresclient.android.repositories.TaskAssignmentsRepository
 import com.ramitsuri.choresclient.android.utils.DispatcherProvider
@@ -30,7 +31,8 @@ class AssignmentsViewModel @Inject constructor(
     private val longLivingCoroutineScope: CoroutineScope
 ) : ViewModel() {
 
-    private val _state = MutableLiveData<ViewState<AssignmentsViewState>>(ViewState.Reload)
+    private val _state =
+        MutableLiveData<ViewState<AssignmentsViewState>>(ViewState.Event(ViewEvent.RELOAD))
     val state: LiveData<ViewState<AssignmentsViewState>> = _state
     private var filterMode: FilterMode
     private val userId = prefManager.getUserId() ?: ""
@@ -47,9 +49,9 @@ class AssignmentsViewModel @Inject constructor(
         val isWorkerRunning = prefManager.isWorkerRunning()
         val shouldRefresh = !(getLocal || isWorkerRunning)
         Timber.d("Will refresh: $shouldRefresh - getLocal($getLocal) || workerRunning($isWorkerRunning)")
-        _state.value = ViewState.Loading
+        _state.value = ViewState.Event(ViewEvent.LOADING)
         // We want this to be run in long living scope so that the refresh operation isn't cancelled
-        // while assignments have been uiploaded but not deleted locally for example. Or are being
+        // while assignments have been uploaded but not deleted locally for example. Or are being
         // uploaded still
         longLivingCoroutineScope.launch(dispatchers.main) {
             if (shouldRefresh) {
@@ -114,28 +116,12 @@ class AssignmentsViewModel @Inject constructor(
         return result
     }
 
-    fun changeStateRequested(taskAssignment: TaskAssignment, clickType: ClickType) {
-        val newProgressStatus = when (taskAssignment.progressStatus) {
-            ProgressStatus.TODO -> {
-                when (clickType) {
-                    ClickType.CHANGE_STATUS -> {
-                        ProgressStatus.DONE
-                    }
-                    else -> {
-                        return
-                    }
-                }
-            }
-            else -> {
-                return
-            }
+    fun changeStateRequested(taskAssignment: TaskAssignment) {
+        if (taskAssignment.progressStatus != ProgressStatus.TODO) {
+            return
         }
-        val updated = taskAssignment.copy(
-            progressStatus = newProgressStatus,
-            progressStatusDate = Instant.now()
-        )
         viewModelScope.launch {
-            repository.updateTaskAssignment(updated, true)
+            repository.markTaskAssignmentDone(taskAssignment.id, Instant.now())
             getLocal()
         }
     }
