@@ -4,7 +4,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.annotation.StringRes
 import androidx.recyclerview.widget.RecyclerView
 import com.ramitsuri.choresclient.android.R
 import com.ramitsuri.choresclient.android.databinding.AssignmentHeaderBinding
@@ -122,14 +121,6 @@ class AssignmentsAdapter(
 
             if (taskAssignment.progressStatus != ProgressStatus.TODO) {
                 binding.btnChangeState.setVisibility(false)
-            }
-        }
-
-        private fun getString(@StringRes resId: Int, formatArg: String? = null): String {
-            return if (formatArg == null) {
-                binding.root.context.getString(resId)
-            } else {
-                binding.root.context.getString(resId, formatArg)
             }
         }
 

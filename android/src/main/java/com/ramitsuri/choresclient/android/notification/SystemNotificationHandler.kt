@@ -28,8 +28,10 @@ class SystemNotificationHandler(context: Context) : NotificationHandler {
             priority = notificationInfo.priority.toPlatformValue()
             setSmallIcon(notificationInfo.iconResId)
             setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            setContentTitle(context.getString(notificationInfo.titleResId))
-            setContentText(notificationInfo.body)
+            setContentTitle(notificationInfo.title)
+            if (!notificationInfo.body.isNullOrEmpty()) {
+                setContentText(notificationInfo.body)
+            }
             if (notificationInfo.actions != null) {
                 for ((index, action) in notificationInfo.actions.withIndex()) {
                     addAction(

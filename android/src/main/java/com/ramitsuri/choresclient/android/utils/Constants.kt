@@ -15,12 +15,12 @@ enum class NotificationAction(val action: String, val requestCode: Int, @StringR
     SNOOZE_HOUR(
         "SNOOZE_HOUR",
         1,
-        R.string.notification_reminder_action_snooze_six_hours
+        R.string.notification_reminder_action_snooze_hours
     ),
     SNOOZE_DAY(
         "SNOOZE_DAY",
         2,
-        R.string.notification_reminder_action_snooze_tomorrow
+        R.string.notification_reminder_action_snooze_day
     ),
     COMPLETE(
         "COMPLETE",

@@ -11,6 +11,7 @@ import com.ramitsuri.choresclient.android.BuildConfig
 import com.ramitsuri.choresclient.android.R
 import com.ramitsuri.choresclient.android.databinding.FragmentLoginBinding
 import com.ramitsuri.choresclient.android.extensions.setVisibility
+import com.ramitsuri.choresclient.android.model.ViewEvent
 import com.ramitsuri.choresclient.android.model.ViewState
 import com.ramitsuri.choresclient.android.ui.BaseFragment
 import dagger.hilt.android.AndroidEntryPoint
@@ -28,9 +29,8 @@ class LoginFragment : BaseFragment<FragmentLoginBinding>() {
     override fun setupViews() {
         viewModel.state.observe(viewLifecycleOwner) { viewState ->
             when (viewState) {
-                is ViewState.Loading, ViewState.Reload -> {
-                    log("Loading")
-                    onLoading(true)
+                is ViewState.Event -> {
+                    onViewEvent(viewState.event)
                 }
                 is ViewState.Error -> {
                     log("Error: ${viewState.error}")
@@ -40,9 +40,6 @@ class LoginFragment : BaseFragment<FragmentLoginBinding>() {
                 is ViewState.Success -> {
                     log("Login success")
                     findNavController().navigate(R.id.action_loginFragment_to_assignmentsFragment)
-                }
-                is ViewState.Login -> {
-                    onLoading(false)
                 }
             }
         }
@@ -68,6 +65,18 @@ class LoginFragment : BaseFragment<FragmentLoginBinding>() {
         if (BuildConfig.DEBUG) {
             binding.textServer.visibility = View.VISIBLE
             binding.textServer.text = viewModel.getServer()
+        }
+    }
+
+    private fun onViewEvent(event: ViewEvent) {
+        when (event) {
+            ViewEvent.LOADING, ViewEvent.RELOAD -> {
+                log("Loading")
+                onLoading(true)
+            }
+            ViewEvent.LOGIN -> {
+                onLoading(false)
+            }
         }
     }
 
