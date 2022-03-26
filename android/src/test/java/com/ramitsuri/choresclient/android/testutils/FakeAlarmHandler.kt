@@ -3,6 +3,7 @@ package com.ramitsuri.choresclient.android.testutils
 import com.ramitsuri.choresclient.android.data.AlarmEntity
 import com.ramitsuri.choresclient.android.data.AssignmentAlarm
 import com.ramitsuri.choresclient.android.reminder.AlarmHandler
+import java.time.Instant
 
 class FakeAlarmHandler : AlarmHandler {
     private val alarms = mutableMapOf<String, AssignmentAlarm>() // AssignmentId | DueDateTime
@@ -28,6 +29,14 @@ class FakeAlarmHandler : AlarmHandler {
                 )
 
         }
+    }
+
+    override suspend fun reschedule(
+        assignmentId: String,
+        showAtTime: Instant,
+        notificationText: String
+    ) {
+        TODO("Not yet implemented")
     }
 
     override suspend fun cancel(assignmentIds: List<String>) {
