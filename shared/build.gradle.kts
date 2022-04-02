@@ -5,6 +5,8 @@ plugins {
     kotlin("native.cocoapods")
     kotlin("plugin.serialization")
     id("com.android.library")
+    id("com.squareup.sqldelight")
+    id ("kotlin-parcelize")
 }
 
 version = "1.0"
@@ -31,19 +33,28 @@ kotlin {
     }
 
     sourceSets {
+        val ktor = findProperty("version.ktor")
         val commonMain by getting {
             dependencies {
-                //Network
-                implementation("io.ktor:ktor-client-core:${findProperty("version.ktor")}")
-                implementation("io.ktor:ktor-client-logging:${findProperty("version.ktor")}")
-                //Coroutines
+                // Network
+                implementation("io.ktor:ktor-client-core:$ktor")
+                implementation("io.ktor:ktor-client-serialization:$ktor")
+                implementation("io.ktor:ktor-client-logging:$ktor")
+
+                // Coroutines
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${findProperty("version.kotlinx.coroutines")}")
-                //Logger
-                implementation("io.github.aakira:napier:2.1.0")
-                //JSON
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${findProperty("version.kotlinx.serialization")}")
-                //Key-Value storage
-                implementation("com.russhwolf:multiplatform-settings:0.8")
+
+                // Date Time
+                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.3.2")
+
+                // Serialization
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.3.0")
+
+                // Settings
+                api("com.russhwolf:multiplatform-settings:0.8.1")
+
+                // SQL
+                implementation("com.squareup.sqldelight:coroutines-extensions:1.5.3")
             }
         }
         val commonTest by getting {
@@ -54,6 +65,12 @@ kotlin {
         }
         val androidMain by getting {
             dependencies {
+                // Encrypted SharedPrefs
+                implementation ("androidx.security:security-crypto:1.1.0-alpha03")
+
+                // SQL
+                implementation("com.squareup.sqldelight:android-driver:1.5.3")
+
                 //Network
                 implementation("io.ktor:ktor-client-okhttp:${findProperty("version.ktor")}")
             }
@@ -64,7 +81,15 @@ kotlin {
                 implementation("junit:junit:4.13.2")
             }
         }
-        val iosMain by getting
+        val iosMain by getting {
+            dependencies {
+                // SQL
+                implementation("com.squareup.sqldelight:native-driver:1.5.3")
+
+                // Network
+                implementation("io.ktor:ktor-client-ios:$ktor")
+            }
+        }
         val iosTest by getting
     }
 }
@@ -76,4 +101,10 @@ android {
         targetSdk = (findProperty("android.targetSdk") as String).toInt()
     }
     sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
+}
+
+sqldelight {
+    database("ChoresDatabase") {
+        packageName = "com.ramitsuri.choresclient.db"
+    }
 }

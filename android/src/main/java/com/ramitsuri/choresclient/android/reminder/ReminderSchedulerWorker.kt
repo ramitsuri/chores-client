@@ -8,8 +8,8 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequest
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
-import com.ramitsuri.choresclient.android.notification.ReminderScheduler
-import com.ramitsuri.choresclient.android.utils.PrefManager
+import com.ramitsuri.choresclient.data.notification.ReminderScheduler
+import com.ramitsuri.choresclient.android.utils.AppHelper
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Dispatchers
@@ -22,7 +22,7 @@ class ReminderSchedulerWorker @AssistedInject constructor(
     @Assisted context: Context,
     @Assisted workerParameters: WorkerParameters,
     private val reminderScheduler: ReminderScheduler,
-    private val prefManager: PrefManager
+    private val prefManager: AppHelper
 ):
     CoroutineWorker(context, workerParameters) {
 

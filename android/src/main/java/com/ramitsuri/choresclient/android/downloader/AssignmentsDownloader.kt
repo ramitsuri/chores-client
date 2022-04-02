@@ -9,8 +9,8 @@ import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequest
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
-import com.ramitsuri.choresclient.android.repositories.TaskAssignmentsRepository
-import com.ramitsuri.choresclient.android.utils.PrefManager
+import com.ramitsuri.choresclient.repositories.TaskAssignmentsRepository
+import com.ramitsuri.choresclient.android.utils.AppHelper
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import timber.log.Timber
@@ -21,22 +21,22 @@ class AssignmentsDownloader @AssistedInject constructor(
     @Assisted context: Context,
     @Assisted workerParams: WorkerParameters,
     private val repository: TaskAssignmentsRepository,
-    private val prefManager: PrefManager
+    private val appHelper: AppHelper
 ):
     CoroutineWorker(context, workerParams) {
 
     override suspend fun doWork(): Result {
-        if (prefManager.isWorkerRunning()) {
+        if (appHelper.isWorkerRunning()) {
             Timber.d("A worker is already running, exit")
             return Result.failure()
         }
-        prefManager.setWorkerRunning(true)
+        appHelper.setWorkerRunning(true)
         try {
             repository.refresh()
         } catch (e: Exception) {
             Timber.e(e)
         } finally {
-            prefManager.setWorkerRunning(false)
+            appHelper.setWorkerRunning(false)
         }
         Timber.d("Run complete")
         return Result.success()

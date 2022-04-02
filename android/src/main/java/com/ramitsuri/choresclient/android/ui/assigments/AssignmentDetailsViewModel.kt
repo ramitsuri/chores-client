@@ -5,10 +5,9 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.ramitsuri.choresclient.android.model.AssignmentDetailsViewState
-import com.ramitsuri.choresclient.android.model.TaskAssignment
-import com.ramitsuri.choresclient.android.model.ViewError
 import com.ramitsuri.choresclient.android.model.ViewState
-import com.ramitsuri.choresclient.android.repositories.AssignmentActionManager
+import com.ramitsuri.choresclient.data.ViewError
+import com.ramitsuri.choresclient.repositories.AssignmentActionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -18,33 +17,33 @@ class AssignmentDetailsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val taskAssignment: TaskAssignment? = savedStateHandle["taskAssignment"]
+    private val details: AssignmentDetails? = savedStateHandle["details"]
     private val _state: MutableLiveData<ViewState<AssignmentDetailsViewState>> =
-        if (taskAssignment != null) {
-            MutableLiveData(ViewState.Success(AssignmentDetailsViewState(taskAssignment)))
+        if (details != null) {
+            MutableLiveData(ViewState.Success(AssignmentDetailsViewState(details)))
         } else {
             MutableLiveData(ViewState.Error(ViewError.TASK_ASSIGNMENT_ARG_NULL))
         }
     val state: LiveData<ViewState<AssignmentDetailsViewState>> = _state
 
     fun onSnoozeHour() {
-        if (taskAssignment == null) {
+        if (details == null) {
             return
         }
-        assignmentActionManager.onSnoozeHourRequested(taskAssignment.id, taskAssignment.task.name)
+        assignmentActionManager.onSnoozeHourRequested(details.id, details.name)
     }
 
     fun onSnoozeDay() {
-        if (taskAssignment == null) {
+        if (details == null) {
             return
         }
-        assignmentActionManager.onSnoozeDayRequested(taskAssignment.id, taskAssignment.task.name)
+        assignmentActionManager.onSnoozeDayRequested(details.id, details.name)
     }
 
     fun onComplete() {
-        if (taskAssignment == null) {
+        if (details == null) {
             return
         }
-        assignmentActionManager.onCompleteRequested(taskAssignment.id)
+        assignmentActionManager.onCompleteRequested(details.id)
     }
 }

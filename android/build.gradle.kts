@@ -6,7 +6,6 @@ plugins {
     id("kotlinx-serialization")
     id("androidx.navigation.safeargs.kotlin")
     id("dagger.hilt.android.plugin")
-    id ("kotlin-parcelize")
 }
 
 dependencies {
@@ -21,7 +20,6 @@ dependencies {
     // Ktor
     implementation("io.ktor:ktor-client-android:1.6.7")
     implementation("io.ktor:ktor-client-serialization:1.6.7")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.0")
     implementation("io.ktor:ktor-client-logging-jvm:1.6.3")
     implementation ("io.ktor:ktor-client-auth:1.6.7")
 
@@ -36,6 +34,9 @@ dependencies {
     kapt("com.google.dagger:hilt-android-compiler:2.37")
     implementation("androidx.hilt:hilt-lifecycle-viewmodel:1.0.0-alpha03")
     kapt("androidx.hilt:hilt-compiler:1.0.0")
+    
+    // Date Time
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.3.2")
 
     // Encrypted SharedPrefs
     implementation ("androidx.security:security-crypto:1.1.0-alpha03")
@@ -68,6 +69,7 @@ dependencies {
 
     // Testing
     testImplementation("junit:junit:4.13.2")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-datetime:0.3.2")
     androidTestImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit-ktx:1.1.4-alpha03")
     androidTestImplementation("androidx.test:runner:1.4.0")

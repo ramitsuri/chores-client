@@ -5,16 +5,16 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ramitsuri.choresclient.android.model.LoginViewState
-import com.ramitsuri.choresclient.android.model.Result
 import com.ramitsuri.choresclient.android.model.ViewEvent
 import com.ramitsuri.choresclient.android.model.ViewState
-import com.ramitsuri.choresclient.android.repositories.LoginRepository
-import com.ramitsuri.choresclient.android.utils.DispatcherProvider
-import com.ramitsuri.choresclient.android.utils.PrefManager
+import com.ramitsuri.choresclient.data.Result
+import com.ramitsuri.choresclient.data.settings.PrefManager
+import com.ramitsuri.choresclient.repositories.LoginRepository
+import com.ramitsuri.choresclient.utils.DispatcherProvider
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(

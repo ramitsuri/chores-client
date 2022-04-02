@@ -2,7 +2,7 @@ package com.ramitsuri.choresclient.android.utils
 
 import android.content.Context
 import com.ramitsuri.choresclient.android.R
-import com.ramitsuri.choresclient.android.model.RepeatUnit
+import com.ramitsuri.choresclient.data.RepeatUnit
 
 fun Context.formatRepeatUnit(repeatValue: Int, repeatUnit: RepeatUnit): String {
     if (repeatValue == 0 && repeatUnit != RepeatUnit.ON_COMPLETE && repeatUnit != RepeatUnit.NONE) {

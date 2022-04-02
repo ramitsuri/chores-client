@@ -1,6 +1,6 @@
 package com.ramitsuri.choresclient.android.testutils
 
-import com.ramitsuri.choresclient.android.keyvaluestore.KeyValueStore
+import com.ramitsuri.choresclient.data.settings.KeyValueStore
 
 class FakeKeyValueStore : KeyValueStore {
 
