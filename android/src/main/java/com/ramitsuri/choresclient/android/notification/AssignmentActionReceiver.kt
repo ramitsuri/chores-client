@@ -4,7 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import com.ramitsuri.choresclient.android.R
-import com.ramitsuri.choresclient.android.repositories.AssignmentActionManager
+import com.ramitsuri.choresclient.repositories.AssignmentActionManager
 import com.ramitsuri.choresclient.android.utils.NotificationAction
 import com.ramitsuri.choresclient.android.utils.NotificationActionExtra
 import dagger.hilt.android.AndroidEntryPoint

@@ -10,14 +10,15 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewbinding.ViewBinding
+import com.ramitsuri.choresclient.data.FilterMode
 import com.ramitsuri.choresclient.android.R
 import com.ramitsuri.choresclient.android.databinding.FragmentAssignmentsBinding
 import com.ramitsuri.choresclient.android.extensions.setVisibility
-import com.ramitsuri.choresclient.android.model.TaskAssignment
 import com.ramitsuri.choresclient.android.model.ViewEvent
 import com.ramitsuri.choresclient.android.model.ViewState
 import com.ramitsuri.choresclient.android.ui.BaseFragment
 import com.ramitsuri.choresclient.android.ui.decoration.ItemDecorator
+import com.ramitsuri.choresclient.data.TaskAssignment
 import dagger.hilt.android.AndroidEntryPoint
 import timber.log.Timber
 
@@ -147,7 +148,9 @@ class AssignmentsFragment : BaseFragment<FragmentAssignmentsBinding>() {
                         onViewEvent(ViewEvent.RELOAD)
                     }
                 }
-                val action = AssignmentsFragmentDirections.actionAssignmentDetails(taskAssignment)
+                val action = AssignmentsFragmentDirections.actionAssignmentDetails(
+                    AssignmentDetails(taskAssignment)
+                )
                 findNavController().navigate(action)
             }
         }

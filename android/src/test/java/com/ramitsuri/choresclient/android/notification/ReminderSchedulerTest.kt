@@ -1,26 +1,30 @@
 package com.ramitsuri.choresclient.android.notification
 
-import com.ramitsuri.choresclient.android.data.AssignmentAlarm
-import com.ramitsuri.choresclient.android.model.CreateType
-import com.ramitsuri.choresclient.android.model.Member
-import com.ramitsuri.choresclient.android.model.ProgressStatus
-import com.ramitsuri.choresclient.android.model.RepeatUnit
-import com.ramitsuri.choresclient.android.model.Task
-import com.ramitsuri.choresclient.android.model.TaskAssignment
 import com.ramitsuri.choresclient.android.testutils.FakeAlarmHandler
 import com.ramitsuri.choresclient.android.testutils.FakeKeyValueStore
 import com.ramitsuri.choresclient.android.testutils.FakeTaskAssignmentsRepository
-import com.ramitsuri.choresclient.android.utils.DefaultDispatchers
-import com.ramitsuri.choresclient.android.utils.PrefManager
+import com.ramitsuri.choresclient.data.CreateType
+import com.ramitsuri.choresclient.data.Member
+import com.ramitsuri.choresclient.data.ProgressStatus
+import com.ramitsuri.choresclient.data.RepeatUnit
+import com.ramitsuri.choresclient.data.Task
+import com.ramitsuri.choresclient.data.TaskAssignment
+import com.ramitsuri.choresclient.data.entities.AssignmentAlarm
+import com.ramitsuri.choresclient.data.notification.ReminderScheduler
+import com.ramitsuri.choresclient.data.settings.PrefManager
+import com.ramitsuri.choresclient.utils.DispatcherProvider
 import kotlinx.coroutines.runBlocking
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
-import java.time.Duration
-import java.time.Instant
+import kotlin.time.Duration
+import kotlin.time.ExperimentalTime
 
+@OptIn(ExperimentalTime::class)
 class ReminderSchedulerTest {
     private lateinit var reminderScheduler: ReminderScheduler
     private lateinit var taskAssignmentsRepository: FakeTaskAssignmentsRepository
@@ -36,7 +40,7 @@ class ReminderSchedulerTest {
             taskAssignmentsRepository,
             alarmHandler,
             prefManager,
-            DefaultDispatchers()
+            DispatcherProvider()
         )
     }
 
@@ -45,7 +49,8 @@ class ReminderSchedulerTest {
         runBlocking {
             // Arrange
             val assignmentId = "1"
-            val scheduledTime = Instant.now().plusSeconds(30)
+            val duration = Duration.seconds(30)
+            val scheduledTime = Clock.System.now().plus(duration)
             val memberId = "1"
             prefManager.setUserId(memberId)
             taskAssignmentsRepository.setSince(
@@ -73,7 +78,8 @@ class ReminderSchedulerTest {
         runBlocking {
             // Arrange
             val assignmentId = "1"
-            val scheduledTime = Instant.now().minusSeconds(30)
+            val duration = Duration.seconds(30)
+            val scheduledTime = Clock.System.now().minus(duration)
             val memberId = "1"
             prefManager.setUserId(memberId)
             taskAssignmentsRepository.setSince(
@@ -99,7 +105,8 @@ class ReminderSchedulerTest {
         runBlocking {
             // Arrange
             val assignmentId = "1"
-            val scheduledTime = Instant.now().minusSeconds(30)
+            val duration = Duration.seconds(30)
+            val scheduledTime = Clock.System.now().minus(duration)
             val memberId = "1"
             prefManager.setUserId(memberId)
             taskAssignmentsRepository.setSince(
@@ -110,11 +117,12 @@ class ReminderSchedulerTest {
                     )
                 )
             )
+            val scheduledTimeDuration = Duration.hours(25)
             alarmHandler.schedule(
                 listOf(
                     AssignmentAlarm(
                         assignmentId,
-                        scheduledTime.minusSeconds(Duration.ofHours(25).seconds),
+                        scheduledTime.minus(scheduledTimeDuration),
                         100,
                         ""
                     )
@@ -136,7 +144,8 @@ class ReminderSchedulerTest {
         runBlocking {
             // Arrange
             val assignmentId = "1"
-            val scheduledTime = Instant.now().plusSeconds(30)
+            val duration = Duration.seconds(30)
+            val scheduledTime = Clock.System.now().plus(duration)
             val memberId = "1"
             prefManager.setUserId(memberId)
             taskAssignmentsRepository.setSince(
@@ -162,7 +171,8 @@ class ReminderSchedulerTest {
         runBlocking {
             // Arrange
             val assignmentId = "1"
-            val scheduledTime = Instant.now().plusSeconds(30)
+            val duration = Duration.seconds(30)
+            val scheduledTime = Clock.System.now().plus(duration)
             val memberId = "1"
             prefManager.setUserId(memberId)
             taskAssignmentsRepository.setSince(
@@ -188,7 +198,8 @@ class ReminderSchedulerTest {
         runBlocking {
             // Arrange
             val assignmentId = "1"
-            val scheduledTime = Instant.now().plusSeconds(30)
+            val duration = Duration.seconds(30)
+            val scheduledTime = Clock.System.now().plus(duration)
             val memberId = "1"
             prefManager.setUserId("2")
             taskAssignmentsRepository.setSince(
@@ -212,29 +223,29 @@ class ReminderSchedulerTest {
     private fun getAssignment(
         assignmentId: String,
         progressStatus: ProgressStatus = ProgressStatus.TODO,
-        dueDateTime: Instant = Instant.now(),
+        dueDateTime: Instant = Clock.System.now(),
         memberId: String = "1"
     ): TaskAssignment {
-        val member = Member(memberId, "member", Instant.now())
+        val member = Member(memberId, "member", Clock.System.now())
         return TaskAssignment(
             assignmentId,
             progressStatus,
-            progressStatusDate = Instant.now(),
+            progressStatusDate = Clock.System.now(),
             Task(
                 id = "1",
                 "Name",
                 "Description",
-                Instant.now(),
+                Clock.System.now(),
                 1,
                 RepeatUnit.DAY,
                 "",
                 "",
                 false,
-                Instant.now()
+                Clock.System.now()
             ),
             member,
             dueDateTime,
-            createdDate = Instant.now(),
+            createdDate = Clock.System.now(),
             CreateType.AUTO
         )
     }

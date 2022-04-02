@@ -1,9 +1,9 @@
 package com.ramitsuri.choresclient.android.testutils
 
-import com.ramitsuri.choresclient.android.data.AlarmEntity
-import com.ramitsuri.choresclient.android.data.AssignmentAlarm
-import com.ramitsuri.choresclient.android.reminder.AlarmHandler
-import java.time.Instant
+import com.ramitsuri.choresclient.data.entities.AssignmentAlarm
+import com.ramitsuri.choresclient.db.AlarmEntity
+import com.ramitsuri.choresclient.reminder.AlarmHandler
+import kotlinx.datetime.Instant
 
 class FakeAlarmHandler : AlarmHandler {
     private val alarms = mutableMapOf<String, AssignmentAlarm>() // AssignmentId | DueDateTime
@@ -13,7 +13,7 @@ class FakeAlarmHandler : AlarmHandler {
             AlarmEntity(
                 it.assignmentId,
                 it.showAtTime,
-                it.systemNotificationId
+                it.systemNotificationId.toLong()
             )
         }
     }

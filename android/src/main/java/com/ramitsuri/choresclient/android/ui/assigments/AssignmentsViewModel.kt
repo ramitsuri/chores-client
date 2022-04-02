@@ -5,18 +5,20 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ramitsuri.choresclient.android.model.AssignmentsViewState
-import com.ramitsuri.choresclient.android.model.ProgressStatus
-import com.ramitsuri.choresclient.android.model.RepeatUnit
-import com.ramitsuri.choresclient.android.model.Result
-import com.ramitsuri.choresclient.android.model.TaskAssignment
 import com.ramitsuri.choresclient.android.model.TaskAssignmentWrapper
 import com.ramitsuri.choresclient.android.model.ViewEvent
 import com.ramitsuri.choresclient.android.model.ViewState
-import com.ramitsuri.choresclient.android.repositories.AssignmentActionManager
-import com.ramitsuri.choresclient.android.repositories.TaskAssignmentsRepository
-import com.ramitsuri.choresclient.android.utils.DispatcherProvider
-import com.ramitsuri.choresclient.android.utils.PrefManager
+import com.ramitsuri.choresclient.android.utils.AppHelper
 import com.ramitsuri.choresclient.android.utils.getDay
+import com.ramitsuri.choresclient.data.FilterMode
+import com.ramitsuri.choresclient.data.ProgressStatus
+import com.ramitsuri.choresclient.data.RepeatUnit
+import com.ramitsuri.choresclient.data.Result
+import com.ramitsuri.choresclient.data.TaskAssignment
+import com.ramitsuri.choresclient.data.settings.PrefManager
+import com.ramitsuri.choresclient.repositories.AssignmentActionManager
+import com.ramitsuri.choresclient.repositories.TaskAssignmentsRepository
+import com.ramitsuri.choresclient.utils.DispatcherProvider
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.Instant
 import javax.inject.Inject
@@ -29,6 +31,7 @@ class AssignmentsViewModel @Inject constructor(
     private val assignmentActionManager: AssignmentActionManager,
     private val repository: TaskAssignmentsRepository,
     private val prefManager: PrefManager,
+    private val appHelper: AppHelper,
     private val dispatchers: DispatcherProvider,
     private val longLivingCoroutineScope: CoroutineScope
 ) : ViewModel() {
@@ -48,7 +51,7 @@ class AssignmentsViewModel @Inject constructor(
     }
 
     fun fetchAssignments(getLocal: Boolean = false) {
-        val isWorkerRunning = prefManager.isWorkerRunning()
+        val isWorkerRunning = appHelper.isWorkerRunning()
         val shouldRefresh = !(getLocal || isWorkerRunning)
         Timber.d("Will refresh: $shouldRefresh - getLocal($getLocal) || workerRunning($isWorkerRunning)")
         _state.value = ViewState.Event(ViewEvent.LOADING)
@@ -77,7 +80,8 @@ class AssignmentsViewModel @Inject constructor(
 
     private fun getLocal() {
         viewModelScope.launch(dispatchers.main) {
-            val assignmentsResult = repository.getLocal(filterMode) as Result.Success
+            val assignmentsResult =
+                repository.getLocal(filterMode) as Result.Success
             val assignmentsState = AssignmentsViewState(
                 getAssignmentsForDisplay(assignmentsResult.data),
                 filterMode
@@ -96,7 +100,7 @@ class AssignmentsViewModel @Inject constructor(
                 if (it.task.repeatUnit == RepeatUnit.ON_COMPLETE) {
                     onCompletionKey
                 } else {
-                    getDay(it.dueDateTime)
+                    getDay(Instant.ofEpochMilli(it.dueDateTime.toEpochMilliseconds()))
                 }
             }
 

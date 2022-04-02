@@ -1,14 +1,11 @@
 package com.ramitsuri.choresclient.android.model
 
-import com.ramitsuri.choresclient.android.ui.assigments.FilterMode
-
-sealed class Result<out T> {
-    data class Success<T>(val data: T) : Result<T>()
-    data class Failure(val error: ViewError) : Result<Nothing>()
-}
+import com.ramitsuri.choresclient.android.ui.assigments.AssignmentDetails
+import com.ramitsuri.choresclient.data.FilterMode
+import com.ramitsuri.choresclient.data.ViewError
 
 sealed class ViewState<out T> {
-    data class Event(val event: ViewEvent): ViewState<Nothing>()
+    data class Event(val event: ViewEvent) : ViewState<Nothing>()
     data class Success<T>(val data: T) : ViewState<T>()
     data class Error(val error: ViewError) : ViewState<Nothing>()
 }
@@ -19,9 +16,15 @@ data class AssignmentsViewState(
 )
 
 data class AssignmentDetailsViewState(
-    val assignment: TaskAssignment
+    val assignment: AssignmentDetails
 )
 
 data class LoginViewState(
     val loggedIn: Boolean
 )
+
+enum class ViewEvent {
+    LOADING,
+    RELOAD,
+    LOGIN
+}

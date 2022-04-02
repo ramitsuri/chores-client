@@ -10,6 +10,7 @@ buildscript {
         classpath("com.android.tools.build:gradle:${findProperty("version.androidGradlePlugin")}")
         classpath("com.google.dagger:hilt-android-gradle-plugin:2.37")
         classpath("androidx.navigation:navigation-safe-args-gradle-plugin:2.3.5")
+        classpath("com.squareup.sqldelight:gradle-plugin:1.5.3")
     }
 }
 

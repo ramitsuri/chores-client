@@ -1,11 +1,13 @@
 package com.ramitsuri.choresclient.android.reminder
 
 import android.content.Context
-import com.ramitsuri.choresclient.android.data.AlarmDao
-import com.ramitsuri.choresclient.android.data.AlarmEntity
-import com.ramitsuri.choresclient.android.data.AssignmentAlarm
 import com.ramitsuri.choresclient.android.notification.ShowNotificationWorker
-import java.time.Instant
+import com.ramitsuri.choresclient.data.entities.AlarmDao
+import com.ramitsuri.choresclient.data.entities.AssignmentAlarm
+import com.ramitsuri.choresclient.db.AlarmEntity
+import com.ramitsuri.choresclient.reminder.AlarmHandler
+import kotlinx.datetime.Instant
+
 
 class SystemAlarmHandler(
     private val showNotificationWorker: ShowNotificationWorker.Companion,
@@ -24,7 +26,7 @@ class SystemAlarmHandler(
             AlarmEntity(
                 it.assignmentId,
                 it.showAtTime,
-                it.systemNotificationId
+                it.systemNotificationId.toLong()
             )
         })
     }
@@ -42,7 +44,7 @@ class SystemAlarmHandler(
                 AssignmentAlarm(
                     assignmentId,
                     showAtTime,
-                    existing.systemNotificationId,
+                    existing.systemNotificationId.toInt(),
                     notificationText
                 )
             )
@@ -51,6 +53,6 @@ class SystemAlarmHandler(
 
     override suspend fun cancel(assignmentIds: List<String>) {
         showNotificationWorker.cancel(context, assignmentIds)
-        alarmDao.delete(assignmentIds.map { AlarmEntity(it) })
+        alarmDao.delete(assignmentIds)
     }
 }

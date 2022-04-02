@@ -1,0 +1,138 @@
+import com.ramitsuri.choresclient.data.CreateType;
+import com.ramitsuri.choresclient.data.ProgressStatus;
+import com.ramitsuri.choresclient.data.RepeatUnit;
+import kotlinx.datetime.Instant;
+
+/**
+ * TASK-ASSIGNMNET
+ */
+CREATE TABLE IF NOT EXISTS TaskAssignmentEntity (
+    id TEXT NOT NULL PRIMARY KEY,
+    progressStatus INTEGER AS ProgressStatus NOT NULL,
+    progressStatusDate INTEGER AS Instant NOT NULL,
+    taskId TEXT NOT NULL,
+    memberId TEXT NOT NULL,
+    dueDateTime INTEGER AS Instant NOT NULL,
+    createDate INTEGER AS Instant NOT NULL,
+    createType INTEGER AS CreateType NOT NULL,
+    shouldUpload INTEGER AS Boolean NOT NULL
+);
+
+selectAssignments:
+SELECT * FROM TaskAssignmentEntity;
+/**
+ * INNER JOIN MemberEntity ON TaskAssignmentEntity.memberId = MemberEntity.id
+ * INNER JOIN TaskEntity ON TaskAssignmentEntity.taskId = TaskEntity.id;
+ */
+
+selectTodoAssignments:
+SELECT * FROM TaskAssignmentEntity
+WHERE progressStatus = 1;
+
+selectAssignment:
+SELECT * FROM TaskAssignmentEntity
+WHERE id = :id;
+
+selectAssignmentsByMember:
+SELECT * FROM TaskAssignmentEntity
+WHERE memberId = ?;
+
+selectAssignmentsSince:
+SELECT * FROM TaskAssignmentEntity
+WHERE dueDateTime >= ?;
+
+selectAssignmentsByNotMember:
+SELECT * FROM TaskAssignmentEntity
+WHERE memberId != :memberId;
+
+selectAssignmentsForUpload:
+SELECT * FROM TaskAssignmentEntity
+WHERE shouldUpload = 1;
+
+updateAssignment:
+UPDATE TaskAssignmentEntity
+SET progressStatus = ?, progressStatusDate = ?, shouldUpload = ?
+WHERE id = ?;
+
+insertAssignment:
+INSERT OR REPLACE INTO
+TaskAssignmentEntity (id, progressStatus, progressStatusDate, taskId, memberId, dueDateTime, createDate, createType, shouldUpload)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+deleteAssignment:
+DELETE FROM TaskAssignmentEntity
+WHERE id IN (?);
+
+/**
+ * MEMBER
+ */
+CREATE TABLE IF NOT EXISTS MemberEntity (
+    id TEXT NOT NULL PRIMARY KEY,
+    name TEXT NOT NULL,
+    createdDate INTEGER AS Instant NOT NULL
+);
+
+selectMember:
+SELECT * FROM MemberEntity
+WHERE id = ?;
+
+insertMember:
+INSERT OR REPLACE INTO
+MemberEntity (id, name, createdDate)
+VALUES (?, ?, ?);
+
+deleteMembers:
+DELETE FROM MemberEntity;
+
+/**
+ * TASK
+ */
+CREATE TABLE IF NOT EXISTS TaskEntity (
+    id TEXT NOT NULL PRIMARY KEY,
+    name TEXT NOT NULL,
+    description TEXT NOT NULL,
+    dueDateTime INTEGER AS Instant NOT NULL,
+    repeatValue INTEGER NOT NULL,
+    repeatUnit INTEGER AS RepeatUnit NOT NULL,
+    houseId TEXT NOT NULL,
+    memberId TEXT NOT NULL,
+    rotateMember INTEGER AS Boolean NOT NULL,
+    createdDate INTEGER AS Instant NOT NULL
+);
+
+selectTask:
+SELECT * FROM TaskEntity
+WHERE id = ?;
+
+insertTask:
+INSERT OR REPLACE INTO
+TaskEntity (id, name, description, dueDateTime, repeatValue, repeatUnit, houseId, memberId, rotateMember, createdDate)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+deleteTasks:
+DELETE FROM TaskEntity;
+
+/**
+ * ALARM
+ */
+CREATE TABLE IF NOT EXISTS AlarmEntity (
+    assignmentId TEXT NOT NULL PRIMARY KEY,
+    showAtTime INTEGER AS Instant NOT NULL,
+    systemNotificationId INTEGER NOT NULL
+);
+
+selectAlarms:
+SELECT * FROM AlarmEntity;
+
+selectAlarm:
+SELECT * FROM AlarmEntity
+WHERE assignmentId = ?;
+
+insertAlarm:
+INSERT OR REPLACE INTO
+AlarmEntity (assignmentId, showAtTime, systemNotificationId)
+VALUES (?, ?, ?);
+
+deleteAlarm:
+DELETE FROM AlarmEntity
+WHERE assignmentId = ?;

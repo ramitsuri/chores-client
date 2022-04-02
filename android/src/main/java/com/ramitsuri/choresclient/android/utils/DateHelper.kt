@@ -6,26 +6,6 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
 
-fun formatInstant(
-    toFormat: Instant,
-    now: Instant = Instant.now(),
-    zoneId: ZoneId = ZoneId.systemDefault(),
-    locale: Locale = Locale.getDefault()
-): String {
-    val toFormatZoned = getZonedDateTime(toFormat)
-    val nowZoned = getZonedDateTime(now)
-    val pattern = if (toFormatZoned.year == nowZoned.year) {
-        "d MMM h:mm a"
-    } else {
-        "d MMM, uuuu h:mm a"
-    }
-    val formatter = DateTimeFormatter
-        .ofPattern(pattern)
-        .withLocale(locale)
-        .withZone(zoneId)
-    return formatter.format(toFormat)
-}
-
 fun getDay(
     toFormat: Instant,
     now: Instant = Instant.now(),
@@ -40,7 +20,7 @@ fun getDay(
         "MMM d, uuuu"
     }
     val formatter = DateTimeFormatter
-        .ofPattern("MMM d")
+        .ofPattern(pattern)
         .withLocale(locale)
         .withZone(zoneId)
     return formatter.format(toFormat)

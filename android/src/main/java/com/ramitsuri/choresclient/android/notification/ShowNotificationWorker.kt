@@ -10,15 +10,14 @@ import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.ramitsuri.choresclient.android.R
-import com.ramitsuri.choresclient.android.data.AssignmentAlarm
 import com.ramitsuri.choresclient.android.utils.NotificationAction
 import com.ramitsuri.choresclient.android.utils.NotificationActionExtra
-import com.ramitsuri.choresclient.android.utils.PrefManager
+import com.ramitsuri.choresclient.data.entities.AssignmentAlarm
+import com.ramitsuri.choresclient.data.settings.PrefManager
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
-import java.time.Duration
-import java.time.Instant
 import java.util.concurrent.TimeUnit
+import kotlinx.datetime.Clock
 import timber.log.Timber
 
 @HiltWorker
@@ -89,7 +88,9 @@ class ShowNotificationWorker @AssistedInject constructor(
                 val workName = getWorkName(assignmentAlarm.assignmentId)
                 Timber.d("Schedule $workName")
 
-                val showAfter = Duration.between(Instant.now(), assignmentAlarm.showAtTime).seconds
+                val showAfter =
+                    assignmentAlarm.showAtTime.toEpochMilliseconds() - Clock.System.now()
+                        .toEpochMilliseconds()
                 val inputData = workDataOf(
                     NOTIFICATION_BODY to assignmentAlarm.systemNotificationText,
                     NOTIFICATION_ID to assignmentAlarm.systemNotificationId,
@@ -103,7 +104,7 @@ class ShowNotificationWorker @AssistedInject constructor(
                 val builder = OneTimeWorkRequest
                     .Builder(ShowNotificationWorker::class.java)
                     .addTag(workName)
-                    .setInitialDelay(showAfter, TimeUnit.SECONDS)
+                    .setInitialDelay(showAfter, TimeUnit.MILLISECONDS)
                     .setInputData(inputData)
                     .setConstraints(constraints)
 

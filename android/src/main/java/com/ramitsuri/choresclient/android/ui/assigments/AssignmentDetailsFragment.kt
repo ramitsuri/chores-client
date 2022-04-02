@@ -7,7 +7,6 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.viewbinding.ViewBinding
 import com.ramitsuri.choresclient.android.databinding.FragmentAssignmentDetailsBinding
-import com.ramitsuri.choresclient.android.model.TaskAssignment
 import com.ramitsuri.choresclient.android.model.ViewState
 import com.ramitsuri.choresclient.android.ui.BaseBottomSheetFragment
 import com.ramitsuri.choresclient.android.utils.formatRepeatUnit
@@ -54,12 +53,11 @@ class AssignmentDetailsFragment : BaseBottomSheetFragment<FragmentAssignmentDeta
         }
     }
 
-    private fun showTaskAssignmentDetails(taskAssignment: TaskAssignment) {
-        val task = taskAssignment.task
-        binding.textTitle.text = task.name
-        binding.textDescription.text = task.description
+    private fun showTaskAssignmentDetails(details: AssignmentDetails) {
+        binding.textTitle.text = details.name
+        binding.textDescription.text = details.description
         binding.textRepeats.text =
-            requireContext().formatRepeatUnit(task.repeatValue, task.repeatUnit)
+            requireContext().formatRepeatUnit(details.repeatValue, details.repeatUnit)
     }
 
     private fun log(message: String) {
@@ -69,8 +67,5 @@ class AssignmentDetailsFragment : BaseBottomSheetFragment<FragmentAssignmentDeta
     companion object {
         const val REQUEST_DONE_STATUS = "request_done_status"
         const val BUNDLE_DONE = "bundle_done"
-        fun newInstance(): AssignmentDetailsFragment {
-            return AssignmentDetailsFragment()
-        }
     }
 }

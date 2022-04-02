@@ -1,31 +1,34 @@
 package com.ramitsuri.choresclient.android.di
 
 import android.content.Context
-import androidx.room.Room
 import com.ramitsuri.choresclient.android.BuildConfig
-import com.ramitsuri.choresclient.android.data.AlarmDao
-import com.ramitsuri.choresclient.android.data.AppDatabase
-import com.ramitsuri.choresclient.android.data.MemberDao
-import com.ramitsuri.choresclient.android.data.TaskAssignmentDao
-import com.ramitsuri.choresclient.android.data.TaskAssignmentDataSource
-import com.ramitsuri.choresclient.android.data.TaskDao
-import com.ramitsuri.choresclient.android.keyvaluestore.KeyValueStore
-import com.ramitsuri.choresclient.android.keyvaluestore.PrefKeyValueStore
-import com.ramitsuri.choresclient.android.keyvaluestore.SecurePrefKeyValueStore
-import com.ramitsuri.choresclient.android.network.TaskAssignmentsApi
 import com.ramitsuri.choresclient.android.notification.NotificationHandler
-import com.ramitsuri.choresclient.android.notification.ReminderScheduler
 import com.ramitsuri.choresclient.android.notification.ShowNotificationWorker
 import com.ramitsuri.choresclient.android.notification.SystemNotificationHandler
-import com.ramitsuri.choresclient.android.reminder.AlarmHandler
 import com.ramitsuri.choresclient.android.reminder.SystemAlarmHandler
-import com.ramitsuri.choresclient.android.repositories.AssignmentActionManager
-import com.ramitsuri.choresclient.android.repositories.SystemTaskAssignmentsRepository
-import com.ramitsuri.choresclient.android.repositories.TaskAssignmentsRepository
-import com.ramitsuri.choresclient.android.utils.Base
-import com.ramitsuri.choresclient.android.utils.DefaultDispatchers
-import com.ramitsuri.choresclient.android.utils.DispatcherProvider
-import com.ramitsuri.choresclient.android.utils.PrefManager
+import com.ramitsuri.choresclient.android.utils.AppHelper
+import com.ramitsuri.choresclient.utils.Base
+import com.ramitsuri.choresclient.data.db.Database
+import com.ramitsuri.choresclient.data.db.DatabaseDriverFactory
+import com.ramitsuri.choresclient.data.entities.AlarmDao
+import com.ramitsuri.choresclient.data.entities.MemberDao
+import com.ramitsuri.choresclient.data.entities.TaskAssignmentDao
+import com.ramitsuri.choresclient.data.entities.TaskDao
+import com.ramitsuri.choresclient.data.notification.ReminderScheduler
+import com.ramitsuri.choresclient.data.settings.KeyValueStore
+import com.ramitsuri.choresclient.data.settings.PrefManager
+import com.ramitsuri.choresclient.data.settings.SecureSettingsKeyValueStore
+import com.ramitsuri.choresclient.data.settings.SettingsKeyValueStore
+import com.ramitsuri.choresclient.data.settings.SettingsProvider
+import com.ramitsuri.choresclient.network.LoginApi
+import com.ramitsuri.choresclient.network.TaskAssignmentsApi
+import com.ramitsuri.choresclient.reminder.AlarmHandler
+import com.ramitsuri.choresclient.repositories.AssignmentActionManager
+import com.ramitsuri.choresclient.repositories.LoginRepository
+import com.ramitsuri.choresclient.repositories.SystemTaskAssignmentsRepository
+import com.ramitsuri.choresclient.repositories.TaskAssignmentDataSource
+import com.ramitsuri.choresclient.repositories.TaskAssignmentsRepository
+import com.ramitsuri.choresclient.utils.DispatcherProvider
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -102,9 +105,8 @@ class AppModule {
                 }
                 refreshTokens {
                     Timber.d("Token expired, refreshing")
-                    val module = LoginModule()
-                    val api = module.provideLoginApi(tokenClient, baseUrl)
-                    val repo = module.provideLoginRepository(api, prefManager, dispatcherProvider)
+                    val api = provideLoginApi(tokenClient, baseUrl)
+                    val repo = provideLoginRepository(api, prefManager, dispatcherProvider)
                     repo.login(prefManager.getUserId() ?: "", prefManager.getKey() ?: "")
                     BearerTokens(
                         accessToken = prefManager.getToken() ?: "",
@@ -138,7 +140,7 @@ class AppModule {
 
     @Singleton
     @Provides
-    fun provideDefaultDispatchers(): DispatcherProvider = DefaultDispatchers()
+    fun provideDefaultDispatchers(): DispatcherProvider = DispatcherProvider()
 
     @Provides
     fun provideBaseApiUrl(prefManager: PrefManager) =
@@ -151,11 +153,11 @@ class AppModule {
 
     @Singleton
     @Provides
-    fun provideDatabase(@ApplicationContext context: Context): AppDatabase {
-        return Room.databaseBuilder(
-            context,
-            AppDatabase::class.java, "app-database"
-        ).build()
+    fun provideDatabase(
+        @ApplicationContext context: Context,
+        dispatcherProvider: DispatcherProvider
+    ): Database {
+        return Database(DatabaseDriverFactory(context), dispatcherProvider)
     }
 
     @Singleton
@@ -187,14 +189,24 @@ class AppModule {
     @Singleton
     @Provides
     fun provideKeyValueStore(@ApplicationContext context: Context): KeyValueStore {
-        return PrefKeyValueStore(context, "com.ramitsuri.choresclient.android.prefs")
+        val settingsProvider = SettingsProvider(
+            "com.ramitsuri.choresclient.android.prefs",
+            "com.ramitsuri.choresclient.android.normal",
+            context
+        )
+        return SettingsKeyValueStore(settingsProvider.provide())
     }
 
     @SecurePref
     @Singleton
     @Provides
     fun provideSecureKeyValueStore(@ApplicationContext context: Context): KeyValueStore {
-        return SecurePrefKeyValueStore(context, "com.ramitsuri.choresclient.android.normal")
+        val settingsProvider = SettingsProvider(
+            "com.ramitsuri.choresclient.android.prefs",
+            "com.ramitsuri.choresclient.android.normal",
+            context
+        )
+        return SecureSettingsKeyValueStore(settingsProvider.provideSecure())
     }
 
     @Singleton
@@ -209,23 +221,23 @@ class AppModule {
     }
 
     @Provides
-    fun provideAssignmentsDao(database: AppDatabase): TaskAssignmentDao {
-        return database.taskAssignmentDao()
+    fun provideAssignmentsDao(database: Database): TaskAssignmentDao {
+        return database.taskAssignmentDao
     }
 
     @Provides
-    fun provideTasksDao(database: AppDatabase): TaskDao {
-        return database.taskDao()
+    fun provideTasksDao(database: Database): TaskDao {
+        return database.taskDao
     }
 
     @Provides
-    fun provideMembersDao(database: AppDatabase): MemberDao {
-        return database.memberDao()
+    fun provideMembersDao(database: Database): MemberDao {
+        return database.memberDao
     }
 
     @Provides
-    fun provideAlarmDao(database: AppDatabase): AlarmDao {
-        return database.alarmDao()
+    fun provideAlarmDao(database: Database): AlarmDao {
+        return database.alarmDao
     }
 
     @Provides
@@ -268,6 +280,27 @@ class AppModule {
     fun provideLongLivingCoroutineScope(): CoroutineScope {
         return CoroutineScope(SupervisorJob())
     }
+
+    @Singleton
+    @Provides
+    fun provideAppHelper(): AppHelper {
+        return AppHelper()
+    }
+
+    @Provides
+    fun provideLoginApi(httpClient: HttpClient, baseUrl: String) =
+        LoginApi(httpClient, baseUrl)
+
+    @Provides
+    fun provideLoginRepository(
+        api: LoginApi,
+        prefManager: PrefManager,
+        dispatcherProvider: DispatcherProvider
+    ) = LoginRepository(
+        api,
+        prefManager,
+        dispatcherProvider
+    )
 }
 
 @Qualifier
