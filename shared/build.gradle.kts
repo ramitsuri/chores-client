@@ -1,60 +1,55 @@
-import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
-
 plugins {
     kotlin("multiplatform")
     kotlin("native.cocoapods")
     kotlin("plugin.serialization")
     id("com.android.library")
     id("com.squareup.sqldelight")
-    id ("kotlin-parcelize")
+    id("kotlin-parcelize")
 }
 
 version = "1.0"
 
 kotlin {
     android()
-
-    val iosTarget: (String, KotlinNativeTarget.() -> Unit) -> KotlinNativeTarget = when {
-        System.getenv("SDK_NAME")?.startsWith("iphoneos") == true -> ::iosArm64
-        System.getenv("NATIVE_ARCH")?.startsWith("arm") == true -> ::iosSimulatorArm64
-        else -> ::iosX64
-    }
-
-    iosTarget("ios") {}
-
-    cocoapods {
-        summary = "Some description for the Shared Module"
-        homepage = "Link to the Shared Module homepage"
-        ios.deploymentTarget = "14.1"
-        podfile = project.file("../ios/Podfile")
-        framework {
-            baseName = "shared"
+    listOf(
+        iosX64(),
+        iosArm64(),
+        iosSimulatorArm64()
+    ).forEach {
+        it.binaries.framework {
+            baseName = "Chores"
         }
     }
 
     sourceSets {
         val ktor = findProperty("version.ktor")
+        val sqlDelight = findProperty("version.sqldelight")
         val commonMain by getting {
             dependencies {
                 // Network
                 implementation("io.ktor:ktor-client-core:$ktor")
-                implementation("io.ktor:ktor-client-serialization:$ktor")
+                implementation("io.ktor:ktor-serialization-kotlinx-json:$ktor")
                 implementation("io.ktor:ktor-client-logging:$ktor")
+                implementation("io.ktor:ktor-client-content-negotiation:$ktor")
 
                 // Coroutines
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${findProperty("version.kotlinx.coroutines")}")
+                val coroutines = findProperty("version.kotlinx.coroutines")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines")
 
                 // Date Time
-                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.3.2")
+                val dateTime = findProperty("version.kotlinx.datetime")
+                implementation("org.jetbrains.kotlinx:kotlinx-datetime:$dateTime")
 
                 // Serialization
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.3.0")
+                val serialization = findProperty("version.kotlinx.serialization")
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:$serialization")
 
                 // Settings
-                api("com.russhwolf:multiplatform-settings:0.8.1")
+                val settings = findProperty("version.multiplatformSettings")
+                api("com.russhwolf:multiplatform-settings:$settings")
 
                 // SQL
-                implementation("com.squareup.sqldelight:coroutines-extensions:1.5.3")
+                implementation("com.squareup.sqldelight:coroutines-extensions:$sqlDelight")
             }
         }
         val commonTest by getting {
@@ -66,13 +61,13 @@ kotlin {
         val androidMain by getting {
             dependencies {
                 // Encrypted SharedPrefs
-                implementation ("androidx.security:security-crypto:1.1.0-alpha03")
+                implementation("androidx.security:security-crypto:1.1.0-alpha03")
 
                 // SQL
-                implementation("com.squareup.sqldelight:android-driver:1.5.3")
+                implementation("com.squareup.sqldelight:android-driver:$sqlDelight")
 
                 //Network
-                implementation("io.ktor:ktor-client-okhttp:${findProperty("version.ktor")}")
+                implementation("io.ktor:ktor-client-okhttp:$ktor")
             }
         }
         val androidTest by getting {
@@ -81,16 +76,23 @@ kotlin {
                 implementation("junit:junit:4.13.2")
             }
         }
-        val iosMain by getting {
+
+        val iosX64Main by getting
+        val iosArm64Main by getting
+        val iosSimulatorArm64Main by getting
+        val iosMain by creating {
+            dependsOn(commonMain)
+            iosX64Main.dependsOn(this)
+            iosArm64Main.dependsOn(this)
+            iosSimulatorArm64Main.dependsOn(this)
             dependencies {
                 // SQL
-                implementation("com.squareup.sqldelight:native-driver:1.5.3")
+                implementation("com.squareup.sqldelight:native-driver:$sqlDelight")
 
                 // Network
                 implementation("io.ktor:ktor-client-ios:$ktor")
             }
         }
-        val iosTest by getting
     }
 }
 

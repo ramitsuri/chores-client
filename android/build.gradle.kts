@@ -18,10 +18,12 @@ dependencies {
     implementation("com.google.android.material:material:1.5.0-alpha05")
 
     // Ktor
-    implementation("io.ktor:ktor-client-android:1.6.7")
-    implementation("io.ktor:ktor-client-serialization:1.6.7")
-    implementation("io.ktor:ktor-client-logging-jvm:1.6.3")
-    implementation ("io.ktor:ktor-client-auth:1.6.7")
+    val ktor = findProperty("version.ktor")
+    implementation("io.ktor:ktor-client-android:$ktor")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:$ktor")
+    implementation("io.ktor:ktor-client-content-negotiation:$ktor")
+    implementation("io.ktor:ktor-client-logging-jvm:1.6.8")
+    implementation ("io.ktor:ktor-client-auth:$ktor")
 
     // App Compat
     implementation("androidx.appcompat:appcompat:1.3.1")
@@ -30,9 +32,9 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.1.0")
 
     // Dagger - Hilt
-    implementation("com.google.dagger:hilt-android:2.37")
-    kapt("com.google.dagger:hilt-android-compiler:2.37")
-    implementation("androidx.hilt:hilt-lifecycle-viewmodel:1.0.0-alpha03")
+    implementation("com.google.dagger:hilt-android:2.41")
+    kapt("com.google.dagger:hilt-android-compiler:2.41")
+    //implementation("androidx.hilt:hilt-lifecycle-viewmodel:1.0.0-alpha03")
     kapt("androidx.hilt:hilt-compiler:1.0.0")
     
     // Date Time

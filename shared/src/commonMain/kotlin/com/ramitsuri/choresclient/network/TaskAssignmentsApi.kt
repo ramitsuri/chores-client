@@ -5,6 +5,7 @@ import com.ramitsuri.choresclient.data.TaskAssignment
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.request.put
+import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
@@ -19,7 +20,7 @@ class TaskAssignmentsApi(
 
     suspend fun updateTaskAssignments(taskAssignments: List<TaskAssignment>): HttpResponse {
         return client.put("$baseUrl/task-assignments") {
-            body = taskAssignments.map { TaskAssignmentUpdate(it) }
+            setBody(taskAssignments.map { TaskAssignmentUpdate(it) })
         }
     }
 }

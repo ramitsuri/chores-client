@@ -1,12 +1,12 @@
 package com.ramitsuri.choresclient.repositories
 
-import com.ramitsuri.choresclient.utils.DispatcherProvider
 import com.ramitsuri.choresclient.data.FilterMode
 import com.ramitsuri.choresclient.data.Result
 import com.ramitsuri.choresclient.data.TaskAssignment
 import com.ramitsuri.choresclient.data.ViewError
 import com.ramitsuri.choresclient.network.TaskAssignmentsApi
-import io.ktor.client.call.receive
+import com.ramitsuri.choresclient.utils.DispatcherProvider
+import io.ktor.client.call.body
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Instant
@@ -63,7 +63,7 @@ class SystemTaskAssignmentsRepository(
 
             return@withContext when (uploadResult?.status) {
                 HttpStatusCode.OK -> {
-                    val uploadedTaskAssignmentIds: List<String> = uploadResult.receive()
+                    val uploadedTaskAssignmentIds: List<String> = uploadResult.body()
                     uploadedTaskAssignmentIds
                 }
                 else -> {
@@ -83,7 +83,7 @@ class SystemTaskAssignmentsRepository(
 
             when (result?.status) {
                 HttpStatusCode.OK -> {
-                    val taskAssignments: List<TaskAssignment> = result.receive()
+                    val taskAssignments: List<TaskAssignment> = result.body()
                     localDataSource.saveTaskAssignments(taskAssignments)
                     true
                 }

@@ -7,7 +7,6 @@ import com.ramitsuri.choresclient.android.notification.ShowNotificationWorker
 import com.ramitsuri.choresclient.android.notification.SystemNotificationHandler
 import com.ramitsuri.choresclient.android.reminder.SystemAlarmHandler
 import com.ramitsuri.choresclient.android.utils.AppHelper
-import com.ramitsuri.choresclient.utils.Base
 import com.ramitsuri.choresclient.data.db.Database
 import com.ramitsuri.choresclient.data.db.DatabaseDriverFactory
 import com.ramitsuri.choresclient.data.entities.AlarmDao
@@ -28,6 +27,7 @@ import com.ramitsuri.choresclient.repositories.LoginRepository
 import com.ramitsuri.choresclient.repositories.SystemTaskAssignmentsRepository
 import com.ramitsuri.choresclient.repositories.TaskAssignmentDataSource
 import com.ramitsuri.choresclient.repositories.TaskAssignmentsRepository
+import com.ramitsuri.choresclient.utils.Base
 import com.ramitsuri.choresclient.utils.DispatcherProvider
 import dagger.Module
 import dagger.Provides
@@ -36,21 +36,21 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.android.Android
-import io.ktor.client.features.DefaultRequest
-import io.ktor.client.features.auth.Auth
-import io.ktor.client.features.auth.providers.BearerTokens
-import io.ktor.client.features.auth.providers.bearer
-import io.ktor.client.features.defaultRequest
-import io.ktor.client.features.json.JsonFeature
-import io.ktor.client.features.json.serializer.KotlinxSerializer
-import io.ktor.client.features.logging.LogLevel
-import io.ktor.client.features.logging.Logger
-import io.ktor.client.features.logging.Logging
-import io.ktor.client.features.observer.ResponseObserver
+import io.ktor.client.plugins.DefaultRequest
+import io.ktor.client.plugins.auth.Auth
+import io.ktor.client.plugins.auth.providers.BearerTokens
+import io.ktor.client.plugins.auth.providers.bearer
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.defaultRequest
+import io.ktor.client.plugins.logging.LogLevel
+import io.ktor.client.plugins.logging.Logger
+import io.ktor.client.plugins.logging.Logging
+import io.ktor.client.plugins.observer.ResponseObserver
 import io.ktor.client.request.header
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
+import io.ktor.serialization.kotlinx.json.json
 import javax.inject.Qualifier
 import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
@@ -71,8 +71,8 @@ class AppModule {
     ) = HttpClient(Android) {
 
         val tokenClient = HttpClient {
-            install(JsonFeature) {
-                serializer = KotlinxSerializer(Json {
+            install(ContentNegotiation) {
+                json(Json {
                     prettyPrint = true
                     isLenient = true
                     ignoreUnknownKeys = true
@@ -82,8 +82,8 @@ class AppModule {
                 contentType(ContentType.Application.Json)
             }
         }
-        install(JsonFeature) {
-            serializer = KotlinxSerializer(Json {
+        install(ContentNegotiation) {
+            json(Json {
                 prettyPrint = true
                 isLenient = true
                 ignoreUnknownKeys = true

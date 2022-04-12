@@ -6,7 +6,7 @@ import com.ramitsuri.choresclient.data.ViewError
 import com.ramitsuri.choresclient.data.settings.PrefManager
 import com.ramitsuri.choresclient.network.LoginApi
 import com.ramitsuri.choresclient.utils.DispatcherProvider
-import io.ktor.client.call.receive
+import io.ktor.client.call.body
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.withContext
 
@@ -28,7 +28,7 @@ class LoginRepository (
                     Result.Failure(ViewError.NETWORK)
                 }
                 result.status == HttpStatusCode.OK -> {
-                    val token: Token? = result.receive()
+                    val token: Token? = result.body()
                     token?.let {
                         prefManager.setToken(token.authToken)
                         prefManager.setUserId(id)
