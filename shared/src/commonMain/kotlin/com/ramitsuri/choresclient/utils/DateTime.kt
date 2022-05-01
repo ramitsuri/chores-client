@@ -26,5 +26,5 @@ fun getNewReminderTimeSnoozeDay(
         minute = 0,
         second = 0
     )
-    return reminderDateTime.toInstant(TimeZone.currentSystemDefault())
+    return reminderDateTime.toInstant(timeZone)
 }
