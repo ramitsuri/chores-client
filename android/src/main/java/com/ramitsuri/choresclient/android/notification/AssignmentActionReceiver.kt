@@ -15,13 +15,9 @@ class AssignmentActionReceiver : BroadcastReceiver() {
     @Inject
     lateinit var assignmentActionManager: AssignmentActionManager
 
-    @Inject
-    lateinit var notificationHandler: NotificationHandler
-
     override fun onReceive(context: Context?, intent: Intent?) {
         val action = intent?.action ?: return
         val assignmentId = intent.getStringExtra(NotificationActionExtra.KEY_ASSIGNMENT_ID) ?: ""
-        val notificationId = intent.getIntExtra(NotificationActionExtra.KEY_NOTIFICATION_ID, -1)
         val notificationText = intent.getStringExtra(NotificationActionExtra.KEY_NOTIFICATION_TEXT)
             ?: requireNotNull(context).getString(R.string.notification_reminder_title)
         when (action) {
@@ -30,18 +26,15 @@ class AssignmentActionReceiver : BroadcastReceiver() {
                     assignmentId,
                     notificationText
                 )
-                notificationHandler.cancelNotification(notificationId)
             }
             NotificationAction.SNOOZE_DAY.action -> {
                 assignmentActionManager.onSnoozeDayRequested(
                     assignmentId,
                     notificationText
                 )
-                notificationHandler.cancelNotification(notificationId)
             }
             NotificationAction.COMPLETE.action -> {
                 assignmentActionManager.onCompleteRequested(assignmentId)
-                notificationHandler.cancelNotification(notificationId)
             }
             else -> {
                 // Do nothing

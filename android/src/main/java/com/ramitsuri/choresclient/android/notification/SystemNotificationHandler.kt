@@ -1,12 +1,17 @@
 package com.ramitsuri.choresclient.android.notification
 
+import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.ramitsuri.choresclient.android.MainActivity
+import com.ramitsuri.choresclient.notification.Importance
+import com.ramitsuri.choresclient.notification.NotificationActionInfo
+import com.ramitsuri.choresclient.notification.NotificationChannelInfo
+import com.ramitsuri.choresclient.notification.NotificationHandler
+import com.ramitsuri.choresclient.notification.NotificationInfo
 
 class SystemNotificationHandler(context: Context) : NotificationHandler {
     private val context = context.applicationContext
@@ -14,11 +19,8 @@ class SystemNotificationHandler(context: Context) : NotificationHandler {
         context.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager
 
     override fun createChannels(channels: List<NotificationChannelInfo>) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-            return
-        }
         for (channelInfo in channels) {
-            notificationManager?.createNotificationChannel(channelInfo.toPlatformChannel())
+            notificationManager?.createNotificationChannel(toPlatformChannel(channelInfo))
         }
     }
 
@@ -32,8 +34,8 @@ class SystemNotificationHandler(context: Context) : NotificationHandler {
             if (!notificationInfo.body.isNullOrEmpty()) {
                 setContentText(notificationInfo.body)
             }
-            if (notificationInfo.actions != null) {
-                for ((index, action) in notificationInfo.actions.withIndex()) {
+            notificationInfo.actions?.let {
+                for ((index, action) in it.withIndex()) {
                     addAction(
                         getAction(
                             notificationInfo.id,
@@ -62,7 +64,7 @@ class SystemNotificationHandler(context: Context) : NotificationHandler {
         actionExtras: Map<String, Any>?
     ): NotificationCompat.Action {
         val actionRequestCode = notificationId * 10 + actionIndex
-        val intent = Intent(context, actionInfo.intentReceiverClass)
+        val intent = Intent(context, actionInfo.intentReceiverClass.java)
         intent.action = actionInfo.action
         actionExtras?.forEach { (extraKey, extraValue) ->
             when (extraValue) {
@@ -102,5 +104,28 @@ class SystemNotificationHandler(context: Context) : NotificationHandler {
             intent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
+    }
+
+    private fun toPlatformChannel(channelInfo: NotificationChannelInfo): NotificationChannel {
+        val importance = toPlatformImportance(channelInfo.importance)
+        val channel = NotificationChannel(channelInfo.id, channelInfo.name, importance).apply {
+            description = description
+            vibrationPattern = null
+            enableVibration(true)
+
+        }
+        return channel
+    }
+
+    // Returns the platformValue for now but could change with future Android versions
+    private fun toPlatformImportance(importance: Importance): Int {
+        return when (importance) {
+            Importance.NONE -> 0
+            Importance.MIN -> 1
+            Importance.LOW -> 2
+            Importance.DEFAULT -> 3
+            Importance.HIGH -> 4
+            Importance.MAX -> 5
+        }
     }
 }

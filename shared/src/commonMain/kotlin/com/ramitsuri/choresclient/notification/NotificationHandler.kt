@@ -1,4 +1,4 @@
-package com.ramitsuri.choresclient.android.notification
+package com.ramitsuri.choresclient.notification
 
 interface NotificationHandler {
     fun createChannels(channels: List<NotificationChannelInfo>)

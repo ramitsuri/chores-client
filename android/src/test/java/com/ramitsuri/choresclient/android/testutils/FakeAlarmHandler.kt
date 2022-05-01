@@ -18,6 +18,18 @@ class FakeAlarmHandler : AlarmHandler {
         }
     }
 
+    override suspend fun getExisting(assignmentId: String): AlarmEntity? {
+        return alarms.values.filter {
+            it.assignmentId == assignmentId
+        }.map {
+            AlarmEntity(
+                it.assignmentId,
+                it.showAtTime,
+                it.systemNotificationId.toLong()
+            )
+        }.firstOrNull()
+    }
+
     override suspend fun schedule(assignmentAlarms: List<AssignmentAlarm>) {
         assignmentAlarms.forEach { assignmentAlarm ->
             alarms[assignmentAlarm.assignmentId] =

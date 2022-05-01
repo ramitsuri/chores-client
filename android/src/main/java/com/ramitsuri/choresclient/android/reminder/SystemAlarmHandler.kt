@@ -20,6 +20,10 @@ class SystemAlarmHandler(
         return alarmDao.get()
     }
 
+    override suspend fun getExisting(assignmentId: String): AlarmEntity? {
+        return alarmDao.get(assignmentId)
+    }
+
     override suspend fun schedule(assignmentAlarms: List<AssignmentAlarm>) {
         showNotificationWorker.schedule(context, assignmentAlarms)
         alarmDao.insert(assignmentAlarms.map {

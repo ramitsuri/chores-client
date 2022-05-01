@@ -66,7 +66,6 @@ class AssignmentsFragment : BaseFragment<FragmentAssignmentsBinding>() {
 
                 is ViewState.Success -> {
                     binding.filterGroup.setOnCheckedChangeListener(null)
-                    var showCompleteButton = false
                     when (viewState.data.selectedFilter) {
                         is FilterMode.ALL -> {
                             // Do nothing
@@ -76,13 +75,12 @@ class AssignmentsFragment : BaseFragment<FragmentAssignmentsBinding>() {
                         }
                         is FilterMode.MINE -> {
                             binding.filterMine.isChecked = true
-                            showCompleteButton = true
                         }
                         is FilterMode.NONE -> {
                             // Do nothing
                         }
                     }
-                    adapter.update(viewState.data.assignments, showCompleteButton)
+                    adapter.update(viewState.data.assignments, allowEdits())
                     setupFilters()
                     onLoading(false)
                 }
@@ -143,6 +141,9 @@ class AssignmentsFragment : BaseFragment<FragmentAssignmentsBinding>() {
             }
             ClickType.DETAIL -> {
                 log("Detail requested")
+                if (!allowEdits()) {
+                    return
+                }
                 setFragmentResultListener(AssignmentDetailsFragment.REQUEST_DONE_STATUS) { _, bundle ->
                     if (bundle[AssignmentDetailsFragment.BUNDLE_DONE] as? Boolean == true) {
                         onViewEvent(ViewEvent.RELOAD)
@@ -155,6 +156,8 @@ class AssignmentsFragment : BaseFragment<FragmentAssignmentsBinding>() {
             }
         }
     }
+
+    private fun allowEdits() = binding.filterMine.isChecked
 
     private fun onLoading(loading: Boolean) {
         val showContent = !loading
