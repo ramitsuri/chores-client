@@ -21,7 +21,8 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
-import kotlin.time.Duration
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
@@ -49,7 +50,7 @@ class ReminderSchedulerTest {
         runBlocking {
             // Arrange
             val assignmentId = "1"
-            val duration = Duration.seconds(30)
+            val duration = 30.seconds
             val scheduledTime = Clock.System.now().plus(duration)
             val memberId = "1"
             prefManager.setUserId(memberId)
@@ -78,7 +79,7 @@ class ReminderSchedulerTest {
         runBlocking {
             // Arrange
             val assignmentId = "1"
-            val duration = Duration.seconds(30)
+            val duration = 30.seconds
             val scheduledTime = Clock.System.now().minus(duration)
             val memberId = "1"
             prefManager.setUserId(memberId)
@@ -105,7 +106,7 @@ class ReminderSchedulerTest {
         runBlocking {
             // Arrange
             val assignmentId = "1"
-            val duration = Duration.seconds(30)
+            val duration = 30.seconds
             val scheduledTime = Clock.System.now().minus(duration)
             val memberId = "1"
             prefManager.setUserId(memberId)
@@ -117,7 +118,7 @@ class ReminderSchedulerTest {
                     )
                 )
             )
-            val scheduledTimeDuration = Duration.hours(25)
+            val scheduledTimeDuration = 25.hours
             alarmHandler.schedule(
                 listOf(
                     AssignmentAlarm(
@@ -144,7 +145,7 @@ class ReminderSchedulerTest {
         runBlocking {
             // Arrange
             val assignmentId = "1"
-            val duration = Duration.seconds(30)
+            val duration = 30.seconds
             val scheduledTime = Clock.System.now().plus(duration)
             val memberId = "1"
             prefManager.setUserId(memberId)
@@ -171,7 +172,7 @@ class ReminderSchedulerTest {
         runBlocking {
             // Arrange
             val assignmentId = "1"
-            val duration = Duration.seconds(30)
+            val duration = 30.seconds
             val scheduledTime = Clock.System.now().plus(duration)
             val memberId = "1"
             prefManager.setUserId(memberId)
@@ -198,7 +199,7 @@ class ReminderSchedulerTest {
         runBlocking {
             // Arrange
             val assignmentId = "1"
-            val duration = Duration.seconds(30)
+            val duration = 30.seconds
             val scheduledTime = Clock.System.now().plus(duration)
             val memberId = "1"
             prefManager.setUserId("2")

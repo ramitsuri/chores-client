@@ -1,14 +1,17 @@
 package com.ramitsuri.choresclient.utils
 
 import kotlinx.datetime.Instant
+import kotlinx.datetime.TimeZone
 import org.junit.Assert.*
 import org.junit.Test
 
 class DateTimeKtTest{
+
+    private val timeZone = TimeZone.of("America/New_York")
     @Test
     fun testSnoozeDay1() {
         val now = Instant.fromEpochMilliseconds(1651406400000) // 2022-05-01 8AM UTC -4
-        val actual = getNewReminderTimeSnoozeDay(now)
+        val actual = getNewReminderTimeSnoozeDay(now, timeZone)
         val expected = Instant.parse("2022-05-02T12:00:00Z") // 2022-05-02 8AM UTC -4
         assertEquals(expected, actual)
     }
@@ -16,7 +19,7 @@ class DateTimeKtTest{
     @Test
     fun testSnoozeDay2() {
         val now = Instant.fromEpochMilliseconds(1651377600000) // 2022-05-01 00:00:00 AM UTC -4
-        val actual = getNewReminderTimeSnoozeDay(now)
+        val actual = getNewReminderTimeSnoozeDay(now, timeZone)
         val expected = Instant.parse("2022-05-02T12:00:00Z") // 2022-05-02 8AM UTC -4
         assertEquals(expected, actual)
     }
@@ -24,7 +27,7 @@ class DateTimeKtTest{
     @Test
     fun testSnoozeDay3() {
         val now = Instant.fromEpochMilliseconds(1651463999000) // 2022-05-01 23:59:59 UTC -4
-        val actual = getNewReminderTimeSnoozeDay(now)
+        val actual = getNewReminderTimeSnoozeDay(now, timeZone)
         val expected = Instant.parse("2022-05-02T12:00:00Z") // 2022-05-02 8AM UTC -4
         assertEquals(expected, actual)
     }

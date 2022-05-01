@@ -13,8 +13,11 @@ fun getNewReminderTimeSnoozeHour(now: Instant = Clock.System.now()): Instant {
     return now.plus(6.hours)
 }
 
-fun getNewReminderTimeSnoozeDay(now: Instant = Clock.System.now()): Instant {
-    val tomorrowDateTime = now.plus(1.days).toLocalDateTime(TimeZone.currentSystemDefault())
+fun getNewReminderTimeSnoozeDay(
+    now: Instant = Clock.System.now(),
+    timeZone: TimeZone = TimeZone.currentSystemDefault()
+): Instant {
+    val tomorrowDateTime = now.plus(1.days).toLocalDateTime(timeZone)
     val reminderDateTime = LocalDateTime(
         year = tomorrowDateTime.year,
         month = tomorrowDateTime.month,
