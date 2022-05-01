@@ -15,6 +15,8 @@ import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 
 class ReminderScheduler(
@@ -47,7 +49,7 @@ class ReminderScheduler(
         withContext(dispatchers.io) {
             // Schedule only reminders from one week in the past. We don't want to be handling
             // assignments to far back in the past as they are assumed to be handled by now
-            val previousDuration = Duration.days(21)
+            val previousDuration = 21.days
             val sinceDueDateTime = now.minus(previousDuration)
             val assignments = taskAssignmentsRepository.getLocal(sinceDueDateTime)
             val memberId = prefManager.getUserId() ?: ""
@@ -82,7 +84,7 @@ class ReminderScheduler(
         memberId: String
     ): List<String> {
         val newAssignmentAlarms = mutableListOf<AssignmentAlarm>()
-        val duration = Duration.seconds(60)
+        val duration = 60.seconds
         val scheduledTime = now.plus(duration)
         val missed = assignments.filter {
             it.member.id == memberId &&
@@ -96,7 +98,7 @@ class ReminderScheduler(
             }
             val newNotificationId: Int = if (existingNotification != null) {
                 // It's been more than 1 day since the notification was last shown
-                if (now.minus(Duration.days(1)) > existingNotification.showAtTime) {
+                if (now.minus(1.days) > existingNotification.showAtTime) {
                     existingNotification.systemNotificationId.toInt()
                 } else {
                     return@forEach
