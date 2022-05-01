@@ -1,34 +1,42 @@
 package com.ramitsuri.choresclient.repositories
 
+import com.ramitsuri.choresclient.notification.NotificationHandler
 import com.ramitsuri.choresclient.reminder.AlarmHandler
 import com.ramitsuri.choresclient.utils.DispatcherProvider
-import com.ramitsuri.choresclient.utils.Base
+import com.ramitsuri.choresclient.utils.getNewReminderTimeSnoozeDay
+import com.ramitsuri.choresclient.utils.getNewReminderTimeSnoozeHour
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
 
 class AssignmentActionManager(
     private val coroutineScope: CoroutineScope,
     private val dispatcherProvider: DispatcherProvider,
     private val taskAssignmentsRepository: TaskAssignmentsRepository,
-    private val alarmHandler: AlarmHandler
+    private val alarmHandler: AlarmHandler,
+    private val notificationHandler: NotificationHandler
 ) {
 
     fun onSnoozeHourRequested(
         assignmentId: String,
         notificationText: String
     ) {
-        val snoozeBySeconds = Base.SNOOZE_HOUR
-        snooze(assignmentId, notificationText, snoozeBySeconds)
+        val showAtTime = getNewReminderTimeSnoozeHour()
+        coroutineScope.launch(dispatcherProvider.io) {
+            cancelNotification(assignmentId)
+            alarmHandler.reschedule(assignmentId, showAtTime, notificationText)
+        }
     }
 
     fun onSnoozeDayRequested(
         assignmentId: String,
         notificationText: String
     ) {
-        val snoozeBySeconds = Base.SNOOZE_DAY
-        snooze(assignmentId, notificationText, snoozeBySeconds)
+        val showAtTime = getNewReminderTimeSnoozeDay()
+        coroutineScope.launch(dispatcherProvider.io) {
+            cancelNotification(assignmentId)
+            alarmHandler.reschedule(assignmentId, showAtTime, notificationText)
+        }
     }
 
     fun onCompleteRequested(assignmentId: String) {
@@ -38,19 +46,15 @@ class AssignmentActionManager(
     }
 
     suspend fun onCompleteRequestedSuspend(assignmentId: String) {
+        cancelNotification(assignmentId)
         alarmHandler.cancel(listOf(assignmentId))
         taskAssignmentsRepository.markTaskAssignmentDone(assignmentId, Clock.System.now())
     }
 
-    private fun snooze(
-        assignmentId: String,
-        notificationText: String,
-        snoozeBySeconds: Long
-    ) {
-        val newTime = Clock.System.now().toEpochMilliseconds() + snoozeBySeconds * 1000
-        val showAtTime = Instant.fromEpochMilliseconds(newTime)
-        coroutineScope.launch(dispatcherProvider.io) {
-            alarmHandler.reschedule(assignmentId, showAtTime, notificationText)
+    private suspend fun cancelNotification(assignmentId: String) {
+        val existing = alarmHandler.getExisting(assignmentId)
+        existing?.let {
+            notificationHandler.cancelNotification(it.systemNotificationId.toInt())
         }
     }
 }

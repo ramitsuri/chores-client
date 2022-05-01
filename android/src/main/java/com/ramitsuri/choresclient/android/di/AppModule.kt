@@ -2,7 +2,7 @@ package com.ramitsuri.choresclient.android.di
 
 import android.content.Context
 import com.ramitsuri.choresclient.android.BuildConfig
-import com.ramitsuri.choresclient.android.notification.NotificationHandler
+import com.ramitsuri.choresclient.notification.NotificationHandler
 import com.ramitsuri.choresclient.android.notification.ShowNotificationWorker
 import com.ramitsuri.choresclient.android.notification.SystemNotificationHandler
 import com.ramitsuri.choresclient.android.reminder.SystemAlarmHandler
@@ -267,12 +267,14 @@ class AppModule {
         coroutineScope: CoroutineScope,
         dispatcherProvider: DispatcherProvider,
         taskAssignmentsRepository: TaskAssignmentsRepository,
-        alarmHandler: AlarmHandler
+        alarmHandler: AlarmHandler,
+        notificationHandler: NotificationHandler
     ) = AssignmentActionManager(
         coroutineScope,
         dispatcherProvider,
         taskAssignmentsRepository,
-        alarmHandler
+        alarmHandler,
+        notificationHandler
     )
 
     @Singleton

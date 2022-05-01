@@ -5,9 +5,9 @@ import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
 import com.google.android.material.color.DynamicColors
 import com.ramitsuri.choresclient.android.downloader.AssignmentsDownloader
-import com.ramitsuri.choresclient.android.notification.Importance
-import com.ramitsuri.choresclient.android.notification.NotificationChannelInfo
-import com.ramitsuri.choresclient.android.notification.NotificationHandler
+import com.ramitsuri.choresclient.notification.Importance
+import com.ramitsuri.choresclient.notification.NotificationChannelInfo
+import com.ramitsuri.choresclient.notification.NotificationHandler
 import com.ramitsuri.choresclient.android.reminder.ReminderSchedulerWorker
 import dagger.hilt.android.HiltAndroidApp
 import timber.log.Timber

@@ -14,6 +14,10 @@ import com.ramitsuri.choresclient.android.utils.NotificationAction
 import com.ramitsuri.choresclient.android.utils.NotificationActionExtra
 import com.ramitsuri.choresclient.data.entities.AssignmentAlarm
 import com.ramitsuri.choresclient.data.settings.PrefManager
+import com.ramitsuri.choresclient.notification.NotificationActionInfo
+import com.ramitsuri.choresclient.notification.NotificationHandler
+import com.ramitsuri.choresclient.notification.NotificationInfo
+import com.ramitsuri.choresclient.notification.Priority
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import java.util.concurrent.TimeUnit
@@ -53,17 +57,17 @@ class ShowNotificationWorker @AssistedInject constructor(
                     NotificationActionInfo(
                         NotificationAction.SNOOZE_HOUR.action,
                         NotificationAction.SNOOZE_HOUR.text,
-                        AssignmentActionReceiver::class.java
+                        AssignmentActionReceiver::class
                     ),
                     NotificationActionInfo(
                         NotificationAction.SNOOZE_DAY.action,
                         NotificationAction.SNOOZE_DAY.text,
-                        AssignmentActionReceiver::class.java
+                        AssignmentActionReceiver::class
                     ),
                     NotificationActionInfo(
                         NotificationAction.COMPLETE.action,
                         NotificationAction.COMPLETE.text,
-                        AssignmentActionReceiver::class.java
+                        AssignmentActionReceiver::class
                     )
                 ),
                 mapOf(

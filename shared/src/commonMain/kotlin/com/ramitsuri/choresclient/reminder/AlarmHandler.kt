@@ -7,6 +7,8 @@ import kotlinx.datetime.Instant
 interface AlarmHandler {
     suspend fun getExisting(): List<AlarmEntity>
 
+    suspend fun getExisting(assignmentId: String): AlarmEntity?
+
     suspend fun schedule(assignmentAlarms: List<AssignmentAlarm>)
 
     suspend fun reschedule(assignmentId: String, showAtTime: Instant, notificationText: String)
