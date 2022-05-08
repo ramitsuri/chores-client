@@ -14,14 +14,15 @@ import com.ramitsuri.choresclient.db.TaskAssignmentEntity
 import com.ramitsuri.choresclient.db.TaskEntity
 import com.ramitsuri.choresclient.utils.DispatcherProvider
 import com.squareup.sqldelight.ColumnAdapter
+import com.squareup.sqldelight.db.SqlDriver
 import kotlinx.datetime.Instant
 
 class Database(
-    databaseDriverFactory: DatabaseDriverFactory,
+    driver: SqlDriver,
     dispatcherProvider: DispatcherProvider
 ) {
     private val database = ChoresDatabase(
-        driver = databaseDriverFactory.createDriver(),
+        driver = driver,
         TaskAssignmentEntityAdapter = TaskAssignmentEntity.Adapter(
             progressStatusAdapter = progressStatusConverter,
             progressStatusDateAdapter = instantConverter,

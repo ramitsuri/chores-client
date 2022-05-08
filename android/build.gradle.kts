@@ -5,25 +5,17 @@ plugins {
     id("kotlin-android")
     id("kotlinx-serialization")
     id("androidx.navigation.safeargs.kotlin")
-    id("dagger.hilt.android.plugin")
 }
 
 dependencies {
     val fragmentVersion = "1.3.6"
 
     implementation(project(":shared"))
-    implementation ("androidx.core:core-ktx:1.7.0")
+    implementation("androidx.core:core-ktx:1.7.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.4.1")
 
     // Material
     implementation("com.google.android.material:material:1.5.0-alpha05")
-
-    // Ktor
-    val ktor = findProperty("version.ktor")
-    implementation("io.ktor:ktor-client-android:$ktor")
-    implementation("io.ktor:ktor-serialization-kotlinx-json:$ktor")
-    implementation("io.ktor:ktor-client-content-negotiation:$ktor")
-    implementation("io.ktor:ktor-client-logging-jvm:1.6.8")
-    implementation ("io.ktor:ktor-client-auth:$ktor")
 
     // App Compat
     implementation("androidx.appcompat:appcompat:1.3.1")
@@ -31,22 +23,19 @@ dependencies {
     // Constraint Layout
     implementation("androidx.constraintlayout:constraintlayout:2.1.0")
 
-    // Dagger - Hilt
-    implementation("com.google.dagger:hilt-android:2.41")
-    kapt("com.google.dagger:hilt-android-compiler:2.41")
-    //implementation("androidx.hilt:hilt-lifecycle-viewmodel:1.0.0-alpha03")
-    kapt("androidx.hilt:hilt-compiler:1.0.0")
-    
     // Date Time
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.3.2")
 
     // Encrypted SharedPrefs
-    implementation ("androidx.security:security-crypto:1.1.0-alpha03")
+    implementation("androidx.security:security-crypto:1.1.0-alpha03")
 
     // Fragment
     implementation("androidx.fragment:fragment-ktx:$fragmentVersion")
     debugImplementation("androidx.fragment:fragment-testing:$fragmentVersion")
 
+    // Koin
+    val koin = findProperty("version.koin")
+    implementation("io.insert-koin:koin-android:$koin")
     // Navigation Component
     implementation("androidx.navigation:navigation-fragment-ktx:2.3.5")
     implementation("androidx.navigation:navigation-ui-ktx:2.3.5")
@@ -62,12 +51,11 @@ dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:1.1.5")
 
     // Logging
-    implementation ("com.jakewharton.timber:timber:4.7.1")
+    implementation("com.jakewharton.timber:timber:4.7.1")
 
     // Work
     val workVersion = "2.7.0"
-    implementation ("androidx.work:work-runtime-ktx:$workVersion")
-    implementation ("androidx.hilt:hilt-work:1.0.0")
+    implementation("androidx.work:work-runtime-ktx:$workVersion")
 
     // Testing
     testImplementation("junit:junit:4.13.2")

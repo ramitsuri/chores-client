@@ -1,7 +1,6 @@
 package com.ramitsuri.choresclient.android.downloader
 
 import android.content.Context
-import androidx.hilt.work.HiltWorker
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingPeriodicWorkPolicy
@@ -10,20 +9,19 @@ import androidx.work.PeriodicWorkRequest
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import com.ramitsuri.choresclient.repositories.TaskAssignmentsRepository
-import com.ramitsuri.choresclient.android.utils.AppHelper
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedInject
-import timber.log.Timber
+import com.ramitsuri.choresclient.utils.AppHelper
 import java.util.concurrent.TimeUnit
+import org.koin.core.component.inject
+import org.koin.core.component.KoinComponent
+import timber.log.Timber
 
-@HiltWorker
-class AssignmentsDownloader @AssistedInject constructor(
-    @Assisted context: Context,
-    @Assisted workerParams: WorkerParameters,
-    private val repository: TaskAssignmentsRepository,
-    private val appHelper: AppHelper
-):
-    CoroutineWorker(context, workerParams) {
+class AssignmentsDownloader(
+    context: Context,
+    workerParams: WorkerParameters
+) : CoroutineWorker(context, workerParams), KoinComponent {
+
+    private val repository: TaskAssignmentsRepository by inject()
+    private val appHelper: AppHelper by inject()
 
     override suspend fun doWork(): Result {
         if (appHelper.isWorkerRunning()) {

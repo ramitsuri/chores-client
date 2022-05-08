@@ -1,4 +1,4 @@
-package com.ramitsuri.choresclient.android.model
+package com.ramitsuri.choresclient.model
 
 import com.ramitsuri.choresclient.data.TaskAssignment
 

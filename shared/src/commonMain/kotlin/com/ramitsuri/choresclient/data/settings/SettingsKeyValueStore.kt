@@ -6,97 +6,43 @@ import com.russhwolf.settings.get
 import com.russhwolf.settings.set
 
 class SettingsKeyValueStore(private val settings: Settings) : KeyValueStore {
-    override fun get(key: String, fallback: String?): String? {
+    override fun getString(key: String, fallback: String?): String? {
         return settings[key] ?: fallback
     }
 
-    override fun put(key: String, value: String?) {
+    override fun putString(key: String, value: String?) {
         settings[key] = value
     }
 
-    override fun get(key: String, fallback: Long): Long {
+    override fun getLong(key: String, fallback: Long): Long {
         return settings[key] ?: fallback
     }
 
-    override fun put(key: String, value: Long) {
+    override fun putLong(key: String, value: Long) {
         settings[key] = value
     }
 
-    override fun get(key: String, fallback: Int): Int {
+    override fun getInt(key: String, fallback: Int): Int {
         return settings[key] ?: fallback
     }
 
-    override fun put(key: String, value: Int) {
+    override fun putInt(key: String, value: Int) {
         settings[key] = value
     }
 
-    override fun get(key: String, fallback: Boolean): Boolean {
+    override fun getBoolean(key: String, fallback: Boolean): Boolean {
         return settings[key] ?: fallback
     }
 
-    override fun put(key: String, value: Boolean) {
+    override fun putBoolean(key: String, value: Boolean) {
         settings[key] = value
     }
 
-    override fun get(key: String, fallback: Float): Float {
+    override fun getFloat(key: String, fallback: Float): Float {
         return settings[key] ?: fallback
     }
 
-    override fun put(key: String, value: Float) {
-        settings[key] = value
-    }
-
-    override fun contains(key: String): Boolean {
-        return settings.contains(key)
-    }
-
-    override fun remove(key: String) {
-        settings.remove(key)
-    }
-
-    override fun removeAll() {
-        settings.clear()
-    }
-}
-
-class SecureSettingsKeyValueStore(private val settings: Settings) : KeyValueStore {
-    override fun get(key: String, fallback: String?): String? {
-        return settings[key] ?: fallback
-    }
-
-    override fun put(key: String, value: String?) {
-        settings[key] = value
-    }
-
-    override fun get(key: String, fallback: Long): Long {
-        return settings[key] ?: fallback
-    }
-
-    override fun put(key: String, value: Long) {
-        settings[key] = value
-    }
-
-    override fun get(key: String, fallback: Int): Int {
-        return settings[key] ?: fallback
-    }
-
-    override fun put(key: String, value: Int) {
-        settings[key] = value
-    }
-
-    override fun get(key: String, fallback: Boolean): Boolean {
-        return settings[key] ?: fallback
-    }
-
-    override fun put(key: String, value: Boolean) {
-        settings[key] = value
-    }
-
-    override fun get(key: String, fallback: Float): Float {
-        return settings[key] ?: fallback
-    }
-
-    override fun put(key: String, value: Float) {
+    override fun putFloat(key: String, value: Float) {
         settings[key] = value
     }
 
@@ -113,7 +59,3 @@ class SecureSettingsKeyValueStore(private val settings: Settings) : KeyValueStor
     }
 }
 
-expect class SettingsProvider {
-    fun provide(): Settings
-    fun provideSecure(): Settings
-}

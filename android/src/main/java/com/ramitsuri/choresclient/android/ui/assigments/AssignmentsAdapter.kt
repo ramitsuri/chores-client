@@ -9,7 +9,7 @@ import com.ramitsuri.choresclient.android.R
 import com.ramitsuri.choresclient.android.databinding.AssignmentHeaderBinding
 import com.ramitsuri.choresclient.android.databinding.AssignmentItemBinding
 import com.ramitsuri.choresclient.android.extensions.setVisibility
-import com.ramitsuri.choresclient.android.model.TaskAssignmentWrapper
+import com.ramitsuri.choresclient.model.TaskAssignmentWrapper
 import com.ramitsuri.choresclient.android.ui.decoration.StickyHeaderItemDecoration
 import com.ramitsuri.choresclient.android.utils.formatRepeatUnit
 import com.ramitsuri.choresclient.data.ProgressStatus

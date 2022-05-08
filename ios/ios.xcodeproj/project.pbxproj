@@ -9,6 +9,9 @@
 /* Begin PBXBuildFile section */
 		2152FB042600AC8F00CF470E /* iOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2152FB032600AC8F00CF470E /* iOSApp.swift */; };
 		7555FF83242A565900829871 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7555FF82242A565900829871 /* ContentView.swift */; };
+		B50FA5232823DDFA001D8245 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B50FA5222823DDFA001D8245 /* Extensions.swift */; };
+		B53BD60F281FEB4A00FBC47C /* AppModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = B53BD60E281FEB4A00FBC47C /* AppModule.swift */; };
+		B5DD30802816185B00C0D89A /* DiContainerProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5DD307F2816185B00C0D89A /* DiContainerProtocol.swift */; };
 		FE82E8F9D2789BAEC90A0143 /* Pods_ios.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9A56EA8261E53346E1BEC5A4 /* Pods_ios.framework */; };
 /* End PBXBuildFile section */
 
@@ -19,6 +22,9 @@
 		7555FF8C242A565B00829871 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		9A56EA8261E53346E1BEC5A4 /* Pods_ios.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ios.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		A538D7EA5BB5F67B013C03E6 /* Pods-ios.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ios.release.xcconfig"; path = "Target Support Files/Pods-ios/Pods-ios.release.xcconfig"; sourceTree = "<group>"; };
+		B50FA5222823DDFA001D8245 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
+		B53BD60E281FEB4A00FBC47C /* AppModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModule.swift; sourceTree = "<group>"; };
+		B5DD307F2816185B00C0D89A /* DiContainerProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiContainerProtocol.swift; sourceTree = "<group>"; };
 		D7DAF09A4638EFCB54CAB76D /* Pods-ios.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ios.debug.xcconfig"; path = "Target Support Files/Pods-ios/Pods-ios.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -55,9 +61,12 @@
 		7555FF7D242A565900829871 /* ios */ = {
 			isa = PBXGroup;
 			children = (
+				B50FA5212823DDE4001D8245 /* extensions */,
+				B53BD60D281FEB2200FBC47C /* di */,
 				7555FF82242A565900829871 /* ContentView.swift */,
 				7555FF8C242A565B00829871 /* Info.plist */,
 				2152FB032600AC8F00CF470E /* iOSApp.swift */,
+				B5DD307F2816185B00C0D89A /* DiContainerProtocol.swift */,
 			);
 			path = ios;
 			sourceTree = "<group>";
@@ -77,6 +86,22 @@
 				A538D7EA5BB5F67B013C03E6 /* Pods-ios.release.xcconfig */,
 			);
 			path = Pods;
+			sourceTree = "<group>";
+		};
+		B50FA5212823DDE4001D8245 /* extensions */ = {
+			isa = PBXGroup;
+			children = (
+				B50FA5222823DDFA001D8245 /* Extensions.swift */,
+			);
+			path = extensions;
+			sourceTree = "<group>";
+		};
+		B53BD60D281FEB2200FBC47C /* di */ = {
+			isa = PBXGroup;
+			children = (
+				B53BD60E281FEB4A00FBC47C /* AppModule.swift */,
+			);
+			path = di;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -173,6 +198,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B50FA5232823DDFA001D8245 /* Extensions.swift in Sources */,
+				B5DD30802816185B00C0D89A /* DiContainerProtocol.swift in Sources */,
+				B53BD60F281FEB4A00FBC47C /* AppModule.swift in Sources */,
 				2152FB042600AC8F00CF470E /* iOSApp.swift in Sources */,
 				7555FF83242A565900829871 /* ContentView.swift in Sources */,
 			);
@@ -303,6 +331,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 5D5K42SF7J;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = ios/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -317,7 +346,7 @@
 					"\"shared\"",
 					"-lsqlite3",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = orgIdentifier.ios;
+				PRODUCT_BUNDLE_IDENTIFIER = chores;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -330,6 +359,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 5D5K42SF7J;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = ios/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -344,7 +374,7 @@
 					"\"shared\"",
 					"-lsqlite3",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = orgIdentifier.ios;
+				PRODUCT_BUNDLE_IDENTIFIER = chores;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

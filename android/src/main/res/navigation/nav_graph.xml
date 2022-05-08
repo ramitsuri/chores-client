@@ -24,8 +24,8 @@
             android:id="@+id/action_assignment_details"
             app:destination="@id/assignmentsDetailsFragment">
             <argument
-                android:name="details"
-                app:argType="com.ramitsuri.choresclient.android.ui.assigments.AssignmentDetails"
+                android:name="assignmentId"
+                app:argType="string"
                 app:nullable="false" />
 
         </action>
@@ -36,8 +36,8 @@
         android:name="com.ramitsuri.choresclient.android.ui.assigments.AssignmentDetailsFragment"
         tools:layout="@layout/fragment_assignment_details">
         <argument
-            android:name="details"
-            app:argType="com.ramitsuri.choresclient.android.ui.assigments.AssignmentDetails"
+            android:name="assignmentId"
+            app:argType="string"
             app:nullable="false" />
     </dialog>
 </navigation>

@@ -3,37 +3,49 @@ package com.ramitsuri.choresclient.android.ui.assigments
 import android.view.LayoutInflater
 import androidx.core.os.bundleOf
 import androidx.fragment.app.setFragmentResult
-import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import androidx.viewbinding.ViewBinding
 import com.ramitsuri.choresclient.android.databinding.FragmentAssignmentDetailsBinding
-import com.ramitsuri.choresclient.android.model.ViewState
 import com.ramitsuri.choresclient.android.ui.BaseBottomSheetFragment
+import com.ramitsuri.choresclient.android.utils.formatReminderAt
 import com.ramitsuri.choresclient.android.utils.formatRepeatUnit
-import dagger.hilt.android.AndroidEntryPoint
+import com.ramitsuri.choresclient.model.AssignmentDetails
+import com.ramitsuri.choresclient.model.ViewState
+import com.ramitsuri.choresclient.viewmodel.AssignmentDetailsViewModel
+import kotlinx.coroutines.launch
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import timber.log.Timber
 
-@AndroidEntryPoint
 class AssignmentDetailsFragment : BaseBottomSheetFragment<FragmentAssignmentDetailsBinding>() {
 
-    private val viewModel: AssignmentDetailsViewModel by viewModels()
+    private val args: AssignmentDetailsFragmentArgs by navArgs()
+    private val viewModel: AssignmentDetailsViewModel by viewModel()
 
     override val bindingInflater: (LayoutInflater) -> ViewBinding
         get() = FragmentAssignmentDetailsBinding::inflate
 
     override fun setupViews() {
-        viewModel.state.observe(viewLifecycleOwner) { viewState ->
-            when (viewState) {
-                is ViewState.Error -> {
-                    log("Error: ${viewState.error}")
-                    dismiss()
-                }
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.setAssignmentId(args.assignmentId)
+                viewModel.state.collect { viewState ->
+                    when (viewState) {
+                        is ViewState.Error -> {
+                            log("Error: ${viewState.error}")
+                            dismiss()
+                        }
 
-                is ViewState.Success -> {
-                    showTaskAssignmentDetails(viewState.data.assignment)
-                }
-                else -> {
-                    // Not used here
+                        is ViewState.Success -> {
+                            showTaskAssignmentDetails(viewState.data.assignment)
+                        }
+                        else -> {
+                            // Not used here
+                        }
+                    }
                 }
             }
         }
@@ -58,6 +70,7 @@ class AssignmentDetailsFragment : BaseBottomSheetFragment<FragmentAssignmentDeta
         binding.textDescription.text = details.description
         binding.textRepeats.text =
             requireContext().formatRepeatUnit(details.repeatValue, details.repeatUnit)
+        binding.textReminderTime.text = requireContext().formatReminderAt(details.notificationTime)
     }
 
     private fun log(message: String) {

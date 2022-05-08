@@ -1,5 +1,6 @@
 package com.ramitsuri.choresclient.repositories
 
+import com.ramitsuri.choresclient.model.AssignmentDetails
 import com.ramitsuri.choresclient.notification.NotificationHandler
 import com.ramitsuri.choresclient.reminder.AlarmHandler
 import com.ramitsuri.choresclient.utils.DispatcherProvider
@@ -9,7 +10,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 
-class AssignmentActionManager(
+class AssignmentDetailsRepository(
     private val coroutineScope: CoroutineScope,
     private val dispatcherProvider: DispatcherProvider,
     private val taskAssignmentsRepository: TaskAssignmentsRepository,
@@ -43,6 +44,22 @@ class AssignmentActionManager(
         coroutineScope.launch(dispatcherProvider.io) {
             onCompleteRequestedSuspend(assignmentId)
         }
+    }
+
+    suspend fun getDetails(assignmentId: String): AssignmentDetails? {
+        val assignment = taskAssignmentsRepository.getLocal(assignmentId)
+        val alarmEntity = alarmHandler.getExisting(assignmentId)
+        if (assignment == null) {
+            return null
+        }
+        return AssignmentDetails(
+            id = assignmentId,
+            name = assignment.task.name,
+            description = assignment.task.description,
+            repeatValue = assignment.task.repeatValue,
+            repeatUnit = assignment.task.repeatUnit,
+            notificationTime = alarmEntity?.showAtTime
+        )
     }
 
     suspend fun onCompleteRequestedSuspend(assignmentId: String) {

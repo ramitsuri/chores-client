@@ -1,7 +1,6 @@
 package com.ramitsuri.choresclient.android.notification
 
 import android.content.Context
-import androidx.hilt.work.HiltWorker
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingWorkPolicy
@@ -18,19 +17,19 @@ import com.ramitsuri.choresclient.notification.NotificationActionInfo
 import com.ramitsuri.choresclient.notification.NotificationHandler
 import com.ramitsuri.choresclient.notification.NotificationInfo
 import com.ramitsuri.choresclient.notification.Priority
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedInject
 import java.util.concurrent.TimeUnit
 import kotlinx.datetime.Clock
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import timber.log.Timber
 
-@HiltWorker
-class ShowNotificationWorker @AssistedInject constructor(
-    @Assisted context: Context,
-    @Assisted workerParameters: WorkerParameters,
-    private val notificationHandler: NotificationHandler,
-    private val prefManager: PrefManager
-) : CoroutineWorker(context, workerParameters) {
+class ShowNotificationWorker(
+    context: Context,
+    workerParameters: WorkerParameters,
+) : CoroutineWorker(context, workerParameters), KoinComponent {
+
+    private val notificationHandler: NotificationHandler by inject()
+    private val prefManager: PrefManager by inject()
 
     override suspend fun doWork(): Result {
         val notificationTitle = inputData.getString(NOTIFICATION_BODY)

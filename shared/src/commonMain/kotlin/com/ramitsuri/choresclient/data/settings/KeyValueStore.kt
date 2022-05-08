@@ -1,20 +1,20 @@
 package com.ramitsuri.choresclient.data.settings
 
 interface KeyValueStore {
-    fun get(key: String, fallback: String?): String?
-    fun put(key: String, value: String?)
+    fun getString(key: String, fallback: String?): String?
+    fun putString(key: String, value: String?)
 
-    fun get(key: String, fallback: Long): Long
-    fun put(key: String, value: Long)
+    fun getLong(key: String, fallback: Long): Long
+    fun putLong(key: String, value: Long)
 
-    fun get(key: String, fallback: Int): Int
-    fun put(key: String, value: Int)
+    fun getInt(key: String, fallback: Int): Int
+    fun putInt(key: String, value: Int)
 
-    fun get(key: String, fallback: Boolean): Boolean
-    fun put(key: String, value: Boolean)
+    fun getBoolean(key: String, fallback: Boolean): Boolean
+    fun putBoolean(key: String, value: Boolean)
 
-    fun get(key: String, fallback: Float): Float
-    fun put(key: String, value: Float)
+    fun getFloat(key: String, fallback: Float): Float
+    fun putFloat(key: String, value: Float)
 
     fun contains(key: String): Boolean
     fun remove(key: String)

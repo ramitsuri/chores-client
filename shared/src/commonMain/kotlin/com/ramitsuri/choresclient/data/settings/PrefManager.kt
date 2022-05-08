@@ -15,41 +15,41 @@ class PrefManager(
     private val notificationIdLock = Lock()
 
     fun setUserId(userId: String) {
-        keyValueStore.put(USER_ID, userId)
+        keyValueStore.putString(USER_ID, userId)
     }
 
     fun getUserId(default: String? = null): String? {
-        return keyValueStore.get(USER_ID, default)
+        return keyValueStore.getString(USER_ID, default)
     }
 
     fun setKey(key: String) {
-        secureKeyValueStore.put(KEY, key)
+        secureKeyValueStore.putString(KEY, key)
     }
 
     fun getKey(default: String? = null): String? {
-        return secureKeyValueStore.get(KEY, default)
+        return secureKeyValueStore.getString(KEY, default)
     }
 
     fun setToken(token: String) {
-        secureKeyValueStore.put(TOKEN, token)
+        secureKeyValueStore.putString(TOKEN, token)
     }
 
     fun getToken(default: String? = null): String? {
-        return secureKeyValueStore.get(TOKEN, default)
+        return secureKeyValueStore.getString(TOKEN, default)
     }
 
     fun setDebugServer(server: String) {
-        keyValueStore.put(DEBUG_SERVER, server)
+        keyValueStore.putString(DEBUG_SERVER, server)
     }
 
     fun getDebugServer(): String {
-        return keyValueStore.get(DEBUG_SERVER, "") ?: ""
+        return keyValueStore.getString(DEBUG_SERVER, "") ?: ""
     }
 
     fun generateNewNotificationId(): Int {
         notificationIdLock.use {
-            val newId = keyValueStore.get(PREV_NOTIFICATION_ID, 0) + 1
-            keyValueStore.put(PREV_NOTIFICATION_ID, newId)
+            val newId = keyValueStore.getInt(PREV_NOTIFICATION_ID, 0) + 1
+            keyValueStore.putInt(PREV_NOTIFICATION_ID, newId)
             return newId
         }
     }

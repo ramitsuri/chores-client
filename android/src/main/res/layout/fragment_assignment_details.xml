@@ -34,12 +34,23 @@
         style="@style/TextAppearance.Material3.BodyMedium"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:padding="@dimen/padding_medium"
+        app:layout_constraintBottom_toTopOf="@id/textReminderTime"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:text="Clean the whole shower thoroughly" />
+
+    <TextView
+        android:id="@+id/textReminderTime"
+        style="@style/TextAppearance.Material3.BodyMedium"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/margin_large"
         android:padding="@dimen/padding_medium"
         app:layout_constraintBottom_toTopOf="@id/buttonDone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        tools:text="Clean the whole shower thoroughly" />
+        tools:text="Reminder scheduled for 6pm" />
 
     <Button
         android:id="@+id/buttonDone"
