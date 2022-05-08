@@ -4,42 +4,45 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
-import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.viewbinding.ViewBinding
 import com.ramitsuri.choresclient.android.BuildConfig
 import com.ramitsuri.choresclient.android.R
 import com.ramitsuri.choresclient.android.databinding.FragmentLoginBinding
 import com.ramitsuri.choresclient.android.extensions.setVisibility
-import com.ramitsuri.choresclient.android.model.ViewEvent
-import com.ramitsuri.choresclient.android.model.ViewState
 import com.ramitsuri.choresclient.android.ui.BaseFragment
-import dagger.hilt.android.AndroidEntryPoint
+import com.ramitsuri.choresclient.model.ViewEvent
+import com.ramitsuri.choresclient.model.ViewState
+import com.ramitsuri.choresclient.viewmodel.LoginViewModel
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.component.KoinComponent
 import timber.log.Timber
 import kotlin.system.exitProcess
 
-@AndroidEntryPoint
-class LoginFragment : BaseFragment<FragmentLoginBinding>() {
+class LoginFragment : BaseFragment<FragmentLoginBinding>(), KoinComponent {
 
-    private val viewModel: LoginViewModel by viewModels()
+    private val viewModel: LoginViewModel by viewModel()
 
     override val bindingInflater: (LayoutInflater) -> ViewBinding
         get() = FragmentLoginBinding::inflate
 
     override fun setupViews() {
-        viewModel.state.observe(viewLifecycleOwner) { viewState ->
-            when (viewState) {
-                is ViewState.Event -> {
-                    onViewEvent(viewState.event)
-                }
-                is ViewState.Error -> {
-                    log("Error: ${viewState.error}")
-                    onLoading(false)
-                }
+        lifecycleScope.launchWhenResumed {
+            viewModel.state.collect { viewState ->
+                when (viewState) {
+                    is ViewState.Event -> {
+                        onViewEvent(viewState.event)
+                    }
+                    is ViewState.Error -> {
+                        log("Error: ${viewState.error}")
+                        onLoading(false)
+                    }
 
-                is ViewState.Success -> {
-                    log("Login success")
-                    findNavController().navigate(R.id.action_loginFragment_to_assignmentsFragment)
+                    is ViewState.Success -> {
+                        log("Login success")
+                        findNavController().navigate(R.id.action_loginFragment_to_assignmentsFragment)
+                    }
                 }
             }
         }

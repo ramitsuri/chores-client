@@ -31,6 +31,7 @@ kotlin {
                 implementation("io.ktor:ktor-serialization-kotlinx-json:$ktor")
                 implementation("io.ktor:ktor-client-logging:$ktor")
                 implementation("io.ktor:ktor-client-content-negotiation:$ktor")
+                implementation ("io.ktor:ktor-client-auth:$ktor")
 
                 // Coroutines
                 val coroutines = findProperty("version.kotlinx.coroutines")
@@ -39,6 +40,14 @@ kotlin {
                 // Date Time
                 val dateTime = findProperty("version.kotlinx.datetime")
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:$dateTime")
+
+                // Koin
+                val koin = findProperty("version.koin")
+                implementation("io.insert-koin:koin-core:$koin")
+
+                // Logging
+                val kermitLog = findProperty("version.kermit")
+                implementation("co.touchlab:kermit:$kermitLog")
 
                 // Serialization
                 val serialization = findProperty("version.kotlinx.serialization")
@@ -66,8 +75,13 @@ kotlin {
                 // SQL
                 implementation("com.squareup.sqldelight:android-driver:$sqlDelight")
 
-                //Network
+                // Network
                 implementation("io.ktor:ktor-client-okhttp:$ktor")
+                implementation("io.ktor:ktor-client-core:$ktor")
+                implementation("io.ktor:ktor-client-android:$ktor")
+
+                // ViewModel
+                implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.1")
             }
         }
         val androidTest by getting {

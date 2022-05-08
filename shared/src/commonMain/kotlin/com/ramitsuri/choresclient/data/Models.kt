@@ -125,7 +125,7 @@ enum class ViewError {
     NETWORK,
     LOGIN_REQUEST_FAILED,
     LOGIN_NO_TOKEN,
-    TASK_ASSIGNMENT_ARG_NULL
+    TASK_ASSIGNMENT_DETAILS_NULL
 }
 
 enum class RepeatUnit(val key: Int) {

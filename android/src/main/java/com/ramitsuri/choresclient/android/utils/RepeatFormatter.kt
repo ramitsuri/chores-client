@@ -3,6 +3,8 @@ package com.ramitsuri.choresclient.android.utils
 import android.content.Context
 import com.ramitsuri.choresclient.android.R
 import com.ramitsuri.choresclient.data.RepeatUnit
+import com.ramitsuri.choresclient.utils.formatReminderTime
+import kotlinx.datetime.Instant
 
 fun Context.formatRepeatUnit(repeatValue: Int, repeatUnit: RepeatUnit): String {
     if (repeatValue == 0 && repeatUnit != RepeatUnit.ON_COMPLETE && repeatUnit != RepeatUnit.NONE) {
@@ -46,5 +48,14 @@ fun Context.formatRepeatUnit(repeatValue: Int, repeatUnit: RepeatUnit): String {
         RepeatUnit.ON_COMPLETE -> {
             getString(R.string.assignment_repeats_on_complete)
         }
+    }
+}
+
+fun Context.formatReminderAt(toFormat: Instant?): String {
+    return if (toFormat != null) {
+        val formatted = formatReminderTime(toFormat)
+        getString(R.string.assignment_details_reminder_time, formatted)
+    } else {
+        getString(R.string.assignment_details_reminder_time_unavailable)
     }
 }

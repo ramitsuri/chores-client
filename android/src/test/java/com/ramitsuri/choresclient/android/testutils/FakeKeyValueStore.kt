@@ -6,7 +6,7 @@ class FakeKeyValueStore : KeyValueStore {
 
     private val store = mutableMapOf<String, Any?>()
 
-    override fun get(key: String, fallback: String?): String? {
+    override fun getString(key: String, fallback: String?): String? {
         val value = store[key]
         return if (value is String?) {
             value
@@ -15,11 +15,11 @@ class FakeKeyValueStore : KeyValueStore {
         }
     }
 
-    override fun put(key: String, value: String?) {
+    override fun putString(key: String, value: String?) {
         store[key] = value
     }
 
-    override fun get(key: String, fallback: Long): Long {
+    override fun getLong(key: String, fallback: Long): Long {
         val value = store[key]
         return if (value is Long) {
             value
@@ -28,11 +28,11 @@ class FakeKeyValueStore : KeyValueStore {
         }
     }
 
-    override fun put(key: String, value: Long) {
+    override fun putLong(key: String, value: Long) {
         store[key] = value
     }
 
-    override fun get(key: String, fallback: Int): Int {
+    override fun getInt(key: String, fallback: Int): Int {
         val value = store[key]
         return if (value is Int) {
             value
@@ -41,11 +41,11 @@ class FakeKeyValueStore : KeyValueStore {
         }
     }
 
-    override fun put(key: String, value: Int) {
+    override fun putInt(key: String, value: Int) {
         store[key] = value
     }
 
-    override fun get(key: String, fallback: Boolean): Boolean {
+    override fun getBoolean(key: String, fallback: Boolean): Boolean {
         val value = store[key]
         return if (value is Boolean) {
             value
@@ -54,11 +54,11 @@ class FakeKeyValueStore : KeyValueStore {
         }
     }
 
-    override fun put(key: String, value: Boolean) {
+    override fun putBoolean(key: String, value: Boolean) {
         store[key] = value
     }
 
-    override fun get(key: String, fallback: Float): Float {
+    override fun getFloat(key: String, fallback: Float): Float {
         val value = store[key]
         return if (value is Float) {
             value
@@ -67,7 +67,7 @@ class FakeKeyValueStore : KeyValueStore {
         }
     }
 
-    override fun put(key: String, value: Float) {
+    override fun putFloat(key: String, value: Float) {
         store[key] = value
     }
 

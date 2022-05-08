@@ -37,5 +37,7 @@
     <string name="assignment_details_button_done">Done</string>
     <string name="assignment_details_button_snooze_hours">Remind in 6 hours</string>
     <string name="assignment_details_button_snooze_day">Remind tomorrow</string>
+    <string name="assignment_details_reminder_time">Reminder set for %1$s</string>
+    <string name="assignment_details_reminder_time_unavailable">Reminder will be set in some time</string>
 
 </resources>

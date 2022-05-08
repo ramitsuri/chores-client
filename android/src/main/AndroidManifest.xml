@@ -38,9 +38,5 @@
             android:name=".notification.AssignmentActionReceiver"
             android:enabled="true"
             android:exported="true" />
-        <provider
-            android:name="androidx.startup.InitializationProvider"
-            android:authorities="${applicationId}.androidx-startup"
-            tools:node="remove" />
     </application>
 </manifest> 

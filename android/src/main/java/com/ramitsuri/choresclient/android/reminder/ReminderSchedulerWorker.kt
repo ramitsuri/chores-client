@@ -1,7 +1,6 @@
 package com.ramitsuri.choresclient.android.reminder
 
 import android.content.Context
-import androidx.hilt.work.HiltWorker
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingPeriodicWorkPolicy
@@ -9,22 +8,21 @@ import androidx.work.PeriodicWorkRequest
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import com.ramitsuri.choresclient.data.notification.ReminderScheduler
-import com.ramitsuri.choresclient.android.utils.AppHelper
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedInject
+import com.ramitsuri.choresclient.utils.AppHelper
+import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import timber.log.Timber
-import java.util.concurrent.TimeUnit
 
-@HiltWorker
-class ReminderSchedulerWorker @AssistedInject constructor(
-    @Assisted context: Context,
-    @Assisted workerParameters: WorkerParameters,
-    private val reminderScheduler: ReminderScheduler,
-    private val prefManager: AppHelper
-):
-    CoroutineWorker(context, workerParameters) {
+class ReminderSchedulerWorker(
+    context: Context,
+    workerParameters: WorkerParameters,
+) : CoroutineWorker(context, workerParameters), KoinComponent {
+
+    private val reminderScheduler: ReminderScheduler by inject()
+    private val prefManager: AppHelper by inject()
 
     override suspend fun doWork(): Result {
         if (prefManager.isWorkerRunning()) {
@@ -34,7 +32,7 @@ class ReminderSchedulerWorker @AssistedInject constructor(
         prefManager.setWorkerRunning(true)
         try {
             withContext(Dispatchers.IO) {
-                    reminderScheduler.addReminders()
+                reminderScheduler.addReminders()
             }
         } catch (e: Exception) {
             Timber.e(e)

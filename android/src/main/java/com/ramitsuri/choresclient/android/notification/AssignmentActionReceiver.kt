@@ -4,16 +4,14 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import com.ramitsuri.choresclient.android.R
-import com.ramitsuri.choresclient.repositories.AssignmentActionManager
 import com.ramitsuri.choresclient.android.utils.NotificationAction
 import com.ramitsuri.choresclient.android.utils.NotificationActionExtra
-import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
+import com.ramitsuri.choresclient.repositories.AssignmentDetailsRepository
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
-@AndroidEntryPoint
-class AssignmentActionReceiver : BroadcastReceiver() {
-    @Inject
-    lateinit var assignmentActionManager: AssignmentActionManager
+class AssignmentActionReceiver : BroadcastReceiver(), KoinComponent {
+    private val detailsRepository: AssignmentDetailsRepository by inject()
 
     override fun onReceive(context: Context?, intent: Intent?) {
         val action = intent?.action ?: return
@@ -22,19 +20,19 @@ class AssignmentActionReceiver : BroadcastReceiver() {
             ?: requireNotNull(context).getString(R.string.notification_reminder_title)
         when (action) {
             NotificationAction.SNOOZE_HOUR.action -> {
-                assignmentActionManager.onSnoozeHourRequested(
+                detailsRepository.onSnoozeHourRequested(
                     assignmentId,
                     notificationText
                 )
             }
             NotificationAction.SNOOZE_DAY.action -> {
-                assignmentActionManager.onSnoozeDayRequested(
+                detailsRepository.onSnoozeDayRequested(
                     assignmentId,
                     notificationText
                 )
             }
             NotificationAction.COMPLETE.action -> {
-                assignmentActionManager.onCompleteRequested(assignmentId)
+                detailsRepository.onCompleteRequested(assignmentId)
             }
             else -> {
                 // Do nothing

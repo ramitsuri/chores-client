@@ -6,26 +6,26 @@ import android.widget.PopupMenu
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.setFragmentResultListener
-import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewbinding.ViewBinding
-import com.ramitsuri.choresclient.data.FilterMode
 import com.ramitsuri.choresclient.android.R
 import com.ramitsuri.choresclient.android.databinding.FragmentAssignmentsBinding
 import com.ramitsuri.choresclient.android.extensions.setVisibility
-import com.ramitsuri.choresclient.android.model.ViewEvent
-import com.ramitsuri.choresclient.android.model.ViewState
 import com.ramitsuri.choresclient.android.ui.BaseFragment
 import com.ramitsuri.choresclient.android.ui.decoration.ItemDecorator
+import com.ramitsuri.choresclient.data.FilterMode
 import com.ramitsuri.choresclient.data.TaskAssignment
-import dagger.hilt.android.AndroidEntryPoint
+import com.ramitsuri.choresclient.model.ViewEvent
+import com.ramitsuri.choresclient.model.ViewState
+import com.ramitsuri.choresclient.viewmodel.AssignmentsViewModel
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.component.KoinComponent
 import timber.log.Timber
 
-@AndroidEntryPoint
-class AssignmentsFragment : BaseFragment<FragmentAssignmentsBinding>() {
-
-    private val viewModel: AssignmentsViewModel by viewModels()
+class AssignmentsFragment : BaseFragment<FragmentAssignmentsBinding>(), KoinComponent {
+    private val viewModel: AssignmentsViewModel by viewModel()
     private val adapter = AssignmentsAdapter(listOf()) { taskAssignment, clickType ->
         onItemClickListener(taskAssignment, clickType)
     }
@@ -54,35 +54,37 @@ class AssignmentsFragment : BaseFragment<FragmentAssignmentsBinding>() {
         )
         binding.listAssignments.adapter = adapter
         binding.listAssignments.layoutManager = LinearLayoutManager(requireContext())
-        viewModel.state.observe(viewLifecycleOwner) { viewState ->
-            when (viewState) {
-                is ViewState.Event -> {
-                    onViewEvent(viewState.event)
-                }
-                is ViewState.Error -> {
-                    log("Error: ${viewState.error}")
-                    onLoading(false)
-                }
-
-                is ViewState.Success -> {
-                    binding.filterGroup.setOnCheckedChangeListener(null)
-                    when (viewState.data.selectedFilter) {
-                        is FilterMode.ALL -> {
-                            // Do nothing
-                        }
-                        is FilterMode.OTHER -> {
-                            binding.filterOther.isChecked = true
-                        }
-                        is FilterMode.MINE -> {
-                            binding.filterMine.isChecked = true
-                        }
-                        is FilterMode.NONE -> {
-                            // Do nothing
-                        }
+        lifecycleScope.launchWhenResumed {
+            viewModel.state.collect { viewState ->
+                when (viewState) {
+                    is ViewState.Event -> {
+                        onViewEvent(viewState.event)
                     }
-                    adapter.update(viewState.data.assignments, allowEdits())
-                    setupFilters()
-                    onLoading(false)
+                    is ViewState.Error -> {
+                        log("Error: ${viewState.error}")
+                        onLoading(false)
+                    }
+
+                    is ViewState.Success -> {
+                        binding.filterGroup.setOnCheckedChangeListener(null)
+                        when (viewState.data.selectedFilter) {
+                            is FilterMode.ALL -> {
+                                // Do nothing
+                            }
+                            is FilterMode.OTHER -> {
+                                binding.filterOther.isChecked = true
+                            }
+                            is FilterMode.MINE -> {
+                                binding.filterMine.isChecked = true
+                            }
+                            is FilterMode.NONE -> {
+                                // Do nothing
+                            }
+                        }
+                        adapter.update(viewState.data.assignments, allowEdits())
+                        setupFilters()
+                        onLoading(false)
+                    }
                 }
             }
         }
@@ -94,7 +96,7 @@ class AssignmentsFragment : BaseFragment<FragmentAssignmentsBinding>() {
         binding.btnMenu.setOnClickListener {
             val popup = PopupMenu(requireContext(), binding.btnMenu)
             popup.menuInflater.inflate(R.menu.assignments_menu, popup.menu)
-            popup.setOnMenuItemClickListener { menuItem ->
+            popup.setOnMenuItemClickListener {
                 return@setOnMenuItemClickListener false
             }
             popup.show()
@@ -120,7 +122,7 @@ class AssignmentsFragment : BaseFragment<FragmentAssignmentsBinding>() {
     }
 
     private fun setupFilters() {
-        binding.filterGroup.setOnCheckedChangeListener { group, checkedId ->
+        binding.filterGroup.setOnCheckedChangeListener { _, checkedId ->
             when (checkedId) {
                 binding.filterMine.id -> {
                     log("Mine")
@@ -149,9 +151,8 @@ class AssignmentsFragment : BaseFragment<FragmentAssignmentsBinding>() {
                         onViewEvent(ViewEvent.RELOAD)
                     }
                 }
-                val action = AssignmentsFragmentDirections.actionAssignmentDetails(
-                    AssignmentDetails(taskAssignment)
-                )
+                val action =
+                    AssignmentsFragmentDirections.actionAssignmentDetails(taskAssignment.id)
                 findNavController().navigate(action)
             }
         }
