@@ -7,11 +7,13 @@ import com.ramitsuri.choresclient.android.R
 import com.ramitsuri.choresclient.android.utils.NotificationAction
 import com.ramitsuri.choresclient.android.utils.NotificationActionExtra
 import com.ramitsuri.choresclient.repositories.AssignmentDetailsRepository
+import com.ramitsuri.choresclient.utils.LogHelper
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 class AssignmentActionReceiver : BroadcastReceiver(), KoinComponent {
     private val detailsRepository: AssignmentDetailsRepository by inject()
+    private val logger: LogHelper by inject()
 
     override fun onReceive(context: Context?, intent: Intent?) {
         val action = intent?.action ?: return
@@ -32,11 +34,16 @@ class AssignmentActionReceiver : BroadcastReceiver(), KoinComponent {
                 )
             }
             NotificationAction.COMPLETE.action -> {
+                logger.v(TAG, "Marked $assignmentId as done")
                 detailsRepository.onCompleteRequested(assignmentId)
             }
             else -> {
                 // Do nothing
             }
         }
+    }
+
+    companion object {
+        private const val TAG = "AssignmentActionReceiver"
     }
 }

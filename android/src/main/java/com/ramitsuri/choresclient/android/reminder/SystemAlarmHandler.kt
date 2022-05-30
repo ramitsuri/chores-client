@@ -6,14 +6,18 @@ import com.ramitsuri.choresclient.data.entities.AlarmDao
 import com.ramitsuri.choresclient.data.entities.AssignmentAlarm
 import com.ramitsuri.choresclient.db.AlarmEntity
 import com.ramitsuri.choresclient.reminder.AlarmHandler
+import com.ramitsuri.choresclient.utils.LogHelper
 import kotlinx.datetime.Instant
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 
 class SystemAlarmHandler(
     private val showNotificationWorker: ShowNotificationWorker.Companion,
     private val alarmDao: AlarmDao,
     context: Context
-) : AlarmHandler {
+) : AlarmHandler, KoinComponent {
+    private val logger: LogHelper by inject()
     private val context = context.applicationContext
 
     override suspend fun getExisting(): List<AlarmEntity> {
@@ -56,7 +60,12 @@ class SystemAlarmHandler(
     }
 
     override suspend fun cancel(assignmentIds: List<String>) {
+        logger.v(TAG, "Cancel requested for $assignmentIds")
         showNotificationWorker.cancel(context, assignmentIds)
         alarmDao.delete(assignmentIds)
+    }
+
+    companion object {
+        private const val TAG = "SystemAlarmHandler"
     }
 }

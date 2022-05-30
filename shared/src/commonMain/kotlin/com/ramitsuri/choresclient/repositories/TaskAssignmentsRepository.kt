@@ -6,20 +6,25 @@ import com.ramitsuri.choresclient.data.TaskAssignment
 import com.ramitsuri.choresclient.data.ViewError
 import com.ramitsuri.choresclient.network.TaskAssignmentsApi
 import com.ramitsuri.choresclient.utils.DispatcherProvider
+import com.ramitsuri.choresclient.utils.LogHelper
 import io.ktor.client.call.body
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Instant
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 class SystemTaskAssignmentsRepository(
     private val api: TaskAssignmentsApi,
     private val localDataSource: TaskAssignmentDataSource,
     private val dispatcherProvider: DispatcherProvider
-) : TaskAssignmentsRepository {
+) : TaskAssignmentsRepository, KoinComponent {
 
+    private val logger: LogHelper by inject()
     override suspend fun refresh(): Result<List<TaskAssignment>> {
         // Upload completed local assignments
         val uploadedIds = uploadLocal()
+        logger.v(TAG, "Uploaded: ${uploadedIds.joinToString()}")
 
         // Delete Ids that have been confirmed to be deleted by server
         localDataSource.delete(uploadedIds)
@@ -49,7 +54,9 @@ class SystemTaskAssignmentsRepository(
     }
 
     override suspend fun markTaskAssignmentDone(taskAssignmentId: String, doneTime: Instant) {
+        logger.v(TAG, "Mark $taskAssignmentId done requested")
         localDataSource.markDone(taskAssignmentId, doneTime)
+        logger.v(TAG, "Mark $taskAssignmentId done completed")
     }
 
     private suspend fun uploadLocal(): List<String> {
@@ -85,6 +92,7 @@ class SystemTaskAssignmentsRepository(
                 HttpStatusCode.OK -> {
                     val taskAssignments: List<TaskAssignment> = result.body()
                     localDataSource.saveTaskAssignments(taskAssignments)
+                    logger.v(TAG, "Fetched: ${taskAssignments.joinToString { it.id }}")
                     true
                 }
                 else -> {
@@ -92,6 +100,10 @@ class SystemTaskAssignmentsRepository(
                 }
             }
         }
+    }
+
+    companion object {
+        private const val TAG = "SystemTaskAssignmentsRepository"
     }
 }
 

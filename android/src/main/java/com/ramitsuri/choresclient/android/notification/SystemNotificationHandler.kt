@@ -12,8 +12,12 @@ import com.ramitsuri.choresclient.notification.NotificationActionInfo
 import com.ramitsuri.choresclient.notification.NotificationChannelInfo
 import com.ramitsuri.choresclient.notification.NotificationHandler
 import com.ramitsuri.choresclient.notification.NotificationInfo
+import com.ramitsuri.choresclient.utils.LogHelper
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
-class SystemNotificationHandler(context: Context) : NotificationHandler {
+class SystemNotificationHandler(context: Context) : NotificationHandler, KoinComponent {
+    private val logger: LogHelper by inject()
     private val context = context.applicationContext
     private val notificationManager =
         context.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager
@@ -54,6 +58,10 @@ class SystemNotificationHandler(context: Context) : NotificationHandler {
     }
 
     override fun cancelNotification(notificationId: Int) {
+        logger.v(
+            TAG,
+            "Cancel notification requested for $notificationId. NotificationManager is null: ${notificationManager == null}"
+        )
         notificationManager?.cancel(notificationId)
     }
 
@@ -127,5 +135,9 @@ class SystemNotificationHandler(context: Context) : NotificationHandler {
             Importance.HIGH -> 4
             Importance.MAX -> 5
         }
+    }
+
+    companion object {
+        private const val TAG = "SystemNotificationHandler"
     }
 }
