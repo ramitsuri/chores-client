@@ -11,7 +11,6 @@ actual class LogHelper(
     private val deviceDetails: String
 ) {
 
-
     actual fun enableRemoteLogging(enable: Boolean) {
         localLog(message = "EnableRemote -> $enable")
         enableRemote = enable
