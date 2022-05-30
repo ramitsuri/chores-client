@@ -31,7 +31,7 @@ kotlin {
                 implementation("io.ktor:ktor-serialization-kotlinx-json:$ktor")
                 implementation("io.ktor:ktor-client-logging:$ktor")
                 implementation("io.ktor:ktor-client-content-negotiation:$ktor")
-                implementation ("io.ktor:ktor-client-auth:$ktor")
+                implementation("io.ktor:ktor-client-auth:$ktor")
 
                 // Coroutines
                 val coroutines = findProperty("version.kotlinx.coroutines")
@@ -82,6 +82,11 @@ kotlin {
 
                 // ViewModel
                 implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.1")
+
+                // Firebase
+                implementation(project.dependencies.platform("com.google.firebase:firebase-bom:30.1.0"))
+                implementation ("com.google.firebase:firebase-database-ktx")
+
             }
         }
         val androidTest by getting {

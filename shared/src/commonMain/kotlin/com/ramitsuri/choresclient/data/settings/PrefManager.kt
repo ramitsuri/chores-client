@@ -46,6 +46,14 @@ class PrefManager(
         return keyValueStore.getString(DEBUG_SERVER, "") ?: ""
     }
 
+    fun setEnableRemoteLogging(enable: Boolean) {
+        keyValueStore.putBoolean(ENABLE_REMOTE_LOGGING, enable)
+    }
+
+    fun getEnableRemoteLogging(): Boolean {
+        return keyValueStore.getBoolean(ENABLE_REMOTE_LOGGING, false)
+    }
+
     fun generateNewNotificationId(): Int {
         notificationIdLock.use {
             val newId = keyValueStore.getInt(PREV_NOTIFICATION_ID, 0) + 1
@@ -69,6 +77,7 @@ class PrefManager(
         private const val KEY = "key"
         private const val TOKEN = "token"
         private const val DEBUG_SERVER = "debug_server"
+        private const val ENABLE_REMOTE_LOGGING = "enable_remote_logging"
         private const val PREV_NOTIFICATION_ID = "prev_notification_id"
 
         private const val KV = "KV"

@@ -14,14 +14,16 @@ import com.ramitsuri.choresclient.android.extensions.setVisibility
 import com.ramitsuri.choresclient.android.ui.BaseFragment
 import com.ramitsuri.choresclient.model.ViewEvent
 import com.ramitsuri.choresclient.model.ViewState
+import com.ramitsuri.choresclient.utils.LogHelper
 import com.ramitsuri.choresclient.viewmodel.LoginViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.component.KoinComponent
-import timber.log.Timber
+import org.koin.core.component.inject
 import kotlin.system.exitProcess
 
 class LoginFragment : BaseFragment<FragmentLoginBinding>(), KoinComponent {
 
+    private val logger: LogHelper by inject()
     private val viewModel: LoginViewModel by viewModel()
 
     override val bindingInflater: (LayoutInflater) -> ViewBinding
@@ -35,12 +37,12 @@ class LoginFragment : BaseFragment<FragmentLoginBinding>(), KoinComponent {
                         onViewEvent(viewState.event)
                     }
                     is ViewState.Error -> {
-                        log("Error: ${viewState.error}")
+                        logger.v(TAG, "Error: ${viewState.error}")
                         onLoading(false)
                     }
 
                     is ViewState.Success -> {
-                        log("Login success")
+                        logger.d(TAG, "Login success")
                         findNavController().navigate(R.id.action_loginFragment_to_assignmentsFragment)
                     }
                 }
@@ -74,7 +76,7 @@ class LoginFragment : BaseFragment<FragmentLoginBinding>(), KoinComponent {
     private fun onViewEvent(event: ViewEvent) {
         when (event) {
             ViewEvent.LOADING, ViewEvent.RELOAD -> {
-                log("Loading")
+                logger.d(TAG, "Loading")
                 onLoading(true)
             }
             ViewEvent.LOGIN -> {
@@ -115,7 +117,7 @@ class LoginFragment : BaseFragment<FragmentLoginBinding>(), KoinComponent {
         binding.progress.setVisibility(loading)
     }
 
-    private fun log(message: String) {
-        Timber.d(message)
+    companion object {
+        private const val TAG = "LoginFragment"
     }
 }

@@ -2,6 +2,7 @@ package com.ramitsuri.choresclient.android
 
 import android.app.Application
 import android.content.Context
+import android.os.Build
 import com.google.android.material.color.DynamicColors
 import com.ramitsuri.choresclient.AppInfo
 import com.ramitsuri.choresclient.android.downloader.AssignmentsDownloader
@@ -29,7 +30,6 @@ import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.dsl.module
-import timber.log.Timber
 
 class MainApplication : Application(), KoinComponent {
 
@@ -39,9 +39,6 @@ class MainApplication : Application(), KoinComponent {
         super.onCreate()
         DynamicColors.applyToActivitiesIfAvailable(this)
         initDependencyInjection()
-        if (BuildConfig.DEBUG) {
-            Timber.plant(Timber.DebugTree())
-        }
 
         createNotificationChannels()
         enqueueWorkers()
@@ -120,4 +117,6 @@ class MainApplication : Application(), KoinComponent {
 class AndroidAppInfo : AppInfo {
     override val appId: String = BuildConfig.APPLICATION_ID
     override val isDebug: Boolean = BuildConfig.DEBUG
+    override val deviceDetails: String =
+        "${Build.MANUFACTURER}:${Build.MODEL}:${BuildConfig.VERSION_NAME}"
 }

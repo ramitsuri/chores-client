@@ -1,6 +1,5 @@
 package com.ramitsuri.choresclient.viewmodel
 
-import co.touchlab.kermit.Logger
 import com.ramitsuri.choresclient.data.FilterMode
 import com.ramitsuri.choresclient.data.ProgressStatus
 import com.ramitsuri.choresclient.data.RepeatUnit
@@ -15,12 +14,15 @@ import com.ramitsuri.choresclient.repositories.AssignmentDetailsRepository
 import com.ramitsuri.choresclient.repositories.TaskAssignmentsRepository
 import com.ramitsuri.choresclient.utils.AppHelper
 import com.ramitsuri.choresclient.utils.DispatcherProvider
+import com.ramitsuri.choresclient.utils.LogHelper
 import com.ramitsuri.choresclient.utils.getDay
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 class AssignmentsViewModel(
     private val assignmentDetailsRepository: AssignmentDetailsRepository,
@@ -29,8 +31,9 @@ class AssignmentsViewModel(
     private val appHelper: AppHelper,
     private val dispatchers: DispatcherProvider,
     private val longLivingCoroutineScope: CoroutineScope
-) : ViewModel() {
+) : ViewModel(), KoinComponent {
 
+    private val logger: LogHelper by inject()
     private val _state: MutableStateFlow<ViewState<AssignmentsViewState>> =
         MutableStateFlow(
             ViewState.Event(ViewEvent.RELOAD)
@@ -40,8 +43,6 @@ class AssignmentsViewModel(
 
     private var filterMode: FilterMode
     private val userId = prefManager.getUserId() ?: ""
-
-    private val logger = Logger.withTag("AssignmentsViewModel")
 
     init {
         filterMode = if (userId.isNotEmpty()) {
@@ -54,7 +55,10 @@ class AssignmentsViewModel(
     fun fetchAssignments(getLocal: Boolean = false) {
         val isWorkerRunning = appHelper.isWorkerRunning()
         val shouldRefresh = !(getLocal || isWorkerRunning)
-        logger.d("Will refresh: $shouldRefresh - getLocal($getLocal) || workerRunning($isWorkerRunning)")
+        logger.d(
+            "AssignmentsViewModel",
+            "Will refresh: $shouldRefresh - getLocal($getLocal) || workerRunning($isWorkerRunning)"
+        )
         _state.update {
             ViewState.Event(ViewEvent.LOADING)
         }
@@ -89,6 +93,12 @@ class AssignmentsViewModel(
             assignmentDetailsRepository.onCompleteRequestedSuspend(taskAssignment.id)
             getLocal()
         }
+    }
+
+    fun toggleLogging() {
+        val currentlyEnabled = prefManager.getEnableRemoteLogging()
+        prefManager.setEnableRemoteLogging(!currentlyEnabled)
+        logger.enableRemoteLogging(!currentlyEnabled)
     }
 
     private fun getLocal() {

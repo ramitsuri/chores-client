@@ -15,13 +15,17 @@ import com.ramitsuri.choresclient.android.utils.formatReminderAt
 import com.ramitsuri.choresclient.android.utils.formatRepeatUnit
 import com.ramitsuri.choresclient.model.AssignmentDetails
 import com.ramitsuri.choresclient.model.ViewState
+import com.ramitsuri.choresclient.utils.LogHelper
 import com.ramitsuri.choresclient.viewmodel.AssignmentDetailsViewModel
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import timber.log.Timber
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
-class AssignmentDetailsFragment : BaseBottomSheetFragment<FragmentAssignmentDetailsBinding>() {
+class AssignmentDetailsFragment : BaseBottomSheetFragment<FragmentAssignmentDetailsBinding>(),
+    KoinComponent {
 
+    private val logger: LogHelper by inject()
     private val args: AssignmentDetailsFragmentArgs by navArgs()
     private val viewModel: AssignmentDetailsViewModel by viewModel()
 
@@ -35,7 +39,7 @@ class AssignmentDetailsFragment : BaseBottomSheetFragment<FragmentAssignmentDeta
                 viewModel.state.collect { viewState ->
                     when (viewState) {
                         is ViewState.Error -> {
-                            log("Error: ${viewState.error}")
+                            logger.v(TAG, "Error: ${viewState.error}")
                             dismiss()
                         }
 
@@ -73,11 +77,8 @@ class AssignmentDetailsFragment : BaseBottomSheetFragment<FragmentAssignmentDeta
         binding.textReminderTime.text = requireContext().formatReminderAt(details.notificationTime)
     }
 
-    private fun log(message: String) {
-        Timber.d(message)
-    }
-
     companion object {
+        private const val TAG = "AssignmentDetailsFragment"
         const val REQUEST_DONE_STATUS = "request_done_status"
         const val BUNDLE_DONE = "bundle_done"
     }

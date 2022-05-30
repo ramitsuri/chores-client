@@ -19,12 +19,15 @@ import com.ramitsuri.choresclient.data.FilterMode
 import com.ramitsuri.choresclient.data.TaskAssignment
 import com.ramitsuri.choresclient.model.ViewEvent
 import com.ramitsuri.choresclient.model.ViewState
+import com.ramitsuri.choresclient.utils.LogHelper
 import com.ramitsuri.choresclient.viewmodel.AssignmentsViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.component.KoinComponent
-import timber.log.Timber
+import org.koin.core.component.inject
 
 class AssignmentsFragment : BaseFragment<FragmentAssignmentsBinding>(), KoinComponent {
+
+    private val logger: LogHelper by inject()
     private val viewModel: AssignmentsViewModel by viewModel()
     private val adapter = AssignmentsAdapter(listOf()) { taskAssignment, clickType ->
         onItemClickListener(taskAssignment, clickType)
@@ -61,7 +64,7 @@ class AssignmentsFragment : BaseFragment<FragmentAssignmentsBinding>(), KoinComp
                         onViewEvent(viewState.event)
                     }
                     is ViewState.Error -> {
-                        log("Error: ${viewState.error}")
+                        logger.v(TAG, "Error: ${viewState.error}")
                         onLoading(false)
                     }
 
@@ -102,20 +105,25 @@ class AssignmentsFragment : BaseFragment<FragmentAssignmentsBinding>(), KoinComp
             popup.show()
         }
 
+        binding.btnMenu.setOnLongClickListener {
+            viewModel.toggleLogging()
+            return@setOnLongClickListener true
+        }
+
         setupFilters()
     }
 
     private fun onViewEvent(event: ViewEvent) {
         when (event) {
             ViewEvent.LOADING -> {
-                log("Loading")
+                logger.d(TAG, "Loading")
                 onLoading(true)
             }
             ViewEvent.LOGIN -> {
-                log("Should not happen")
+                logger.d(TAG, "Should not happen")
             }
             ViewEvent.RELOAD -> {
-                log("Reload")
+                logger.d(TAG, "Reload")
                 viewModel.fetchAssignments(true)
             }
         }
@@ -125,11 +133,11 @@ class AssignmentsFragment : BaseFragment<FragmentAssignmentsBinding>(), KoinComp
         binding.filterGroup.setOnCheckedChangeListener { _, checkedId ->
             when (checkedId) {
                 binding.filterMine.id -> {
-                    log("Mine")
+                    logger.d(TAG, "Mine")
                     viewModel.filterMine()
                 }
                 binding.filterOther.id -> {
-                    log("Other")
+                    logger.d(TAG, "Other")
                     viewModel.filterExceptMine()
                 }
             }
@@ -142,7 +150,7 @@ class AssignmentsFragment : BaseFragment<FragmentAssignmentsBinding>(), KoinComp
                 viewModel.changeStateRequested(taskAssignment)
             }
             ClickType.DETAIL -> {
-                log("Detail requested")
+                logger.d(TAG, "Detail requested")
                 if (!allowEdits()) {
                     return
                 }
@@ -169,7 +177,7 @@ class AssignmentsFragment : BaseFragment<FragmentAssignmentsBinding>(), KoinComp
         binding.progress.setVisibility(loading)
     }
 
-    private fun log(message: String) {
-        Timber.d(message)
+    companion object {
+        private const val TAG = "AssignmentsFragment"
     }
 }

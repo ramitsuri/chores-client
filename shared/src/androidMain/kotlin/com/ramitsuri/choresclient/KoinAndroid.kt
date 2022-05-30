@@ -10,6 +10,7 @@ import com.ramitsuri.choresclient.data.settings.SettingsKeyValueStore
 import com.ramitsuri.choresclient.db.ChoresDatabase
 import com.ramitsuri.choresclient.utils.AppHelper
 import com.ramitsuri.choresclient.utils.DispatcherProvider
+import com.ramitsuri.choresclient.utils.LogHelper
 import com.russhwolf.settings.AndroidSettings
 import com.squareup.sqldelight.android.AndroidSqliteDriver
 import io.ktor.client.engine.HttpClientEngine
@@ -61,5 +62,13 @@ actual val platformModule = module {
 
     single<AppHelper> {
         AppHelper()
+    }
+
+    single<LogHelper> {
+        LogHelper(
+            get<AppInfo>().isDebug,
+            get<PrefManager>().getEnableRemoteLogging(),
+            get<AppInfo>().deviceDetails
+        )
     }
 }
