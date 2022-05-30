@@ -17,24 +17,25 @@ import com.ramitsuri.choresclient.notification.NotificationActionInfo
 import com.ramitsuri.choresclient.notification.NotificationHandler
 import com.ramitsuri.choresclient.notification.NotificationInfo
 import com.ramitsuri.choresclient.notification.Priority
+import com.ramitsuri.choresclient.utils.LogHelper
 import java.util.concurrent.TimeUnit
 import kotlinx.datetime.Clock
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import timber.log.Timber
 
 class ShowNotificationWorker(
     context: Context,
     workerParameters: WorkerParameters,
 ) : CoroutineWorker(context, workerParameters), KoinComponent {
 
+    private val logger: LogHelper by inject()
     private val notificationHandler: NotificationHandler by inject()
     private val prefManager: PrefManager by inject()
 
     override suspend fun doWork(): Result {
         val notificationTitle = inputData.getString(NOTIFICATION_BODY)
             ?: applicationContext.getString(R.string.notification_reminder_title)
-        Timber.d("Showing notification for: $notificationTitle")
+        logger.d(TAG, "Showing notification for: $notificationTitle")
 
         val providedNotificationId = inputData.getInt(NOTIFICATION_ID, -1)
         val notificationId = if (providedNotificationId == -1) {
@@ -84,12 +85,12 @@ class ShowNotificationWorker(
         private const val NOTIFICATION_BODY = "notification_body"
         private const val NOTIFICATION_ID = "notification_id"
         private const val ASSIGNMENT_ID = "assignment_id"
+        private const val TAG = "ShowNotification"
 
         fun schedule(context: Context, assignmentAlarms: List<AssignmentAlarm>) {
             val workManager = WorkManager.getInstance(context)
             assignmentAlarms.forEach { assignmentAlarm ->
                 val workName = getWorkName(assignmentAlarm.assignmentId)
-                Timber.d("Schedule $workName")
 
                 val showAfter =
                     assignmentAlarm.showAtTime.toEpochMilliseconds() - Clock.System.now()
@@ -124,8 +125,6 @@ class ShowNotificationWorker(
             val workManager = WorkManager.getInstance(context)
             assignmentIds.forEach { assignmentId ->
                 val workName = getWorkName(assignmentId)
-                Timber.d("Cancel $workName")
-
                 workManager.cancelUniqueWork(workName)
             }
         }

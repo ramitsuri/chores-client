@@ -27,6 +27,22 @@ fun formatReminderTime(
     return format(toFormat, now, timeZone, "MMM d 'at' HH.mm.ss", "MMM d, uuuu 'at' HH.mm.ss")
 }
 
+fun formatLogTime(
+    toFormat: Instant = Clock.System.now(),
+    now: Instant = Clock.System.now(),
+    timeZone: TimeZone = TimeZone.UTC
+): String {
+    return format(toFormat, now, timeZone, "uuuu-MM-dd HH.mm.ss.SSS", "uuuu-MM-dd HH.mm.ss.SSS")
+}
+
+fun formatLogParent(
+    toFormat: Instant = Clock.System.now(),
+    now: Instant = Clock.System.now(),
+    timeZone: TimeZone = TimeZone.UTC
+): String {
+    return format(toFormat, now, timeZone, "uuuu-MM-dd", "uuuu-MM-dd")
+}
+
 private fun format(
     toFormat: Instant,
     now: Instant,

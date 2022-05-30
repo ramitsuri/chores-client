@@ -1,6 +1,5 @@
 package com.ramitsuri.choresclient.viewmodel
 
-import co.touchlab.kermit.Logger
 import com.ramitsuri.choresclient.data.Result
 import com.ramitsuri.choresclient.data.settings.PrefManager
 import com.ramitsuri.choresclient.model.LoginViewState
@@ -18,13 +17,11 @@ class LoginViewModel(
     private val prefManager: PrefManager,
     private val dispatchers: DispatcherProvider
 ) : ViewModel() {
-    private val logger = Logger.withTag("LoginViewModel")
     private val _state: MutableStateFlow<ViewState<LoginViewState>> =
         if (prefManager.getKey().isNullOrEmpty() ||
             prefManager.getUserId().isNullOrEmpty() ||
             prefManager.getToken().isNullOrEmpty()
         ) {
-            logger.i("${prefManager.getKey()}, ${prefManager.getUserId()}, ${prefManager.getToken()}")
             MutableStateFlow((ViewState.Event(ViewEvent.LOGIN)))
         } else {
             MutableStateFlow(ViewState.Success(LoginViewState(true)))

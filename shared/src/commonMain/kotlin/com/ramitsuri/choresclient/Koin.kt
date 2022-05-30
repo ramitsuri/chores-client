@@ -113,4 +113,5 @@ expect val platformModule: Module
 interface AppInfo {
     val appId: String
     val isDebug: Boolean
+    val deviceDetails: String
 }

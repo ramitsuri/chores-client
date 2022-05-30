@@ -5,6 +5,8 @@ plugins {
     id("kotlin-android")
     id("kotlinx-serialization")
     id("androidx.navigation.safeargs.kotlin")
+    id("com.google.gms.google-services")
+    id("com.google.firebase.crashlytics")
 }
 
 dependencies {
@@ -49,9 +51,6 @@ dependencies {
     implementation("androidx.legacy:legacy-support-v4:1.0.0")
 
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:1.1.5")
-
-    // Logging
-    implementation("com.jakewharton.timber:timber:4.7.1")
 
     // Work
     val workVersion = "2.7.0"
