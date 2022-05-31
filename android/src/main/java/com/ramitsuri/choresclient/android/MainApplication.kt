@@ -117,6 +117,5 @@ class MainApplication : Application(), KoinComponent {
 class AndroidAppInfo : AppInfo {
     override val appId: String = BuildConfig.APPLICATION_ID
     override val isDebug: Boolean = BuildConfig.DEBUG
-    override val deviceDetails: String =
-        "${Build.MANUFACTURER}:${Build.MODEL}:${BuildConfig.VERSION_NAME}"
+    override val deviceDetails: String = Build.MODEL
 }

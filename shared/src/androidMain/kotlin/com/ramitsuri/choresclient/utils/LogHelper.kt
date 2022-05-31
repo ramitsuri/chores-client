@@ -34,21 +34,14 @@ actual class LogHelper(
 
     private fun remoteLog(tag: String, message: String) {
         if (enableRemote) {
-            val remoteLog = RemoteLog(formatLogTime(), tag, message, deviceDetails)
-            getDb().setValue(remoteLog)
+            val remoteLog = "${formatLogTime()} $tag: $message"
+            getDb().push().setValue(remoteLog)
         }
     }
 
     private fun getDb(): DatabaseReference {
-        return Firebase.database.getReference("logs/${formatLogParent()}")
+        return Firebase.database.getReference("logs/$deviceDetails/${formatLogParent()}")
     }
-
-    data class RemoteLog(
-        val time: String,
-        val tag: String,
-        val message: String,
-        val device: String
-    )
 
     companion object {
         private const val TAG = "LogHelper"
