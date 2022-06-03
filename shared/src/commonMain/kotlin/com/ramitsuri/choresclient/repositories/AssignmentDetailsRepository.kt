@@ -78,7 +78,6 @@ class AssignmentDetailsRepository(
         logger.v(TAG, "Cancel requested for $assignmentId")
         val existing = alarmHandler.getExisting(assignmentId)
         existing?.let {
-            logger.v(TAG, "Existing $assignmentId found, cancelling notification")
             notificationHandler.cancelNotification(it.systemNotificationId.toInt())
         } ?: run {
             logger.v(TAG, "Existing $assignmentId not found, cannot cancel notification")
