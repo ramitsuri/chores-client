@@ -24,7 +24,6 @@ class SystemTaskAssignmentsRepository(
     override suspend fun refresh(): Result<List<TaskAssignment>> {
         // Upload completed local assignments
         val uploadedIds = uploadLocal()
-        logger.v(TAG, "Uploaded: ${uploadedIds.joinToString()}")
 
         // Delete Ids that have been confirmed to be deleted by server
         localDataSource.delete(uploadedIds)
@@ -54,14 +53,19 @@ class SystemTaskAssignmentsRepository(
     }
 
     override suspend fun markTaskAssignmentDone(taskAssignmentId: String, doneTime: Instant) {
-        logger.v(TAG, "Mark $taskAssignmentId done requested")
         localDataSource.markDone(taskAssignmentId, doneTime)
-        logger.v(TAG, "Mark $taskAssignmentId done completed")
+        logger.v(
+            TAG,
+            "Mark $taskAssignmentId done completed. New status: ${
+                localDataSource.getTaskAssignment(taskAssignmentId)
+            }"
+        )
     }
 
     private suspend fun uploadLocal(): List<String> {
         return withContext(dispatcherProvider.io) {
             val readyForUpload = localDataSource.getReadyForUpload()
+            logger.v(TAG, "Ready for upload: ${readyForUpload.joinToString()}")
             val uploadResult = try {
                 api.updateTaskAssignments(readyForUpload)
             } catch (e: Exception) {
@@ -71,6 +75,7 @@ class SystemTaskAssignmentsRepository(
             return@withContext when (uploadResult?.status) {
                 HttpStatusCode.OK -> {
                     val uploadedTaskAssignmentIds: List<String> = uploadResult.body()
+                    logger.v(TAG, "Uploaded: ${uploadedTaskAssignmentIds.joinToString()}")
                     uploadedTaskAssignmentIds
                 }
                 else -> {
