@@ -1,5 +1,6 @@
 package com.ramitsuri.choresclient.android
 
+import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
 import android.view.ViewGroup
@@ -30,5 +31,7 @@ class MainActivity : AppCompatActivity() {
         } else {
             window.invertInsets(true)
         }
+
+        startActivity(Intent(this, MainActivity2::class.java))
     }
 }

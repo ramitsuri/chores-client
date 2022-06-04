@@ -39,5 +39,6 @@
     <string name="assignment_details_button_snooze_day">Remind tomorrow</string>
     <string name="assignment_details_reminder_time">Reminder set for %1$s</string>
     <string name="assignment_details_reminder_time_unavailable">Reminder will be set in some time</string>
+    <string name="title_activity_main2">MainActivity2</string>
 
 </resources>
