@@ -13,7 +13,7 @@ dependencies {
     val fragmentVersion = "1.3.6"
 
     implementation(project(":shared"))
-    implementation("androidx.core:core-ktx:1.7.0")
+    implementation("androidx.core:core-ktx:1.8.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.4.1")
 
     // Material
@@ -28,9 +28,6 @@ dependencies {
     // Date Time
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.3.2")
 
-    // Encrypted SharedPrefs
-    implementation("androidx.security:security-crypto:1.1.0-alpha03")
-
     // Fragment
     implementation("androidx.fragment:fragment-ktx:$fragmentVersion")
     debugImplementation("androidx.fragment:fragment-testing:$fragmentVersion")
@@ -42,11 +39,6 @@ dependencies {
     implementation("androidx.navigation:navigation-fragment-ktx:2.3.5")
     implementation("androidx.navigation:navigation-ui-ktx:2.3.5")
 
-    // Room
-    implementation("androidx.room:room-runtime:2.5.0-alpha01")
-    implementation("androidx.room:room-ktx:2.5.0-alpha01")
-    kapt("androidx.room:room-compiler:2.5.0-alpha01")
-
     // Support
     implementation("androidx.legacy:legacy-support-v4:1.0.0")
 
@@ -55,6 +47,16 @@ dependencies {
     // Work
     val workVersion = "2.7.0"
     implementation("androidx.work:work-runtime-ktx:$workVersion")
+
+    // Compose
+    implementation ("androidx.compose.ui:ui:1.1.1")
+    implementation ("androidx.compose.ui:ui-tooling-preview:1.1.1")
+    implementation ("androidx.lifecycle:lifecycle-runtime-ktx:2.4.1")
+    implementation ("androidx.activity:activity-compose:1.4.0")
+    implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.4.1")
+    implementation ("androidx.compose.material3:material3:1.0.0-alpha13")
+    implementation ("androidx.compose.material3:material3-window-size-class:1.0.0-alpha13")
+    implementation ("com.google.accompanist:accompanist-flowlayout:0.24.8-beta")
 
     // Testing
     testImplementation("junit:junit:4.13.2")
@@ -70,11 +72,11 @@ kapt {
 }
 
 android {
-    compileSdk = 31
+    compileSdk = 32
     defaultConfig {
         applicationId = "com.ramitsuri.choresclient.android"
         minSdk = 26
-        targetSdk = 31
+        targetSdk = 32
         versionCode = 27
         versionName = "4.2"
 
@@ -105,5 +107,14 @@ android {
     }
     buildFeatures {
         viewBinding = true
+        compose = true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.1.1"
+    }
+    packagingOptions {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
     }
 }
