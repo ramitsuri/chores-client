@@ -77,8 +77,8 @@ android {
         applicationId = "com.ramitsuri.choresclient.android"
         minSdk = 26
         targetSdk = 32
-        versionCode = 27
-        versionName = "4.2"
+        versionCode = 28
+        versionName = "4.3"
 
         kapt {
             arguments {
