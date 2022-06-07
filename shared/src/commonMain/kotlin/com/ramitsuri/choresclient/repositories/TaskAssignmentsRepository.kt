@@ -57,7 +57,7 @@ class SystemTaskAssignmentsRepository(
         logger.v(
             TAG,
             "Mark $taskAssignmentId done completed. New status: ${
-                localDataSource.getTaskAssignment(taskAssignmentId)
+                localDataSource.getTaskAssignmentStatus(taskAssignmentId)
             }"
         )
     }
