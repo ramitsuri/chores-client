@@ -70,6 +70,11 @@ class TaskAssignmentDataSource(
         return toTaskAssignment(taskAssignmentDao.get(id))
     }
 
+    suspend fun getTaskAssignmentStatus(id: String): String {
+        val assignmentEntity = taskAssignmentDao.get(id)
+        return "Upload: ${assignmentEntity?.shouldUpload}, Status: ${assignmentEntity?.progressStatus}"
+    }
+
     /**
      * Will always return locally saved assignments since the passed due date time
      */
