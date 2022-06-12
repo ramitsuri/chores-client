@@ -34,8 +34,8 @@ class TaskAssignmentDataSource(
 
         val taskAssignments = assignments.map { taskAssignmentToTaskAssignmentEntity(it) }
         // Do not do clearAndInsert as there might be local assignments that have been completed
-        // but not uploaded
-        taskAssignmentDao.clearAndInsert(taskAssignments)
+        // but not uploaded. The insert statement here ignores a row if it already exists.
+        taskAssignmentDao.insert(taskAssignments)
     }
 
     suspend fun markDone(assignmentId: String, doneTime: Instant) {
