@@ -85,23 +85,6 @@ class TaskAssignmentDao(
         }
     }
 
-    suspend fun clearAndInsert(taskAssignmentEntities: List<TaskAssignmentEntity>) {
-        withContext(dispatcherProvider.io) {
-            val todo = getTodo()
-            dbQueries.transaction {
-                // Delete only incomplete assignments and not completed ones that haven't been uploaded.
-                // Even though it's unlikely to happen that a completed assignment is not uploaded at this
-                // point in the real flow
-                todo.forEach {
-                    delete(it.id)
-                }
-                taskAssignmentEntities.forEach {
-                    insert(it)
-                }
-            }
-        }
-    }
-
     private fun delete(id: String) {
         dbQueries.deleteAssignment(id)
     }

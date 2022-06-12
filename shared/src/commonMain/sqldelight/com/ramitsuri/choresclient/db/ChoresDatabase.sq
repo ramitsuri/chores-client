@@ -55,7 +55,7 @@ SET progressStatus = ?, progressStatusDate = ?, shouldUpload = ?
 WHERE id = ?;
 
 insertAssignment:
-INSERT OR REPLACE INTO
+INSERT OR IGNORE INTO
 TaskAssignmentEntity (id, progressStatus, progressStatusDate, taskId, memberId, dueDateTime, createDate, createType, shouldUpload)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
 
