@@ -48,19 +48,30 @@ class TaskAssignmentDataSource(
         taskAssignmentDao.update(taskAssignment)
     }
 
-    suspend fun getTaskAssignments(filterMode: FilterMode = FilterMode.ALL): List<TaskAssignment> {
+    suspend fun getTaskAssignments(
+        filterMode: FilterMode = FilterMode.ALL,
+        memberId: String? = null
+    ): List<TaskAssignment> {
         val result = when (filterMode) {
-            is FilterMode.NONE -> {
+            FilterMode.NONE -> {
                 listOf()
             }
-            is FilterMode.ALL -> {
+            FilterMode.ALL -> {
                 taskAssignmentDao.getAll()
             }
-            is FilterMode.MINE -> {
-                taskAssignmentDao.getForMember(filterMode.memberId)
+            FilterMode.MINE -> {
+                if (memberId == null) {
+                    listOf()
+                } else {
+                    taskAssignmentDao.getForMember(memberId)
+                }
             }
-            is FilterMode.OTHER -> {
-                taskAssignmentDao.getForExceptMember(filterMode.ownUserId)
+            FilterMode.OTHER -> {
+                if (memberId == null) {
+                    listOf()
+                } else {
+                    taskAssignmentDao.getForExceptMember(memberId)
+                }
             }
         }
         return toTaskAssignments(result)

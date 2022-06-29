@@ -35,6 +35,8 @@ dependencies {
     // Koin
     val koin = findProperty("version.koin")
     implementation("io.insert-koin:koin-android:$koin")
+    implementation("io.insert-koin:koin-androidx-compose:$koin")
+
     // Navigation Component
     implementation("androidx.navigation:navigation-fragment-ktx:2.3.5")
     implementation("androidx.navigation:navigation-ui-ktx:2.3.5")
@@ -49,14 +51,19 @@ dependencies {
     implementation("androidx.work:work-runtime-ktx:$workVersion")
 
     // Compose
-    implementation ("androidx.compose.ui:ui:1.1.1")
-    implementation ("androidx.compose.ui:ui-tooling-preview:1.1.1")
-    implementation ("androidx.lifecycle:lifecycle-runtime-ktx:2.4.1")
-    implementation ("androidx.activity:activity-compose:1.4.0")
-    implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.4.1")
-    implementation ("androidx.compose.material3:material3:1.0.0-alpha13")
-    implementation ("androidx.compose.material3:material3-window-size-class:1.0.0-alpha13")
-    implementation ("com.google.accompanist:accompanist-flowlayout:0.24.8-beta")
+    implementation("androidx.compose.ui:ui:1.1.1")
+    implementation("androidx.compose.ui:ui-tooling-preview:1.1.1")
+    implementation("androidx.compose.ui:ui-tooling:1.2.0-beta03")
+    implementation("androidx.compose.material:material:1.1.1")
+    implementation("androidx.compose.material:material-icons-extended:1.1.1")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.4.1")
+    implementation("androidx.activity:activity-compose:1.4.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.4.1")
+    implementation("androidx.compose.material3:material3:1.0.0-alpha13")
+    implementation("androidx.compose.material3:material3-window-size-class:1.0.0-alpha13")
+    implementation("com.google.accompanist:accompanist-swiperefresh:0.23.1")
+    implementation("com.google.accompanist:accompanist-systemuicontroller:0.24.12-rc")
+    implementation("androidx.navigation:navigation-compose:2.4.2")
 
     // Testing
     testImplementation("junit:junit:4.13.2")

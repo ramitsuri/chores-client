@@ -8,6 +8,7 @@ import com.ramitsuri.choresclient.utils.LogHelper
 import com.ramitsuri.choresclient.utils.getNewReminderTimeSnoozeDay
 import com.ramitsuri.choresclient.utils.getNewReminderTimeSnoozeHour
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import org.koin.core.component.KoinComponent
@@ -54,6 +55,9 @@ class AssignmentDetailsRepository(
     suspend fun getDetails(assignmentId: String): AssignmentDetails? {
         val assignment = taskAssignmentsRepository.getLocal(assignmentId)
         val alarmEntity = alarmHandler.getExisting(assignmentId)
+        // Delay because there's choppy animation when switching from loading to showing details.
+        // Temp fix for now
+        delay(400)
         if (assignment == null) {
             return null
         }
