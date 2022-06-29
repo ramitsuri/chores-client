@@ -2,32 +2,32 @@ package com.ramitsuri.choresclient.model
 
 import com.ramitsuri.choresclient.data.FilterMode
 import com.ramitsuri.choresclient.data.RepeatUnit
+import com.ramitsuri.choresclient.data.TaskAssignment
 import com.ramitsuri.choresclient.data.ViewError
 import kotlinx.datetime.Instant
 
-sealed class ViewState<out T> {
-    data class Event(val event: ViewEvent) : ViewState<Nothing>()
-    data class Success<T>(val data: T) : ViewState<T>()
-    data class Error(val error: ViewError) : ViewState<Nothing>()
-
-    companion object {
-        fun event(event: ViewEvent) = Event(event)
-        fun <T> success(data: T) = Success(data)
-        fun error(error: ViewError) = Error(error)
-    }
-}
-
 data class AssignmentsViewState(
-    val assignments: List<TaskAssignmentWrapper>,
-    val selectedFilter: FilterMode
+    val loading: Boolean = false,
+    val assignments: Map<String, List<TaskAssignment>> = mapOf(),
+    val selectedFilter: FilterMode = FilterMode.NONE
 )
 
 data class LoginViewState(
-    val loggedIn: Boolean
+    val loading: Boolean = false,
+    val id: String = "",
+    val key: String = "",
+    val error: ViewError? = null,
+    val isLoggedIn: Boolean = false,
+    val loginDebugViewState: LoginDebugViewState? = null
+)
+
+data class LoginDebugViewState(
+    val serverText: String = ""
 )
 
 data class AssignmentDetailsViewState(
-    val assignment: AssignmentDetails
+    val loading: Boolean = false,
+    val assignment: AssignmentDetails? = null
 )
 
 data class AssignmentDetails(
@@ -38,9 +38,3 @@ data class AssignmentDetails(
     val repeatUnit: RepeatUnit,
     val notificationTime: Instant?
 )
-
-enum class ViewEvent {
-    LOADING,
-    RELOAD,
-    LOGIN
-}

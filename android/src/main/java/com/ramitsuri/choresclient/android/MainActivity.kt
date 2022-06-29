@@ -1,34 +1,19 @@
 package com.ramitsuri.choresclient.android
 
-import android.content.res.Configuration
 import android.os.Bundle
-import android.view.ViewGroup
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.updateLayoutParams
-import com.ramitsuri.choresclient.android.extensions.invertInsets
+import com.ramitsuri.choresclient.android.ui.theme.ChoresClientTheme
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.navHostFragment)) { view, windowInsets ->
-            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
-            view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                this.topMargin = insets.top
+        setContent {
+            ChoresClientTheme {
+                NavGraph()
             }
-            WindowInsetsCompat.CONSUMED
-        }
-
-        if ((resources.configuration.uiMode and
-                    Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_NO
-        ) { // Light theme
-            window.invertInsets(false)
-        } else {
-            window.invertInsets(true)
         }
     }
 }

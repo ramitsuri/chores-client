@@ -1,6 +1,7 @@
 package com.ramitsuri.choresclient.viewmodel
 
-import com.ramitsuri.choresclient.data.TaskAssignment
+import com.ramitsuri.choresclient.data.FilterMode
+import com.ramitsuri.choresclient.data.ProgressStatus
 
 class AssignmentsCallbackViewModel(vm: AssignmentsViewModel) : CallbackViewModel() {
     override val viewModel: AssignmentsViewModel = vm
@@ -11,15 +12,11 @@ class AssignmentsCallbackViewModel(vm: AssignmentsViewModel) : CallbackViewModel
         viewModel.fetchAssignments(getLocal)
     }
 
-    fun filterMine() {
-        viewModel.filterMine()
+    fun filter(filterMode: FilterMode) {
+        viewModel.filter(filterMode)
     }
 
-    fun filterExceptMine() {
-        viewModel.filterExceptMine()
-    }
-
-    fun changeStateRequested(taskAssignment: TaskAssignment) {
-        viewModel.changeStateRequested(taskAssignment)
+    fun changeStateRequested(id: String, progressStatus: ProgressStatus) {
+        viewModel.changeStateRequested(id, progressStatus)
     }
 }

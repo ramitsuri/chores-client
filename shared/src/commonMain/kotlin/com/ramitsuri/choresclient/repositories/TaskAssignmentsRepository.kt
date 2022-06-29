@@ -44,8 +44,8 @@ class SystemTaskAssignmentsRepository(
         return localDataSource.getSince(sinceDueDateTime)
     }
 
-    override suspend fun getLocal(filterMode: FilterMode): Result<List<TaskAssignment>> {
-        return Result.Success(localDataSource.getTaskAssignments(filterMode))
+    override suspend fun getLocal(filterMode: FilterMode, memberId: String): Result<List<TaskAssignment>> {
+        return Result.Success(localDataSource.getTaskAssignments(filterMode, memberId))
     }
 
     override suspend fun getLocal(id: String): TaskAssignment? {
@@ -117,7 +117,7 @@ interface TaskAssignmentsRepository {
 
     suspend fun getLocal(sinceDueDateTime: Instant): List<TaskAssignment>
 
-    suspend fun getLocal(filterMode: FilterMode): Result<List<TaskAssignment>>
+    suspend fun getLocal(filterMode: FilterMode, memberId: String): Result<List<TaskAssignment>>
 
     suspend fun getLocal(id: String): TaskAssignment?
 

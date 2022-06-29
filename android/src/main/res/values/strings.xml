@@ -3,6 +3,7 @@
     <string name="app_name">Chores</string>
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
+    <string name="refresh">Refresh</string>
 
     <!-- Assignments -->
     <string name="assignment_due">Due %1$s</string>
@@ -13,9 +14,11 @@
     <string name="assignment_mark_todo">To Do</string>
     <string name="assignment_mark_completed">Mark Completed</string>
     <string name="assignment_refresh">Refresh</string>
-    <string name="assignment_filter_all">All</string>
     <string name="assignment_filter_mine">Mine</string>
+    <string name="assignment_filter_mine_content_description">Filter mine</string>
     <string name="assignment_filter_other">Others\'</string>
+    <string name="assignment_filter_other_content_description">Filter others\'</string>
+    <string name="assignment_empty">Hurray! All Done</string>
 
     <!-- Notifications -->
     <string name="notification_reminders_id">Reminders</string>
@@ -28,10 +31,10 @@
 
     <!-- Login -->
     <string name="login_button_login">Log In</string>
+    <string name="login_button_password_visibility_toggle">Toggle password visibility</string>
     <string name="login_hint_id">Id</string>
     <string name="login_hint_key">Key</string>
     <string name="login_server_alert_title">Enter Server URL</string>
-
 
     <!-- Assignment Details -->
     <string name="assignment_details_button_done">Done</string>
@@ -39,5 +42,11 @@
     <string name="assignment_details_button_snooze_day">Remind tomorrow</string>
     <string name="assignment_details_reminder_time">Reminder set for %1$s</string>
     <string name="assignment_details_reminder_time_unavailable">Reminder will be set in some time</string>
+
+    <!-- Errors -->
+    <string name="error_network">No internet</string>
+    <string name="error_login_failed">Failed to login</string>
+    <string name="error_no_token">Failed to login</string>
+    <string name="error_unknown">Unknown error</string>
 
 </resources>

@@ -24,9 +24,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".MainActivity2"
-            android:exported="false"/>
-        <activity
             android:name="androidx.test.core.app.InstrumentationActivityInvoker$EmptyFloatingActivity"
             android:exported="false"
             tools:node="merge" />

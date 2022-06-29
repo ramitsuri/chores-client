@@ -22,7 +22,10 @@ class FakeTaskAssignmentsRepository : TaskAssignmentsRepository {
         return sinceAssignments
     }
 
-    override suspend fun getLocal(filterMode: FilterMode): Result<List<TaskAssignment>> {
+    override suspend fun getLocal(
+        filterMode: FilterMode,
+        memberId: String
+    ): Result<List<TaskAssignment>> {
         TODO("Not yet implemented")
     }
 

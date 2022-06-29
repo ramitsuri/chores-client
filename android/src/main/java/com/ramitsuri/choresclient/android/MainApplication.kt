@@ -100,7 +100,8 @@ class MainApplication : Application(), KoinComponent {
                     LoginViewModel(
                         get<LoginRepository>(),
                         get<PrefManager>(),
-                        get<DispatcherProvider>()
+                        get<DispatcherProvider>(),
+                        BuildConfig.DEBUG
                     )
                 }
 
