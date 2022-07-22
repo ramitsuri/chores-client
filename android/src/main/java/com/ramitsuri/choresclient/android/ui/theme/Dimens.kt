@@ -16,3 +16,4 @@ val paddingCardView = 12.dp
 val minBottomSheetHeight = 264.dp
 val iconWidth = 48.dp
 val assignmentHeaderCornerRadius = 24.dp
+val minAssignmentItemHeight = 64.dp

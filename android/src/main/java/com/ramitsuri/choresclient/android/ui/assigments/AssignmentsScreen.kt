@@ -66,6 +66,7 @@ import com.ramitsuri.choresclient.android.ui.theme.assignmentHeaderCornerRadius
 import com.ramitsuri.choresclient.android.ui.theme.iconWidth
 import com.ramitsuri.choresclient.android.ui.theme.marginLarge
 import com.ramitsuri.choresclient.android.ui.theme.marginMedium
+import com.ramitsuri.choresclient.android.ui.theme.minAssignmentItemHeight
 import com.ramitsuri.choresclient.android.ui.theme.paddingCardView
 import com.ramitsuri.choresclient.android.ui.theme.paddingMedium
 import com.ramitsuri.choresclient.android.ui.theme.paddingSmall
@@ -238,8 +239,10 @@ private fun AssignmentItem(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background)
     ) {
         Row(
-            horizontalArrangement = Arrangement.Start, modifier = modifier
-                .fillMaxWidth()
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = modifier
+                .defaultMinSize(minHeight = minAssignmentItemHeight)
                 .padding(paddingCardView)
         ) {
             if (showCompletedButton && assignment.progressStatus == ProgressStatus.TODO) {
@@ -260,7 +263,10 @@ private fun AssignmentItem(
                 }
             }
             Spacer(modifier = modifier.width(marginMedium))
-            Column(modifier = modifier.weight(1f)) {
+            Column(
+                modifier = modifier.weight(1f),
+                verticalArrangement = Arrangement.Center
+            ) {
                 val task = assignment.task
                 Text(
                     text = task.name,
@@ -426,7 +432,7 @@ fun PreviewAssignmentContent() {
                                 description = "Clean Kitchen now",
                                 dueDateTime = Clock.System.now(),
                                 repeatValue = 2,
-                                repeatUnit = RepeatUnit.DAY,
+                                repeatUnit = RepeatUnit.NONE,
                                 houseId = "",
                                 memberId = "",
                                 rotateMember = false,
@@ -600,6 +606,38 @@ fun PreviewAssignmentItem() {
                     dueDateTime = Clock.System.now(),
                     repeatValue = 2,
                     repeatUnit = RepeatUnit.DAY,
+                    houseId = "",
+                    memberId = "",
+                    rotateMember = false,
+                    createdDate = Clock.System.now()
+                ),
+                Member(id = "", name = "Ramit", createdDate = Clock.System.now()),
+                dueDateTime = Clock.System.now(),
+                createdDate = Clock.System.now(),
+                createType = CreateType.AUTO
+            ),
+            showCompletedButton = true,
+            { _, _ -> }
+        )
+    }
+}
+
+@Preview
+@Composable
+fun PreviewAssignmentItemNoRepeat() {
+    ChoresClientTheme {
+        AssignmentItem(
+            assignment = TaskAssignment(
+                id = "",
+                progressStatus = ProgressStatus.TODO,
+                progressStatusDate = Clock.System.now(),
+                Task(
+                    id = "",
+                    name = "Clean Kitchen",
+                    description = "Clean Kitchen now",
+                    dueDateTime = Clock.System.now(),
+                    repeatValue = 0,
+                    repeatUnit = RepeatUnit.NONE,
                     houseId = "",
                     memberId = "",
                     rotateMember = false,
