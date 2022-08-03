@@ -1,6 +1,5 @@
 package com.ramitsuri.choresclient.repositories
 
-import com.ramitsuri.choresclient.data.FilterMode
 import com.ramitsuri.choresclient.data.Member
 import com.ramitsuri.choresclient.data.ProgressStatus
 import com.ramitsuri.choresclient.data.Task
@@ -12,6 +11,8 @@ import com.ramitsuri.choresclient.data.entities.TaskDao
 import com.ramitsuri.choresclient.db.MemberEntity
 import com.ramitsuri.choresclient.db.TaskAssignmentEntity
 import com.ramitsuri.choresclient.db.TaskEntity
+import com.ramitsuri.choresclient.model.Filter
+import com.ramitsuri.choresclient.model.FilterType
 import kotlinx.datetime.Instant
 
 class TaskAssignmentDataSource(
@@ -49,32 +50,29 @@ class TaskAssignmentDataSource(
     }
 
     suspend fun getTaskAssignments(
-        filterMode: FilterMode = FilterMode.ALL,
-        memberId: String? = null
+        filters: List<Filter> = listOf()
     ): List<TaskAssignment> {
-        val result = when (filterMode) {
-            FilterMode.NONE -> {
-                listOf()
-            }
-            FilterMode.ALL -> {
-                taskAssignmentDao.getAll()
-            }
-            FilterMode.MINE -> {
-                if (memberId == null) {
-                    listOf()
-                } else {
-                    taskAssignmentDao.getForMember(memberId)
-                }
-            }
-            FilterMode.OTHER -> {
-                if (memberId == null) {
-                    listOf()
-                } else {
-                    taskAssignmentDao.getForExceptMember(memberId)
+        if (filters.isEmpty()) {
+            return toTaskAssignments(taskAssignmentDao.getAll())
+        }
+        val filtered = mutableListOf<TaskAssignmentEntity>()
+        filters.forEach { filter ->
+            when (filter.getType()) {
+                FilterType.PERSON -> {
+                    if (filter.getItems()
+                            .any { it.getIsSelected() && it.getId() == Filter.ALL_ID }
+                    ) {
+                        filtered.addAll(taskAssignmentDao.getAll())
+                    } else {
+                        filtered.addAll(
+                            taskAssignmentDao.getForMembers(
+                                filter.getItems().filter { it.getIsSelected() }.map { it.getId() })
+                        )
+                    }
                 }
             }
         }
-        return toTaskAssignments(result)
+        return toTaskAssignments(filtered)
     }
 
     suspend fun getTaskAssignment(id: String): TaskAssignment? {

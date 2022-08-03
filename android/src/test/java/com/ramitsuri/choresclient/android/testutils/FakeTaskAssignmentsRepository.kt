@@ -1,8 +1,8 @@
 package com.ramitsuri.choresclient.android.testutils
 
-import com.ramitsuri.choresclient.data.FilterMode
 import com.ramitsuri.choresclient.data.Result
 import com.ramitsuri.choresclient.data.TaskAssignment
+import com.ramitsuri.choresclient.model.Filter
 import com.ramitsuri.choresclient.repositories.TaskAssignmentsRepository
 import kotlinx.datetime.Instant
 
@@ -22,10 +22,7 @@ class FakeTaskAssignmentsRepository : TaskAssignmentsRepository {
         return sinceAssignments
     }
 
-    override suspend fun getLocal(
-        filterMode: FilterMode,
-        memberId: String
-    ): Result<List<TaskAssignment>> {
+    override suspend fun getLocal(filters: List<Filter>): Result<List<TaskAssignment>> {
         TODO("Not yet implemented")
     }
 

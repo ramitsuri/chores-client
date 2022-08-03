@@ -35,16 +35,22 @@ class TaskAssignmentDao(
         }
     }
 
+    suspend fun getForMembers(memberIds: List<String>): List<TaskAssignmentEntity> {
+        return withContext(dispatcherProvider.io) {
+            val result = mutableListOf<TaskAssignmentEntity>()
+            dbQueries.transaction {
+                memberIds.forEach { memberId ->
+                    result.addAll(dbQueries.selectAssignmentsByMembers(memberId).executeAsList())
+                }
+            }
+            return@withContext result
+        }
+    }
+
     suspend fun getSince(time: Long): List<TaskAssignmentEntity> {
         return withContext(dispatcherProvider.io) {
             return@withContext dbQueries.selectAssignmentsSince(Instant.fromEpochMilliseconds(time))
                 .executeAsList()
-        }
-    }
-
-    suspend fun getForExceptMember(memberId: String): List<TaskAssignmentEntity> {
-        return withContext(dispatcherProvider.io) {
-            return@withContext dbQueries.selectAssignmentsByNotMember(memberId).executeAsList()
         }
     }
 

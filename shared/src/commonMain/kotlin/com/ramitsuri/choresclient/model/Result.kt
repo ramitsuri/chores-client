@@ -1,15 +1,13 @@
 package com.ramitsuri.choresclient.model
 
-import com.ramitsuri.choresclient.data.FilterMode
 import com.ramitsuri.choresclient.data.RepeatUnit
-import com.ramitsuri.choresclient.data.TaskAssignment
 import com.ramitsuri.choresclient.data.ViewError
 import kotlinx.datetime.Instant
 
 data class AssignmentsViewState(
     val loading: Boolean = false,
-    val assignments: Map<String, List<TaskAssignment>> = mapOf(),
-    val selectedFilter: FilterMode = FilterMode.NONE
+    val assignments: Map<TextValue, List<TaskAssignmentWrapper>> = mapOf(),
+    val filters: List<Filter>
 )
 
 data class LoginViewState(

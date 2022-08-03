@@ -15,10 +15,12 @@
     <string name="assignment_mark_completed">Mark Completed</string>
     <string name="assignment_refresh">Refresh</string>
     <string name="assignment_filter_mine">Mine</string>
-    <string name="assignment_filter_mine_content_description">Filter mine</string>
     <string name="assignment_filter_other">Others\'</string>
-    <string name="assignment_filter_other_content_description">Filter others\'</string>
+    <string name="assignment_filter_content_description">Filter person</string>
     <string name="assignment_empty">Hurray! All Done</string>
+    <string name="assignment_filter_all">All</string>
+    <string name="assignment_filter_person">Person</string>
+    <string name="assignment_header_on_completion">On Completion</string>
 
     <!-- Notifications -->
     <string name="notification_reminders_id">Reminders</string>

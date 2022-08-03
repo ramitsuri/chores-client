@@ -58,6 +58,9 @@ class MainApplication : Application(), KoinComponent {
     }
 
     private fun enqueueWorkers() {
+        if (BuildConfig.DEBUG) {
+            return
+        }
         AssignmentsDownloader.enqueuePeriodic(this)
         ReminderSchedulerWorker.enqueuePeriodic(this)
     }

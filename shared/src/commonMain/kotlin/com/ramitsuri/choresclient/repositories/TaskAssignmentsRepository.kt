@@ -1,9 +1,9 @@
 package com.ramitsuri.choresclient.repositories
 
-import com.ramitsuri.choresclient.data.FilterMode
 import com.ramitsuri.choresclient.data.Result
 import com.ramitsuri.choresclient.data.TaskAssignment
 import com.ramitsuri.choresclient.data.ViewError
+import com.ramitsuri.choresclient.model.Filter
 import com.ramitsuri.choresclient.network.TaskAssignmentsApi
 import com.ramitsuri.choresclient.utils.DispatcherProvider
 import com.ramitsuri.choresclient.utils.LogHelper
@@ -44,8 +44,8 @@ class SystemTaskAssignmentsRepository(
         return localDataSource.getSince(sinceDueDateTime)
     }
 
-    override suspend fun getLocal(filterMode: FilterMode, memberId: String): Result<List<TaskAssignment>> {
-        return Result.Success(localDataSource.getTaskAssignments(filterMode, memberId))
+    override suspend fun getLocal(filters: List<Filter>): Result<List<TaskAssignment>> {
+        return Result.Success(localDataSource.getTaskAssignments(filters))
     }
 
     override suspend fun getLocal(id: String): TaskAssignment? {
@@ -117,7 +117,7 @@ interface TaskAssignmentsRepository {
 
     suspend fun getLocal(sinceDueDateTime: Instant): List<TaskAssignment>
 
-    suspend fun getLocal(filterMode: FilterMode, memberId: String): Result<List<TaskAssignment>>
+    suspend fun getLocal(filters: List<Filter>): Result<List<TaskAssignment>>
 
     suspend fun getLocal(id: String): TaskAssignment?
 

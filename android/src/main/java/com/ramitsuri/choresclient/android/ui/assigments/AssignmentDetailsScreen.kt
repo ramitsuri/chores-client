@@ -48,6 +48,7 @@ import org.koin.androidx.compose.getViewModel
 fun AssignmentDetailsScreen(
     assignmentId: String,
     modifier: Modifier = Modifier,
+    enableCompleteAndSnooze:Boolean,
     modalBottomSheetState: ModalBottomSheetState,
     viewModel: AssignmentDetailsViewModel = getViewModel(),
     markAsDone: (String, ProgressStatus) -> Unit
@@ -64,6 +65,7 @@ fun AssignmentDetailsScreen(
             AssignmentDetailsContent(
                 assignment = it,
                 modifier = modifier,
+                enableCompleteAndSnooze = enableCompleteAndSnooze,
                 onComplete = {
                     coroutineScope.launch {
                         markAsDone(assignmentId, ProgressStatus.TODO)
@@ -95,6 +97,7 @@ fun AssignmentDetailsScreen(
 fun AssignmentDetailsContent(
     assignment: AssignmentDetails,
     modifier: Modifier = Modifier,
+    enableCompleteAndSnooze: Boolean,
     onComplete: () -> Unit,
     onSnoozeHour: () -> Unit,
     onSnoozeDay: () -> Unit
@@ -135,6 +138,7 @@ fun AssignmentDetailsContent(
         Spacer(modifier = modifier.height(marginLarge))
         FilledTonalButton(
             onClick = onComplete,
+            enabled = enableCompleteAndSnooze,
             modifier = modifier.fillMaxWidth()
         ) {
             Text(text = stringResource(id = R.string.assignment_details_button_done))
@@ -142,13 +146,15 @@ fun AssignmentDetailsContent(
         Spacer(modifier = modifier.height(marginLarge))
         Row(modifier = modifier.fillMaxWidth()) {
             OutlinedButton(
-                onClick = onSnoozeHour
+                onClick = onSnoozeHour,
+                enabled = enableCompleteAndSnooze
             ) {
                 Text(text = stringResource(id = R.string.assignment_details_button_snooze_hours))
             }
             Spacer(modifier = modifier.width(marginMedium))
             OutlinedButton(
-                onClick = onSnoozeDay
+                onClick = onSnoozeDay,
+                enabled = enableCompleteAndSnooze
             ) {
                 Text(text = stringResource(id = R.string.assignment_details_button_snooze_day))
             }
@@ -187,6 +193,7 @@ fun PreviewAssignmentDetailsContent() {
                 onComplete = {},
                 onSnoozeHour = {},
                 onSnoozeDay = {},
+                enableCompleteAndSnooze = false
             )
         }
     }
