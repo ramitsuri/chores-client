@@ -37,13 +37,13 @@ selectAssignmentsByMember:
 SELECT * FROM TaskAssignmentEntity
 WHERE memberId = ?;
 
+selectAssignmentsByMembers:
+SELECT * FROM TaskAssignmentEntity
+WHERE memberId IN (?);
+
 selectAssignmentsSince:
 SELECT * FROM TaskAssignmentEntity
 WHERE dueDateTime >= ?;
-
-selectAssignmentsByNotMember:
-SELECT * FROM TaskAssignmentEntity
-WHERE memberId != :memberId;
 
 selectAssignmentsForUpload:
 SELECT * FROM TaskAssignmentEntity
