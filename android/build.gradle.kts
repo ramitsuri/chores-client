@@ -10,66 +10,49 @@ plugins {
 }
 
 dependencies {
-    val fragmentVersion = "1.3.6"
-
     implementation(project(":shared"))
     implementation("androidx.core:core-ktx:1.8.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.4.1")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.5.1")
 
     // Material
-    implementation("com.google.android.material:material:1.5.0-alpha05")
+    implementation("com.google.android.material:material:1.7.0-alpha03")
 
     // App Compat
-    implementation("androidx.appcompat:appcompat:1.3.1")
-
-    // Constraint Layout
-    implementation("androidx.constraintlayout:constraintlayout:2.1.0")
+    implementation("androidx.appcompat:appcompat:1.4.2")
 
     // Date Time
-    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.3.2")
-
-    // Fragment
-    implementation("androidx.fragment:fragment-ktx:$fragmentVersion")
-    debugImplementation("androidx.fragment:fragment-testing:$fragmentVersion")
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
 
     // Koin
     val koin = findProperty("version.koin")
-    implementation("io.insert-koin:koin-android:$koin")
+    implementation("io.insert-koin:koin-android:3.1.6")
     implementation("io.insert-koin:koin-androidx-compose:$koin")
-
-    // Navigation Component
-    implementation("androidx.navigation:navigation-fragment-ktx:2.3.5")
-    implementation("androidx.navigation:navigation-ui-ktx:2.3.5")
-
-    // Support
-    implementation("androidx.legacy:legacy-support-v4:1.0.0")
-
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:1.1.5")
 
     // Work
     val workVersion = "2.7.0"
     implementation("androidx.work:work-runtime-ktx:$workVersion")
 
     // Compose
-    implementation("androidx.compose.ui:ui:1.1.1")
-    implementation("androidx.compose.ui:ui-tooling-preview:1.1.1")
-    implementation("androidx.compose.ui:ui-tooling:1.2.0-beta03")
-    implementation("androidx.compose.material:material:1.1.1")
-    implementation("androidx.compose.material:material-icons-extended:1.1.1")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.4.1")
-    implementation("androidx.activity:activity-compose:1.4.0")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.4.1")
-    implementation("androidx.compose.material3:material3:1.0.0-alpha13")
-    implementation("androidx.compose.material3:material3-window-size-class:1.0.0-alpha13")
+    implementation("androidx.compose.ui:ui:1.2.0")
+    implementation("androidx.compose.ui:ui-tooling-preview:1.2.0")
+    implementation("androidx.compose.ui:ui-tooling:1.3.0-alpha02")
+    implementation("androidx.compose.material:material:1.2.0")
+    implementation("androidx.compose.material:material-icons-extended:1.2.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.5.1")
+    implementation("androidx.activity:activity-compose:1.5.1")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.5.1")
+    implementation("androidx.compose.material3:material3:1.0.0-alpha15")
+    implementation("androidx.compose.material3:material3-window-size-class:1.0.0-alpha15")
     implementation("com.google.accompanist:accompanist-swiperefresh:0.23.1")
     implementation("com.google.accompanist:accompanist-systemuicontroller:0.24.12-rc")
+    // 2.5.1 is causing a crash - List contains no element matching the predicate
     implementation("androidx.navigation:navigation-compose:2.4.2")
 
     // Testing
     testImplementation("junit:junit:4.13.2")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-datetime:0.3.2")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
     androidTestImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit-ktx:1.1.4-alpha03")
+    androidTestImplementation("androidx.test.ext:junit-ktx:1.1.4-alpha07")
     androidTestImplementation("androidx.test:runner:1.4.0")
     androidTestImplementation("androidx.test:rules:1.4.0")
 }
@@ -105,7 +88,6 @@ android {
         }
     }
     compileOptions {
-        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
