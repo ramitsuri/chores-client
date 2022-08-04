@@ -367,13 +367,6 @@ fun FilterOption(
         selected = filter.getItems().any { it.getIsSelected() },
         onClick = { expanded = !expanded },
         label = { Text(filter.getDisplayText().stringValue()) },
-        selectedIcon = {
-            Icon(
-                imageVector = Icons.Filled.Person,
-                contentDescription = stringResource(id = R.string.assignment_filter_content_description),
-                modifier = Modifier.size(FilterChipDefaults.IconSize)
-            )
-        },
         leadingIcon = {
             Icon(
                 imageVector = Icons.Filled.Person,

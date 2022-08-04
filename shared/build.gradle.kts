@@ -38,8 +38,7 @@ kotlin {
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines")
 
                 // Date Time
-                val dateTime = findProperty("version.kotlinx.datetime")
-                implementation("org.jetbrains.kotlinx:kotlinx-datetime:$dateTime")
+                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
 
                 // Koin
                 val koin = findProperty("version.koin")
@@ -81,7 +80,7 @@ kotlin {
                 implementation("io.ktor:ktor-client-android:$ktor")
 
                 // ViewModel
-                implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.1")
+                implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1")
 
                 // Firebase
                 implementation(project.dependencies.platform("com.google.firebase:firebase-bom:30.1.0"))
