@@ -20,23 +20,13 @@ dependencies {
     // App Compat
     implementation("androidx.appcompat:appcompat:1.4.2")
 
-    // Constraint Layout
-    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
-
     // Date Time
-    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.3.2")
-
-    // Fragment
-    implementation("androidx.fragment:fragment-ktx:1.5.1")
-    debugImplementation("androidx.fragment:fragment-testing:1.5.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
 
     // Koin
     val koin = findProperty("version.koin")
     implementation("io.insert-koin:koin-android:3.1.6")
     implementation("io.insert-koin:koin-androidx-compose:$koin")
-
-    // Support
-    implementation("androidx.legacy:legacy-support-v4:1.0.0")
 
     // Work
     val workVersion = "2.7.0"
@@ -60,7 +50,7 @@ dependencies {
 
     // Testing
     testImplementation("junit:junit:4.13.2")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-datetime:0.3.2")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
     androidTestImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit-ktx:1.1.4-alpha07")
     androidTestImplementation("androidx.test:runner:1.4.0")
