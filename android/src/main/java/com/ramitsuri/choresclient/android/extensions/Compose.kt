@@ -19,5 +19,6 @@ private fun getResId(key: LocalizedString): Int {
         LocalizedString.FILTER_ALL -> R.string.assignment_filter_all
         LocalizedString.ON_COMPLETION -> R.string.assignment_header_on_completion
         LocalizedString.PERSON_FILTER -> R.string.assignment_filter_person
+        LocalizedString.SETTINGS -> R.string.settings
     }
 }

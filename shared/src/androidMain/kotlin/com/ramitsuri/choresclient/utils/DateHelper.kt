@@ -1,14 +1,14 @@
 package com.ramitsuri.choresclient.utils
 
-import java.time.ZoneId
-import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
-import java.util.*
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toJavaInstant
 import kotlinx.datetime.toJavaZoneId
+import java.time.ZoneId
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 import java.time.Instant as JvmInstant
 
 actual fun getDay(
@@ -25,6 +25,21 @@ fun formatReminderTime(
     timeZone: TimeZone = TimeZone.currentSystemDefault()
 ): String {
     return format(toFormat, now, timeZone, "MMM d 'at' HH.mm.ss", "MMM d, uuuu 'at' HH.mm.ss")
+}
+
+fun formatSyncTime(
+    toFormat: Instant,
+    now: Instant = Clock.System.now(),
+    timeZone: TimeZone = TimeZone.currentSystemDefault()
+): String {
+    val jvmToFormat = toFormat.toJavaInstant()
+    val toFormatZoned = getZonedDateTime(jvmToFormat, timeZone.toJavaZoneId())
+    val (formatSameYear, formatDifferentYear) = if (toFormatZoned.minute == 0) {
+        Pair("K a MMM d", "K a MMM d, uuuu")
+    } else {
+        Pair("K:mm a MMM d", "K:m a MMM d, uuuu")
+    }
+    return format(toFormat, now, timeZone, formatSameYear, formatDifferentYear)
 }
 
 fun formatLogTime(
@@ -51,8 +66,8 @@ private fun format(
     formatDifferentYear: String
 ): String {
     val jvmToFormat = toFormat.toJavaInstant()
-    val toFormatZoned = getZonedDateTime(jvmToFormat)
-    val nowZoned = getZonedDateTime(now.toJavaInstant())
+    val toFormatZoned = getZonedDateTime(jvmToFormat, timeZone.toJavaZoneId())
+    val nowZoned = getZonedDateTime(now.toJavaInstant(), timeZone.toJavaZoneId())
     val pattern = if (toFormatZoned.year == nowZoned.year) {
         formatSameYear
     } else {

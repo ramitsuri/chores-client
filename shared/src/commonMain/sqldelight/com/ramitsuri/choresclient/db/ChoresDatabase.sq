@@ -1,10 +1,11 @@
+import com.ramitsuri.choresclient.data.ActiveStatus;
 import com.ramitsuri.choresclient.data.CreateType;
 import com.ramitsuri.choresclient.data.ProgressStatus;
 import com.ramitsuri.choresclient.data.RepeatUnit;
 import kotlinx.datetime.Instant;
 
 /**
- * TASK-ASSIGNMNET
+ * TASK-ASSIGNMENT
  */
 CREATE TABLE IF NOT EXISTS TaskAssignmentEntity (
     id TEXT NOT NULL PRIMARY KEY,
@@ -136,3 +137,29 @@ VALUES (?, ?, ?);
 deleteAlarm:
 DELETE FROM AlarmEntity
 WHERE assignmentId = ?;
+
+/**
+ * HOUSE (also known as lists)
+ */
+CREATE TABLE IF NOT EXISTS HouseEntity (
+    id TEXT NOT NULL PRIMARY KEY,
+    name TEXT NOT NULL,
+    createdByMemberId TEXT NOT NULL,
+    createdDate INTEGER AS Instant NOT NULL,
+    status INTEGER AS ActiveStatus NOT NULL
+);
+
+selectHouse:
+SELECT * FROM HouseEntity
+WHERE id = ?;
+
+selectHouses:
+SELECT * FROM HouseEntity;
+
+insertHouse:
+INSERT OR REPLACE INTO
+HouseEntity (id, name, createdByMemberId, createdDate, status)
+VALUES (?, ?, ?, ?, ?);
+
+deleteHouses:
+DELETE FROM HouseEntity;

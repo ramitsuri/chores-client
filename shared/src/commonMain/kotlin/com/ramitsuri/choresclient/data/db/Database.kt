@@ -1,14 +1,17 @@
 package com.ramitsuri.choresclient.data.db
 
+import com.ramitsuri.choresclient.data.ActiveStatus
 import com.ramitsuri.choresclient.data.CreateType
 import com.ramitsuri.choresclient.data.ProgressStatus
 import com.ramitsuri.choresclient.data.RepeatUnit
 import com.ramitsuri.choresclient.data.entities.AlarmDao
+import com.ramitsuri.choresclient.data.entities.HouseDao
 import com.ramitsuri.choresclient.data.entities.MemberDao
 import com.ramitsuri.choresclient.data.entities.TaskAssignmentDao
 import com.ramitsuri.choresclient.data.entities.TaskDao
 import com.ramitsuri.choresclient.db.AlarmEntity
 import com.ramitsuri.choresclient.db.ChoresDatabase
+import com.ramitsuri.choresclient.db.HouseEntity
 import com.ramitsuri.choresclient.db.MemberEntity
 import com.ramitsuri.choresclient.db.TaskAssignmentEntity
 import com.ramitsuri.choresclient.db.TaskEntity
@@ -40,14 +43,18 @@ class Database(
             dueDateTimeAdapter = instantConverter,
             repeatUnitAdapter = repeatUnitConverter,
             createdDateAdapter = instantConverter
+        ),
+        HouseEntityAdapter = HouseEntity.Adapter(
+            createdDateAdapter = instantConverter,
+            statusAdapter = statusConverter
         )
-
     )
     private val dbQuery = database.choresDatabaseQueries
     val taskAssignmentDao = TaskAssignmentDao(dbQuery, dispatcherProvider)
     val taskDao = TaskDao(dbQuery, dispatcherProvider)
     val memberDao = MemberDao(dbQuery, dispatcherProvider)
     val alarmDao = AlarmDao(dbQuery, dispatcherProvider)
+    val houseDao = HouseDao(dbQuery, dispatcherProvider)
 }
 
 private val progressStatusConverter = object : ColumnAdapter<ProgressStatus, Long> {
@@ -87,5 +94,15 @@ private val instantConverter = object : ColumnAdapter<Instant, Long> {
 
     override fun encode(value: Instant): Long {
         return value.toEpochMilliseconds()
+    }
+}
+
+private val statusConverter = object : ColumnAdapter<ActiveStatus, Long> {
+    override fun decode(databaseValue: Long): ActiveStatus {
+        return ActiveStatus.fromKey(databaseValue.toInt())
+    }
+
+    override fun encode(value: ActiveStatus): Long {
+        return value.key.toLong()
     }
 }

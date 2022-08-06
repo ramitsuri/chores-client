@@ -1,5 +1,6 @@
 package com.ramitsuri.choresclient.network
 
+import com.ramitsuri.choresclient.data.ActiveStatus
 import com.ramitsuri.choresclient.data.CreateType
 import com.ramitsuri.choresclient.data.ProgressStatus
 import com.ramitsuri.choresclient.data.RepeatUnit
@@ -10,7 +11,7 @@ import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 
-object ProgressStatusSerializer: KSerializer<ProgressStatus> {
+object ProgressStatusSerializer : KSerializer<ProgressStatus> {
     override val descriptor = PrimitiveSerialDescriptor("ProgressStatus", PrimitiveKind.STRING)
 
     override fun deserialize(decoder: Decoder): ProgressStatus {
@@ -27,7 +28,7 @@ object ProgressStatusSerializer: KSerializer<ProgressStatus> {
     }
 }
 
-object InstantSerializer: KSerializer<Instant> {
+object InstantSerializer : KSerializer<Instant> {
     override val descriptor = PrimitiveSerialDescriptor("Instant", PrimitiveKind.STRING)
 
     override fun deserialize(decoder: Decoder): Instant {
@@ -39,7 +40,7 @@ object InstantSerializer: KSerializer<Instant> {
     }
 }
 
-object CreateTypeSerializer: KSerializer<CreateType> {
+object CreateTypeSerializer : KSerializer<CreateType> {
     override val descriptor = PrimitiveSerialDescriptor("CreateType", PrimitiveKind.STRING)
 
     override fun deserialize(decoder: Decoder): CreateType {
@@ -56,7 +57,7 @@ object CreateTypeSerializer: KSerializer<CreateType> {
     }
 }
 
-object RepeatUnitSerializer: KSerializer<RepeatUnit> {
+object RepeatUnitSerializer : KSerializer<RepeatUnit> {
     override val descriptor = PrimitiveSerialDescriptor("RepeatUnit", PrimitiveKind.STRING)
 
     override fun deserialize(decoder: Decoder): RepeatUnit {
@@ -73,3 +74,19 @@ object RepeatUnitSerializer: KSerializer<RepeatUnit> {
     }
 }
 
+object ActiveStatusSerializer : KSerializer<ActiveStatus> {
+    override val descriptor = PrimitiveSerialDescriptor("ActiveStatus", PrimitiveKind.STRING)
+
+    override fun deserialize(decoder: Decoder): ActiveStatus {
+        val repeatUnit = try {
+            ActiveStatus.fromKey(decoder.decodeString().toInt())
+        } catch (e: Exception) {
+            ActiveStatus.UNKNOWN
+        }
+        return repeatUnit
+    }
+
+    override fun serialize(encoder: Encoder, value: ActiveStatus) {
+        encoder.encodeInt(value.key)
+    }
+}
