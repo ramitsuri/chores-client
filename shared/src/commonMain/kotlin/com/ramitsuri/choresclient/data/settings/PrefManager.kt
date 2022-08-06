@@ -2,6 +2,8 @@ package com.ramitsuri.choresclient.data.settings
 
 import com.ramitsuri.choresclient.utils.Lock
 import com.ramitsuri.choresclient.utils.use
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 
 class PrefManager(
     private val keyValueStore: KeyValueStore,
@@ -62,6 +64,16 @@ class PrefManager(
         }
     }
 
+    fun getLastSyncTime(): Instant {
+        val lastSyncTimeMillis = keyValueStore.getLong(LAST_SYNC_TIME, 0L)
+        return Instant.fromEpochMilliseconds(lastSyncTimeMillis)
+    }
+
+    fun setLastSyncTime(time: Instant = Clock.System.now()) {
+        val millis = time.toEpochMilliseconds()
+        keyValueStore.putLong(LAST_SYNC_TIME, millis)
+    }
+
     private fun deleteLegacyPrefs() {
         legacyPrefs.forEach { (key, store) ->
             if (store == KV) {
@@ -79,6 +91,7 @@ class PrefManager(
         private const val DEBUG_SERVER = "debug_server"
         private const val ENABLE_REMOTE_LOGGING = "enable_remote_logging"
         private const val PREV_NOTIFICATION_ID = "prev_notification_id"
+        private const val LAST_SYNC_TIME = "last_sync_time"
 
         private const val KV = "KV"
         private const val SKV = "SKV"

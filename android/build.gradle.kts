@@ -93,6 +93,7 @@ android {
     }
     kotlinOptions {
         jvmTarget = "1.8"
+        freeCompilerArgs = freeCompilerArgs + "-Xjvm-default=enable"
     }
     buildFeatures {
         viewBinding = true

@@ -116,11 +116,8 @@ class TaskAssignmentDataSource(
         if (assignmentEntity == null) {
             return null
         }
-        val memberEntity = memberDao.get(assignmentEntity.memberId)
-        val taskEntity = taskDao.get(assignmentEntity.taskId)
-        if (memberEntity == null || taskEntity == null) {
-            return null
-        }
+        val memberEntity = memberDao.get(assignmentEntity.memberId) ?: return null
+        val taskEntity = taskDao.get(assignmentEntity.taskId) ?: return null
 
         return TaskAssignment(
             assignmentEntity,

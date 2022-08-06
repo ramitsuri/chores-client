@@ -30,6 +30,7 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckBox
 import androidx.compose.material.icons.filled.CheckBoxOutlineBlank
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.Card
@@ -41,6 +42,7 @@ import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -62,11 +64,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.ramitsuri.choresclient.android.R
 import com.ramitsuri.choresclient.android.extensions.stringValue
+import com.ramitsuri.choresclient.android.ui.preview.AssignmentsPreview
 import com.ramitsuri.choresclient.android.ui.theme.ChoresClientTheme
 import com.ramitsuri.choresclient.android.ui.theme.assignmentHeaderCornerRadius
 import com.ramitsuri.choresclient.android.ui.theme.iconWidth
@@ -83,6 +87,7 @@ import com.ramitsuri.choresclient.data.ProgressStatus
 import com.ramitsuri.choresclient.data.RepeatUnit
 import com.ramitsuri.choresclient.data.Task
 import com.ramitsuri.choresclient.data.TaskAssignment
+import com.ramitsuri.choresclient.model.AssignmentsMenuItem
 import com.ramitsuri.choresclient.model.Filter
 import com.ramitsuri.choresclient.model.FilterItem
 import com.ramitsuri.choresclient.model.PersonFilter
@@ -99,7 +104,8 @@ import org.koin.androidx.compose.getViewModel
 fun AssignmentsScreen(
     modifier: Modifier = Modifier,
     viewModel: AssignmentsViewModel = getViewModel(),
-    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
+    onSettingsClicked: () -> Unit
 ) {
     val activity = (LocalContext.current as? Activity)
     BackHandler {
@@ -110,6 +116,7 @@ fun AssignmentsScreen(
     var enableCompleteAndSnooze by rememberSaveable { mutableStateOf(false) }
     val modalBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     val coroutineScope = rememberCoroutineScope()
+    val menu = listOf(AssignmentsMenuItem.SETTINGS)
 
     ModalBottomSheetLayout(
         sheetState = modalBottomSheetState,
@@ -132,7 +139,7 @@ fun AssignmentsScreen(
             snackbarHost = { SnackbarHost(snackbarHostState) },
             modifier = modifier
                 .fillMaxSize()
-                .displayCutoutPadding(),
+                .displayCutoutPadding()
         ) { paddingValues ->
             AssignmentsContent(
                 isLoading = viewState.loading,
@@ -154,8 +161,13 @@ fun AssignmentsScreen(
                 onRefresh = viewModel::fetchAssignments,
                 modifier = modifier.padding(paddingValues),
                 filters = viewState.filters,
-                onFilterSelected = viewModel::filter
-            )
+                onFilterSelected = viewModel::filter,
+                menu = menu
+            ) { menuItem ->
+                if (menuItem.id == AssignmentsMenuItem.SETTINGS.id) {
+                    onSettingsClicked()
+                }
+            }
         }
     }
 }
@@ -170,14 +182,22 @@ private fun AssignmentsContent(
     filters: List<Filter>,
     onFilterSelected: (Filter, FilterItem) -> Unit,
     onRefresh: (Boolean) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    menu: List<AssignmentsMenuItem>,
+    onMenuSelected: (AssignmentsMenuItem) -> Unit
 ) {
     Column(
         modifier = modifier
             .fillMaxSize()
             .padding(horizontal = paddingMedium)
     ) {
-        FilterOptionGroup(filters, onFilterSelected = onFilterSelected)
+        FilterRow(
+            filters,
+            onFilterSelected = onFilterSelected,
+            menu = menu,
+            onMenuSelected = onMenuSelected,
+            modifier = modifier
+        )
         LoadingContent(
             loading = isLoading,
             empty = assignments.isEmpty(),
@@ -343,16 +363,23 @@ private fun LoadingContent(
 }
 
 @Composable
-fun FilterOptionGroup(
+fun FilterRow(
     filters: List<Filter>,
-    onFilterSelected: (Filter, FilterItem) -> Unit
+    onFilterSelected: (Filter, FilterItem) -> Unit,
+    menu: List<AssignmentsMenuItem>,
+    onMenuSelected: (AssignmentsMenuItem) -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    LazyRow(
-        horizontalArrangement = Arrangement.spacedBy(marginMedium)
-    ) {
-        items(filters, key = { it.getKey() }) { item ->
-            FilterOption(filter = item, onFilterSelected = onFilterSelected)
+    Row(modifier = modifier.fillMaxWidth()) {
+        LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(marginMedium),
+            modifier = modifier.weight(1F)
+        ) {
+            items(filters, key = { it.getKey() }) { item ->
+                FilterOption(filter = item, onFilterSelected = onFilterSelected)
+            }
         }
+        MoreMenu(menu, onMenuSelected, modifier)
     }
 }
 
@@ -363,49 +390,89 @@ fun FilterOption(
     onFilterSelected: (Filter, FilterItem) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
-    FilterChip(
-        selected = filter.getItems().any { it.getIsSelected() },
-        onClick = { expanded = !expanded },
-        label = { Text(filter.getDisplayText().stringValue()) },
-        leadingIcon = {
+    Box {
+        FilterChip(
+            selected = filter.getItems().any { it.getIsSelected() },
+            onClick = { expanded = !expanded },
+            label = { Text(filter.getDisplayText().stringValue()) },
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Filled.Person,
+                    contentDescription = stringResource(id = R.string.assignment_filter_content_description),
+                    modifier = Modifier.size(FilterChipDefaults.IconSize)
+                )
+            },
+            trailingIcon = {
+                Icon(
+                    imageVector = Icons.Filled.ArrowDropDown,
+                    contentDescription = stringResource(id = R.string.assignment_filter_content_description),
+                    modifier = Modifier.size(FilterChipDefaults.IconSize)
+                )
+            }
+        )
+
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+        ) {
+            filter.getItems().forEach { item ->
+                DropdownMenuItem(
+                    text = { Text(item.getDisplayName()) },
+                    trailingIcon = {
+                        Icon(
+                            imageVector = if (item.getIsSelected()) {
+                                Icons.Filled.CheckBox
+                            } else {
+                                Icons.Filled.CheckBoxOutlineBlank
+                            },
+                            contentDescription = stringResource(id = R.string.assignment_filter_content_description),
+                            modifier = Modifier.size(FilterChipDefaults.IconSize)
+                        )
+                    },
+                    onClick = {
+                        expanded = false
+                        onFilterSelected(filter, item)
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun MoreMenu(
+    menu: List<AssignmentsMenuItem>,
+    onMenuSelected: (AssignmentsMenuItem) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var expanded by remember { mutableStateOf(false) }
+    Box {
+        IconButton(
+            onClick = {
+                expanded = !expanded
+            },
+            modifier = modifier
+                .size(iconWidth)
+                .padding(paddingSmall)
+        ) {
             Icon(
-                imageVector = Icons.Filled.Person,
-                contentDescription = stringResource(id = R.string.assignment_filter_content_description),
-                modifier = Modifier.size(FilterChipDefaults.IconSize)
-            )
-        },
-        trailingIcon = {
-            Icon(
-                imageVector = Icons.Filled.ArrowDropDown,
-                contentDescription = stringResource(id = R.string.assignment_filter_content_description),
-                modifier = Modifier.size(FilterChipDefaults.IconSize)
+                imageVector = Icons.Filled.MoreVert,
+                contentDescription = stringResource(id = R.string.assignment_menu_content_description)
             )
         }
-    )
-
-    DropdownMenu(
-        expanded = expanded,
-        onDismissRequest = { expanded = false },
-    ) {
-        filter.getItems().forEach { item ->
-            DropdownMenuItem(
-                text = { Text(item.getDisplayName()) },
-                trailingIcon = {
-                    Icon(
-                        imageVector = if (item.getIsSelected()) {
-                            Icons.Filled.CheckBox
-                        } else {
-                            Icons.Filled.CheckBoxOutlineBlank
-                        },
-                        contentDescription = stringResource(id = R.string.assignment_filter_content_description),
-                        modifier = Modifier.size(FilterChipDefaults.IconSize)
-                    )
-                },
-                onClick = {
-                    expanded = false
-                    onFilterSelected(filter, item)
-                }
-            )
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+        ) {
+            menu.forEach { item ->
+                DropdownMenuItem(
+                    text = { Text(item.text.stringValue()) },
+                    onClick = {
+                        expanded = false
+                        onMenuSelected(item)
+                    }
+                )
+            }
         }
     }
 }
@@ -414,7 +481,7 @@ fun FilterOption(
 @Composable
 fun PreviewIcon() {
     Icon(
-        imageVector = Icons.Filled.Person,
+        imageVector = Icons.Filled.MoreVert,
         contentDescription = stringResource(id = R.string.assignment_filter_content_description),
         modifier = Modifier.size(64.dp)
     )
@@ -462,21 +529,25 @@ fun PreviewAssignmentContentContentEmpty() {
                 onItemClick = { _: TaskAssignment, _: Boolean, _: ClickType -> },
                 filters = listOf(),
                 onFilterSelected = { _, _ -> },
-                onRefresh = {}
-            )
+                onRefresh = {},
+                menu = listOf(AssignmentsMenuItem.SETTINGS)
+            ) {
+
+            }
         }
     }
 }
 
 @Preview
 @Composable
-fun PreviewAssignmentContent_personFilter() {
+fun PreviewAssignmentContent_personFilter(
+    @PreviewParameter(AssignmentsPreview::class) assignments: Map<TextValue, List<TaskAssignmentWrapper>>
+) {
     ChoresClientTheme {
         Surface {
             AssignmentsContent(
                 isLoading = false,
-                assignments = previewAssignments(),
-                onRefresh = {},
+                assignments = assignments,
                 onItemClick = { _, _, _ -> },
                 filters = listOf(
                     PersonFilter(
@@ -501,7 +572,11 @@ fun PreviewAssignmentContent_personFilter() {
                     )
                 ),
                 onFilterSelected = { _, _ -> },
-            )
+                onRefresh = {},
+                menu = listOf(AssignmentsMenuItem.SETTINGS),
+            ) {
+
+            }
         }
     }
 }
@@ -617,211 +692,3 @@ fun PreviewEmptyContent() {
         EmptyContent(onRefresh = {})
     }
 }
-
-private fun previewAssignments(enableCompletedButton: Boolean = true): Map<TextValue, List<TaskAssignmentWrapper>> =
-    mapOf(
-        TextValue.ForString("Oct 31") to listOf(
-            TaskAssignmentWrapper(
-                TaskAssignment(
-                    id = "1",
-                    progressStatus = ProgressStatus.TODO,
-                    progressStatusDate = Clock.System.now(),
-                    Task(
-                        id = "",
-                        name = "Clean Kitchen",
-                        description = "Clean Kitchen now",
-                        dueDateTime = Clock.System.now(),
-                        repeatValue = 2,
-                        repeatUnit = RepeatUnit.DAY,
-                        houseId = "",
-                        memberId = "",
-                        rotateMember = false,
-                        createdDate = Clock.System.now()
-                    ),
-                    Member(id = "", name = "Ramit", createdDate = Clock.System.now()),
-                    dueDateTime = Clock.System.now(),
-                    createdDate = Clock.System.now(),
-                    createType = CreateType.AUTO
-                ), enableCompletedButton
-            ),
-            TaskAssignmentWrapper(
-                TaskAssignment(
-                    id = "2",
-                    progressStatus = ProgressStatus.TODO,
-                    progressStatusDate = Clock.System.now(),
-                    Task(
-                        id = "",
-                        name = "Clean Kitchen",
-                        description = "Clean Kitchen now",
-                        dueDateTime = Clock.System.now(),
-                        repeatValue = 2,
-                        repeatUnit = RepeatUnit.NONE,
-                        houseId = "",
-                        memberId = "",
-                        rotateMember = false,
-                        createdDate = Clock.System.now()
-                    ),
-                    Member(id = "", name = "Ramit", createdDate = Clock.System.now()),
-                    dueDateTime = Clock.System.now(),
-                    createdDate = Clock.System.now(),
-                    createType = CreateType.AUTO
-                ), enableCompletedButton
-            ),
-            TaskAssignmentWrapper(
-                TaskAssignment(
-                    id = "3",
-                    progressStatus = ProgressStatus.TODO,
-                    progressStatusDate = Clock.System.now(),
-                    Task(
-                        id = "",
-                        name = "Clean Kitchen",
-                        description = "Clean Kitchen now",
-                        dueDateTime = Clock.System.now(),
-                        repeatValue = 2,
-                        repeatUnit = RepeatUnit.DAY,
-                        houseId = "",
-                        memberId = "",
-                        rotateMember = false,
-                        createdDate = Clock.System.now()
-                    ),
-                    Member(id = "", name = "Ramit", createdDate = Clock.System.now()),
-                    dueDateTime = Clock.System.now(),
-                    createdDate = Clock.System.now(),
-                    createType = CreateType.AUTO
-                ), enableCompletedButton
-            ),
-            TaskAssignmentWrapper(
-                TaskAssignment(
-                    id = "4",
-                    progressStatus = ProgressStatus.TODO,
-                    progressStatusDate = Clock.System.now(),
-                    Task(
-                        id = "",
-                        name = "Clean Kitchen",
-                        description = "Clean Kitchen now",
-                        dueDateTime = Clock.System.now(),
-                        repeatValue = 2,
-                        repeatUnit = RepeatUnit.DAY,
-                        houseId = "",
-                        memberId = "",
-                        rotateMember = false,
-                        createdDate = Clock.System.now()
-                    ),
-                    Member(id = "", name = "Ramit", createdDate = Clock.System.now()),
-                    dueDateTime = Clock.System.now(),
-                    createdDate = Clock.System.now(),
-                    createType = CreateType.AUTO
-                ), enableCompletedButton
-            )
-        ),
-        TextValue.ForString("Nov 01") to listOf(
-            TaskAssignmentWrapper(
-                TaskAssignment(
-                    id = "5",
-                    progressStatus = ProgressStatus.TODO,
-                    progressStatusDate = Clock.System.now(),
-                    Task(
-                        id = "",
-                        name = "Clean Kitchen",
-                        description = "Clean Kitchen now",
-                        dueDateTime = Clock.System.now(),
-                        repeatValue = 2,
-                        repeatUnit = RepeatUnit.DAY,
-                        houseId = "",
-                        memberId = "",
-                        rotateMember = false,
-                        createdDate = Clock.System.now()
-                    ),
-                    Member(
-                        id = "",
-                        name = "Ramit",
-                        createdDate = Clock.System.now()
-                    ),
-                    dueDateTime = Clock.System.now(),
-                    createdDate = Clock.System.now(),
-                    createType = CreateType.AUTO
-                ), enableCompletedButton
-            ),
-            TaskAssignmentWrapper(
-                TaskAssignment(
-                    id = "6",
-                    progressStatus = ProgressStatus.TODO,
-                    progressStatusDate = Clock.System.now(),
-                    Task(
-                        id = "",
-                        name = "Clean Kitchen",
-                        description = "Clean Kitchen now",
-                        dueDateTime = Clock.System.now(),
-                        repeatValue = 2,
-                        repeatUnit = RepeatUnit.DAY,
-                        houseId = "",
-                        memberId = "",
-                        rotateMember = false,
-                        createdDate = Clock.System.now()
-                    ),
-                    Member(
-                        id = "",
-                        name = "Ramit",
-                        createdDate = Clock.System.now()
-                    ),
-                    dueDateTime = Clock.System.now(),
-                    createdDate = Clock.System.now(),
-                    createType = CreateType.AUTO
-                ), enableCompletedButton
-            ),
-            TaskAssignmentWrapper(
-                TaskAssignment(
-                    id = "",
-                    progressStatus = ProgressStatus.TODO,
-                    progressStatusDate = Clock.System.now(),
-                    Task(
-                        id = "7",
-                        name = "Clean Kitchen",
-                        description = "Clean Kitchen now",
-                        dueDateTime = Clock.System.now(),
-                        repeatValue = 2,
-                        repeatUnit = RepeatUnit.DAY,
-                        houseId = "",
-                        memberId = "",
-                        rotateMember = false,
-                        createdDate = Clock.System.now()
-                    ),
-                    Member(
-                        id = "",
-                        name = "Ramit",
-                        createdDate = Clock.System.now()
-                    ),
-                    dueDateTime = Clock.System.now(),
-                    createdDate = Clock.System.now(),
-                    createType = CreateType.AUTO
-                ), enableCompletedButton
-            ),
-            TaskAssignmentWrapper(
-                TaskAssignment(
-                    id = "8",
-                    progressStatus = ProgressStatus.TODO,
-                    progressStatusDate = Clock.System.now(),
-                    Task(
-                        id = "",
-                        name = "Clean Kitchen",
-                        description = "Clean Kitchen now",
-                        dueDateTime = Clock.System.now(),
-                        repeatValue = 2,
-                        repeatUnit = RepeatUnit.DAY,
-                        houseId = "",
-                        memberId = "",
-                        rotateMember = false,
-                        createdDate = Clock.System.now()
-                    ),
-                    Member(
-                        id = "",
-                        name = "Ramit",
-                        createdDate = Clock.System.now()
-                    ),
-                    dueDateTime = Clock.System.now(),
-                    createdDate = Clock.System.now(),
-                    createType = CreateType.AUTO
-                ), enableCompletedButton
-            )
-        )
-    )

@@ -1,12 +1,13 @@
 package com.ramitsuri.choresclient.data
 
+import com.ramitsuri.choresclient.db.MemberEntity
+import com.ramitsuri.choresclient.db.TaskAssignmentEntity
+import com.ramitsuri.choresclient.db.TaskEntity
+import com.ramitsuri.choresclient.network.ActiveStatusSerializer
 import com.ramitsuri.choresclient.network.CreateTypeSerializer
 import com.ramitsuri.choresclient.network.InstantSerializer
 import com.ramitsuri.choresclient.network.ProgressStatusSerializer
 import com.ramitsuri.choresclient.network.RepeatUnitSerializer
-import com.ramitsuri.choresclient.db.MemberEntity
-import com.ramitsuri.choresclient.db.TaskAssignmentEntity
-import com.ramitsuri.choresclient.db.TaskEntity
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 
@@ -70,6 +71,17 @@ data class Task(
 }
 
 @Serializable
+data class House(
+    val id: String,
+    val name: String,
+    val createdByMemberId: String,
+    @Serializable(with = InstantSerializer::class)
+    val createdDate: Instant,
+    @Serializable(with = ActiveStatusSerializer::class)
+    val status: ActiveStatus
+)
+
+@Serializable
 data class Member(
     val id: String,
     val name: String,
@@ -85,6 +97,9 @@ data class Member(
 
 @Serializable
 data class Token(val authToken: String)
+
+@Serializable
+data class SyncResult(val associatedLists: List<House>)
 
 enum class ProgressStatus(val key: Int) {
     UNKNOWN(0),
@@ -111,6 +126,23 @@ enum class CreateType(val key: Int) {
 
     companion object {
         fun fromKey(key: Int): CreateType {
+            for (value in values()) {
+                if (value.key == key) {
+                    return value
+                }
+            }
+            return UNKNOWN
+        }
+    }
+}
+
+enum class ActiveStatus(val key: Int) {
+    UNKNOWN(0),
+    ACTIVE(1),
+    INACTIVE(2);
+
+    companion object {
+        fun fromKey(key: Int): ActiveStatus {
             for (value in values()) {
                 if (value.key == key) {
                     return value

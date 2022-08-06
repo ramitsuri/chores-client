@@ -19,12 +19,14 @@ import com.ramitsuri.choresclient.notification.NotificationHandler
 import com.ramitsuri.choresclient.reminder.AlarmHandler
 import com.ramitsuri.choresclient.repositories.AssignmentDetailsRepository
 import com.ramitsuri.choresclient.repositories.LoginRepository
+import com.ramitsuri.choresclient.repositories.SyncRepository
 import com.ramitsuri.choresclient.repositories.TaskAssignmentsRepository
 import com.ramitsuri.choresclient.utils.AppHelper
 import com.ramitsuri.choresclient.utils.DispatcherProvider
 import com.ramitsuri.choresclient.viewmodel.AssignmentDetailsViewModel
 import com.ramitsuri.choresclient.viewmodel.AssignmentsViewModel
 import com.ramitsuri.choresclient.viewmodel.LoginViewModel
+import com.ramitsuri.choresclient.viewmodel.SettingsViewModel
 import kotlinx.coroutines.CoroutineScope
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.component.KoinComponent
@@ -102,6 +104,8 @@ class MainApplication : Application(), KoinComponent {
                 viewModel {
                     LoginViewModel(
                         get<LoginRepository>(),
+                        get<SyncRepository>(),
+                        get<TaskAssignmentsRepository>(),
                         get<PrefManager>(),
                         get<DispatcherProvider>(),
                         BuildConfig.DEBUG
@@ -111,6 +115,14 @@ class MainApplication : Application(), KoinComponent {
                 viewModel {
                     AssignmentDetailsViewModel(
                         get()
+                    )
+                }
+
+                viewModel {
+                    SettingsViewModel(
+                        get<SyncRepository>(),
+                        get<PrefManager>(),
+                        get<DispatcherProvider>()
                     )
                 }
             }

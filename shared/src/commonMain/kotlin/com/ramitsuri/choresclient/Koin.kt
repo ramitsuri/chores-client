@@ -2,6 +2,7 @@ package com.ramitsuri.choresclient
 
 import com.ramitsuri.choresclient.data.db.Database
 import com.ramitsuri.choresclient.data.entities.AlarmDao
+import com.ramitsuri.choresclient.data.entities.HouseDao
 import com.ramitsuri.choresclient.data.entities.MemberDao
 import com.ramitsuri.choresclient.data.entities.TaskAssignmentDao
 import com.ramitsuri.choresclient.data.entities.TaskDao
@@ -11,7 +12,9 @@ import com.ramitsuri.choresclient.network.NetworkProvider
 import com.ramitsuri.choresclient.notification.NotificationHandler
 import com.ramitsuri.choresclient.reminder.AlarmHandler
 import com.ramitsuri.choresclient.repositories.AssignmentDetailsRepository
+import com.ramitsuri.choresclient.repositories.HouseDataSource
 import com.ramitsuri.choresclient.repositories.LoginRepository
+import com.ramitsuri.choresclient.repositories.SyncRepository
 import com.ramitsuri.choresclient.repositories.SystemTaskAssignmentsRepository
 import com.ramitsuri.choresclient.repositories.TaskAssignmentDataSource
 import com.ramitsuri.choresclient.repositories.TaskAssignmentsRepository
@@ -74,12 +77,20 @@ private val coreModule = module {
         get<Database>().alarmDao
     }
 
+    factory<HouseDao> {
+        get<Database>().houseDao
+    }
+
     factory<TaskAssignmentDataSource> {
         TaskAssignmentDataSource(
             get<TaskAssignmentDao>(),
             get<MemberDao>(),
             get<TaskDao>()
         )
+    }
+
+    factory<HouseDataSource> {
+        HouseDataSource(get<HouseDao>())
     }
 
     factory<TaskAssignmentsRepository> {
@@ -104,6 +115,15 @@ private val coreModule = module {
         get<NetworkProvider>().provideLoginRepository(
             prefManager = get<PrefManager>(),
             dispatcherProvider = get<DispatcherProvider>()
+        )
+    }
+
+    factory<SyncRepository> {
+        SyncRepository(
+            get<HouseDataSource>(),
+            get<NetworkProvider>().provideSyncApi(),
+            get<PrefManager>(),
+            get<DispatcherProvider>()
         )
     }
 }
