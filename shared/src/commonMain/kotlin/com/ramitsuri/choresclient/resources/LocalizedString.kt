@@ -4,5 +4,6 @@ enum class LocalizedString {
     FILTER_ALL,
     ON_COMPLETION,
     PERSON_FILTER,
+    HOUSE_FILTER,
     SETTINGS
 }

@@ -92,6 +92,7 @@ class LoginViewModel(
     }
 
     fun getServer() = prefManager.getDebugServer()
+
     private fun getDebugViewState() = if (isDebug) {
         LoginDebugViewState(serverText = prefManager.getDebugServer())
     } else {
