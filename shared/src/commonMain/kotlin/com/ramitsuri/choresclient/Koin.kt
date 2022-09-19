@@ -19,6 +19,7 @@ import com.ramitsuri.choresclient.repositories.SystemTaskAssignmentsRepository
 import com.ramitsuri.choresclient.repositories.TaskAssignmentDataSource
 import com.ramitsuri.choresclient.repositories.TaskAssignmentsRepository
 import com.ramitsuri.choresclient.utils.DispatcherProvider
+import com.ramitsuri.choresclient.utils.FilterHelper
 import io.ktor.client.engine.HttpClientEngine
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -124,6 +125,14 @@ private val coreModule = module {
             get<NetworkProvider>().provideSyncApi(),
             get<PrefManager>(),
             get<DispatcherProvider>()
+        )
+    }
+
+    factory<FilterHelper> {
+        FilterHelper(
+            get<TaskAssignmentsRepository>(),
+            get<SyncRepository>(),
+            get<PrefManager>()
         )
     }
 }

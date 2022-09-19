@@ -55,24 +55,34 @@ class TaskAssignmentDataSource(
         if (filters.isEmpty()) {
             return toTaskAssignments(taskAssignmentDao.getAll())
         }
-        val filtered = mutableListOf<TaskAssignmentEntity>()
+        val filtered = toTaskAssignments(taskAssignmentDao.getAll()).toMutableList()
         filters.forEach { filter ->
             when (filter.getType()) {
                 FilterType.PERSON -> {
                     if (filter.getItems()
                             .any { it.getIsSelected() && it.getId() == Filter.ALL_ID }
                     ) {
-                        filtered.addAll(taskAssignmentDao.getAll())
+                        // All selected, remove nothing
                     } else {
-                        filtered.addAll(
-                            taskAssignmentDao.getForMembers(
-                                filter.getItems().filter { it.getIsSelected() }.map { it.getId() })
-                        )
+                        val selectedMemberIds =
+                            filter.getItems().filter { it.getIsSelected() }.map { it.getId() }
+                        filtered.removeAll { !selectedMemberIds.contains(it.member.id) }
+                    }
+                }
+                FilterType.HOUSE -> {
+                    if (filter.getItems()
+                            .any { it.getIsSelected() && it.getId() == Filter.ALL_ID }
+                    ) {
+                        // All selected, remove nothing
+                    } else {
+                        val selectedHouseIds =
+                            filter.getItems().filter { it.getIsSelected() }.map { it.getId() }
+                        filtered.removeAll { !selectedHouseIds.contains(it.task.houseId) }
                     }
                 }
             }
         }
-        return toTaskAssignments(filtered)
+        return filtered
     }
 
     suspend fun getTaskAssignment(id: String): TaskAssignment? {

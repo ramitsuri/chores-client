@@ -14,6 +14,17 @@ class SettingsKeyValueStore(private val settings: Settings) : KeyValueStore {
         settings[key] = value
     }
 
+    override fun getStringList(key: String, fallback: List<String>): List<String> {
+        val storedString =
+            getString(key, fallback = null)?.split(LIST_SEPARATOR) ?: return fallback
+        return storedString.toList()
+    }
+
+    override fun putStringList(key: String, value: List<String>) {
+        val listToString = value.joinToString(LIST_SEPARATOR)
+        putString(key, listToString)
+    }
+
     override fun getLong(key: String, fallback: Long): Long {
         return settings[key] ?: fallback
     }
@@ -56,6 +67,10 @@ class SettingsKeyValueStore(private val settings: Settings) : KeyValueStore {
 
     override fun removeAll() {
         settings.clear()
+    }
+
+    companion object {
+        private const val LIST_SEPARATOR = ";;;"
     }
 }
 

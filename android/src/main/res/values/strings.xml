@@ -7,6 +7,7 @@
     <string name="settings">Settings</string>
     <string name="sync">Sync</string>
     <string name="back">Back</string>
+    <string name="save">Save</string>
 
     <!-- Assignments -->
     <string name="assignment_due">Due %1$s</string>
@@ -19,11 +20,13 @@
     <string name="assignment_refresh">Refresh</string>
     <string name="assignment_filter_mine">Mine</string>
     <string name="assignment_filter_other">Others\'</string>
-    <string name="assignment_filter_content_description">Filter person</string>
+    <string name="assignment_filter_person_content_description">Filter person</string>
+    <string name="assignment_filter_house_content_description">Filter list</string>
     <string name="assignment_menu_content_description">Menu</string>
     <string name="assignment_empty">Hurray! All Done</string>
     <string name="assignment_filter_all">All</string>
     <string name="assignment_filter_person">Person</string>
+    <string name="assignment_filter_house">List</string>
     <string name="assignment_header_on_completion">On Completion</string>
 
     <!-- Notifications -->
@@ -57,5 +60,8 @@
 
     <!-- Settings -->
     <string name="settings_item_sync_last_time">Last synced at %1$s</string>
+    <string name="settings_item_default_filter_title">Default filter</string>
+    <string name="settings_item_default_filter">Person: %1$s, List: %2$s</string>
+    <string name="settings_item_filter_none">NONE</string>
 
 </resources>

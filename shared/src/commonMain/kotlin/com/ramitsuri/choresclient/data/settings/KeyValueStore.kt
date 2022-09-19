@@ -4,6 +4,9 @@ interface KeyValueStore {
     fun getString(key: String, fallback: String?): String?
     fun putString(key: String, value: String?)
 
+    fun getStringList(key: String, fallback: List<String>): List<String>
+    fun putStringList(key: String, value: List<String>)
+
     fun getLong(key: String, fallback: Long): Long
     fun putLong(key: String, value: Long)
 

@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -30,6 +31,8 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckBox
 import androidx.compose.material.icons.filled.CheckBoxOutlineBlank
+import androidx.compose.material.icons.filled.House
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.rememberModalBottomSheetState
@@ -69,7 +72,7 @@ import androidx.compose.ui.unit.dp
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.ramitsuri.choresclient.android.R
-import com.ramitsuri.choresclient.android.extensions.stringValue
+import com.ramitsuri.choresclient.android.extensions.string
 import com.ramitsuri.choresclient.android.ui.preview.AssignmentsPreview
 import com.ramitsuri.choresclient.android.ui.theme.ChoresClientTheme
 import com.ramitsuri.choresclient.android.ui.theme.assignmentHeaderCornerRadius
@@ -90,10 +93,11 @@ import com.ramitsuri.choresclient.data.TaskAssignment
 import com.ramitsuri.choresclient.model.AssignmentsMenuItem
 import com.ramitsuri.choresclient.model.Filter
 import com.ramitsuri.choresclient.model.FilterItem
-import com.ramitsuri.choresclient.model.PersonFilter
-import com.ramitsuri.choresclient.model.PersonFilterItem
+import com.ramitsuri.choresclient.model.FilterType
 import com.ramitsuri.choresclient.model.TaskAssignmentWrapper
 import com.ramitsuri.choresclient.model.TextValue
+import com.ramitsuri.choresclient.model.filter.PersonFilter
+import com.ramitsuri.choresclient.model.filter.PersonFilterItem
 import com.ramitsuri.choresclient.viewmodel.AssignmentsViewModel
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
@@ -102,11 +106,13 @@ import org.koin.androidx.compose.getViewModel
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
 fun AssignmentsScreen(
+    shouldRefreshFilter: Boolean,
     modifier: Modifier = Modifier,
     viewModel: AssignmentsViewModel = getViewModel(),
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     onSettingsClicked: () -> Unit
 ) {
+    // TODO use shouldRefreshFilter to refresh filters after changed in settings
     val activity = (LocalContext.current as? Activity)
     BackHandler {
         activity?.finish()
@@ -139,6 +145,7 @@ fun AssignmentsScreen(
             snackbarHost = { SnackbarHost(snackbarHostState) },
             modifier = modifier
                 .fillMaxSize()
+                .systemBarsPadding()
                 .displayCutoutPadding()
         ) { paddingValues ->
             AssignmentsContent(
@@ -214,7 +221,7 @@ private fun AssignmentsContent(
                 ) {
                     assignments.forEach { (header, assignments) ->
                         stickyHeader {
-                            AssignmentHeader(text = header.stringValue())
+                            AssignmentHeader(text = header.string())
                         }
                         items(assignments, key = { it.assignment.id }) { item ->
                             AssignmentItem(
@@ -390,22 +397,28 @@ fun FilterOption(
     onFilterSelected: (Filter, FilterItem) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
+    val (optionIcon, contentDescription) = when (filter.getType()) {
+        FilterType.PERSON ->
+            Pair(Icons.Filled.Person, R.string.assignment_filter_person_content_description)
+        FilterType.HOUSE ->
+            Pair(Icons.Filled.House, R.string.assignment_filter_house_content_description)
+    }
     Box {
         FilterChip(
             selected = filter.getItems().any { it.getIsSelected() },
             onClick = { expanded = !expanded },
-            label = { Text(filter.getDisplayText().stringValue()) },
+            label = { Text(filter.getDisplayText().string()) },
             leadingIcon = {
                 Icon(
-                    imageVector = Icons.Filled.Person,
-                    contentDescription = stringResource(id = R.string.assignment_filter_content_description),
+                    imageVector = optionIcon,
+                    contentDescription = stringResource(id = contentDescription),
                     modifier = Modifier.size(FilterChipDefaults.IconSize)
                 )
             },
             trailingIcon = {
                 Icon(
                     imageVector = Icons.Filled.ArrowDropDown,
-                    contentDescription = stringResource(id = R.string.assignment_filter_content_description),
+                    contentDescription = stringResource(id = contentDescription),
                     modifier = Modifier.size(FilterChipDefaults.IconSize)
                 )
             }
@@ -417,7 +430,7 @@ fun FilterOption(
         ) {
             filter.getItems().forEach { item ->
                 DropdownMenuItem(
-                    text = { Text(item.getDisplayName()) },
+                    text = { Text(item.getDisplayName().string()) },
                     trailingIcon = {
                         Icon(
                             imageVector = if (item.getIsSelected()) {
@@ -425,7 +438,7 @@ fun FilterOption(
                             } else {
                                 Icons.Filled.CheckBoxOutlineBlank
                             },
-                            contentDescription = stringResource(id = R.string.assignment_filter_content_description),
+                            contentDescription = stringResource(id = contentDescription),
                             modifier = Modifier.size(FilterChipDefaults.IconSize)
                         )
                     },
@@ -466,7 +479,7 @@ fun MoreMenu(
         ) {
             menu.forEach { item ->
                 DropdownMenuItem(
-                    text = { Text(item.text.stringValue()) },
+                    text = { Text(item.text.string()) },
                     onClick = {
                         expanded = false
                         onMenuSelected(item)
@@ -481,8 +494,8 @@ fun MoreMenu(
 @Composable
 fun PreviewIcon() {
     Icon(
-        imageVector = Icons.Filled.MoreVert,
-        contentDescription = stringResource(id = R.string.assignment_filter_content_description),
+        imageVector = Icons.Filled.List,
+        contentDescription = stringResource(id = R.string.assignment_filter_person_content_description),
         modifier = Modifier.size(64.dp)
     )
 }
@@ -497,17 +510,17 @@ fun PreviewFilterOption() {
                 items = listOf(
                     PersonFilterItem(
                         id = "1",
-                        displayName = "Ramit",
+                        displayName = TextValue.ForString("Ramit"),
                         selected = false
                     ),
                     PersonFilterItem(
                         id = "2",
-                        displayName = "Jess",
+                        displayName = TextValue.ForString("Jess"),
                         selected = true
                     ),
                     PersonFilterItem(
                         id = "3",
-                        displayName = "All",
+                        displayName = TextValue.ForString("All"),
                         selected = false
                     )
                 )
@@ -555,17 +568,17 @@ fun PreviewAssignmentContent_personFilter(
                         items = listOf(
                             PersonFilterItem(
                                 id = "1",
-                                displayName = "Ramit",
+                                displayName = TextValue.ForString("Ramit"),
                                 selected = false
                             ),
                             PersonFilterItem(
                                 id = "2",
-                                displayName = "Jess",
+                                displayName = TextValue.ForString("Jess"),
                                 selected = true
                             ),
                             PersonFilterItem(
                                 id = "3",
-                                displayName = "All",
+                                displayName = TextValue.ForString("All"),
                                 selected = false
                             )
                         )

@@ -5,9 +5,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.ramitsuri.choresclient.android.ui.assigments.AssignmentsScreen
 import com.ramitsuri.choresclient.android.ui.login.LoginScreen
 import com.ramitsuri.choresclient.android.ui.settings.SettingsScreen
@@ -25,8 +27,8 @@ object Destinations {
 }
 
 class NavigationActions(private val navController: NavHostController) {
-    fun navigateToAssignments() {
-        navController.navigate(Destinations.ASSIGNMENTS_ROUTE) {
+    fun navigateToAssignments(shouldRefreshFilter: Boolean) {
+        navController.navigate("${Destinations.ASSIGNMENTS_ROUTE}/$shouldRefreshFilter") {
             popUpTo(navController.graph.findStartDestination().id) {
                 saveState = true
             }
@@ -61,13 +63,19 @@ fun NavGraph(
         modifier = modifier
     ) {
         composable(Destinations.LOGIN_ROUTE) {
-            LoginScreen(onLoggedIn = { navActions.navigateToAssignments() })
+            LoginScreen(onLoggedIn = { navActions.navigateToAssignments(shouldRefreshFilter = false) })
         }
-        composable(Destinations.ASSIGNMENTS_ROUTE) {
-            AssignmentsScreen(onSettingsClicked = { navActions.navigateToSettings() })
+        composable(
+            "${Destinations.ASSIGNMENTS_ROUTE}/{refreshFilter}",
+            arguments = listOf(navArgument("refreshFilter") { type = NavType.BoolType })
+        ) { backStackEntry ->
+            val shouldRefreshFilter = backStackEntry.arguments?.getBoolean("refreshFilter") ?: false
+            AssignmentsScreen(
+                shouldRefreshFilter,
+                onSettingsClicked = { navActions.navigateToSettings() })
         }
         composable(Destinations.SETTINGS_ROUTE) {
-            SettingsScreen(onBack = { navActions.navigateToAssignments() })
+            SettingsScreen(onBack = { navActions.navigateToAssignments(shouldRefreshFilter = true) })
         }
     }
 }

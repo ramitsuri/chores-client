@@ -3,7 +3,6 @@ package com.ramitsuri.choresclient.model
 import com.ramitsuri.choresclient.data.RepeatUnit
 import com.ramitsuri.choresclient.data.ViewError
 import kotlinx.datetime.Instant
-import kotlinx.datetime.TimeZone
 
 data class AssignmentsViewState(
     val loading: Boolean = false,
@@ -36,11 +35,4 @@ data class AssignmentDetails(
     val repeatValue: Int,
     val repeatUnit: RepeatUnit,
     val notificationTime: Instant?
-)
-
-data class SettingsViewState(
-    val loading: Boolean = false,
-    val lastSyncTime: Instant,
-    val timeZone: TimeZone,
-    val error: ViewError? = null
 )

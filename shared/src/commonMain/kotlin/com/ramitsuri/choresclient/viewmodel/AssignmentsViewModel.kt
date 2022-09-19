@@ -8,9 +8,6 @@ import com.ramitsuri.choresclient.data.settings.PrefManager
 import com.ramitsuri.choresclient.model.AssignmentsViewState
 import com.ramitsuri.choresclient.model.Filter
 import com.ramitsuri.choresclient.model.FilterItem
-import com.ramitsuri.choresclient.model.FilterType
-import com.ramitsuri.choresclient.model.PersonFilter
-import com.ramitsuri.choresclient.model.PersonFilterItem
 import com.ramitsuri.choresclient.model.TaskAssignmentWrapper
 import com.ramitsuri.choresclient.model.TextValue
 import com.ramitsuri.choresclient.repositories.AssignmentDetailsRepository
@@ -18,6 +15,7 @@ import com.ramitsuri.choresclient.repositories.TaskAssignmentsRepository
 import com.ramitsuri.choresclient.resources.LocalizedString
 import com.ramitsuri.choresclient.utils.AppHelper
 import com.ramitsuri.choresclient.utils.DispatcherProvider
+import com.ramitsuri.choresclient.utils.FilterHelper
 import com.ramitsuri.choresclient.utils.LogHelper
 import com.ramitsuri.choresclient.utils.getDay
 import kotlinx.coroutines.CoroutineScope
@@ -31,6 +29,7 @@ import org.koin.core.component.inject
 class AssignmentsViewModel(
     private val assignmentDetailsRepository: AssignmentDetailsRepository,
     private val repository: TaskAssignmentsRepository,
+    private val filterHelper: FilterHelper,
     private val prefManager: PrefManager,
     private val appHelper: AppHelper,
     private val dispatchers: DispatcherProvider,
@@ -71,142 +70,14 @@ class AssignmentsViewModel(
     }
 
     fun filter(filter: Filter, filterItem: FilterItem) {
-        when (filter.getType()) {
-            FilterType.PERSON -> {
-                val items: List<FilterItem>
-                val text: TextValue
-                if (filterItem.getId() == Filter.ALL_ID) { // All filter
-                    if (filterItem.getIsSelected()) { // All filter unselected
-                        items = filter.getItems()
-                            .map {
-                                PersonFilterItem(
-                                    it.getId(),
-                                    it.getDisplayName(),
-                                    selected = false
-                                )
-                            }
-                        text = TextValue.ForKey(LocalizedString.PERSON_FILTER)
-                    } else { // All filter selected
-                        items = filter.getItems()
-                            .map {
-                                PersonFilterItem(
-                                    it.getId(),
-                                    it.getDisplayName(),
-                                    selected = true
-                                )
-                            }
-                        text = TextValue.ForKey(LocalizedString.FILTER_ALL)
-                    }
-                } else { // Non All filter
-                    val previousSelectionCount = filter.getItems().count { it.getIsSelected() }
-                    if (filterItem.getIsSelected()) { // New filter unselected
-                        // Unselect all filter item as well
-                        if (previousSelectionCount == filter.getItems().count()) {
-                            items = filter.getItems()
-                                .map {
-                                    PersonFilterItem(
-                                        it.getId(),
-                                        it.getDisplayName(),
-                                        selected = if (it.getId() == filterItem.getId() ||
-                                            it.getId() == Filter.ALL_ID
-                                        ) {
-                                            false
-                                        } else {
-                                            it.getIsSelected()
-                                        }
-                                    )
-                                }
-                            val newSelectionCount = items.count { it.getIsSelected() }
-                            text = if (newSelectionCount == 0) {
-                                TextValue.ForKey(LocalizedString.PERSON_FILTER)
-                            } else if (newSelectionCount == 1) {
-                                TextValue.ForString(items.find { it.getIsSelected() }
-                                    ?.getDisplayName() ?: "")
-                            } else {
-                                val firstSelectionText =
-                                    items.firstOrNull() { it.getIsSelected() }?.getDisplayName()
-                                        ?: ""
-                                TextValue.ForString("$firstSelectionText+$newSelectionCount")
-                            }
-                        } else { // Unselect just the filter item
-                            items = filter.getItems()
-                                .map {
-                                    PersonFilterItem(
-                                        it.getId(),
-                                        it.getDisplayName(),
-                                        selected = if (it.getId() == filterItem.getId()) {
-                                            false
-                                        } else {
-                                            it.getIsSelected()
-                                        }
-                                    )
-                                }
-                            val newSelectionCount = items.count { it.getIsSelected() }
-                            text = if (newSelectionCount == 0) {
-                                TextValue.ForKey(LocalizedString.PERSON_FILTER)
-                            } else if (newSelectionCount == 1) {
-                                TextValue.ForString(items.find { it.getIsSelected() }
-                                    ?.getDisplayName() ?: "")
-                            } else {
-                                val firstSelectionText =
-                                    items.firstOrNull() { it.getIsSelected() }?.getDisplayName()
-                                        ?: ""
-                                TextValue.ForString("$firstSelectionText+$newSelectionCount")
-                            }
-                        }
-                    } else { // New filter selected
-                        val newSelectionCount = previousSelectionCount + 1
-                        // Select all filter item as well since last unselected item was selected
-                        if (previousSelectionCount == filter.getItems().count() - 2) {
-                            items = filter.getItems()
-                                .map {
-                                    PersonFilterItem(
-                                        it.getId(),
-                                        it.getDisplayName(),
-                                        selected = if (it.getId() == filterItem.getId() ||
-                                            it.getId() == Filter.ALL_ID
-                                        ) {
-                                            true
-                                        } else {
-                                            it.getIsSelected()
-                                        }
-                                    )
-                                }
-                            text = TextValue.ForKey(LocalizedString.FILTER_ALL)
-                        } else { // Select just the filter item
-                            items = filter.getItems()
-                                .map {
-                                    PersonFilterItem(
-                                        it.getId(),
-                                        it.getDisplayName(),
-                                        selected = if (it.getId() == filterItem.getId()) {
-                                            true
-                                        } else {
-                                            it.getIsSelected()
-                                        }
-                                    )
-                                }
-                            // Text is "selectedItem + other selections count"
-                            text = if (newSelectionCount == 1) { // Rob
-                                TextValue.ForString(filterItem.getDisplayName())
-                            } else { // Rob +1
-                                TextValue.ForString(
-                                    "${filterItem.getDisplayName()}+" +
-                                            "${items.count() - 1}"
-                                )
-                            }
-                        }
-                    }
-                }
-                val newFilter = PersonFilter(text, items)
-                filters.removeAll { it.getType() == FilterType.PERSON }
-                filters.add(newFilter)
-                _state.update {
-                    it.copy(filters = filters, loading = true)
-                }
-                getLocal(refreshFilters = false)
-            }
+        val newFilter = filterHelper.onFilterItemSelected(filter, filterItem)
+        filters.removeAll { it.getType() == filter.getType() }
+        filters.add(newFilter)
+        filters.sortBy { it.getType().index }
+        _state.update {
+            it.copy(filters = filters, loading = true)
         }
+        getLocal(refreshFilters = false)
     }
 
     fun changeStateRequested(id: String, progressStatus: ProgressStatus) {
@@ -230,9 +101,9 @@ class AssignmentsViewModel(
 
     private fun getLocal(refreshFilters: Boolean) {
         viewModelScope.launch(dispatchers.main) {
+            refreshFilters(refreshFilters)
             val assignmentsResult =
                 repository.getLocal(filters) as Result.Success
-            refreshFilters(refreshFilters)
             val assignmentsState = AssignmentsViewState(
                 loading = false,
                 getAssignmentsForDisplay(assignmentsResult.data),
@@ -277,31 +148,8 @@ class AssignmentsViewModel(
             return
         }
         filters.clear()
-        // Always use all existing assignments to create filters
-        val assignments = (repository.getLocal(listOf()) as Result.Success).data
-        val personFilterItems = assignments
-            .map { // Get members for assignments
-                it.member
-            }
-            .distinct() // Remove duplicates
-            .map { member -> // Create person filter items
-                PersonFilterItem(
-                    id = member.id,
-                    displayName = member.name,
-                    selected = true
-                )
-            }
-            .plus(
-                PersonFilterItem(
-                    id = Filter.ALL_ID,
-                    displayName = "All",
-                    selected = true
-                )
-            )
-        if (personFilterItems.count() > 1) {
-            val text = TextValue.ForKey(LocalizedString.FILTER_ALL)
-            filters.add(PersonFilter(text = text, personFilterItems))
-        }
+        filters.addAll(filterHelper.get())
+        filters.sortBy { it.getType().index }
         _state.update {
             it.copy(filters = filters)
         }

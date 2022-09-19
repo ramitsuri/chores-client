@@ -1,5 +1,6 @@
 package com.ramitsuri.choresclient.data.settings
 
+import com.ramitsuri.choresclient.model.Filter
 import com.ramitsuri.choresclient.utils.Lock
 import com.ramitsuri.choresclient.utils.use
 import kotlinx.datetime.Clock
@@ -74,6 +75,22 @@ class PrefManager(
         keyValueStore.putLong(LAST_SYNC_TIME, millis)
     }
 
+    fun getSavedPersonFilterIds(): List<String> {
+        return keyValueStore.getStringList(SAVED_PERSON_FILTER_IDS, listOf(Filter.ALL_ID))
+    }
+
+    fun setSavedPersonFilterIds(ids: List<String>) {
+        keyValueStore.putStringList(SAVED_PERSON_FILTER_IDS, ids)
+    }
+
+    fun getSavedHouseFilterIds(): List<String> {
+        return keyValueStore.getStringList(SAVED_HOUSE_FILTER_IDS, listOf(Filter.ALL_ID))
+    }
+
+    fun setSavedHouseFilterIds(ids: List<String>) {
+        keyValueStore.putStringList(SAVED_HOUSE_FILTER_IDS, ids)
+    }
+
     private fun deleteLegacyPrefs() {
         legacyPrefs.forEach { (key, store) ->
             if (store == KV) {
@@ -92,6 +109,8 @@ class PrefManager(
         private const val ENABLE_REMOTE_LOGGING = "enable_remote_logging"
         private const val PREV_NOTIFICATION_ID = "prev_notification_id"
         private const val LAST_SYNC_TIME = "last_sync_time"
+        private const val SAVED_PERSON_FILTER_IDS = "saved_person_filter_ids"
+        private const val SAVED_HOUSE_FILTER_IDS = "saved_house_filter_ids"
 
         private const val KV = "KV"
         private const val SKV = "SKV"

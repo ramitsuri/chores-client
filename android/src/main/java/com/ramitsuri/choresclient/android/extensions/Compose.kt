@@ -7,10 +7,14 @@ import com.ramitsuri.choresclient.model.TextValue
 import com.ramitsuri.choresclient.resources.LocalizedString
 
 @Composable
-fun TextValue.stringValue(): String {
+fun TextValue.string(): String {
     return when (this) {
-        is TextValue.ForString -> value
-        is TextValue.ForKey -> stringResource(id = getResId(key))
+        is TextValue.ForString -> {
+            value.plus(args.joinToString(separator = ""))
+        }
+        is TextValue.ForKey -> {
+            stringResource(id = getResId(key)).plus(args.joinToString(separator = ""))
+        }
     }
 }
 
@@ -19,6 +23,7 @@ private fun getResId(key: LocalizedString): Int {
         LocalizedString.FILTER_ALL -> R.string.assignment_filter_all
         LocalizedString.ON_COMPLETION -> R.string.assignment_header_on_completion
         LocalizedString.PERSON_FILTER -> R.string.assignment_filter_person
+        LocalizedString.HOUSE_FILTER -> R.string.assignment_filter_house
         LocalizedString.SETTINGS -> R.string.settings
     }
 }
