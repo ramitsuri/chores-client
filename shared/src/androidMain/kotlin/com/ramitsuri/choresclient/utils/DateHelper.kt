@@ -61,7 +61,7 @@ fun formatLogTime(
 }
 
 fun formatLogParent(
-    toFormat: LocalDateTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
+    toFormat: LocalDateTime = LocalDateTime.now(),
     now: Instant = Clock.System.now(),
     timeZone: TimeZone = TimeZone.UTC
 ): String {
