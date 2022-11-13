@@ -4,21 +4,23 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 
-fun getNewReminderTimeSnoozeHour(now: Instant = Clock.System.now()): Instant {
-    return now.plus(6.hours)
+fun getNewReminderTimeSnoozeHour(
+    now: Instant = Clock.System.now(),
+    timeZone: TimeZone = TimeZone.currentSystemDefault()
+): LocalDateTime {
+    return now.plus(6.hours).toLocalDateTime(timeZone)
 }
 
 fun getNewReminderTimeSnoozeDay(
     now: Instant = Clock.System.now(),
     timeZone: TimeZone = TimeZone.currentSystemDefault()
-): Instant {
+): LocalDateTime {
     val tomorrowDateTime = now.plus(1.days).toLocalDateTime(timeZone)
-    val reminderDateTime = LocalDateTime(
+    return LocalDateTime(
         year = tomorrowDateTime.year,
         month = tomorrowDateTime.month,
         dayOfMonth = tomorrowDateTime.dayOfMonth,
@@ -26,5 +28,4 @@ fun getNewReminderTimeSnoozeDay(
         minute = 0,
         second = 0
     )
-    return reminderDateTime.toInstant(timeZone)
 }

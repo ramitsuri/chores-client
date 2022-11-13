@@ -14,6 +14,7 @@ import com.ramitsuri.choresclient.db.TaskEntity
 import com.ramitsuri.choresclient.model.Filter
 import com.ramitsuri.choresclient.model.FilterType
 import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDateTime
 
 class TaskAssignmentDataSource(
     private val taskAssignmentDao: TaskAssignmentDao,
@@ -97,8 +98,8 @@ class TaskAssignmentDataSource(
     /**
      * Will always return locally saved assignments since the passed due date time
      */
-    suspend fun getSince(dueDateTime: Instant): List<TaskAssignment> {
-        return toTaskAssignments(taskAssignmentDao.getSince(dueDateTime.toEpochMilliseconds()))
+    suspend fun getSince(dueDateTime: LocalDateTime): List<TaskAssignment> {
+        return toTaskAssignments(taskAssignmentDao.getSince(dueDateTime))
     }
 
     suspend fun getReadyForUpload(): List<TaskAssignment> {
@@ -147,7 +148,8 @@ class TaskAssignmentDataSource(
             houseId = task.houseId,
             memberId = task.memberId,
             rotateMember = task.rotateMember,
-            createdDate = task.createdDate
+            createdDate = task.createdDate,
+            status = task.status
         )
     }
 

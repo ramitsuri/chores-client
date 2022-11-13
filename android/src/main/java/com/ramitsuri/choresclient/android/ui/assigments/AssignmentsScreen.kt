@@ -84,6 +84,7 @@ import com.ramitsuri.choresclient.android.ui.theme.paddingCardView
 import com.ramitsuri.choresclient.android.ui.theme.paddingMedium
 import com.ramitsuri.choresclient.android.ui.theme.paddingSmall
 import com.ramitsuri.choresclient.android.utils.formatRepeatUnit
+import com.ramitsuri.choresclient.data.ActiveStatus
 import com.ramitsuri.choresclient.data.CreateType
 import com.ramitsuri.choresclient.data.Member
 import com.ramitsuri.choresclient.data.ProgressStatus
@@ -101,6 +102,8 @@ import com.ramitsuri.choresclient.model.filter.PersonFilterItem
 import com.ramitsuri.choresclient.viewmodel.AssignmentsViewModel
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.koin.androidx.compose.getViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
@@ -615,16 +618,18 @@ fun PreviewAssignmentItem() {
                     id = "",
                     name = "Clean Kitchen",
                     description = "Clean Kitchen now",
-                    dueDateTime = Clock.System.now(),
+                    dueDateTime = Clock.System.now()
+                        .toLocalDateTime(TimeZone.currentSystemDefault()),
                     repeatValue = 2,
                     repeatUnit = RepeatUnit.DAY,
                     houseId = "",
                     memberId = "",
                     rotateMember = false,
-                    createdDate = Clock.System.now()
+                    createdDate = Clock.System.now(),
+                    status = ActiveStatus.ACTIVE
                 ),
                 Member(id = "", name = "Ramit", createdDate = Clock.System.now()),
-                dueDateTime = Clock.System.now(),
+                dueDateTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
                 createdDate = Clock.System.now(),
                 createType = CreateType.AUTO
             ),
@@ -647,16 +652,17 @@ fun PreviewAssignmentItem_completeButtonDisabled() {
                     id = "",
                     name = "Clean Kitchen",
                     description = "Clean Kitchen now",
-                    dueDateTime = Clock.System.now(),
+                    dueDateTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
                     repeatValue = 2,
                     repeatUnit = RepeatUnit.DAY,
                     houseId = "",
                     memberId = "",
                     rotateMember = false,
-                    createdDate = Clock.System.now()
+                    createdDate = Clock.System.now(),
+                    status = ActiveStatus.ACTIVE
                 ),
                 Member(id = "", name = "Ramit", createdDate = Clock.System.now()),
-                dueDateTime = Clock.System.now(),
+                dueDateTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
                 createdDate = Clock.System.now(),
                 createType = CreateType.AUTO
             ),
@@ -679,16 +685,17 @@ fun PreviewAssignmentItemNoRepeat() {
                     id = "",
                     name = "Clean Kitchen",
                     description = "Clean Kitchen now",
-                    dueDateTime = Clock.System.now(),
+                    dueDateTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
                     repeatValue = 0,
                     repeatUnit = RepeatUnit.NONE,
                     houseId = "",
                     memberId = "",
                     rotateMember = false,
-                    createdDate = Clock.System.now()
+                    createdDate = Clock.System.now(),
+                    status = ActiveStatus.ACTIVE
                 ),
                 Member(id = "", name = "Ramit", createdDate = Clock.System.now()),
-                dueDateTime = Clock.System.now(),
+                dueDateTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
                 createdDate = Clock.System.now(),
                 createType = CreateType.AUTO
             ),

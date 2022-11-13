@@ -41,6 +41,8 @@ import com.ramitsuri.choresclient.model.AssignmentDetails
 import com.ramitsuri.choresclient.viewmodel.AssignmentDetailsViewModel
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.koin.androidx.compose.getViewModel
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -48,7 +50,7 @@ import org.koin.androidx.compose.getViewModel
 fun AssignmentDetailsScreen(
     assignmentId: String,
     modifier: Modifier = Modifier,
-    enableCompleteAndSnooze:Boolean,
+    enableCompleteAndSnooze: Boolean,
     modalBottomSheetState: ModalBottomSheetState,
     viewModel: AssignmentDetailsViewModel = getViewModel(),
     markAsDone: (String, ProgressStatus) -> Unit
@@ -188,7 +190,8 @@ fun PreviewAssignmentDetailsContent() {
                     description = "Clean kitchen now",
                     repeatValue = 2,
                     repeatUnit = RepeatUnit.DAY,
-                    notificationTime = Clock.System.now(),
+                    notificationTime = Clock.System.now()
+                        .toLocalDateTime(TimeZone.currentSystemDefault()),
                 ),
                 onComplete = {},
                 onSnoozeHour = {},

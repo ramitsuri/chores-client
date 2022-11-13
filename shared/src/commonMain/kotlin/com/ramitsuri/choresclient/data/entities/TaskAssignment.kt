@@ -6,6 +6,7 @@ import com.ramitsuri.choresclient.db.TaskAssignmentEntity
 import com.ramitsuri.choresclient.utils.DispatcherProvider
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDateTime
 
 class TaskAssignmentDao(
     private val dbQueries: ChoresDatabaseQueries,
@@ -47,10 +48,11 @@ class TaskAssignmentDao(
         }
     }
 
-    suspend fun getSince(time: Long): List<TaskAssignmentEntity> {
+    suspend fun getSince(time: LocalDateTime): List<TaskAssignmentEntity> {
         return withContext(dispatcherProvider.io) {
-            return@withContext dbQueries.selectAssignmentsSince(Instant.fromEpochMilliseconds(time))
-                .executeAsList()
+            dbQueries.selectAssignments().executeAsList().filter { taskAssignmentEntity ->
+                taskAssignmentEntity.dueDateTime > time
+            }
         }
     }
 

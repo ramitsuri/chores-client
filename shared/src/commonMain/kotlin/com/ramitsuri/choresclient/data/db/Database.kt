@@ -19,6 +19,7 @@ import com.ramitsuri.choresclient.utils.DispatcherProvider
 import com.squareup.sqldelight.ColumnAdapter
 import com.squareup.sqldelight.db.SqlDriver
 import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDateTime
 
 class Database(
     driver: SqlDriver,
@@ -29,20 +30,21 @@ class Database(
         TaskAssignmentEntityAdapter = TaskAssignmentEntity.Adapter(
             progressStatusAdapter = progressStatusConverter,
             progressStatusDateAdapter = instantConverter,
-            dueDateTimeAdapter = instantConverter,
+            dueDateTimeAdapter = localDateTimeConverter,
             createDateAdapter = instantConverter,
             createTypeAdapter = createTypeConverter
         ),
         AlarmEntityAdapter = AlarmEntity.Adapter(
-            showAtTimeAdapter = instantConverter
+            showAtTimeAdapter = localDateTimeConverter
         ),
         MemberEntityAdapter = MemberEntity.Adapter(
             createdDateAdapter = instantConverter
         ),
         TaskEntityAdapter = TaskEntity.Adapter(
-            dueDateTimeAdapter = instantConverter,
+            dueDateTimeAdapter = localDateTimeConverter,
             repeatUnitAdapter = repeatUnitConverter,
-            createdDateAdapter = instantConverter
+            createdDateAdapter = instantConverter,
+            statusAdapter = statusConverter
         ),
         HouseEntityAdapter = HouseEntity.Adapter(
             createdDateAdapter = instantConverter,
@@ -94,6 +96,16 @@ private val instantConverter = object : ColumnAdapter<Instant, Long> {
 
     override fun encode(value: Instant): Long {
         return value.toEpochMilliseconds()
+    }
+}
+
+private val localDateTimeConverter = object : ColumnAdapter<LocalDateTime, String> {
+    override fun decode(databaseValue: String): LocalDateTime {
+        return LocalDateTime.parse(databaseValue)
+    }
+
+    override fun encode(value: LocalDateTime): String {
+        return value.toString()
     }
 }
 
