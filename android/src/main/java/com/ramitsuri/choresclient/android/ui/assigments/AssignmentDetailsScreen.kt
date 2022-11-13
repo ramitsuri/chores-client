@@ -38,11 +38,10 @@ import com.ramitsuri.choresclient.android.utils.formatRepeatUnit
 import com.ramitsuri.choresclient.data.ProgressStatus
 import com.ramitsuri.choresclient.data.RepeatUnit
 import com.ramitsuri.choresclient.model.AssignmentDetails
+import com.ramitsuri.choresclient.utils.now
 import com.ramitsuri.choresclient.viewmodel.AssignmentDetailsViewModel
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
+import kotlinx.datetime.LocalDateTime
 import org.koin.androidx.compose.getViewModel
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -190,8 +189,7 @@ fun PreviewAssignmentDetailsContent() {
                     description = "Clean kitchen now",
                     repeatValue = 2,
                     repeatUnit = RepeatUnit.DAY,
-                    notificationTime = Clock.System.now()
-                        .toLocalDateTime(TimeZone.currentSystemDefault()),
+                    notificationTime = LocalDateTime.now(),
                 ),
                 onComplete = {},
                 onSnoozeHour = {},

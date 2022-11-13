@@ -10,18 +10,15 @@ import com.ramitsuri.choresclient.reminder.AlarmHandler
 import com.ramitsuri.choresclient.repositories.TaskAssignmentsRepository
 import com.ramitsuri.choresclient.utils.DispatcherProvider
 import com.ramitsuri.choresclient.utils.Lock
+import com.ramitsuri.choresclient.utils.minus
+import com.ramitsuri.choresclient.utils.now
+import com.ramitsuri.choresclient.utils.plus
 import com.ramitsuri.choresclient.utils.use
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.Clock
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atTime
 import kotlinx.datetime.minus
-import kotlinx.datetime.toInstant
-import kotlinx.datetime.toLocalDateTime
-import kotlin.time.Duration.Companion.days
-import kotlin.time.Duration.Companion.seconds
 
 class ReminderScheduler(
     private val taskAssignmentsRepository: TaskAssignmentsRepository,
@@ -42,7 +39,7 @@ class ReminderScheduler(
         runningLock.use {
             running = true
         }
-        scheduleReminders(Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()))
+        scheduleReminders(LocalDateTime.now())
         runningLock.use {
             running = false
         }
@@ -52,8 +49,7 @@ class ReminderScheduler(
         withContext(dispatchers.io) {
             // Schedule only reminders from one week in the past. We don't want to be handling
             // assignments to far back in the past as they are assumed to be handled by now
-            val sinceDuration = DatePeriod(days = 21)
-            val sinceDueDateTime = now.date.minus(sinceDuration).atTime(now.time)
+            val sinceDueDateTime = now.minus(days = 21)
             val assignments = taskAssignmentsRepository.getLocal(sinceDueDateTime)
             val memberId = prefManager.getUserId() ?: ""
             val existingNotifications = alarmHandler.getExisting()
@@ -152,19 +148,5 @@ class ReminderScheduler(
         }
         alarmHandler.schedule(newAssignmentAlarms)
         return inFuture.map { it.id }
-    }
-
-    private fun LocalDateTime.plus(
-        second: Int = 0,
-        timeZone: TimeZone = TimeZone.currentSystemDefault()
-    ): LocalDateTime {
-        return toInstant(timeZone).plus(second.seconds).toLocalDateTime(timeZone)
-    }
-
-    private fun LocalDateTime.minus(
-        days: Int = 0,
-        timeZone: TimeZone = TimeZone.currentSystemDefault()
-    ): LocalDateTime {
-        return toInstant(timeZone).minus(days.days).toLocalDateTime(timeZone)
     }
 }

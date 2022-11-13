@@ -55,20 +55,21 @@ class ReminderSchedulerTest {
             // Arrange
             val assignmentId = "1"
             val duration = 30.seconds
-            val scheduledTime = Clock.System.now().plus(duration)
+            val scheduledTime =
+                Clock.System.now().plus(duration).toLocalDateTime(TimeZone.currentSystemDefault())
             val memberId = "1"
             prefManager.setUserId(memberId)
             taskAssignmentsRepository.setSince(
                 listOf(
                     getAssignment(
                         assignmentId,
-                        dueDateTime = scheduledTime.toLocalDateTime(TimeZone.currentSystemDefault()),
+                        dueDateTime = scheduledTime,
                         progressStatus = ProgressStatus.DONE
                     )
                 )
             )
-            alarmHandler.schedule(listOf())// TODO
-                // /*AssignmentAlarm(assignmentId, scheduledTime, 1, "")*/))
+            alarmHandler.schedule(listOf())
+            AssignmentAlarm(assignmentId, scheduledTime, 1, "")
 
             // Act
             reminderScheduler.addReminders()
@@ -85,7 +86,8 @@ class ReminderSchedulerTest {
             // Arrange
             val assignmentId = "1"
             val duration = 30.seconds
-            val scheduledTime = Clock.System.now().minus(duration).toLocalDateTime(TimeZone.currentSystemDefault())
+            val scheduledTime =
+                Clock.System.now().minus(duration).toLocalDateTime(TimeZone.currentSystemDefault())
             val memberId = "1"
             prefManager.setUserId(memberId)
             taskAssignmentsRepository.setSince(
@@ -126,13 +128,13 @@ class ReminderSchedulerTest {
             val scheduledTimeDuration = 25.hours
             alarmHandler.schedule(
                 listOf(
-                    // TODO
-                    /*AssignmentAlarm(
+                    AssignmentAlarm(
                         assignmentId,
-                        scheduledTime.minus(scheduledTimeDuration),
+                        scheduledTime.minus(scheduledTimeDuration)
+                            .toLocalDateTime(TimeZone.currentSystemDefault()),
                         100,
                         ""
-                    )*/
+                    )
                 )
             )
 
@@ -152,7 +154,8 @@ class ReminderSchedulerTest {
             // Arrange
             val assignmentId = "1"
             val duration = 30.seconds
-            val scheduledTime = Clock.System.now().plus(duration).toLocalDateTime(TimeZone.currentSystemDefault())
+            val scheduledTime =
+                Clock.System.now().plus(duration).toLocalDateTime(TimeZone.currentSystemDefault())
             val memberId = "1"
             prefManager.setUserId(memberId)
             taskAssignmentsRepository.setSince(
@@ -179,7 +182,8 @@ class ReminderSchedulerTest {
             // Arrange
             val assignmentId = "1"
             val duration = 30.seconds
-            val scheduledTime = Clock.System.now().plus(duration).toLocalDateTime(TimeZone.currentSystemDefault())
+            val scheduledTime =
+                Clock.System.now().plus(duration).toLocalDateTime(TimeZone.currentSystemDefault())
             val memberId = "1"
             prefManager.setUserId(memberId)
             taskAssignmentsRepository.setSince(
@@ -206,7 +210,8 @@ class ReminderSchedulerTest {
             // Arrange
             val assignmentId = "1"
             val duration = 30.seconds
-            val scheduledTime = Clock.System.now().plus(duration).toLocalDateTime(TimeZone.currentSystemDefault())
+            val scheduledTime =
+                Clock.System.now().plus(duration).toLocalDateTime(TimeZone.currentSystemDefault())
             val memberId = "1"
             prefManager.setUserId("2")
             taskAssignmentsRepository.setSince(

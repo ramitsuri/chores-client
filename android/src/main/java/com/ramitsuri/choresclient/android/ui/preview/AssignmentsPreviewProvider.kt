@@ -10,9 +10,9 @@ import com.ramitsuri.choresclient.data.Task
 import com.ramitsuri.choresclient.data.TaskAssignment
 import com.ramitsuri.choresclient.model.TaskAssignmentWrapper
 import com.ramitsuri.choresclient.model.TextValue
+import com.ramitsuri.choresclient.utils.now
 import kotlinx.datetime.Clock
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
+import kotlinx.datetime.LocalDateTime
 
 class AssignmentsPreview : PreviewParameterProvider<Map<TextValue, List<TaskAssignmentWrapper>>> {
     private val enableCompletedButton = true
@@ -29,8 +29,7 @@ class AssignmentsPreview : PreviewParameterProvider<Map<TextValue, List<TaskAssi
                                 id = "",
                                 name = "Clean Kitchen",
                                 description = "Clean Kitchen now",
-                                dueDateTime = Clock.System.now()
-                                    .toLocalDateTime(TimeZone.currentSystemDefault()),
+                                dueDateTime = LocalDateTime.now(),
                                 repeatValue = 2,
                                 repeatUnit = RepeatUnit.DAY,
                                 houseId = "",
@@ -40,8 +39,7 @@ class AssignmentsPreview : PreviewParameterProvider<Map<TextValue, List<TaskAssi
                                 status = ActiveStatus.ACTIVE
                             ),
                             Member(id = "", name = "Ramit", createdDate = Clock.System.now()),
-                            dueDateTime = Clock.System.now()
-                                .toLocalDateTime(TimeZone.currentSystemDefault()),
+                            dueDateTime = LocalDateTime.now(),
                             createdDate = Clock.System.now(),
                             createType = CreateType.AUTO
                         ), enableCompletedButton
@@ -55,8 +53,7 @@ class AssignmentsPreview : PreviewParameterProvider<Map<TextValue, List<TaskAssi
                                 id = "",
                                 name = "Clean Kitchen",
                                 description = "Clean Kitchen now",
-                                dueDateTime = Clock.System.now()
-                                    .toLocalDateTime(TimeZone.currentSystemDefault()),
+                                dueDateTime = LocalDateTime.now(),
                                 repeatValue = 2,
                                 repeatUnit = RepeatUnit.NONE,
                                 houseId = "",
@@ -66,8 +63,7 @@ class AssignmentsPreview : PreviewParameterProvider<Map<TextValue, List<TaskAssi
                                 status = ActiveStatus.ACTIVE
                             ),
                             Member(id = "", name = "Ramit", createdDate = Clock.System.now()),
-                            dueDateTime = Clock.System.now()
-                                .toLocalDateTime(TimeZone.currentSystemDefault()),
+                            dueDateTime = LocalDateTime.now(),
                             createdDate = Clock.System.now(),
                             createType = CreateType.AUTO
                         ), enableCompletedButton
@@ -81,8 +77,7 @@ class AssignmentsPreview : PreviewParameterProvider<Map<TextValue, List<TaskAssi
                                 id = "",
                                 name = "Clean Kitchen",
                                 description = "Clean Kitchen now",
-                                dueDateTime = Clock.System.now()
-                                    .toLocalDateTime(TimeZone.currentSystemDefault()),
+                                dueDateTime = LocalDateTime.now(),
                                 repeatValue = 2,
                                 repeatUnit = RepeatUnit.DAY,
                                 houseId = "",
@@ -92,8 +87,7 @@ class AssignmentsPreview : PreviewParameterProvider<Map<TextValue, List<TaskAssi
                                 status = ActiveStatus.ACTIVE
                             ),
                             Member(id = "", name = "Ramit", createdDate = Clock.System.now()),
-                            dueDateTime = Clock.System.now()
-                                .toLocalDateTime(TimeZone.currentSystemDefault()),
+                            dueDateTime = LocalDateTime.now(),
                             createdDate = Clock.System.now(),
                             createType = CreateType.AUTO
                         ), enableCompletedButton
@@ -107,8 +101,7 @@ class AssignmentsPreview : PreviewParameterProvider<Map<TextValue, List<TaskAssi
                                 id = "",
                                 name = "Clean Kitchen",
                                 description = "Clean Kitchen now",
-                                dueDateTime = Clock.System.now()
-                                    .toLocalDateTime(TimeZone.currentSystemDefault()),
+                                dueDateTime = LocalDateTime.now(),
                                 repeatValue = 2,
                                 repeatUnit = RepeatUnit.DAY,
                                 houseId = "",
@@ -118,8 +111,7 @@ class AssignmentsPreview : PreviewParameterProvider<Map<TextValue, List<TaskAssi
                                 status = ActiveStatus.ACTIVE
                             ),
                             Member(id = "", name = "Ramit", createdDate = Clock.System.now()),
-                            dueDateTime = Clock.System.now()
-                                .toLocalDateTime(TimeZone.currentSystemDefault()),
+                            dueDateTime = LocalDateTime.now(),
                             createdDate = Clock.System.now(),
                             createType = CreateType.AUTO
                         ), enableCompletedButton
@@ -135,8 +127,7 @@ class AssignmentsPreview : PreviewParameterProvider<Map<TextValue, List<TaskAssi
                                 id = "",
                                 name = "Clean Kitchen",
                                 description = "Clean Kitchen now",
-                                dueDateTime = Clock.System.now()
-                                    .toLocalDateTime(TimeZone.currentSystemDefault()),
+                                dueDateTime = LocalDateTime.now(),
                                 repeatValue = 2,
                                 repeatUnit = RepeatUnit.DAY,
                                 houseId = "",
@@ -150,8 +141,7 @@ class AssignmentsPreview : PreviewParameterProvider<Map<TextValue, List<TaskAssi
                                 name = "Ramit",
                                 createdDate = Clock.System.now()
                             ),
-                            dueDateTime = Clock.System.now()
-                                .toLocalDateTime(TimeZone.currentSystemDefault()),
+                            dueDateTime = LocalDateTime.now(),
                             createdDate = Clock.System.now(),
                             createType = CreateType.AUTO
                         ), enableCompletedButton
@@ -165,8 +155,7 @@ class AssignmentsPreview : PreviewParameterProvider<Map<TextValue, List<TaskAssi
                                 id = "",
                                 name = "Clean Kitchen",
                                 description = "Clean Kitchen now",
-                                dueDateTime = Clock.System.now()
-                                    .toLocalDateTime(TimeZone.currentSystemDefault()),
+                                dueDateTime = LocalDateTime.now(),
                                 repeatValue = 2,
                                 repeatUnit = RepeatUnit.DAY,
                                 houseId = "",
@@ -180,8 +169,7 @@ class AssignmentsPreview : PreviewParameterProvider<Map<TextValue, List<TaskAssi
                                 name = "Ramit",
                                 createdDate = Clock.System.now()
                             ),
-                            dueDateTime = Clock.System.now()
-                                .toLocalDateTime(TimeZone.currentSystemDefault()),
+                            dueDateTime = LocalDateTime.now(),
                             createdDate = Clock.System.now(),
                             createType = CreateType.AUTO
                         ), enableCompletedButton
@@ -195,8 +183,7 @@ class AssignmentsPreview : PreviewParameterProvider<Map<TextValue, List<TaskAssi
                                 id = "7",
                                 name = "Clean Kitchen",
                                 description = "Clean Kitchen now",
-                                dueDateTime = Clock.System.now()
-                                    .toLocalDateTime(TimeZone.currentSystemDefault()),
+                                dueDateTime = LocalDateTime.now(),
                                 repeatValue = 2,
                                 repeatUnit = RepeatUnit.DAY,
                                 houseId = "",
@@ -210,8 +197,7 @@ class AssignmentsPreview : PreviewParameterProvider<Map<TextValue, List<TaskAssi
                                 name = "Ramit",
                                 createdDate = Clock.System.now()
                             ),
-                            dueDateTime = Clock.System.now()
-                                .toLocalDateTime(TimeZone.currentSystemDefault()),
+                            dueDateTime = LocalDateTime.now(),
                             createdDate = Clock.System.now(),
                             createType = CreateType.AUTO
                         ), enableCompletedButton
@@ -225,8 +211,7 @@ class AssignmentsPreview : PreviewParameterProvider<Map<TextValue, List<TaskAssi
                                 id = "",
                                 name = "Clean Kitchen",
                                 description = "Clean Kitchen now",
-                                dueDateTime = Clock.System.now()
-                                    .toLocalDateTime(TimeZone.currentSystemDefault()),
+                                dueDateTime = LocalDateTime.now(),
                                 repeatValue = 2,
                                 repeatUnit = RepeatUnit.DAY,
                                 houseId = "",
@@ -240,8 +225,7 @@ class AssignmentsPreview : PreviewParameterProvider<Map<TextValue, List<TaskAssi
                                 name = "Ramit",
                                 createdDate = Clock.System.now()
                             ),
-                            dueDateTime = Clock.System.now()
-                                .toLocalDateTime(TimeZone.currentSystemDefault()),
+                            dueDateTime = LocalDateTime.now(),
                             createdDate = Clock.System.now(),
                             createType = CreateType.AUTO
                         ), enableCompletedButton
