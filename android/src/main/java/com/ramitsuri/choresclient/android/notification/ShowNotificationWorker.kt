@@ -20,6 +20,9 @@ import com.ramitsuri.choresclient.notification.Priority
 import com.ramitsuri.choresclient.utils.LogHelper
 import java.util.concurrent.TimeUnit
 import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
+import kotlinx.datetime.toLocalDateTime
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -93,8 +96,8 @@ class ShowNotificationWorker(
                 val workName = getWorkName(assignmentAlarm.assignmentId)
 
                 val showAfter =
-                    assignmentAlarm.showAtTime.toEpochMilliseconds() - Clock.System.now()
-                        .toEpochMilliseconds()
+                    assignmentAlarm.showAtTime.toInstant(TimeZone.currentSystemDefault())
+                        .toEpochMilliseconds() - Clock.System.now().toEpochMilliseconds()
                 val inputData = workDataOf(
                     NOTIFICATION_BODY to assignmentAlarm.systemNotificationText,
                     NOTIFICATION_ID to assignmentAlarm.systemNotificationId,

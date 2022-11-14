@@ -4,7 +4,7 @@ import com.ramitsuri.choresclient.db.AlarmEntity
 import com.ramitsuri.choresclient.db.ChoresDatabaseQueries
 import com.ramitsuri.choresclient.utils.DispatcherProvider
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDateTime
 
 class AlarmDao(
     private val dbQueries: ChoresDatabaseQueries,
@@ -53,7 +53,7 @@ class AlarmDao(
 
 data class AssignmentAlarm(
     val assignmentId: String,
-    val showAtTime: Instant = Instant.DISTANT_PAST,
+    val showAtTime: LocalDateTime,
     val systemNotificationId: Int = -1,
     val systemNotificationText: String
 )

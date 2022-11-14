@@ -1,6 +1,7 @@
 package com.ramitsuri.choresclient.android.ui.preview
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
+import com.ramitsuri.choresclient.data.ActiveStatus
 import com.ramitsuri.choresclient.data.CreateType
 import com.ramitsuri.choresclient.data.Member
 import com.ramitsuri.choresclient.data.ProgressStatus
@@ -9,7 +10,9 @@ import com.ramitsuri.choresclient.data.Task
 import com.ramitsuri.choresclient.data.TaskAssignment
 import com.ramitsuri.choresclient.model.TaskAssignmentWrapper
 import com.ramitsuri.choresclient.model.TextValue
+import com.ramitsuri.choresclient.utils.now
 import kotlinx.datetime.Clock
+import kotlinx.datetime.LocalDateTime
 
 class AssignmentsPreview : PreviewParameterProvider<Map<TextValue, List<TaskAssignmentWrapper>>> {
     private val enableCompletedButton = true
@@ -26,16 +29,17 @@ class AssignmentsPreview : PreviewParameterProvider<Map<TextValue, List<TaskAssi
                                 id = "",
                                 name = "Clean Kitchen",
                                 description = "Clean Kitchen now",
-                                dueDateTime = Clock.System.now(),
+                                dueDateTime = LocalDateTime.now(),
                                 repeatValue = 2,
                                 repeatUnit = RepeatUnit.DAY,
                                 houseId = "",
                                 memberId = "",
                                 rotateMember = false,
-                                createdDate = Clock.System.now()
+                                createdDate = Clock.System.now(),
+                                status = ActiveStatus.ACTIVE
                             ),
                             Member(id = "", name = "Ramit", createdDate = Clock.System.now()),
-                            dueDateTime = Clock.System.now(),
+                            dueDateTime = LocalDateTime.now(),
                             createdDate = Clock.System.now(),
                             createType = CreateType.AUTO
                         ), enableCompletedButton
@@ -49,16 +53,17 @@ class AssignmentsPreview : PreviewParameterProvider<Map<TextValue, List<TaskAssi
                                 id = "",
                                 name = "Clean Kitchen",
                                 description = "Clean Kitchen now",
-                                dueDateTime = Clock.System.now(),
+                                dueDateTime = LocalDateTime.now(),
                                 repeatValue = 2,
                                 repeatUnit = RepeatUnit.NONE,
                                 houseId = "",
                                 memberId = "",
                                 rotateMember = false,
-                                createdDate = Clock.System.now()
+                                createdDate = Clock.System.now(),
+                                status = ActiveStatus.ACTIVE
                             ),
                             Member(id = "", name = "Ramit", createdDate = Clock.System.now()),
-                            dueDateTime = Clock.System.now(),
+                            dueDateTime = LocalDateTime.now(),
                             createdDate = Clock.System.now(),
                             createType = CreateType.AUTO
                         ), enableCompletedButton
@@ -72,16 +77,17 @@ class AssignmentsPreview : PreviewParameterProvider<Map<TextValue, List<TaskAssi
                                 id = "",
                                 name = "Clean Kitchen",
                                 description = "Clean Kitchen now",
-                                dueDateTime = Clock.System.now(),
+                                dueDateTime = LocalDateTime.now(),
                                 repeatValue = 2,
                                 repeatUnit = RepeatUnit.DAY,
                                 houseId = "",
                                 memberId = "",
                                 rotateMember = false,
-                                createdDate = Clock.System.now()
+                                createdDate = Clock.System.now(),
+                                status = ActiveStatus.ACTIVE
                             ),
                             Member(id = "", name = "Ramit", createdDate = Clock.System.now()),
-                            dueDateTime = Clock.System.now(),
+                            dueDateTime = LocalDateTime.now(),
                             createdDate = Clock.System.now(),
                             createType = CreateType.AUTO
                         ), enableCompletedButton
@@ -95,16 +101,17 @@ class AssignmentsPreview : PreviewParameterProvider<Map<TextValue, List<TaskAssi
                                 id = "",
                                 name = "Clean Kitchen",
                                 description = "Clean Kitchen now",
-                                dueDateTime = Clock.System.now(),
+                                dueDateTime = LocalDateTime.now(),
                                 repeatValue = 2,
                                 repeatUnit = RepeatUnit.DAY,
                                 houseId = "",
                                 memberId = "",
                                 rotateMember = false,
-                                createdDate = Clock.System.now()
+                                createdDate = Clock.System.now(),
+                                status = ActiveStatus.ACTIVE
                             ),
                             Member(id = "", name = "Ramit", createdDate = Clock.System.now()),
-                            dueDateTime = Clock.System.now(),
+                            dueDateTime = LocalDateTime.now(),
                             createdDate = Clock.System.now(),
                             createType = CreateType.AUTO
                         ), enableCompletedButton
@@ -120,20 +127,21 @@ class AssignmentsPreview : PreviewParameterProvider<Map<TextValue, List<TaskAssi
                                 id = "",
                                 name = "Clean Kitchen",
                                 description = "Clean Kitchen now",
-                                dueDateTime = Clock.System.now(),
+                                dueDateTime = LocalDateTime.now(),
                                 repeatValue = 2,
                                 repeatUnit = RepeatUnit.DAY,
                                 houseId = "",
                                 memberId = "",
                                 rotateMember = false,
-                                createdDate = Clock.System.now()
+                                createdDate = Clock.System.now(),
+                                status = ActiveStatus.ACTIVE
                             ),
                             Member(
                                 id = "",
                                 name = "Ramit",
                                 createdDate = Clock.System.now()
                             ),
-                            dueDateTime = Clock.System.now(),
+                            dueDateTime = LocalDateTime.now(),
                             createdDate = Clock.System.now(),
                             createType = CreateType.AUTO
                         ), enableCompletedButton
@@ -147,20 +155,21 @@ class AssignmentsPreview : PreviewParameterProvider<Map<TextValue, List<TaskAssi
                                 id = "",
                                 name = "Clean Kitchen",
                                 description = "Clean Kitchen now",
-                                dueDateTime = Clock.System.now(),
+                                dueDateTime = LocalDateTime.now(),
                                 repeatValue = 2,
                                 repeatUnit = RepeatUnit.DAY,
                                 houseId = "",
                                 memberId = "",
                                 rotateMember = false,
-                                createdDate = Clock.System.now()
+                                createdDate = Clock.System.now(),
+                                status = ActiveStatus.ACTIVE
                             ),
                             Member(
                                 id = "",
                                 name = "Ramit",
                                 createdDate = Clock.System.now()
                             ),
-                            dueDateTime = Clock.System.now(),
+                            dueDateTime = LocalDateTime.now(),
                             createdDate = Clock.System.now(),
                             createType = CreateType.AUTO
                         ), enableCompletedButton
@@ -174,20 +183,21 @@ class AssignmentsPreview : PreviewParameterProvider<Map<TextValue, List<TaskAssi
                                 id = "7",
                                 name = "Clean Kitchen",
                                 description = "Clean Kitchen now",
-                                dueDateTime = Clock.System.now(),
+                                dueDateTime = LocalDateTime.now(),
                                 repeatValue = 2,
                                 repeatUnit = RepeatUnit.DAY,
                                 houseId = "",
                                 memberId = "",
                                 rotateMember = false,
-                                createdDate = Clock.System.now()
+                                createdDate = Clock.System.now(),
+                                status = ActiveStatus.ACTIVE
                             ),
                             Member(
                                 id = "",
                                 name = "Ramit",
                                 createdDate = Clock.System.now()
                             ),
-                            dueDateTime = Clock.System.now(),
+                            dueDateTime = LocalDateTime.now(),
                             createdDate = Clock.System.now(),
                             createType = CreateType.AUTO
                         ), enableCompletedButton
@@ -201,20 +211,21 @@ class AssignmentsPreview : PreviewParameterProvider<Map<TextValue, List<TaskAssi
                                 id = "",
                                 name = "Clean Kitchen",
                                 description = "Clean Kitchen now",
-                                dueDateTime = Clock.System.now(),
+                                dueDateTime = LocalDateTime.now(),
                                 repeatValue = 2,
                                 repeatUnit = RepeatUnit.DAY,
                                 houseId = "",
                                 memberId = "",
                                 rotateMember = false,
-                                createdDate = Clock.System.now()
+                                createdDate = Clock.System.now(),
+                                status = ActiveStatus.ACTIVE
                             ),
                             Member(
                                 id = "",
                                 name = "Ramit",
                                 createdDate = Clock.System.now()
                             ),
-                            dueDateTime = Clock.System.now(),
+                            dueDateTime = LocalDateTime.now(),
                             createdDate = Clock.System.now(),
                             createType = CreateType.AUTO
                         ), enableCompletedButton

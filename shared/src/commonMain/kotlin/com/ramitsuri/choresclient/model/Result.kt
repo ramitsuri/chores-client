@@ -3,6 +3,7 @@ package com.ramitsuri.choresclient.model
 import com.ramitsuri.choresclient.data.RepeatUnit
 import com.ramitsuri.choresclient.data.ViewError
 import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDateTime
 
 data class AssignmentsViewState(
     val loading: Boolean = false,
@@ -34,5 +35,5 @@ data class AssignmentDetails(
     val description: String,
     val repeatValue: Int,
     val repeatUnit: RepeatUnit,
-    val notificationTime: Instant?
+    val notificationTime: LocalDateTime?
 )

@@ -6,9 +6,11 @@ import com.ramitsuri.choresclient.db.TaskEntity
 import com.ramitsuri.choresclient.network.ActiveStatusSerializer
 import com.ramitsuri.choresclient.network.CreateTypeSerializer
 import com.ramitsuri.choresclient.network.InstantSerializer
+import com.ramitsuri.choresclient.network.LocalDateTimeSerializer
 import com.ramitsuri.choresclient.network.ProgressStatusSerializer
 import com.ramitsuri.choresclient.network.RepeatUnitSerializer
 import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
 
 
@@ -21,8 +23,8 @@ data class TaskAssignment(
     val progressStatusDate: Instant,
     val task: Task,
     val member: Member,
-    @Serializable(with = InstantSerializer::class)
-    val dueDateTime: Instant,
+    @Serializable(with = LocalDateTimeSerializer::class)
+    val dueDateTime: LocalDateTime,
     @Serializable(with = InstantSerializer::class)
     val createdDate: Instant,
     @Serializable(with = CreateTypeSerializer::class)
@@ -45,8 +47,8 @@ data class Task(
     val id: String,
     val name: String,
     val description: String,
-    @Serializable(with = InstantSerializer::class)
-    val dueDateTime: Instant,
+    @Serializable(with = LocalDateTimeSerializer::class)
+    val dueDateTime: LocalDateTime,
     val repeatValue: Int,
     @Serializable(with = RepeatUnitSerializer::class)
     val repeatUnit: RepeatUnit,
@@ -54,7 +56,9 @@ data class Task(
     val memberId: String,
     val rotateMember: Boolean,
     @Serializable(with = InstantSerializer::class)
-    val createdDate: Instant
+    val createdDate: Instant,
+    @Serializable(with = ActiveStatusSerializer::class)
+    val status: ActiveStatus
 ) {
     constructor(taskEntity: TaskEntity) : this(
         taskEntity.id,
@@ -66,7 +70,8 @@ data class Task(
         taskEntity.houseId,
         taskEntity.memberId,
         taskEntity.rotateMember,
-        taskEntity.createdDate
+        taskEntity.createdDate,
+        taskEntity.status
     )
 }
 
@@ -105,7 +110,8 @@ enum class ProgressStatus(val key: Int) {
     UNKNOWN(0),
     TODO(1),
     IN_PROGRESS(2),
-    DONE(3);
+    DONE(3),
+    WONT_DO(4);
 
     companion object {
         fun fromKey(key: Int): ProgressStatus {
@@ -139,7 +145,8 @@ enum class CreateType(val key: Int) {
 enum class ActiveStatus(val key: Int) {
     UNKNOWN(0),
     ACTIVE(1),
-    INACTIVE(2);
+    INACTIVE(2), // This entity is no longer being used
+    PAUSED(3);
 
     companion object {
         fun fromKey(key: Int): ActiveStatus {

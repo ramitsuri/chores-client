@@ -11,6 +11,8 @@ import io.ktor.client.call.body
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -40,7 +42,7 @@ class SystemTaskAssignmentsRepository(
     /**
      * Will always return locally saved assignments since the passed due date time
      */
-    override suspend fun getLocal(sinceDueDateTime: Instant): List<TaskAssignment> {
+    override suspend fun getLocal(sinceDueDateTime: LocalDateTime): List<TaskAssignment> {
         return localDataSource.getSince(sinceDueDateTime)
     }
 
@@ -115,7 +117,7 @@ class SystemTaskAssignmentsRepository(
 interface TaskAssignmentsRepository {
     suspend fun refresh(): Result<List<TaskAssignment>>
 
-    suspend fun getLocal(sinceDueDateTime: Instant): List<TaskAssignment>
+    suspend fun getLocal(sinceDueDateTime: LocalDateTime): List<TaskAssignment>
 
     suspend fun getLocal(filters: List<Filter>): Result<List<TaskAssignment>>
 

@@ -59,7 +59,8 @@ class TaskDao(
             taskEntity.houseId,
             taskEntity.memberId,
             taskEntity.rotateMember,
-            taskEntity.createdDate
+            taskEntity.createdDate,
+            taskEntity.status
         )
     }
 

@@ -5,6 +5,7 @@ import com.ramitsuri.choresclient.data.TaskAssignment
 import com.ramitsuri.choresclient.model.Filter
 import com.ramitsuri.choresclient.repositories.TaskAssignmentsRepository
 import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDateTime
 
 class FakeTaskAssignmentsRepository : TaskAssignmentsRepository {
     override suspend fun refresh(): Result<List<TaskAssignment>> {
@@ -18,7 +19,7 @@ class FakeTaskAssignmentsRepository : TaskAssignmentsRepository {
         sinceAssignments.addAll(assignments)
     }
 
-    override suspend fun getLocal(sinceDueDateTime: Instant): List<TaskAssignment> {
+    override suspend fun getLocal(sinceDueDateTime: LocalDateTime): List<TaskAssignment> {
         return sinceAssignments
     }
 

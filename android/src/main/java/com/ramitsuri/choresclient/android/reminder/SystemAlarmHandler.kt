@@ -7,7 +7,7 @@ import com.ramitsuri.choresclient.data.entities.AssignmentAlarm
 import com.ramitsuri.choresclient.db.AlarmEntity
 import com.ramitsuri.choresclient.reminder.AlarmHandler
 import com.ramitsuri.choresclient.utils.LogHelper
-import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDateTime
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -41,7 +41,7 @@ class SystemAlarmHandler(
 
     override suspend fun reschedule(
         assignmentId: String,
-        showAtTime: Instant,
+        showAtTime: LocalDateTime,
         notificationText: String
     ) {
         val existing = alarmDao.get(assignmentId) ?: return

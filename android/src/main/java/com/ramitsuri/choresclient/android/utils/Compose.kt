@@ -9,6 +9,7 @@ import com.ramitsuri.choresclient.android.R
 import com.ramitsuri.choresclient.data.RepeatUnit
 import com.ramitsuri.choresclient.utils.formatReminderTime
 import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDateTime
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -62,7 +63,7 @@ fun formatRepeatUnit(repeatValue: Int, repeatUnit: RepeatUnit): String {
 
 @Composable
 @ReadOnlyComposable
-fun formatReminderAt(toFormat: Instant?): String {
+fun formatReminderAt(toFormat: LocalDateTime?): String {
     return if (toFormat != null) {
         val formatted = formatReminderTime(toFormat)
         stringResource(id = R.string.assignment_details_reminder_time, formatted)

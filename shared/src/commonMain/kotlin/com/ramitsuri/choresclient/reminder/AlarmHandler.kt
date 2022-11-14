@@ -2,7 +2,7 @@ package com.ramitsuri.choresclient.reminder
 
 import com.ramitsuri.choresclient.data.entities.AssignmentAlarm
 import com.ramitsuri.choresclient.db.AlarmEntity
-import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDateTime
 
 interface AlarmHandler {
     suspend fun getExisting(): List<AlarmEntity>
@@ -11,7 +11,7 @@ interface AlarmHandler {
 
     suspend fun schedule(assignmentAlarms: List<AssignmentAlarm>)
 
-    suspend fun reschedule(assignmentId: String, showAtTime: Instant, notificationText: String)
+    suspend fun reschedule(assignmentId: String, showAtTime: LocalDateTime, notificationText: String)
 
     suspend fun cancel(assignmentIds: List<String>)
 }

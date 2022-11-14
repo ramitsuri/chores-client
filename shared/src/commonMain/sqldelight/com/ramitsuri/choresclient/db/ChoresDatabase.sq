@@ -3,6 +3,7 @@ import com.ramitsuri.choresclient.data.CreateType;
 import com.ramitsuri.choresclient.data.ProgressStatus;
 import com.ramitsuri.choresclient.data.RepeatUnit;
 import kotlinx.datetime.Instant;
+import kotlinx.datetime.LocalDateTime;
 
 /**
  * TASK-ASSIGNMENT
@@ -13,7 +14,7 @@ CREATE TABLE IF NOT EXISTS TaskAssignmentEntity (
     progressStatusDate INTEGER AS Instant NOT NULL,
     taskId TEXT NOT NULL,
     memberId TEXT NOT NULL,
-    dueDateTime INTEGER AS Instant NOT NULL,
+    dueDateTime TEXT AS LocalDateTime NOT NULL,
     createDate INTEGER AS Instant NOT NULL,
     createType INTEGER AS CreateType NOT NULL,
     shouldUpload INTEGER AS Boolean NOT NULL
@@ -92,13 +93,14 @@ CREATE TABLE IF NOT EXISTS TaskEntity (
     id TEXT NOT NULL PRIMARY KEY,
     name TEXT NOT NULL,
     description TEXT NOT NULL,
-    dueDateTime INTEGER AS Instant NOT NULL,
+    dueDateTime TEXT AS LocalDateTime NOT NULL,
     repeatValue INTEGER NOT NULL,
     repeatUnit INTEGER AS RepeatUnit NOT NULL,
     houseId TEXT NOT NULL,
     memberId TEXT NOT NULL,
     rotateMember INTEGER AS Boolean NOT NULL,
-    createdDate INTEGER AS Instant NOT NULL
+    createdDate INTEGER AS Instant NOT NULL,
+    status INTEGER AS ActiveStatus NOT NULL
 );
 
 selectTask:
@@ -107,8 +109,8 @@ WHERE id = ?;
 
 insertTask:
 INSERT OR REPLACE INTO
-TaskEntity (id, name, description, dueDateTime, repeatValue, repeatUnit, houseId, memberId, rotateMember, createdDate)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+TaskEntity (id, name, description, dueDateTime, repeatValue, repeatUnit, houseId, memberId, rotateMember, createdDate, status)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 deleteTasks:
 DELETE FROM TaskEntity;
@@ -118,7 +120,7 @@ DELETE FROM TaskEntity;
  */
 CREATE TABLE IF NOT EXISTS AlarmEntity (
     assignmentId TEXT NOT NULL PRIMARY KEY,
-    showAtTime INTEGER AS Instant NOT NULL,
+    showAtTime TEXT AS LocalDateTime NOT NULL,
     systemNotificationId INTEGER NOT NULL
 );
 

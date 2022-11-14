@@ -10,14 +10,15 @@ import com.ramitsuri.choresclient.reminder.AlarmHandler
 import com.ramitsuri.choresclient.repositories.TaskAssignmentsRepository
 import com.ramitsuri.choresclient.utils.DispatcherProvider
 import com.ramitsuri.choresclient.utils.Lock
+import com.ramitsuri.choresclient.utils.minus
+import com.ramitsuri.choresclient.utils.now
+import com.ramitsuri.choresclient.utils.plus
 import com.ramitsuri.choresclient.utils.use
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
-import kotlin.time.Duration
-import kotlin.time.Duration.Companion.days
-import kotlin.time.Duration.Companion.seconds
-import kotlin.time.ExperimentalTime
+import kotlinx.datetime.DatePeriod
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.atTime
+import kotlinx.datetime.minus
 
 class ReminderScheduler(
     private val taskAssignmentsRepository: TaskAssignmentsRepository,
@@ -38,19 +39,17 @@ class ReminderScheduler(
         runningLock.use {
             running = true
         }
-        scheduleReminders(Clock.System.now())
+        scheduleReminders(LocalDateTime.now())
         runningLock.use {
             running = false
         }
     }
 
-    @OptIn(ExperimentalTime::class)
-    private suspend fun scheduleReminders(now: Instant) {
+    private suspend fun scheduleReminders(now: LocalDateTime) {
         withContext(dispatchers.io) {
             // Schedule only reminders from one week in the past. We don't want to be handling
             // assignments to far back in the past as they are assumed to be handled by now
-            val previousDuration = 21.days
-            val sinceDueDateTime = now.minus(previousDuration)
+            val sinceDueDateTime = now.minus(days = 21)
             val assignments = taskAssignmentsRepository.getLocal(sinceDueDateTime)
             val memberId = prefManager.getUserId() ?: ""
             val existingNotifications = alarmHandler.getExisting()
@@ -76,16 +75,14 @@ class ReminderScheduler(
         return completed.map { it.id }
     }
 
-    @OptIn(ExperimentalTime::class)
     private suspend fun handlePastDue(
         assignments: List<TaskAssignment>,
         existingAlarms: List<AlarmEntity>,
-        now: Instant,
+        now: LocalDateTime,
         memberId: String
     ): List<String> {
         val newAssignmentAlarms = mutableListOf<AssignmentAlarm>()
-        val duration = 60.seconds
-        val scheduledTime = now.plus(duration)
+        val scheduledTime = now.plus(second = 60)
         val missed = assignments.filter {
             it.member.id == memberId &&
                     it.dueDateTime <= now &&
@@ -98,7 +95,7 @@ class ReminderScheduler(
             }
             val newNotificationId: Int = if (existingNotification != null) {
                 // It's been more than 1 day since the notification was last shown
-                if (now.minus(1.days) > existingNotification.showAtTime) {
+                if (now.minus(days = 1) > existingNotification.showAtTime) {
                     existingNotification.systemNotificationId.toInt()
                 } else {
                     return@forEach
@@ -122,7 +119,7 @@ class ReminderScheduler(
     private suspend fun handleToSchedule(
         assignments: List<TaskAssignment>,
         existingAlarms: List<AlarmEntity>,
-        now: Instant,
+        now: LocalDateTime,
         memberId: String
     ): List<String> {
         // Find assignments to schedule
