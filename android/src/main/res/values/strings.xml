@@ -83,11 +83,11 @@
 
     <!-- Repeat Units -->
     <string name="repeat_unit_none">No repeat</string>
-    <string name="repeat_unit_day">Repeat every day</string>
-    <string name="repeat_unit_week">Repeat every week</string>
-    <string name="repeat_unit_month">Repeat every month</string>
-    <string name="repeat_unit_hour">Repeat every hour</string>
-    <string name="repeat_unit_year">Repeat every year</string>
-    <string name="repeat_unit_on_complete">Repeat on completion</string>
+    <string name="repeat_unit_day">Day</string>
+    <string name="repeat_unit_week">Week</string>
+    <string name="repeat_unit_month">Month</string>
+    <string name="repeat_unit_hour">Hour</string>
+    <string name="repeat_unit_year">Year</string>
+    <string name="repeat_unit_on_complete">On completion</string>
 
 </resources>
