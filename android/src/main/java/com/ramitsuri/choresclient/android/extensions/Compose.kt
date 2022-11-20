@@ -25,5 +25,12 @@ private fun getResId(key: LocalizedString): Int {
         LocalizedString.PERSON_FILTER -> R.string.assignment_filter_person
         LocalizedString.HOUSE_FILTER -> R.string.assignment_filter_house
         LocalizedString.SETTINGS -> R.string.settings
+        LocalizedString.REPEAT_UNIT_NONE -> R.string.repeat_unit_none
+        LocalizedString.REPEAT_UNIT_DAY -> R.string.repeat_unit_day
+        LocalizedString.REPEAT_UNIT_WEEK -> R.string.repeat_unit_week
+        LocalizedString.REPEAT_UNIT_MONTH -> R.string.repeat_unit_month
+        LocalizedString.REPEAT_UNIT_HOUR -> R.string.repeat_unit_hour
+        LocalizedString.REPEAT_UNIT_YEAR -> R.string.repeat_unit_year
+        LocalizedString.REPEAT_UNIT_ON_COMPLETE -> R.string.repeat_unit_on_complete
     }
 }

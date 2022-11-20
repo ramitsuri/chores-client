@@ -21,9 +21,11 @@ import com.ramitsuri.choresclient.repositories.AssignmentDetailsRepository
 import com.ramitsuri.choresclient.repositories.LoginRepository
 import com.ramitsuri.choresclient.repositories.SyncRepository
 import com.ramitsuri.choresclient.repositories.TaskAssignmentsRepository
+import com.ramitsuri.choresclient.repositories.TasksRepository
 import com.ramitsuri.choresclient.utils.AppHelper
 import com.ramitsuri.choresclient.utils.DispatcherProvider
 import com.ramitsuri.choresclient.utils.FilterHelper
+import com.ramitsuri.choresclient.viewmodel.AddTaskViewModel
 import com.ramitsuri.choresclient.viewmodel.AssignmentDetailsViewModel
 import com.ramitsuri.choresclient.viewmodel.AssignmentsViewModel
 import com.ramitsuri.choresclient.viewmodel.LoginViewModel
@@ -125,6 +127,15 @@ class MainApplication : Application(), KoinComponent {
                         get<SyncRepository>(),
                         get<FilterHelper>(),
                         get<PrefManager>(),
+                        get<DispatcherProvider>()
+                    )
+                }
+
+                viewModel {
+                    AddTaskViewModel(
+                        get<TasksRepository>(),
+                        get<TaskAssignmentsRepository>(),
+                        get<SyncRepository>(),
                         get<DispatcherProvider>()
                     )
                 }

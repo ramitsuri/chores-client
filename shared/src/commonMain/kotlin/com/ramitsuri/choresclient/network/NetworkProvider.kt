@@ -126,6 +126,9 @@ class NetworkProvider(
     fun provideSyncApi() =
         SyncApi(client, provideBaseApiUrl())
 
+    fun provideTasksApi() =
+        TasksApi(client, provideBaseApiUrl())
+
     private fun provideLoginApi(httpClient: HttpClient = client) =
         LoginApi(httpClient, provideBaseApiUrl())
 

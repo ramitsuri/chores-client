@@ -28,6 +28,7 @@
     <string name="assignment_filter_person">Person</string>
     <string name="assignment_filter_house">List</string>
     <string name="assignment_header_on_completion">On Completion</string>
+    <string name="assignment_add_task_content_description">Add task</string>
 
     <!-- Notifications -->
     <string name="notification_reminders_id">Reminders</string>
@@ -52,16 +53,41 @@
     <string name="assignment_details_reminder_time">Reminder set for %1$s</string>
     <string name="assignment_details_reminder_time_unavailable">Reminder will be set in some time</string>
 
+    <!-- Add Task -->
+    <string name="add_task_hint_name">Task name</string>
+    <string name="add_task_hint_description">Task description</string>
+    <string name="add_task_hint_repeat_value">Repeat</string>
+    <string name="add_task_pick_date">Pick date</string>
+    <string name="add_task_pick_time">Pick time</string>
+    <string name="add_task_selection_repeat_unit_content_description">Repeat unit selection</string>
+    <string name="add_task_selection_house_content_description">House selection</string>
+    <string name="add_task_selection_member_content_description">Member selection</string>
+    <string name="add_task_select_repeat_unit">Select repeat unit</string>
+    <string name="add_task_select_member">Select member</string>
+    <string name="add_task_select_house">Select house</string>
+    <string name="add_task_add">Add task</string>
+    <string name="add_task_rotate_member">Rotate</string>
+
     <!-- Errors -->
     <string name="error_network">No internet</string>
     <string name="error_login_failed">Failed to login</string>
     <string name="error_no_token">Failed to login</string>
     <string name="error_unknown">Unknown error</string>
+    <string name="error_add_task">Failed to add task</string>
 
     <!-- Settings -->
     <string name="settings_item_sync_last_time">Last synced at %1$s</string>
     <string name="settings_item_default_filter_title">Default filter</string>
     <string name="settings_item_default_filter">Person: %1$s, List: %2$s</string>
     <string name="settings_item_filter_none">NONE</string>
+
+    <!-- Repeat Units -->
+    <string name="repeat_unit_none">No repeat</string>
+    <string name="repeat_unit_day">Day</string>
+    <string name="repeat_unit_week">Week</string>
+    <string name="repeat_unit_month">Month</string>
+    <string name="repeat_unit_hour">Hour</string>
+    <string name="repeat_unit_year">Year</string>
+    <string name="repeat_unit_on_complete">On completion</string>
 
 </resources>
