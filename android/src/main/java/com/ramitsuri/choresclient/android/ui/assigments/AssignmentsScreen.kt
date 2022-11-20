@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -27,6 +28,7 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckBox
@@ -44,6 +46,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -77,6 +80,7 @@ import com.ramitsuri.choresclient.android.ui.preview.AssignmentsPreview
 import com.ramitsuri.choresclient.android.ui.theme.ChoresClientTheme
 import com.ramitsuri.choresclient.android.ui.theme.assignmentHeaderCornerRadius
 import com.ramitsuri.choresclient.android.ui.theme.iconWidth
+import com.ramitsuri.choresclient.android.ui.theme.marginExtraLarge
 import com.ramitsuri.choresclient.android.ui.theme.marginLarge
 import com.ramitsuri.choresclient.android.ui.theme.marginMedium
 import com.ramitsuri.choresclient.android.ui.theme.minAssignmentItemHeight
@@ -113,6 +117,7 @@ fun AssignmentsScreen(
     modifier: Modifier = Modifier,
     viewModel: AssignmentsViewModel = getViewModel(),
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
+    onAddTaskClicked: () -> Unit,
     onSettingsClicked: () -> Unit
 ) {
     // TODO use shouldRefreshFilter to refresh filters after changed in settings
@@ -148,8 +153,18 @@ fun AssignmentsScreen(
             snackbarHost = { SnackbarHost(snackbarHostState) },
             modifier = modifier
                 .fillMaxSize()
-                .systemBarsPadding()
-                .displayCutoutPadding()
+                .statusBarsPadding()
+                .displayCutoutPadding(),
+            floatingActionButton = {
+                FloatingActionButton(
+                    onClick = onAddTaskClicked,
+                ) {
+                    Icon(
+                        Icons.Filled.Add,
+                        stringResource(id = R.string.assignment_add_task_content_description)
+                    )
+                }
+            }
         ) { paddingValues ->
             AssignmentsContent(
                 isLoading = viewState.loading,
@@ -235,7 +250,8 @@ private fun AssignmentsContent(
                         }
                     }
                     item {
-                        Spacer(modifier = modifier.height(marginLarge))
+                        Spacer(modifier = modifier.height(marginExtraLarge))
+                        Spacer(modifier = modifier.height(marginExtraLarge))
                     }
                 }
             }

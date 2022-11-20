@@ -41,7 +41,7 @@ object InstantSerializer : KSerializer<Instant> {
     }
 }
 
-object LocalDateTimeSerializer: KSerializer<LocalDateTime> {
+object LocalDateTimeSerializer : KSerializer<LocalDateTime> {
     override val descriptor = PrimitiveSerialDescriptor("LocalDateTime", PrimitiveKind.STRING)
 
     override fun deserialize(decoder: Decoder): LocalDateTime {
@@ -88,11 +88,11 @@ object RepeatUnitSerializer : KSerializer<RepeatUnit> {
 }
 
 object ActiveStatusSerializer : KSerializer<ActiveStatus> {
-    override val descriptor = PrimitiveSerialDescriptor("ActiveStatus", PrimitiveKind.STRING)
+    override val descriptor = PrimitiveSerialDescriptor("ActiveStatus", PrimitiveKind.INT)
 
     override fun deserialize(decoder: Decoder): ActiveStatus {
         val repeatUnit = try {
-            ActiveStatus.fromKey(decoder.decodeString().toInt())
+            ActiveStatus.fromKey(decoder.decodeInt())
         } catch (e: Exception) {
             ActiveStatus.UNKNOWN
         }

@@ -2,7 +2,9 @@ package com.ramitsuri.choresclient.utils
 
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toJavaInstant
 import kotlinx.datetime.toJavaLocalDateTime
@@ -28,7 +30,7 @@ fun formatReminderTime(
     now: Instant = Clock.System.now(),
     timeZone: TimeZone = TimeZone.currentSystemDefault()
 ): String {
-    return format(toFormat, now, timeZone, "MMM d 'at' HH.mm.ss", "MMM d, uuuu 'at' HH.mm.ss")
+    return format(toFormat, now, timeZone, "MMM d 'at' K:mm a", "MMM d, uuuu 'at' K:mm a")
 }
 
 fun formatSyncTime(
@@ -41,7 +43,7 @@ fun formatSyncTime(
     val (formatSameYear, formatDifferentYear) = if (toFormatZoned.minute == 0) {
         Pair("K a MMM d", "K a MMM d, uuuu")
     } else {
-        Pair("K:mm a MMM d", "K:m a MMM d, uuuu")
+        Pair("K:mm a MMM d", "K:mm a MMM d, uuuu")
     }
     return format(
         toFormat.toLocalDateTime(timeZone),
@@ -66,6 +68,24 @@ fun formatLogParent(
     timeZone: TimeZone = TimeZone.UTC
 ): String {
     return format(toFormat, now, timeZone, "uuuu-MM-dd", "uuuu-MM-dd")
+}
+
+fun formatPickedDate(
+    toFormat: LocalDate,
+    now: Instant = Clock.System.now(),
+    timeZone: TimeZone = TimeZone.currentSystemDefault()
+): String {
+    val toFormatDateTime = LocalDateTime(date = toFormat, time = LocalDateTime.now(timeZone).time)
+    return format(toFormatDateTime, now, timeZone, "E, MMM dd, yyyy", "E, MMM dd, yyyy")
+}
+
+fun formatPickedTime(
+    toFormat: LocalTime,
+    now: Instant = Clock.System.now(),
+    timeZone: TimeZone = TimeZone.currentSystemDefault()
+): String {
+    val toFormatDateTime = LocalDateTime(date = LocalDateTime.now(timeZone).date, time = toFormat)
+    return format(toFormatDateTime, now, timeZone, "K:mm a", "K:mm a")
 }
 
 private fun format(

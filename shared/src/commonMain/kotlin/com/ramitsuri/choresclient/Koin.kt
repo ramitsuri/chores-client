@@ -9,6 +9,7 @@ import com.ramitsuri.choresclient.data.entities.TaskDao
 import com.ramitsuri.choresclient.data.notification.ReminderScheduler
 import com.ramitsuri.choresclient.data.settings.PrefManager
 import com.ramitsuri.choresclient.network.NetworkProvider
+import com.ramitsuri.choresclient.network.TasksApi
 import com.ramitsuri.choresclient.notification.NotificationHandler
 import com.ramitsuri.choresclient.reminder.AlarmHandler
 import com.ramitsuri.choresclient.repositories.AssignmentDetailsRepository
@@ -16,8 +17,10 @@ import com.ramitsuri.choresclient.repositories.HouseDataSource
 import com.ramitsuri.choresclient.repositories.LoginRepository
 import com.ramitsuri.choresclient.repositories.SyncRepository
 import com.ramitsuri.choresclient.repositories.SystemTaskAssignmentsRepository
+import com.ramitsuri.choresclient.repositories.SystemTasksRepository
 import com.ramitsuri.choresclient.repositories.TaskAssignmentDataSource
 import com.ramitsuri.choresclient.repositories.TaskAssignmentsRepository
+import com.ramitsuri.choresclient.repositories.TasksRepository
 import com.ramitsuri.choresclient.utils.DispatcherProvider
 import com.ramitsuri.choresclient.utils.FilterHelper
 import io.ktor.client.engine.HttpClientEngine
@@ -133,6 +136,13 @@ private val coreModule = module {
             get<TaskAssignmentsRepository>(),
             get<SyncRepository>(),
             get<PrefManager>()
+        )
+    }
+
+    factory<TasksRepository> {
+        SystemTasksRepository(
+            get<NetworkProvider>().provideTasksApi(),
+            get<DispatcherProvider>()
         )
     }
 }

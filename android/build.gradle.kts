@@ -47,6 +47,7 @@ dependencies {
     implementation("com.google.accompanist:accompanist-systemuicontroller:0.24.12-rc")
     // 2.5.1 is causing a crash - List contains no element matching the predicate
     implementation("androidx.navigation:navigation-compose:2.4.2")
+    implementation ("io.github.vanpra.compose-material-dialogs:datetime:0.9.0")
 
     // Testing
     testImplementation("junit:junit:4.13.2")
@@ -62,11 +63,11 @@ kapt {
 }
 
 android {
-    compileSdk = 32
+    compileSdk = 33
     defaultConfig {
         applicationId = "com.ramitsuri.choresclient.android"
         minSdk = 26
-        targetSdk = 32
+        targetSdk = 33
         versionCode = 30
         versionName = "4.5"
 

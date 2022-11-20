@@ -13,17 +13,20 @@ import androidx.navigation.navArgument
 import com.ramitsuri.choresclient.android.ui.assigments.AssignmentsScreen
 import com.ramitsuri.choresclient.android.ui.login.LoginScreen
 import com.ramitsuri.choresclient.android.ui.settings.SettingsScreen
+import com.ramitsuri.choresclient.android.ui.task.AddTasksScreen
 
 private object Screens {
     const val LOGIN = "login"
     const val ASSIGNMENTS = "assignments"
     const val SETTINGS = "settings"
+    const val ADD_TASK = "add_task"
 }
 
 object Destinations {
     const val LOGIN_ROUTE = Screens.LOGIN
     const val ASSIGNMENTS_ROUTE = Screens.ASSIGNMENTS
     const val SETTINGS_ROUTE = Screens.SETTINGS
+    const val ADD_TASK_ROUTE = Screens.ADD_TASK
 }
 
 class NavigationActions(private val navController: NavHostController) {
@@ -39,6 +42,16 @@ class NavigationActions(private val navController: NavHostController) {
 
     fun navigateToSettings() {
         navController.navigate(Destinations.SETTINGS_ROUTE) {
+            popUpTo(navController.graph.findStartDestination().id) {
+                saveState = true
+            }
+            launchSingleTop = true
+            restoreState = true
+        }
+    }
+
+    fun navigateToAddTask() {
+        navController.navigate(Destinations.ADD_TASK_ROUTE) {
             popUpTo(navController.graph.findStartDestination().id) {
                 saveState = true
             }
@@ -72,10 +85,14 @@ fun NavGraph(
             val shouldRefreshFilter = backStackEntry.arguments?.getBoolean("refreshFilter") ?: false
             AssignmentsScreen(
                 shouldRefreshFilter,
-                onSettingsClicked = { navActions.navigateToSettings() })
+                onSettingsClicked = { navActions.navigateToSettings() },
+                onAddTaskClicked = { navActions.navigateToAddTask() })
         }
         composable(Destinations.SETTINGS_ROUTE) {
             SettingsScreen(onBack = { navActions.navigateToAssignments(shouldRefreshFilter = true) })
+        }
+        composable(Destinations.ADD_TASK_ROUTE) {
+            AddTasksScreen(onBack = { navActions.navigateToAssignments(shouldRefreshFilter = false) })
         }
     }
 }
