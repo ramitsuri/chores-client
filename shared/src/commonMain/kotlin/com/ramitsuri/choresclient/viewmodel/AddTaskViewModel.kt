@@ -192,7 +192,6 @@ class AddTaskViewModel(
 
     private suspend fun populateSelectionItems() {
         val assignments = (taskAssignmentsRepository.getLocal(listOf()) as Result.Success).data
-        val houses = syncRepository.getLocal()
         val memberSelectionItems = assignments
             .map { // Get members for assignments
                 it.member
@@ -205,16 +204,8 @@ class AddTaskViewModel(
                 )
             }
 
-        val houseSelectionItems = assignments
-            .map {
-                it.task.houseId
-            }
-            .distinct()
-            .mapNotNull { houseId ->
-                houses.find { house ->
-                    house.id == houseId
-                }
-            }
+        val houses = syncRepository.getLocal()
+        val houseSelectionItems = houses
             .map { house ->
                 HouseSelectionItem(
                     house = house,
