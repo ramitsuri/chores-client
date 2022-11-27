@@ -1,6 +1,9 @@
 package com.ramitsuri.choresclient.utils
 
+import com.ramitsuri.choresclient.model.TextValue
+import com.ramitsuri.choresclient.resources.LocalizedString
 import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import org.junit.Assert.assertEquals
@@ -83,5 +86,71 @@ class DateTimeKtTest {
 
         time = Instant.fromEpochMilliseconds(1660125660000L) // 2022-08-10, 6AM NYC
         assertEquals("6:01 AM Aug 10", formatSyncTime(time, now, timeZone))
+    }
+
+    @Test
+    fun testGetDay() {
+        val timeZone = TimeZone.of("America/New_York")
+        val now = LocalDateTime.parse("2022-11-25T11:00:00").toInstant(timeZone)
+
+        var toFormat: LocalDateTime
+
+        // Today
+        toFormat = LocalDateTime.parse("2022-11-25T11:00:00")
+        assertEquals(TextValue.ForKey(LocalizedString.TODAY), getDay(toFormat, now, timeZone))
+
+        toFormat = LocalDateTime.parse("2022-11-25T00:00:01")
+        assertEquals(TextValue.ForKey(LocalizedString.TODAY), getDay(toFormat, now, timeZone))
+
+        toFormat = LocalDateTime.parse("2022-11-25T23:59:59")
+        assertEquals(TextValue.ForKey(LocalizedString.TODAY), getDay(toFormat, now, timeZone))
+
+        // Yesterday
+        toFormat = LocalDateTime.parse("2022-11-24T11:00:00")
+        assertEquals(TextValue.ForKey(LocalizedString.YESTERDAY), getDay(toFormat, now, timeZone))
+
+        toFormat = LocalDateTime.parse("2022-11-24T11:00:00")
+        assertEquals(TextValue.ForKey(LocalizedString.YESTERDAY), getDay(toFormat, now, timeZone))
+
+        toFormat = LocalDateTime.parse("2022-11-24T11:00:00")
+        assertEquals(TextValue.ForKey(LocalizedString.YESTERDAY), getDay(toFormat, now, timeZone))
+
+        // Tomorrow
+        toFormat = LocalDateTime.parse("2022-11-26T11:00:00")
+        assertEquals(TextValue.ForKey(LocalizedString.TOMORROW), getDay(toFormat, now, timeZone))
+
+        toFormat = LocalDateTime.parse("2022-11-26T11:00:00")
+        assertEquals(TextValue.ForKey(LocalizedString.TOMORROW), getDay(toFormat, now, timeZone))
+
+        toFormat = LocalDateTime.parse("2022-11-26T11:00:00")
+        assertEquals(TextValue.ForKey(LocalizedString.TOMORROW), getDay(toFormat, now, timeZone))
+
+        // Other days
+        toFormat = LocalDateTime.parse("2022-11-23T11:00:00")
+        assertEquals(TextValue.ForString("Nov 23"), getDay(toFormat, now, timeZone))
+
+        toFormat = LocalDateTime.parse("2022-11-23T11:00:00")
+        assertEquals(TextValue.ForString("Nov 23"), getDay(toFormat, now, timeZone))
+
+        toFormat = LocalDateTime.parse("2022-11-23T11:00:00")
+        assertEquals(TextValue.ForString("Nov 23"), getDay(toFormat, now, timeZone))
+
+        toFormat = LocalDateTime.parse("2022-11-27T11:00:00")
+        assertEquals(TextValue.ForString("Nov 27"), getDay(toFormat, now, timeZone))
+
+        toFormat = LocalDateTime.parse("2022-11-27T11:00:00")
+        assertEquals(TextValue.ForString("Nov 27"), getDay(toFormat, now, timeZone))
+
+        toFormat = LocalDateTime.parse("2022-11-27T11:00:00")
+        assertEquals(TextValue.ForString("Nov 27"), getDay(toFormat, now, timeZone))
+
+        toFormat = LocalDateTime.parse("2023-11-27T11:00:00")
+        assertEquals(TextValue.ForString("Nov 27, 2023"), getDay(toFormat, now, timeZone))
+
+        toFormat = LocalDateTime.parse("2023-11-27T11:00:00")
+        assertEquals(TextValue.ForString("Nov 27, 2023"), getDay(toFormat, now, timeZone))
+
+        toFormat = LocalDateTime.parse("2023-11-27T11:00:00")
+        assertEquals(TextValue.ForString("Nov 27, 2023"), getDay(toFormat, now, timeZone))
     }
 }

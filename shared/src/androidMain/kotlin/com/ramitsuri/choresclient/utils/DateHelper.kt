@@ -1,5 +1,7 @@
 package com.ramitsuri.choresclient.utils
 
+import com.ramitsuri.choresclient.model.TextValue
+import com.ramitsuri.choresclient.resources.LocalizedString
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
@@ -10,9 +12,11 @@ import kotlinx.datetime.toJavaInstant
 import kotlinx.datetime.toJavaLocalDateTime
 import kotlinx.datetime.toJavaZoneId
 import kotlinx.datetime.toLocalDateTime
+import java.time.Duration
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 import java.util.Locale
 import java.time.Instant as JvmInstant
 import java.time.LocalDateTime as JvmLocalDateTime
@@ -21,8 +25,19 @@ actual fun getDay(
     toFormat: LocalDateTime,
     now: Instant,
     timeZone: TimeZone
-): String {
-    return format(toFormat, now, timeZone, "MMM d", "MMM d, uuuu")
+): TextValue {
+    val nowLocal = now.toLocalDateTime(timeZone).toJavaLocalDateTime().truncatedTo(ChronoUnit.DAYS)
+    val toFormatDays = toFormat.toJavaLocalDateTime().truncatedTo(ChronoUnit.DAYS)
+    val difference = Duration.between(nowLocal, toFormatDays)
+    return if (difference.toDays() == 0L) {
+            TextValue.ForKey(LocalizedString.TODAY)
+    } else if (difference.toDays() == 1L) {
+        TextValue.ForKey(LocalizedString.TOMORROW)
+    } else if (difference.toDays() == -1L) {
+        TextValue.ForKey(LocalizedString.YESTERDAY)
+    } else {
+        TextValue.ForString(format(toFormat, now, timeZone, "MMM d", "MMM d, uuuu"))
+    }
 }
 
 fun formatReminderTime(
