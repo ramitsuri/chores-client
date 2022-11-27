@@ -116,48 +116,48 @@ class DateTimeKtTest {
         toFormat = LocalDateTime.parse("2022-11-24T11:00:00")
         assertLocalized(LocalizedString.YESTERDAY, toFormat)
 
-        toFormat = LocalDateTime.parse("2022-11-24T11:00:00")
+        toFormat = LocalDateTime.parse("2022-11-24T00:00:01")
         assertLocalized(LocalizedString.YESTERDAY, toFormat)
 
-        toFormat = LocalDateTime.parse("2022-11-24T11:00:00")
+        toFormat = LocalDateTime.parse("2022-11-24T23:59:59")
         assertLocalized(LocalizedString.YESTERDAY, toFormat)
 
         // Tomorrow
         toFormat = LocalDateTime.parse("2022-11-26T11:00:00")
         assertLocalized(LocalizedString.TOMORROW, toFormat)
 
-        toFormat = LocalDateTime.parse("2022-11-26T11:00:00")
+        toFormat = LocalDateTime.parse("2022-11-26T00:00:01")
         assertLocalized(LocalizedString.TOMORROW, toFormat)
 
-        toFormat = LocalDateTime.parse("2022-11-26T11:00:00")
+        toFormat = LocalDateTime.parse("2022-11-26T23:59:59")
         assertLocalized(LocalizedString.TOMORROW, toFormat)
 
         // Other days
         toFormat = LocalDateTime.parse("2022-11-23T11:00:00")
         assertString("Nov 23", toFormat)
 
-        toFormat = LocalDateTime.parse("2022-11-23T11:00:00")
+        toFormat = LocalDateTime.parse("2022-11-23T00:00:01")
         assertString("Nov 23", toFormat)
 
-        toFormat = LocalDateTime.parse("2022-11-23T11:00:00")
+        toFormat = LocalDateTime.parse("2022-11-23T23:59:59")
         assertString("Nov 23", toFormat)
 
         toFormat = LocalDateTime.parse("2022-11-27T11:00:00")
         assertString("Nov 27", toFormat)
 
-        toFormat = LocalDateTime.parse("2022-11-27T11:00:00")
+        toFormat = LocalDateTime.parse("2022-11-27T00:00:01")
         assertString("Nov 27", toFormat)
 
-        toFormat = LocalDateTime.parse("2022-11-27T11:00:00")
+        toFormat = LocalDateTime.parse("2022-11-27T23:59:59")
         assertString("Nov 27", toFormat)
 
         toFormat = LocalDateTime.parse("2023-11-27T11:00:00")
         assertString("Nov 27, 2023", toFormat)
 
-        toFormat = LocalDateTime.parse("2023-11-27T11:00:00")
+        toFormat = LocalDateTime.parse("2023-11-27T00:00:01")
         assertString("Nov 27, 2023", toFormat)
 
-        toFormat = LocalDateTime.parse("2023-11-27T11:00:00")
+        toFormat = LocalDateTime.parse("2023-11-27T23:59:59")
         assertString("Nov 27, 2023", toFormat)
     }
 }
