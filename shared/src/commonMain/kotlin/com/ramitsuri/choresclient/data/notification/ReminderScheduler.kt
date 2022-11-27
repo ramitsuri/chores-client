@@ -15,10 +15,7 @@ import com.ramitsuri.choresclient.utils.now
 import com.ramitsuri.choresclient.utils.plus
 import com.ramitsuri.choresclient.utils.use
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.atTime
-import kotlinx.datetime.minus
 
 class ReminderScheduler(
     private val taskAssignmentsRepository: TaskAssignmentsRepository,
@@ -54,14 +51,14 @@ class ReminderScheduler(
             val memberId = prefManager.getUserId() ?: ""
             val existingNotifications = alarmHandler.getExisting()
 
-            val handledIds = mutableListOf<String>().apply {
+            val handledIds = mutableSetOf<String>().apply {
                 addAll(handleCompleted(assignments))
                 addAll(handlePastDue(assignments, existingNotifications, now, memberId))
                 addAll(handleToSchedule(assignments, existingNotifications, now, memberId))
             }
 
-            val originalIds = assignments.map { it.id }
-            val unhandledIds = originalIds.minus(handledIds.toSet())
+            val originalIds = existingNotifications.map { it.assignmentId }
+            val unhandledIds = originalIds.minus(handledIds)
             alarmHandler.cancel(unhandledIds)
         }
     }

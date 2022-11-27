@@ -16,7 +16,6 @@ import com.ramitsuri.choresclient.data.settings.PrefManager
 import com.ramitsuri.choresclient.utils.DispatcherProvider
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -27,9 +26,7 @@ import org.junit.Before
 import org.junit.Test
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.seconds
-import kotlin.time.ExperimentalTime
 
-@OptIn(ExperimentalTime::class)
 class ReminderSchedulerTest {
     private lateinit var reminderScheduler: ReminderScheduler
     private lateinit var taskAssignmentsRepository: FakeTaskAssignmentsRepository
@@ -68,8 +65,37 @@ class ReminderSchedulerTest {
                     )
                 )
             )
-            alarmHandler.schedule(listOf())
-            AssignmentAlarm(assignmentId, scheduledTime, 1, "")
+            alarmHandler.schedule(
+                listOf(
+                    AssignmentAlarm(assignmentId, scheduledTime, 1, "")
+                )
+            )
+
+            // Act
+            reminderScheduler.addReminders()
+
+            // Assert
+            val added = alarmHandler.get(assignmentId)
+            assertNull(added)
+        }
+    }
+
+    @Test
+    fun testAddReminders_shouldDelete_ifAssignmentNoLongerExists() {
+        runBlocking {
+            // Arrange
+            val assignmentId = "1"
+            val duration = 30.seconds
+            val scheduledTime =
+                Clock.System.now().plus(duration).toLocalDateTime(TimeZone.currentSystemDefault())
+            val memberId = "1"
+            prefManager.setUserId(memberId)
+            taskAssignmentsRepository.setSince(listOf()) // Assignment no longer exists
+            alarmHandler.schedule(
+                listOf(
+                    AssignmentAlarm(assignmentId, scheduledTime, 1, "")
+                )
+            )
 
             // Act
             reminderScheduler.addReminders()
