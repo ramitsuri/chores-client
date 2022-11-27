@@ -26,17 +26,23 @@ actual fun getDay(
     now: Instant,
     timeZone: TimeZone
 ): TextValue {
-    val nowLocal = now.toLocalDateTime(timeZone).toJavaLocalDateTime().truncatedTo(ChronoUnit.DAYS)
-    val toFormatDays = toFormat.toJavaLocalDateTime().truncatedTo(ChronoUnit.DAYS)
-    val difference = Duration.between(nowLocal, toFormatDays)
-    return if (difference.toDays() == 0L) {
+    val nowTruncated =
+        now.toLocalDateTime(timeZone).toJavaLocalDateTime().truncatedTo(ChronoUnit.DAYS)
+    val toFormatTruncated = toFormat.toJavaLocalDateTime().truncatedTo(ChronoUnit.DAYS)
+    val daysBetweenNowAndToFormat = Duration.between(nowTruncated, toFormatTruncated).toDays()
+    return when (daysBetweenNowAndToFormat) {
+        0L -> {
             TextValue.ForKey(LocalizedString.TODAY)
-    } else if (difference.toDays() == 1L) {
-        TextValue.ForKey(LocalizedString.TOMORROW)
-    } else if (difference.toDays() == -1L) {
-        TextValue.ForKey(LocalizedString.YESTERDAY)
-    } else {
-        TextValue.ForString(format(toFormat, now, timeZone, "MMM d", "MMM d, uuuu"))
+        }
+        1L -> {
+            TextValue.ForKey(LocalizedString.TOMORROW)
+        }
+        -1L -> {
+            TextValue.ForKey(LocalizedString.YESTERDAY)
+        }
+        else -> {
+            TextValue.ForString(format(toFormat, now, timeZone, "MMM d", "MMM d, uuuu"))
+        }
     }
 }
 
