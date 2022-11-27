@@ -31,6 +31,10 @@ class FakeTaskAssignmentsRepository : TaskAssignmentsRepository {
         TODO("Not yet implemented")
     }
 
+    override suspend fun markTaskAssignmentWontDo(taskAssignmentId: String, wontDoTime: Instant) {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun getLocal(id: String): TaskAssignment? {
         TODO("Not yet implemented")
     }
