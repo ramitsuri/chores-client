@@ -54,4 +54,11 @@ class AssignmentDetailsViewModel(
         }
         assignmentDetailsRepository.onCompleteRequested(details.id)
     }
+
+    fun onWontDo() {
+        if (!this::details.isInitialized) {
+            return
+        }
+        assignmentDetailsRepository.onWontDoRequested(details.id)
+    }
 }

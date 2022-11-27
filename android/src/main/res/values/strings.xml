@@ -41,6 +41,7 @@
     <string name="notification_reminder_action_snooze_hours">6 hours</string>
     <string name="notification_reminder_action_snooze_day">Tomorrow</string>
     <string name="notification_reminder_action_complete">Done</string>
+    <string name="notification_reminder_action_wont_do">No</string>
 
     <!-- Login -->
     <string name="login_button_login">Log In</string>
@@ -53,6 +54,7 @@
     <string name="assignment_details_button_done">Done</string>
     <string name="assignment_details_button_snooze_hours">Remind in 6 hours</string>
     <string name="assignment_details_button_snooze_day">Remind tomorrow</string>
+    <string name="assignment_details_button_wont_do">No</string>
     <string name="assignment_details_reminder_time">Reminder set for %1$s</string>
     <string name="assignment_details_reminder_time_unavailable">Reminder will be set in some time</string>
 
@@ -83,6 +85,13 @@
     <string name="settings_item_default_filter_title">Default filter</string>
     <string name="settings_item_default_filter">Person: %1$s, List: %2$s</string>
     <string name="settings_item_filter_none">NONE</string>
+    <string name="settings_item_notification_action_title">Notification actions</string>
+    <string name="settings_notification_action_select_3">Select up to 3 actions</string>
+    <string name="settings_notification_action_content_description">Notification Action</string>
+    <string name="settings_notification_action_snooze_hours">Snooze 6 hours</string>
+    <string name="settings_notification_action_snooze_day">Snooze tomorrow</string>
+    <string name="settings_notification_action_complete">Mark done</string>
+    <string name="settings_notification_action_wont_do">Mark no</string>
 
     <!-- Repeat Units -->
     <string name="repeat_unit_none">No repeat</string>

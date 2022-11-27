@@ -52,6 +52,13 @@ class AssignmentDetailsRepository(
         }
     }
 
+    fun onWontDoRequested(assignmentId: String) {
+        logger.v(TAG, "Won't do requested for $assignmentId")
+        coroutineScope.launch(dispatcherProvider.io) {
+            onWontDoRequestedSuspend(assignmentId)
+        }
+    }
+
     suspend fun getDetails(assignmentId: String): AssignmentDetails? {
         val assignment = taskAssignmentsRepository.getLocal(assignmentId)
         val alarmEntity = alarmHandler.getExisting(assignmentId)
@@ -76,6 +83,13 @@ class AssignmentDetailsRepository(
         cancelNotification(assignmentId)
         alarmHandler.cancel(listOf(assignmentId))
         taskAssignmentsRepository.markTaskAssignmentDone(assignmentId, Clock.System.now())
+    }
+
+    suspend fun onWontDoRequestedSuspend(assignmentId: String) {
+        logger.v(TAG, "Won't do requested suspend for $assignmentId")
+        cancelNotification(assignmentId)
+        alarmHandler.cancel(listOf(assignmentId))
+        taskAssignmentsRepository.markTaskAssignmentWontDo(assignmentId, Clock.System.now())
     }
 
     private suspend fun cancelNotification(assignmentId: String) {

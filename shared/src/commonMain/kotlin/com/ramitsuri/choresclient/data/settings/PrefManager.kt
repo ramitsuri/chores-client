@@ -18,77 +18,110 @@ class PrefManager(
     private val notificationIdLock = Lock()
 
     fun setUserId(userId: String) {
-        keyValueStore.putString(USER_ID, userId)
+        val key = Key.USER_ID
+        putString(key, userId)
     }
 
     fun getUserId(default: String? = null): String? {
-        return keyValueStore.getString(USER_ID, default)
+        val key = Key.USER_ID
+        return getString(key, default)
     }
 
-    fun setKey(key: String) {
-        secureKeyValueStore.putString(KEY, key)
+    fun setKey(value: String) {
+        val key = Key.KEY
+        putString(key, value)
     }
 
     fun getKey(default: String? = null): String? {
-        return secureKeyValueStore.getString(KEY, default)
+        val key = Key.KEY
+        return getString(key, default)
     }
 
     fun setToken(token: String) {
-        secureKeyValueStore.putString(TOKEN, token)
+        val key = Key.TOKEN
+        putString(key, token)
     }
 
     fun getToken(default: String? = null): String? {
-        return secureKeyValueStore.getString(TOKEN, default)
+        val key = Key.TOKEN
+        return getString(key, default)
     }
 
     fun setDebugServer(server: String) {
-        keyValueStore.putString(DEBUG_SERVER, server)
+        val key = Key.DEBUG_SERVER
+        putString(key, server)
     }
 
     fun getDebugServer(): String {
-        return keyValueStore.getString(DEBUG_SERVER, "") ?: ""
+        val key = Key.DEBUG_SERVER
+        return getString(key, "") ?: ""
     }
 
     fun setEnableRemoteLogging(enable: Boolean) {
-        keyValueStore.putBoolean(ENABLE_REMOTE_LOGGING, enable)
+        val key = Key.ENABLE_REMOTE_LOGGING
+        putBoolean(key, enable)
     }
 
     fun getEnableRemoteLogging(): Boolean {
-        return keyValueStore.getBoolean(ENABLE_REMOTE_LOGGING, false)
+        val key = Key.ENABLE_REMOTE_LOGGING
+        return getBoolean(key, false)
     }
 
     fun generateNewNotificationId(): Int {
+        val key = Key.PREV_NOTIFICATION_ID
         notificationIdLock.use {
-            val newId = keyValueStore.getInt(PREV_NOTIFICATION_ID, 0) + 1
-            keyValueStore.putInt(PREV_NOTIFICATION_ID, newId)
+            val newId = getInt(key, 0) + 1
+            putInt(key, newId)
             return newId
         }
     }
 
     fun getLastSyncTime(): Instant {
-        val lastSyncTimeMillis = keyValueStore.getLong(LAST_SYNC_TIME, 0L)
+        val key = Key.LAST_SYNC_TIME
+        val lastSyncTimeMillis = getLong(key, 0L)
         return Instant.fromEpochMilliseconds(lastSyncTimeMillis)
     }
 
     fun setLastSyncTime(time: Instant = Clock.System.now()) {
+        val key = Key.LAST_SYNC_TIME
         val millis = time.toEpochMilliseconds()
-        keyValueStore.putLong(LAST_SYNC_TIME, millis)
+        putLong(key, millis)
     }
 
     fun getSavedPersonFilterIds(): List<String> {
-        return keyValueStore.getStringList(SAVED_PERSON_FILTER_IDS, listOf(Filter.ALL_ID))
+        val key = Key.SAVED_PERSON_FILTER_IDS
+        return getStringList(key, listOf(Filter.ALL_ID))
     }
 
     fun setSavedPersonFilterIds(ids: List<String>) {
-        keyValueStore.putStringList(SAVED_PERSON_FILTER_IDS, ids)
+        val key = Key.SAVED_PERSON_FILTER_IDS
+        putStringList(key, ids)
     }
 
     fun getSavedHouseFilterIds(): List<String> {
-        return keyValueStore.getStringList(SAVED_HOUSE_FILTER_IDS, listOf(Filter.ALL_ID))
+        val key = Key.SAVED_HOUSE_FILTER_IDS
+        return getStringList(key, listOf(Filter.ALL_ID))
     }
 
     fun setSavedHouseFilterIds(ids: List<String>) {
-        keyValueStore.putStringList(SAVED_HOUSE_FILTER_IDS, ids)
+        val key = Key.SAVED_HOUSE_FILTER_IDS
+        putStringList(key, ids)
+    }
+
+    fun getEnabledNotificationActions(): List<String> {
+        val key = Key.ENABLED_NOTIFICATION_ACTIONS
+        return getStringList(
+            key, listOf(
+                "SNOOZE_HOUR",
+                "SNOOZE_DAY",
+                "COMPLETE"
+            )
+        )
+    }
+
+    fun setEnabledNotificationActions(value: List<String>) {
+        val key = Key.ENABLED_NOTIFICATION_ACTIONS
+        putStringList(key, value)
     }
 
     private fun deleteLegacyPrefs() {
@@ -101,22 +134,83 @@ class PrefManager(
         }
     }
 
-    companion object {
-        private const val USER_ID = "user_id"
-        private const val KEY = "key"
-        private const val TOKEN = "token"
-        private const val DEBUG_SERVER = "debug_server"
-        private const val ENABLE_REMOTE_LOGGING = "enable_remote_logging"
-        private const val PREV_NOTIFICATION_ID = "prev_notification_id"
-        private const val LAST_SYNC_TIME = "last_sync_time"
-        private const val SAVED_PERSON_FILTER_IDS = "saved_person_filter_ids"
-        private const val SAVED_HOUSE_FILTER_IDS = "saved_house_filter_ids"
+    private fun putString(key: Key, value: String) {
+        val keyValueStore = getKeyValueStore(key)
+        keyValueStore.putString(key.key, value)
+    }
 
+    private fun getString(key: Key, default: String?): String? {
+        val keyValueStore = getKeyValueStore(key)
+        return keyValueStore.getString(key.key, default)
+    }
+
+    private fun putBoolean(key: Key, value: Boolean) {
+        val keyValueStore = getKeyValueStore(key)
+        keyValueStore.putBoolean(key.key, value)
+    }
+
+    private fun getBoolean(key: Key, default: Boolean): Boolean {
+        val keyValueStore = getKeyValueStore(key)
+        return keyValueStore.getBoolean(key.key, default)
+    }
+
+    private fun putInt(key: Key, value: Int) {
+        val keyValueStore = getKeyValueStore(key)
+        keyValueStore.putInt(key.key, value)
+    }
+
+    private fun getInt(key: Key, default: Int): Int {
+        val keyValueStore = getKeyValueStore(key)
+        return keyValueStore.getInt(key.key, default)
+    }
+
+    private fun putLong(key: Key, value: Long) {
+        val keyValueStore = getKeyValueStore(key)
+        keyValueStore.putLong(key.key, value)
+    }
+
+    private fun getLong(key: Key, default: Long): Long {
+        val keyValueStore = getKeyValueStore(key)
+        return keyValueStore.getLong(key.key, default)
+    }
+
+    private fun putStringList(key: Key, value: List<String>) {
+        val keyValueStore = getKeyValueStore(key)
+        keyValueStore.putStringList(key.key, value)
+    }
+
+    private fun getStringList(key: Key, default: List<String>): List<String> {
+        val keyValueStore = getKeyValueStore(key)
+        return keyValueStore.getStringList(key.key, default)
+    }
+
+    private fun getKeyValueStore(key: Key): KeyValueStore {
+        return if (key.isSecure) {
+            secureKeyValueStore
+        } else {
+            keyValueStore
+        }
+    }
+
+    companion object {
         private const val KV = "KV"
         private const val SKV = "SKV"
 
         private val legacyPrefs = mapOf(
             "worker_running" to KV
         )
+
+        private enum class Key(val key: String, val isSecure: Boolean) {
+            USER_ID(key = "user_id", isSecure = false),
+            KEY(key = "key", isSecure = true),
+            TOKEN(key = "token", isSecure = true),
+            DEBUG_SERVER(key = "debug_server", isSecure = false),
+            ENABLE_REMOTE_LOGGING(key = "enable_remote_logging", isSecure = false),
+            PREV_NOTIFICATION_ID(key = "prev_notification_id", isSecure = false),
+            LAST_SYNC_TIME(key = "last_sync_time", isSecure = false),
+            SAVED_PERSON_FILTER_IDS(key = "saved_person_filter_ids", isSecure = false),
+            SAVED_HOUSE_FILTER_IDS(key = "saved_house_filter_ids", isSecure = false),
+            ENABLED_NOTIFICATION_ACTIONS(key = "enabled_notification_actions", isSecure = false)
+        }
     }
 }

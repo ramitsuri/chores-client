@@ -64,6 +64,16 @@ class SystemTaskAssignmentsRepository(
         )
     }
 
+    override suspend fun markTaskAssignmentWontDo(taskAssignmentId: String, wontDoTime: Instant) {
+        localDataSource.markWontDo(taskAssignmentId, wontDoTime)
+        logger.v(
+            TAG,
+            "Mark $taskAssignmentId won't do completed. New status: ${
+                localDataSource.getTaskAssignmentStatus(taskAssignmentId)
+            }"
+        )
+    }
+
     private suspend fun uploadLocal(): List<String> {
         return withContext(dispatcherProvider.io) {
             val readyForUpload = localDataSource.getReadyForUpload()
@@ -124,4 +134,6 @@ interface TaskAssignmentsRepository {
     suspend fun getLocal(id: String): TaskAssignment?
 
     suspend fun markTaskAssignmentDone(taskAssignmentId: String, doneTime: Instant)
+
+    suspend fun markTaskAssignmentWontDo(taskAssignmentId: String, wontDoTime: Instant)
 }

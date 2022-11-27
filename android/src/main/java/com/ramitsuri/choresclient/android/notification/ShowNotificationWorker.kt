@@ -22,7 +22,6 @@ import java.util.concurrent.TimeUnit
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
-import kotlinx.datetime.toLocalDateTime
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -48,6 +47,14 @@ class ShowNotificationWorker(
             providedNotificationId
         }
         val assignmentId = inputData.getString(ASSIGNMENT_ID) ?: ""
+        val notificationActions = prefManager.getEnabledNotificationActions().map {
+            val action = NotificationAction.fromAction(it)
+            NotificationActionInfo(
+                action.action,
+                action.text,
+                AssignmentActionReceiver::class
+            )
+        }
         notificationHandler.buildAndShow(
             NotificationInfo(
                 notificationId,
@@ -56,23 +63,7 @@ class ShowNotificationWorker(
                 notificationTitle,
                 null,
                 R.drawable.ic_notification,
-                listOf(
-                    NotificationActionInfo(
-                        NotificationAction.SNOOZE_HOUR.action,
-                        NotificationAction.SNOOZE_HOUR.text,
-                        AssignmentActionReceiver::class
-                    ),
-                    NotificationActionInfo(
-                        NotificationAction.SNOOZE_DAY.action,
-                        NotificationAction.SNOOZE_DAY.text,
-                        AssignmentActionReceiver::class
-                    ),
-                    NotificationActionInfo(
-                        NotificationAction.COMPLETE.action,
-                        NotificationAction.COMPLETE.text,
-                        AssignmentActionReceiver::class
-                    )
-                ),
+                notificationActions,
                 mapOf(
                     NotificationActionExtra.KEY_ASSIGNMENT_ID to assignmentId,
                     NotificationActionExtra.KEY_NOTIFICATION_ID to notificationId,

@@ -41,7 +41,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -67,9 +69,12 @@ import com.ramitsuri.choresclient.model.Filter
 import com.ramitsuri.choresclient.model.FilterItem
 import com.ramitsuri.choresclient.model.FilterType
 import com.ramitsuri.choresclient.model.FilterViewState
+import com.ramitsuri.choresclient.model.NotificationActionWrapper
+import com.ramitsuri.choresclient.model.NotificationActionsViewState
 import com.ramitsuri.choresclient.model.SyncViewState
 import com.ramitsuri.choresclient.model.TextValue
 import com.ramitsuri.choresclient.model.filter.PersonFilterItem
+import com.ramitsuri.choresclient.resources.LocalizedString
 import com.ramitsuri.choresclient.utils.formatSyncTime
 import com.ramitsuri.choresclient.viewmodel.SettingsViewModel
 import kotlinx.coroutines.launch
@@ -101,6 +106,9 @@ fun SettingsScreen(
         filterViewState = viewState.filterViewState,
         onFilterSelected = viewModel::filter,
         onFilterSaveRequested = viewModel::saveFilters,
+        notificationActionViewState = viewState.notificationActionsViewState,
+        onNotificationActionSelected = viewModel::onNotificationActionClicked,
+        onNotificationActionsSaveRequested = viewModel::saveNotificationActions,
         onBack = onBack,
         modifier = modifier
     )
@@ -119,10 +127,14 @@ private fun SettingsContent(
     filterViewState: FilterViewState,
     onFilterSelected: (Filter, FilterItem) -> Unit,
     onFilterSaveRequested: () -> Unit,
+    notificationActionViewState: NotificationActionsViewState,
+    onNotificationActionSelected: (NotificationActionWrapper) -> Unit,
+    onNotificationActionsSaveRequested: () -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val bottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
+    val bottomSheetType = remember { mutableStateOf(BottomSheetType.NONE) }
 
     ModalBottomSheetLayout(
         sheetState = bottomSheetState,
@@ -132,10 +144,17 @@ private fun SettingsContent(
             // Box is to give something to bottom sheet to draw as initially there would be
             // no sheet content which causes it to error out
             Box(modifier.defaultMinSize(minHeight = 1.dp))
-            FilterContent(
-                filters = filterViewState.filters,
-                onItemClick = onFilterSelected
-            )
+            if (bottomSheetType.value == BottomSheetType.FILTER) {
+                FilterContent(
+                    filters = filterViewState.filters,
+                    onItemClick = onFilterSelected
+                )
+            } else if (bottomSheetType.value == BottomSheetType.NOTIFICATION_ACTION) {
+                NotificationActionContent(
+                    notificationActions = notificationActionViewState.actions,
+                    onItemClick = onNotificationActionSelected
+                )
+            }
         }) {
         Scaffold(
             topBar = {
@@ -177,10 +196,21 @@ private fun SettingsContent(
                             timeZone = timeZone,
                             modifier = modifier
                         )
+                    }
+                    item {
                         FilterItem(
+                            bottomSheetType = bottomSheetType,
                             bottomSheetState = bottomSheetState,
                             filterViewState = filterViewState,
                             onFilterSaveRequested = onFilterSaveRequested
+                        )
+                    }
+                    item {
+                        NotificationActionItem(
+                            bottomSheetType = bottomSheetType,
+                            bottomSheetState = bottomSheetState,
+                            viewState = notificationActionViewState,
+                            onSaveRequested = onNotificationActionsSaveRequested
                         )
                     }
                 }
@@ -271,6 +301,7 @@ fun SyncItem(
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun FilterItem(
+    bottomSheetType: MutableState<BottomSheetType>,
     bottomSheetState: ModalBottomSheetState,
     filterViewState: FilterViewState,
     onFilterSaveRequested: () -> Unit,
@@ -295,7 +326,10 @@ fun FilterItem(
             if (houseFilterSelected) houseFilterText else noneString
         ),
         onClick = {
-            coroutineScope.launch { bottomSheetState.show() }
+            bottomSheetType.value = BottomSheetType.FILTER
+            coroutineScope.launch {
+                bottomSheetState.show()
+            }
         },
         showProgress = false,
         modifier = modifier
@@ -303,6 +337,7 @@ fun FilterItem(
     if (bottomSheetState.currentValue != ModalBottomSheetValue.Hidden) {
         DisposableEffect(Unit) {
             onDispose {
+                bottomSheetType.value = BottomSheetType.NONE
                 onFilterSaveRequested()
             }
         }
@@ -320,6 +355,7 @@ fun FilterContent(
         modifier = modifier
             .fillMaxWidth()
             .padding(paddingLarge)
+            .systemBarsPadding()
     ) {
         LazyColumn {
             items(items = filters, key = { it.getKey() }) { filter ->
@@ -406,6 +442,110 @@ fun FilterOptionItem(
 
 //endregion
 
+// region Notification Action
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun NotificationActionItem(
+    bottomSheetType: MutableState<BottomSheetType>,
+    bottomSheetState: ModalBottomSheetState,
+    viewState: NotificationActionsViewState,
+    onSaveRequested: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val coroutineScope = rememberCoroutineScope()
+
+    SettingsItem(
+        title = stringResource(id = R.string.settings_item_notification_action_title),
+        subtitle =
+        viewState.actions.filter { it.selected }.map { it.name.string() }.joinToString(", "),
+        onClick = {
+            bottomSheetType.value = BottomSheetType.NOTIFICATION_ACTION
+            coroutineScope.launch {
+                bottomSheetState.show()
+            }
+        },
+        showProgress = false,
+        modifier = modifier
+    )
+    if (bottomSheetState.currentValue != ModalBottomSheetValue.Hidden) {
+        DisposableEffect(Unit) {
+            onDispose {
+                bottomSheetType.value = BottomSheetType.NONE
+                onSaveRequested()
+            }
+        }
+    }
+
+}
+
+@Composable
+fun NotificationActionContent(
+    notificationActions: List<NotificationActionWrapper>,
+    onItemClick: (NotificationActionWrapper) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(paddingLarge)
+            .systemBarsPadding()
+    ) {
+        Text(
+            text = stringResource(id = R.string.settings_notification_action_select_3),
+            style = MaterialTheme.typography.titleMedium,
+            modifier = modifier.padding(paddingMedium),
+            color = MaterialTheme.colorScheme.onBackground
+        )
+        Spacer(modifier = modifier.height(marginMedium))
+        LazyColumn {
+            items(items = notificationActions, key = { it.action }) { notificationAction ->
+                NotificationActionOptionItem(
+                    item = notificationAction,
+                    onItemClick = onItemClick,
+                    modifier = modifier
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun NotificationActionOptionItem(
+    item: NotificationActionWrapper,
+    onItemClick: (NotificationActionWrapper) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier
+            .clickable {
+                onItemClick(item)
+            }
+            .defaultMinSize(minHeight = minAssignmentItemHeight)
+            .padding(paddingMedium)) {
+        Icon(
+            imageVector = if (item.selected) {
+                Icons.Filled.CheckBox
+            } else {
+                Icons.Filled.CheckBoxOutlineBlank
+            },
+            contentDescription = stringResource(id = R.string.settings_notification_action_content_description),
+            modifier = modifier.size(FilterChipDefaults.IconSize),
+            tint = MaterialTheme.colorScheme.onBackground
+        )
+        Spacer(modifier = modifier.width(marginSmall))
+        Text(
+            text = item.name.string(),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+    }
+}
+
+// endregion
+
 //region Previews
 
 @Preview
@@ -474,6 +614,11 @@ private fun PreviewSettingsContent(@PreviewParameter(FilterPreview::class) filte
                 filterViewState = FilterViewState(filters),
                 onFilterSelected = { _, _ -> },
                 onFilterSaveRequested = {},
+                notificationActionViewState = NotificationActionsViewState(
+                    actions = getNotificationActionsForPreview()
+                ),
+                onNotificationActionSelected = {},
+                onNotificationActionsSaveRequested = {},
                 onBack = { }
             )
         }
@@ -522,14 +667,57 @@ fun PreviewSettingsItem_Sync_WithProgress() {
 fun PreviewSettingsItem_Filter(
     @PreviewParameter(FilterPreview::class) filters: List<Filter>
 ) {
+    val bottomSheetType = remember { mutableStateOf(BottomSheetType.NONE) }
     ChoresClientTheme {
         Surface {
             FilterItem(
+                bottomSheetType,
                 rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden),
                 filterViewState = FilterViewState(filters),
                 onFilterSaveRequested = {}
             )
         }
+    }
+}
+
+@Preview
+@Composable
+fun PreviewNotificationActionContent() {
+    ChoresClientTheme {
+        Surface {
+            NotificationActionContent(
+                notificationActions = getNotificationActionsForPreview(),
+                onItemClick = { }
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+fun PreviewNotificationActionContentDarkTheme() {
+    ChoresClientTheme(darkTheme = true) {
+        Surface {
+            NotificationActionContent(
+                notificationActions = getNotificationActionsForPreview(),
+                onItemClick = { }
+            )
+        }
+    }
+}
+
+fun getNotificationActionsForPreview(): List<NotificationActionWrapper> {
+    return listOf(
+        "SNOOZE_HOUR" to LocalizedString.NOTIFICATION_ACTION_SNOOZE_HOUR,
+        "SNOOZE_DAY" to LocalizedString.NOTIFICATION_ACTION_SNOOZE_DAY,
+        "COMPLETE" to LocalizedString.NOTIFICATION_ACTION_COMPLETE,
+        "WONT_DO" to LocalizedString.NOTIFICATION_ACTION_WONT_DO
+    ).mapIndexed { index, s ->
+        NotificationActionWrapper(
+            s.first,
+            name = TextValue.ForKey(s.second),
+            selected = index != 3
+        )
     }
 }
 
