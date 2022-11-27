@@ -89,7 +89,7 @@ class PrefManager(
     }
 
     fun getSavedPersonFilterIds(): List<String> {
-        val key = Key.SAVED_HOUSE_FILTER_IDS
+        val key = Key.SAVED_PERSON_FILTER_IDS
         return getStringList(key, listOf(Filter.ALL_ID))
     }
 
