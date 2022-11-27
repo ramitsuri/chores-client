@@ -35,5 +35,9 @@ private fun getResId(key: LocalizedString): Int {
         LocalizedString.TODAY -> R.string.today
         LocalizedString.TOMORROW -> R.string.tomorrow
         LocalizedString.YESTERDAY -> R.string.yesterday
+        LocalizedString.NOTIFICATION_ACTION_SNOOZE_HOUR -> R.string.settings_notification_action_snooze_hours
+        LocalizedString.NOTIFICATION_ACTION_SNOOZE_DAY -> R.string.settings_notification_action_snooze_day
+        LocalizedString.NOTIFICATION_ACTION_COMPLETE -> R.string.settings_notification_action_complete
+        LocalizedString.NOTIFICATION_ACTION_WONT_DO -> R.string.settings_notification_action_wont_do
     }
 }

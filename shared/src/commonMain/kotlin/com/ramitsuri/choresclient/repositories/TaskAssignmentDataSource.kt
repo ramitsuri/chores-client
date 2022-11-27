@@ -50,6 +50,16 @@ class TaskAssignmentDataSource(
         taskAssignmentDao.update(taskAssignment)
     }
 
+    suspend fun markWontDo(assignmentId: String, wontDoTime: Instant) {
+        val taskAssignment = TaskAssignmentUpdate(
+            assignmentId,
+            ProgressStatus.WONT_DO,
+            wontDoTime,
+            shouldUpload = true
+        )
+        taskAssignmentDao.update(taskAssignment)
+    }
+
     suspend fun getTaskAssignments(
         filters: List<Filter> = listOf()
     ): List<TaskAssignment> {

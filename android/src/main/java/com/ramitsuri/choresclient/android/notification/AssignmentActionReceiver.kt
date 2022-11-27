@@ -37,6 +37,10 @@ class AssignmentActionReceiver : BroadcastReceiver(), KoinComponent {
                 logger.v(TAG, "Marked $assignmentId as done")
                 detailsRepository.onCompleteRequested(assignmentId)
             }
+            NotificationAction.WONT_DO.action -> {
+                logger.v(TAG, "Marked $assignmentId as won't do")
+                detailsRepository.onWontDoRequested(assignmentId)
+            }
             else -> {
                 // Do nothing
             }

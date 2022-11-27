@@ -5,9 +5,13 @@ import com.ramitsuri.choresclient.data.settings.PrefManager
 import com.ramitsuri.choresclient.model.Filter
 import com.ramitsuri.choresclient.model.FilterItem
 import com.ramitsuri.choresclient.model.FilterType
+import com.ramitsuri.choresclient.model.NotificationActionWrapper
+import com.ramitsuri.choresclient.model.NotificationActionsViewState
 import com.ramitsuri.choresclient.model.SettingsViewState
 import com.ramitsuri.choresclient.model.SyncViewState
+import com.ramitsuri.choresclient.model.TextValue
 import com.ramitsuri.choresclient.repositories.SyncRepository
+import com.ramitsuri.choresclient.resources.LocalizedString
 import com.ramitsuri.choresclient.utils.DispatcherProvider
 import com.ramitsuri.choresclient.utils.FilterHelper
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,7 +32,10 @@ class SettingsViewModel(
         MutableStateFlow(
             SettingsViewState(
                 syncViewState = SyncViewState(lastSyncTime = prefManager.getLastSyncTime()),
-                timeZone = TimeZone.currentSystemDefault()
+                timeZone = TimeZone.currentSystemDefault(),
+                notificationActionsViewState = NotificationActionsViewState(
+                    actions = getNotificationActionList()
+                )
             )
         )
     val state: StateFlow<SettingsViewState> = _state
@@ -97,9 +104,51 @@ class SettingsViewModel(
         }
     }
 
+    fun onNotificationActionClicked(clicked: NotificationActionWrapper) {
+        val actions = _state.value.notificationActionsViewState.actions
+        // Attempting to select another when already 3 selected
+        if (!clicked.selected && actions.filter { it.selected }.size == 3) {
+            return
+        }
+        val newActions = actions.map {
+            if (it.action == clicked.action) {
+                it.copy(selected = !it.selected)
+            } else {
+                it
+            }
+        }
+        _state.update {
+            it.copy(
+                notificationActionsViewState =
+                it.notificationActionsViewState.copy(actions = newActions)
+            )
+        }
+    }
+
+    fun saveNotificationActions() {
+        val actions = _state.value.notificationActionsViewState.actions
+        prefManager.setEnabledNotificationActions(actions.filter { it.selected }.map { it.action })
+    }
+
     fun onErrorShown() {
         _state.update {
             it.copy(error = null)
+        }
+    }
+
+    private fun getNotificationActionList(): List<NotificationActionWrapper> {
+        val savedActions = prefManager.getEnabledNotificationActions()
+        return listOf(
+            "SNOOZE_HOUR" to LocalizedString.NOTIFICATION_ACTION_SNOOZE_HOUR,
+            "SNOOZE_DAY" to LocalizedString.NOTIFICATION_ACTION_SNOOZE_DAY,
+            "COMPLETE" to LocalizedString.NOTIFICATION_ACTION_COMPLETE,
+            "WONT_DO" to LocalizedString.NOTIFICATION_ACTION_WONT_DO
+        ).map {
+            NotificationActionWrapper(
+                it.first,
+                name = TextValue.ForKey(it.second),
+                selected = savedActions.contains(it.first)
+            )
         }
     }
 }

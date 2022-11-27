@@ -61,7 +61,7 @@ class ReminderScheduler(
             }
 
             val originalIds = assignments.map { it.id }
-            val unhandledIds = originalIds.minus(handledIds)
+            val unhandledIds = originalIds.minus(handledIds.toSet())
             alarmHandler.cancel(unhandledIds)
         }
     }

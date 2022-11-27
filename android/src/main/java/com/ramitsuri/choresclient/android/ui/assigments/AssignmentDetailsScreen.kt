@@ -2,13 +2,13 @@ package com.ramitsuri.choresclient.android.ui.assigments
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.Text
@@ -85,6 +85,12 @@ fun AssignmentDetailsScreen(
                         modalBottomSheetState.hide()
                     }
                 },
+                onWontDo = {
+                    viewModel.onWontDo()
+                    coroutineScope.launch {
+                        modalBottomSheetState.hide()
+                    }
+                }
             )
         } ?: run {
             coroutineScope.launch {
@@ -101,12 +107,14 @@ fun AssignmentDetailsContent(
     enableCompleteAndSnooze: Boolean,
     onComplete: () -> Unit,
     onSnoozeHour: () -> Unit,
-    onSnoozeDay: () -> Unit
+    onSnoozeDay: () -> Unit,
+    onWontDo: () -> Unit
 ) {
     Column(
         modifier = modifier
             .padding(paddingLarge)
             .fillMaxWidth()
+            .systemBarsPadding()
     ) {
         Text(
             text = assignment.name,
@@ -145,19 +153,33 @@ fun AssignmentDetailsContent(
             Text(text = stringResource(id = R.string.assignment_details_button_done))
         }
         Spacer(modifier = modifier.height(marginLarge))
-        Row(modifier = modifier.fillMaxWidth()) {
-            OutlinedButton(
-                onClick = onSnoozeHour,
-                enabled = enableCompleteAndSnooze
-            ) {
-                Text(text = stringResource(id = R.string.assignment_details_button_snooze_hours))
+        LazyRow(
+            modifier = modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(marginMedium)
+        ) {
+            item {
+                OutlinedButton(
+                    onClick = onSnoozeHour,
+                    enabled = enableCompleteAndSnooze
+                ) {
+                    Text(text = stringResource(id = R.string.assignment_details_button_snooze_hours))
+                }
             }
-            Spacer(modifier = modifier.width(marginMedium))
-            OutlinedButton(
-                onClick = onSnoozeDay,
-                enabled = enableCompleteAndSnooze
-            ) {
-                Text(text = stringResource(id = R.string.assignment_details_button_snooze_day))
+            item {
+                OutlinedButton(
+                    onClick = onSnoozeDay,
+                    enabled = enableCompleteAndSnooze
+                ) {
+                    Text(text = stringResource(id = R.string.assignment_details_button_snooze_day))
+                }
+            }
+            item {
+                OutlinedButton(
+                    onClick = onWontDo,
+                    enabled = enableCompleteAndSnooze
+                ) {
+                    Text(text = stringResource(id = R.string.assignment_details_button_wont_do))
+                }
             }
         }
         Spacer(modifier = modifier.height(marginExtraLarge))
@@ -194,6 +216,7 @@ fun PreviewAssignmentDetailsContent() {
                 onComplete = {},
                 onSnoozeHour = {},
                 onSnoozeDay = {},
+                onWontDo = {},
                 enableCompleteAndSnooze = false
             )
         }
