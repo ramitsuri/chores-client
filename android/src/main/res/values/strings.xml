@@ -8,6 +8,9 @@
     <string name="sync">Sync</string>
     <string name="back">Back</string>
     <string name="save">Save</string>
+    <string name="today">Today</string>
+    <string name="tomorrow">Tomorrow</string>
+    <string name="yesterday">Yesterday</string>
 
     <!-- Assignments -->
     <string name="assignment_due">Due %1$s</string>

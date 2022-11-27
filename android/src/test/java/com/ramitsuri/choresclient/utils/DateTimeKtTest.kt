@@ -1,6 +1,9 @@
 package com.ramitsuri.choresclient.utils
 
+import com.ramitsuri.choresclient.model.TextValue
+import com.ramitsuri.choresclient.resources.LocalizedString
 import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import org.junit.Assert.assertEquals
@@ -83,5 +86,78 @@ class DateTimeKtTest {
 
         time = Instant.fromEpochMilliseconds(1660125660000L) // 2022-08-10, 6AM NYC
         assertEquals("6:01 AM Aug 10", formatSyncTime(time, now, timeZone))
+    }
+
+    @Test
+    fun testGetDay() {
+        val timeZone = TimeZone.of("America/New_York")
+        val now = LocalDateTime.parse("2022-11-25T11:00:00").toInstant(timeZone)
+
+        val assertLocalized: (LocalizedString, LocalDateTime) -> Unit = { key, inputDateTime ->
+                assertEquals(TextValue.ForKey(key), getDay(inputDateTime, now, timeZone))
+            }
+        val assertString: (String, LocalDateTime) -> Unit = { string, inputDateTime ->
+            assertEquals(TextValue.ForString(string), getDay(inputDateTime, now, timeZone))
+        }
+
+        var toFormat: LocalDateTime
+
+        // Today
+        toFormat = LocalDateTime.parse("2022-11-25T11:00:00")
+        assertLocalized(LocalizedString.TODAY, toFormat)
+
+        toFormat = LocalDateTime.parse("2022-11-25T00:00:01")
+        assertLocalized(LocalizedString.TODAY, toFormat)
+
+        toFormat = LocalDateTime.parse("2022-11-25T23:59:59")
+        assertLocalized(LocalizedString.TODAY, toFormat)
+
+        // Yesterday
+        toFormat = LocalDateTime.parse("2022-11-24T11:00:00")
+        assertLocalized(LocalizedString.YESTERDAY, toFormat)
+
+        toFormat = LocalDateTime.parse("2022-11-24T00:00:01")
+        assertLocalized(LocalizedString.YESTERDAY, toFormat)
+
+        toFormat = LocalDateTime.parse("2022-11-24T23:59:59")
+        assertLocalized(LocalizedString.YESTERDAY, toFormat)
+
+        // Tomorrow
+        toFormat = LocalDateTime.parse("2022-11-26T11:00:00")
+        assertLocalized(LocalizedString.TOMORROW, toFormat)
+
+        toFormat = LocalDateTime.parse("2022-11-26T00:00:01")
+        assertLocalized(LocalizedString.TOMORROW, toFormat)
+
+        toFormat = LocalDateTime.parse("2022-11-26T23:59:59")
+        assertLocalized(LocalizedString.TOMORROW, toFormat)
+
+        // Other days
+        toFormat = LocalDateTime.parse("2022-11-23T11:00:00")
+        assertString("Nov 23", toFormat)
+
+        toFormat = LocalDateTime.parse("2022-11-23T00:00:01")
+        assertString("Nov 23", toFormat)
+
+        toFormat = LocalDateTime.parse("2022-11-23T23:59:59")
+        assertString("Nov 23", toFormat)
+
+        toFormat = LocalDateTime.parse("2022-11-27T11:00:00")
+        assertString("Nov 27", toFormat)
+
+        toFormat = LocalDateTime.parse("2022-11-27T00:00:01")
+        assertString("Nov 27", toFormat)
+
+        toFormat = LocalDateTime.parse("2022-11-27T23:59:59")
+        assertString("Nov 27", toFormat)
+
+        toFormat = LocalDateTime.parse("2023-11-27T11:00:00")
+        assertString("Nov 27, 2023", toFormat)
+
+        toFormat = LocalDateTime.parse("2023-11-27T00:00:01")
+        assertString("Nov 27, 2023", toFormat)
+
+        toFormat = LocalDateTime.parse("2023-11-27T23:59:59")
+        assertString("Nov 27, 2023", toFormat)
     }
 }

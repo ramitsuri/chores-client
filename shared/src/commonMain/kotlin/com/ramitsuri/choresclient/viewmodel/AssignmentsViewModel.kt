@@ -129,7 +129,7 @@ class AssignmentsViewModel(
                 if (it.assignment.task.repeatUnit == RepeatUnit.ON_COMPLETE) {
                     onCompletionKey
                 } else {
-                    TextValue.ForString(getDay(it.assignment.dueDateTime))
+                    getDay(it.assignment.dueDateTime)
                 }
             }
 

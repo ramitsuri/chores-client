@@ -1,5 +1,6 @@
 package com.ramitsuri.choresclient.utils
 
+import com.ramitsuri.choresclient.model.TextValue
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
@@ -9,4 +10,4 @@ expect fun getDay(
     toFormat: LocalDateTime,
     now: Instant = Clock.System.now(),
     timeZone: TimeZone = TimeZone.currentSystemDefault()
-): String
+): TextValue

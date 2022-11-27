@@ -32,5 +32,8 @@ private fun getResId(key: LocalizedString): Int {
         LocalizedString.REPEAT_UNIT_HOUR -> R.string.repeat_unit_hour
         LocalizedString.REPEAT_UNIT_YEAR -> R.string.repeat_unit_year
         LocalizedString.REPEAT_UNIT_ON_COMPLETE -> R.string.repeat_unit_on_complete
+        LocalizedString.TODAY -> R.string.today
+        LocalizedString.TOMORROW -> R.string.tomorrow
+        LocalizedString.YESTERDAY -> R.string.yesterday
     }
 }
