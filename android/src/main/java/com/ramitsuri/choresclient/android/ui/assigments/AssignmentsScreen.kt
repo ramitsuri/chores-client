@@ -69,10 +69,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.ramitsuri.choresclient.android.R
@@ -89,6 +91,7 @@ import com.ramitsuri.choresclient.android.ui.theme.paddingCardView
 import com.ramitsuri.choresclient.android.ui.theme.paddingMedium
 import com.ramitsuri.choresclient.android.ui.theme.paddingSmall
 import com.ramitsuri.choresclient.android.utils.formatRepeatUnit
+import com.ramitsuri.choresclient.android.utils.observeAsState
 import com.ramitsuri.choresclient.data.ActiveStatus
 import com.ramitsuri.choresclient.data.CreateType
 import com.ramitsuri.choresclient.data.Member
@@ -132,6 +135,11 @@ fun AssignmentsScreen(
     val modalBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     val coroutineScope = rememberCoroutineScope()
     val menu = listOf(AssignmentsMenuItem.SETTINGS)
+
+    val state = LocalLifecycleOwner.current.lifecycle.observeAsState().value
+    if (state == Lifecycle.Event.ON_RESUME) {
+        viewModel.fetchAssignments(getLocal = true)
+    }
 
     ModalBottomSheetLayout(
         sheetState = modalBottomSheetState,

@@ -1,14 +1,19 @@
 package com.ramitsuri.choresclient.android.utils
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import com.ramitsuri.choresclient.android.R
 import com.ramitsuri.choresclient.data.RepeatUnit
 import com.ramitsuri.choresclient.utils.formatReminderTime
-import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -72,3 +77,17 @@ fun formatReminderAt(toFormat: LocalDateTime?): String {
     }
 }
 
+@Composable
+fun Lifecycle.observeAsState(): State<Lifecycle.Event> {
+    val state = remember { mutableStateOf(Lifecycle.Event.ON_ANY) }
+    DisposableEffect(this) {
+        val observer = LifecycleEventObserver { _, event ->
+            state.value = event
+        }
+        this@observeAsState.addObserver(observer)
+        onDispose {
+            this@observeAsState.removeObserver(observer)
+        }
+    }
+    return state
+}

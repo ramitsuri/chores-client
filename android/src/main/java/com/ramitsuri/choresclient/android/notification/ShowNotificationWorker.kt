@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingWorkPolicy
+import androidx.work.ListenableWorker.Result.failure
+import androidx.work.ListenableWorker.Result.success
 import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
@@ -11,19 +13,21 @@ import androidx.work.workDataOf
 import com.ramitsuri.choresclient.android.R
 import com.ramitsuri.choresclient.android.utils.NotificationAction
 import com.ramitsuri.choresclient.android.utils.NotificationActionExtra
+import com.ramitsuri.choresclient.data.ProgressStatus
 import com.ramitsuri.choresclient.data.entities.AssignmentAlarm
 import com.ramitsuri.choresclient.data.settings.PrefManager
 import com.ramitsuri.choresclient.notification.NotificationActionInfo
 import com.ramitsuri.choresclient.notification.NotificationHandler
 import com.ramitsuri.choresclient.notification.NotificationInfo
 import com.ramitsuri.choresclient.notification.Priority
+import com.ramitsuri.choresclient.repositories.TaskAssignmentsRepository
 import com.ramitsuri.choresclient.utils.LogHelper
-import java.util.concurrent.TimeUnit
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import java.util.concurrent.TimeUnit
 
 class ShowNotificationWorker(
     context: Context,
@@ -32,9 +36,27 @@ class ShowNotificationWorker(
 
     private val logger: LogHelper by inject()
     private val notificationHandler: NotificationHandler by inject()
+    private val assignmentRepo: TaskAssignmentsRepository by inject()
     private val prefManager: PrefManager by inject()
 
     override suspend fun doWork(): Result {
+        val assignmentId = inputData.getString(ASSIGNMENT_ID)
+        if (assignmentId == null) {
+            logger.v(TAG, "Assignment Id null. Cannot show notification")
+            return failure()
+        }
+
+        val assignment = assignmentRepo.getLocal(assignmentId)
+        if (assignment == null) {
+            logger.v(TAG, "Assignment null. Cannot show notification")
+            return failure()
+        }
+
+        if (assignment.progressStatus != ProgressStatus.TODO) {
+            logger.v(TAG, "Assignment not TODO. Skipping showing notification")
+            return success()
+        }
+
         val notificationTitle = inputData.getString(NOTIFICATION_BODY)
             ?: applicationContext.getString(R.string.notification_reminder_title)
         logger.d(TAG, "Showing notification for: $notificationTitle")
@@ -46,7 +68,6 @@ class ShowNotificationWorker(
         } else {
             providedNotificationId
         }
-        val assignmentId = inputData.getString(ASSIGNMENT_ID) ?: ""
         val notificationActions = prefManager.getEnabledNotificationActions().map {
             val action = NotificationAction.fromAction(it)
             NotificationActionInfo(
@@ -71,7 +92,7 @@ class ShowNotificationWorker(
                 )
             )
         )
-        return Result.success()
+        return success()
     }
 
     companion object {
