@@ -7,10 +7,12 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
 import com.ramitsuri.choresclient.android.R
 import com.ramitsuri.choresclient.data.RepeatUnit
 import com.ramitsuri.choresclient.utils.formatReminderTime
@@ -78,15 +80,15 @@ fun formatReminderAt(toFormat: LocalDateTime?): String {
 }
 
 @Composable
-fun Lifecycle.observeAsState(): State<Lifecycle.Event> {
+fun LifecycleOwner.observeAsState(): State<Lifecycle.Event> {
     val state = remember { mutableStateOf(Lifecycle.Event.ON_ANY) }
     DisposableEffect(this) {
         val observer = LifecycleEventObserver { _, event ->
             state.value = event
         }
-        this@observeAsState.addObserver(observer)
+        this@observeAsState.lifecycle.addObserver(observer)
         onDispose {
-            this@observeAsState.removeObserver(observer)
+            this@observeAsState.lifecycle.removeObserver(observer)
         }
     }
     return state
