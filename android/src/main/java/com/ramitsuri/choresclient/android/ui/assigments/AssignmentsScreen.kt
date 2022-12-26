@@ -136,9 +136,10 @@ fun AssignmentsScreen(
     val coroutineScope = rememberCoroutineScope()
     val menu = listOf(AssignmentsMenuItem.SETTINGS)
 
-    val state = LocalLifecycleOwner.current.lifecycle.observeAsState().value
+    val state = LocalLifecycleOwner.current.observeAsState().value
     if (state == Lifecycle.Event.ON_RESUME) {
-        viewModel.fetchAssignments(getLocal = true)
+        // TODO figure out why this is breaking filters and adding multiple items to them
+        // viewModel.fetchAssignments(getLocal = true)
     }
 
     ModalBottomSheetLayout(
