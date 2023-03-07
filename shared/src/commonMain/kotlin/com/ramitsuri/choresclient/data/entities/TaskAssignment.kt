@@ -18,33 +18,9 @@ class TaskAssignmentDao(
         }
     }
 
-    suspend fun getTodo(): List<TaskAssignmentEntity> {
-        return withContext(dispatcherProvider.io) {
-            return@withContext dbQueries.selectTodoAssignments().executeAsList()
-        }
-    }
-
     suspend fun get(id: String): TaskAssignmentEntity? {
         return withContext(dispatcherProvider.io) {
             return@withContext dbQueries.selectAssignment(id).executeAsOneOrNull()
-        }
-    }
-
-    suspend fun getForMember(memberId: String): List<TaskAssignmentEntity> {
-        return withContext(dispatcherProvider.io) {
-            return@withContext dbQueries.selectAssignmentsByMember(memberId).executeAsList()
-        }
-    }
-
-    suspend fun getForMembers(memberIds: List<String>): List<TaskAssignmentEntity> {
-        return withContext(dispatcherProvider.io) {
-            val result = mutableListOf<TaskAssignmentEntity>()
-            dbQueries.transaction {
-                memberIds.forEach { memberId ->
-                    result.addAll(dbQueries.selectAssignmentsByMembers(memberId).executeAsList())
-                }
-            }
-            return@withContext result
         }
     }
 
@@ -73,28 +49,15 @@ class TaskAssignmentDao(
         }
     }
 
-    suspend fun insert(taskAssignmentEntities: List<TaskAssignmentEntity>) {
+    suspend fun clearTodoAndInsert(taskAssignmentEntities: List<TaskAssignmentEntity>) {
         withContext(dispatcherProvider.io) {
             dbQueries.transaction {
+                dbQueries.deleteTodo()
                 taskAssignmentEntities.forEach {
                     insert(it)
                 }
             }
         }
-    }
-
-    suspend fun delete(ids: List<String>) {
-        withContext(dispatcherProvider.io) {
-            dbQueries.transaction {
-                ids.forEach {
-                    delete(it)
-                }
-            }
-        }
-    }
-
-    private fun delete(id: String) {
-        dbQueries.deleteAssignment(id)
     }
 
     private fun insert(taskAssignmentEntity: TaskAssignmentEntity) {
