@@ -1,4 +1,4 @@
-package com.ramitsuri.choresclient.android.downloader
+package com.ramitsuri.choresclient.android.work
 
 import android.content.Context
 import androidx.work.Constraints

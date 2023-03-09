@@ -5,11 +5,12 @@ import android.content.Context
 import android.os.Build
 import com.google.android.material.color.DynamicColors
 import com.ramitsuri.choresclient.AppInfo
-import com.ramitsuri.choresclient.android.downloader.AssignmentsDownloader
+import com.ramitsuri.choresclient.android.work.AssignmentsDownloader
 import com.ramitsuri.choresclient.android.notification.ShowNotificationWorker
 import com.ramitsuri.choresclient.android.notification.SystemNotificationHandler
 import com.ramitsuri.choresclient.android.reminder.ReminderSchedulerWorker
 import com.ramitsuri.choresclient.android.reminder.SystemAlarmHandler
+import com.ramitsuri.choresclient.android.work.PushMessageTokenUploader
 import com.ramitsuri.choresclient.data.entities.AlarmDao
 import com.ramitsuri.choresclient.data.settings.PrefManager
 import com.ramitsuri.choresclient.initKoin
@@ -19,6 +20,7 @@ import com.ramitsuri.choresclient.notification.NotificationHandler
 import com.ramitsuri.choresclient.reminder.AlarmHandler
 import com.ramitsuri.choresclient.repositories.AssignmentDetailsRepository
 import com.ramitsuri.choresclient.repositories.LoginRepository
+import com.ramitsuri.choresclient.repositories.PushMessageTokenRepository
 import com.ramitsuri.choresclient.repositories.SyncRepository
 import com.ramitsuri.choresclient.repositories.TaskAssignmentsRepository
 import com.ramitsuri.choresclient.repositories.TasksRepository
@@ -35,10 +37,13 @@ import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.dsl.module
+import java.util.UUID
 
 class MainApplication : Application(), KoinComponent {
 
     private val notificationHandler: NotificationHandler by inject()
+    private val prefManager: PrefManager by inject()
+    private val pushMessageTokenUploader: PushMessageTokenUploader.Companion by inject()
 
     override fun onCreate() {
         super.onCreate()
@@ -47,6 +52,8 @@ class MainApplication : Application(), KoinComponent {
 
         createNotificationChannels()
         enqueueWorkers()
+        pushMessageTokenUploader.upload(this)
+        setDeviceIdIfNecessary()
     }
 
     private fun createNotificationChannels() {
@@ -93,6 +100,8 @@ class MainApplication : Application(), KoinComponent {
                     AndroidAppInfo()
                 }
 
+                factory<PushMessageTokenUploader.Companion> { PushMessageTokenUploader.Companion }
+
                 viewModel {
                     AssignmentsViewModel(
                         get<AssignmentDetailsRepository>(),
@@ -110,6 +119,7 @@ class MainApplication : Application(), KoinComponent {
                         get<LoginRepository>(),
                         get<SyncRepository>(),
                         get<TaskAssignmentsRepository>(),
+                        get<PushMessageTokenRepository>(),
                         get<PrefManager>(),
                         get<DispatcherProvider>(),
                         BuildConfig.DEBUG
@@ -141,6 +151,16 @@ class MainApplication : Application(), KoinComponent {
                 }
             }
         )
+    }
+
+    private fun setDeviceIdIfNecessary() {
+        val currentDeviceId = prefManager.getDeviceId()
+        if (currentDeviceId != null) {
+            return
+        }
+
+        val deviceId = UUID.randomUUID().toString()
+        prefManager.setDeviceId(deviceId)
     }
 }
 

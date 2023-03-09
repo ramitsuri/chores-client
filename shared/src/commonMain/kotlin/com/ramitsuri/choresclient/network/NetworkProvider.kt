@@ -129,6 +129,9 @@ class NetworkProvider(
     fun provideTasksApi() =
         TasksApi(client, provideBaseApiUrl())
 
+    fun providePushMessageTokenApi(httpClient: HttpClient = client) =
+        PushMessageTokenApi(httpClient, provideBaseApiUrl())
+
     private fun provideLoginApi(httpClient: HttpClient = client) =
         LoginApi(httpClient, provideBaseApiUrl())
 

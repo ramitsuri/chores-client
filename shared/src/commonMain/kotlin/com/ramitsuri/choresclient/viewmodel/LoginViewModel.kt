@@ -5,6 +5,7 @@ import com.ramitsuri.choresclient.data.settings.PrefManager
 import com.ramitsuri.choresclient.model.LoginDebugViewState
 import com.ramitsuri.choresclient.model.LoginViewState
 import com.ramitsuri.choresclient.repositories.LoginRepository
+import com.ramitsuri.choresclient.repositories.PushMessageTokenRepository
 import com.ramitsuri.choresclient.repositories.SyncRepository
 import com.ramitsuri.choresclient.repositories.TaskAssignmentsRepository
 import com.ramitsuri.choresclient.utils.DispatcherProvider
@@ -17,29 +18,17 @@ class LoginViewModel(
     private val repository: LoginRepository,
     private val syncRepository: SyncRepository,
     private val taskAssignmentsRepository: TaskAssignmentsRepository,
+    private val pushMessageTokenRepository: PushMessageTokenRepository,
     private val prefManager: PrefManager,
     private val dispatchers: DispatcherProvider,
     private val isDebug: Boolean
 ) : ViewModel() {
-    private val _state: MutableStateFlow<LoginViewState> =
-        if (prefManager.getKey().isNullOrEmpty() ||
-            prefManager.getUserId().isNullOrEmpty() ||
-            prefManager.getToken().isNullOrEmpty()
-        ) {
-            MutableStateFlow(
-                LoginViewState(
-                    isLoggedIn = false,
-                    loginDebugViewState = getDebugViewState()
-                )
-            )
-        } else {
-            MutableStateFlow(
-                LoginViewState(
-                    isLoggedIn = true,
-                    loginDebugViewState = getDebugViewState()
-                )
-            )
-        }
+    private val _state: MutableStateFlow<LoginViewState> = MutableStateFlow(
+        LoginViewState(
+            isLoggedIn = prefManager.isLoggedIn(),
+            loginDebugViewState = getDebugViewState()
+        )
+    )
 
     val state: StateFlow<LoginViewState> = _state
 
@@ -59,6 +48,9 @@ class LoginViewModel(
                     taskAssignmentsRepository.refresh()
                     _state.update {
                         it.copy(loading = false, isLoggedIn = true)
+                    }
+                    launch {
+                        pushMessageTokenRepository.submitToken()
                     }
                 }
             }

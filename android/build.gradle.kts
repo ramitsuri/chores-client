@@ -49,6 +49,10 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.4.2")
     implementation ("io.github.vanpra.compose-material-dialogs:datetime:0.9.0")
 
+    // Firebase
+    implementation(project.dependencies.platform("com.google.firebase:firebase-bom:30.1.0"))
+    implementation ("com.google.firebase:firebase-messaging-ktx")
+
     // Testing
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")

@@ -9,12 +9,12 @@ import com.ramitsuri.choresclient.data.entities.TaskDao
 import com.ramitsuri.choresclient.data.notification.ReminderScheduler
 import com.ramitsuri.choresclient.data.settings.PrefManager
 import com.ramitsuri.choresclient.network.NetworkProvider
-import com.ramitsuri.choresclient.network.TasksApi
 import com.ramitsuri.choresclient.notification.NotificationHandler
 import com.ramitsuri.choresclient.reminder.AlarmHandler
 import com.ramitsuri.choresclient.repositories.AssignmentDetailsRepository
 import com.ramitsuri.choresclient.repositories.HouseDataSource
 import com.ramitsuri.choresclient.repositories.LoginRepository
+import com.ramitsuri.choresclient.repositories.PushMessageTokenRepository
 import com.ramitsuri.choresclient.repositories.SyncRepository
 import com.ramitsuri.choresclient.repositories.SystemTaskAssignmentsRepository
 import com.ramitsuri.choresclient.repositories.SystemTasksRepository
@@ -23,6 +23,7 @@ import com.ramitsuri.choresclient.repositories.TaskAssignmentsRepository
 import com.ramitsuri.choresclient.repositories.TasksRepository
 import com.ramitsuri.choresclient.utils.DispatcherProvider
 import com.ramitsuri.choresclient.utils.FilterHelper
+import com.ramitsuri.choresclient.utils.LogHelper
 import io.ktor.client.engine.HttpClientEngine
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -143,6 +144,15 @@ private val coreModule = module {
         SystemTasksRepository(
             get<NetworkProvider>().provideTasksApi(),
             get<DispatcherProvider>()
+        )
+    }
+
+    factory<PushMessageTokenRepository> {
+        PushMessageTokenRepository(
+            get<PrefManager>(),
+            get<NetworkProvider>().providePushMessageTokenApi(),
+            get<DispatcherProvider>(),
+            get<LogHelper>()
         )
     }
 }

@@ -85,7 +85,7 @@ kotlin {
                 // Firebase
                 implementation(project.dependencies.platform("com.google.firebase:firebase-bom:30.1.0"))
                 implementation ("com.google.firebase:firebase-database-ktx")
-
+                implementation ("com.google.firebase:firebase-messaging-ktx")
             }
         }
         val androidTest by getting {

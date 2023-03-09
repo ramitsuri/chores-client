@@ -124,6 +124,22 @@ class PrefManager(
         putStringList(key, value)
     }
 
+    fun getDeviceId(): String? {
+        val key = Key.DEVICE_ID
+        return getString(key, null)
+    }
+
+    fun setDeviceId(value: String) {
+        val key = Key.DEVICE_ID
+        putString(key, value)
+    }
+
+    fun isLoggedIn(): Boolean {
+        return (getKey().isNullOrEmpty() ||
+                getUserId().isNullOrEmpty() ||
+                getToken().isNullOrEmpty()).not()
+    }
+
     private fun deleteLegacyPrefs() {
         legacyPrefs.forEach { (key, store) ->
             if (store == KV) {
@@ -201,16 +217,61 @@ class PrefManager(
         )
 
         private enum class Key(val key: String, val isSecure: Boolean) {
-            USER_ID(key = "user_id", isSecure = false),
-            KEY(key = "key", isSecure = true),
-            TOKEN(key = "token", isSecure = true),
-            DEBUG_SERVER(key = "debug_server", isSecure = false),
-            ENABLE_REMOTE_LOGGING(key = "enable_remote_logging", isSecure = false),
-            PREV_NOTIFICATION_ID(key = "prev_notification_id", isSecure = false),
-            LAST_SYNC_TIME(key = "last_sync_time", isSecure = false),
-            SAVED_PERSON_FILTER_IDS(key = "saved_person_filter_ids", isSecure = false),
-            SAVED_HOUSE_FILTER_IDS(key = "saved_house_filter_ids", isSecure = false),
-            ENABLED_NOTIFICATION_ACTIONS(key = "enabled_notification_actions", isSecure = false)
+
+            USER_ID(
+                key = "user_id",
+                isSecure = false
+            ),
+
+            KEY(
+                key = "key",
+                isSecure = true
+            ),
+
+            TOKEN(
+                key = "token",
+                isSecure = true
+            ),
+
+            DEBUG_SERVER(
+                key = "debug_server",
+                isSecure = false
+            ),
+
+            ENABLE_REMOTE_LOGGING(
+                key = "enable_remote_logging",
+                isSecure = false
+            ),
+
+            PREV_NOTIFICATION_ID(
+                key = "prev_notification_id",
+                isSecure = false
+            ),
+
+            LAST_SYNC_TIME(
+                key = "last_sync_time",
+                isSecure = false
+            ),
+
+            SAVED_PERSON_FILTER_IDS(
+                key = "saved_person_filter_ids",
+                isSecure = false
+            ),
+
+            SAVED_HOUSE_FILTER_IDS(
+                key = "saved_house_filter_ids",
+                isSecure = false
+            ),
+
+            ENABLED_NOTIFICATION_ACTIONS(
+                key = "enabled_notification_actions",
+                isSecure = false
+            ),
+
+            DEVICE_ID(
+                key = "device_id",
+                isSecure = false
+            )
         }
     }
 }
