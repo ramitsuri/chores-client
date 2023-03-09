@@ -57,6 +57,7 @@
     <string name="assignment_details_button_wont_do">No</string>
     <string name="assignment_details_reminder_time">Reminder set for %1$s</string>
     <string name="assignment_details_reminder_time_unavailable">Reminder will be set in some time</string>
+    <string name="assignment_details_assigned_to_format">Assigned to %1$s</string>
 
     <!-- Add Task -->
     <string name="add_task_hint_name">Task name</string>

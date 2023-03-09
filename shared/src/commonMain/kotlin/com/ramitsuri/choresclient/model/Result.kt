@@ -36,6 +36,7 @@ data class AssignmentDetailsViewState(
 data class AssignmentDetails(
     val id: String,
     val name: String,
+    val member: String,
     val description: String,
     val repeatValue: Int,
     val repeatUnit: RepeatUnit,

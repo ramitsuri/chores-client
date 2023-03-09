@@ -71,6 +71,7 @@ class AssignmentDetailsRepository(
         return AssignmentDetails(
             id = assignmentId,
             name = assignment.task.name,
+            member = assignment.member.name,
             description = assignment.task.description,
             repeatValue = assignment.task.repeatValue,
             repeatUnit = assignment.task.repeatUnit,

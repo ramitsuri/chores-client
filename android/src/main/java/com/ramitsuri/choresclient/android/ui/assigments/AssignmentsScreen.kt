@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -84,7 +83,6 @@ import com.ramitsuri.choresclient.android.ui.theme.ChoresClientTheme
 import com.ramitsuri.choresclient.android.ui.theme.assignmentHeaderCornerRadius
 import com.ramitsuri.choresclient.android.ui.theme.iconWidth
 import com.ramitsuri.choresclient.android.ui.theme.marginExtraLarge
-import com.ramitsuri.choresclient.android.ui.theme.marginLarge
 import com.ramitsuri.choresclient.android.ui.theme.marginMedium
 import com.ramitsuri.choresclient.android.ui.theme.minAssignmentItemHeight
 import com.ramitsuri.choresclient.android.ui.theme.paddingCardView
@@ -343,15 +341,30 @@ private fun AssignmentItem(
                     style = MaterialTheme.typography.headlineSmall,
                     modifier = modifier.padding(paddingSmall)
                 )
-                if (task.repeatUnit != RepeatUnit.NONE) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Text(
-                        text = formatRepeatUnit(
-                            repeatValue = task.repeatValue,
-                            repeatUnit = task.repeatUnit
-                        ),
-                        style = MaterialTheme.typography.bodySmall,
-                        modifier = modifier.padding(horizontal = paddingSmall)
+                        text = assignment.member.name,
+                        style = MaterialTheme.typography.labelSmall,
+                        modifier = modifier
+                            .background(
+                                shape = RoundedCornerShape(8.dp),
+                                color = MaterialTheme.colorScheme.secondaryContainer
+                            )
+                            .padding(paddingSmall)
                     )
+                    if (task.repeatUnit != RepeatUnit.NONE) {
+                        Text(
+                            text = formatRepeatUnit(
+                                repeatValue = task.repeatValue,
+                                repeatUnit = task.repeatUnit
+                            ),
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = modifier.padding(horizontal = paddingSmall)
+                        )
+                    }
                 }
             }
         }

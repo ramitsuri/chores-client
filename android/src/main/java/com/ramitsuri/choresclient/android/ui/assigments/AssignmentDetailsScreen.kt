@@ -144,6 +144,15 @@ fun AssignmentDetailsContent(
             modifier = modifier
                 .padding(all = paddingMedium)
         )
+        Text(
+            text = stringResource(
+                id = R.string.assignment_details_assigned_to_format,
+                assignment.member
+            ),
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = modifier
+                .padding(all = paddingMedium)
+        )
         Spacer(modifier = modifier.height(marginLarge))
         FilledTonalButton(
             onClick = onComplete,
@@ -208,6 +217,7 @@ fun PreviewAssignmentDetailsContent() {
                 assignment = AssignmentDetails(
                     id = "",
                     name = "Clean kitchen",
+                    member = "Paul",
                     description = "Clean kitchen now",
                     repeatValue = 2,
                     repeatUnit = RepeatUnit.DAY,
