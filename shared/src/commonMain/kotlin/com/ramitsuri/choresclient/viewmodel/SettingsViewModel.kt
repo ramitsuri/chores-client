@@ -14,6 +14,7 @@ import com.ramitsuri.choresclient.repositories.SyncRepository
 import com.ramitsuri.choresclient.resources.LocalizedString
 import com.ramitsuri.choresclient.utils.DispatcherProvider
 import com.ramitsuri.choresclient.utils.FilterHelper
+import com.ramitsuri.choresclient.utils.LogHelper
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -25,7 +26,8 @@ class SettingsViewModel(
     private val syncRepository: SyncRepository,
     private val filterHelper: FilterHelper,
     private val prefManager: PrefManager,
-    private val dispatchers: DispatcherProvider
+    private val dispatchers: DispatcherProvider,
+    private val logger: LogHelper
 ) : ViewModel(), KoinComponent {
 
     private val _state =
@@ -35,7 +37,9 @@ class SettingsViewModel(
                 timeZone = TimeZone.currentSystemDefault(),
                 notificationActionsViewState = NotificationActionsViewState(
                     actions = getNotificationActionList()
-                )
+                ),
+                deviceId = prefManager.getDeviceId(),
+                remoteLogging = prefManager.getEnableRemoteLogging()
             )
         )
     val state: StateFlow<SettingsViewState> = _state
@@ -128,6 +132,15 @@ class SettingsViewModel(
     fun saveNotificationActions() {
         val actions = _state.value.notificationActionsViewState.actions
         prefManager.setEnabledNotificationActions(actions.filter { it.selected }.map { it.action })
+    }
+
+    fun toggleLogging() {
+        val enabled = !prefManager.getEnableRemoteLogging()
+        prefManager.setEnableRemoteLogging(enabled)
+        logger.enableRemoteLogging(enabled)
+        _state.update {
+            it.copy(remoteLogging = enabled)
+        }
     }
 
     fun onErrorShown() {

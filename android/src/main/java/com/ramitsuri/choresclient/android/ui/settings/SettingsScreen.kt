@@ -23,6 +23,7 @@ import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckBox
 import androidx.compose.material.icons.filled.CheckBoxOutlineBlank
 import androidx.compose.material.rememberModalBottomSheetState
@@ -37,6 +38,8 @@ import androidx.compose.material3.SmallTopAppBar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -109,6 +112,9 @@ fun SettingsScreen(
         notificationActionViewState = viewState.notificationActionsViewState,
         onNotificationActionSelected = viewModel::onNotificationActionClicked,
         onNotificationActionsSaveRequested = viewModel::saveNotificationActions,
+        remoteLoggingEnabled = viewState.remoteLogging,
+        onEnableRemoteLoggingClicked = viewModel::toggleLogging,
+        deviceId = viewState.deviceId,
         onBack = onBack,
         modifier = modifier
     )
@@ -130,6 +136,9 @@ private fun SettingsContent(
     notificationActionViewState: NotificationActionsViewState,
     onNotificationActionSelected: (NotificationActionWrapper) -> Unit,
     onNotificationActionsSaveRequested: () -> Unit,
+    remoteLoggingEnabled: Boolean,
+    onEnableRemoteLoggingClicked: () -> Unit,
+    deviceId: String?,
     onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -213,6 +222,28 @@ private fun SettingsContent(
                             onSaveRequested = onNotificationActionsSaveRequested
                         )
                     }
+                    item {
+                        SettingsItemWithSwitch(
+                            title = stringResource(id = R.string.settings_remote_logging_title),
+                            subtitle = if (remoteLoggingEnabled) {
+                                stringResource(id = R.string.settings_remote_logging_subtitle_enabled)
+                            } else {
+                                stringResource(id = R.string.settings_remote_logging_subtitle_disabled)
+                            },
+                            checked = remoteLoggingEnabled,
+                            onClick = onEnableRemoteLoggingClicked
+                        )
+                    }
+                    if (deviceId != null) {
+                        item {
+                            SettingsItem(
+                                title = stringResource(id = R.string.settings_device_id_title),
+                                subtitle = deviceId,
+                                onClick = { },
+                                showProgress = false
+                            )
+                        }
+                    }
                 }
             }
 
@@ -263,6 +294,57 @@ fun SettingsItem(
                 modifier = modifier.padding(horizontal = paddingSmall)
             )
         }
+    }
+}
+
+@Composable
+fun SettingsItemWithSwitch(
+    title: String,
+    subtitle: String,
+    checked: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .defaultMinSize(minHeight = minAssignmentItemHeight)
+            .clickable(onClick = onClick)
+            .padding(paddingCardView),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Column(
+            modifier = Modifier.weight(1F),
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = modifier.padding(paddingSmall)
+            )
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = modifier.padding(horizontal = paddingSmall)
+            )
+        }
+
+        val icon: (@Composable () -> Unit)? = if (checked) {
+            {
+                Icon(
+                    imageVector = Icons.Filled.Check,
+                    contentDescription = null,
+                    modifier = Modifier.size(SwitchDefaults.IconSize),
+                )
+            }
+        } else {
+            null
+        }
+        Switch(
+            checked = checked,
+            onCheckedChange = { onClick() },
+            thumbContent = icon
+        )
     }
 }
 
@@ -619,7 +701,10 @@ private fun PreviewSettingsContent(@PreviewParameter(FilterPreview::class) filte
                 ),
                 onNotificationActionSelected = {},
                 onNotificationActionsSaveRequested = {},
-                onBack = { }
+                remoteLoggingEnabled = false,
+                onEnableRemoteLoggingClicked = {},
+                onBack = { },
+                deviceId = "DeviceID12740923024",
             )
         }
     }
@@ -675,6 +760,21 @@ fun PreviewSettingsItem_Filter(
                 rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden),
                 filterViewState = FilterViewState(filters),
                 onFilterSaveRequested = {}
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+fun PreviewSettingsItemWithSwitch() {
+    ChoresClientTheme {
+        Surface {
+            SettingsItemWithSwitch(
+                title = "Remote Logging",
+                subtitle = "Currently enabled",
+                checked = true,
+                onClick = {}
             )
         }
     }

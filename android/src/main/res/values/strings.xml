@@ -92,6 +92,10 @@
     <string name="settings_notification_action_snooze_day">Snooze tomorrow</string>
     <string name="settings_notification_action_complete">Mark done</string>
     <string name="settings_notification_action_wont_do">Mark no</string>
+    <string name="settings_remote_logging_title">Remote Logging</string>
+    <string name="settings_remote_logging_subtitle_enabled">Currently enabled</string>
+    <string name="settings_remote_logging_subtitle_disabled">Currently disabled</string>
+    <string name="settings_device_id_title">Device ID</string>
 
     <!-- Repeat Units -->
     <string name="repeat_unit_none">No repeat</string>

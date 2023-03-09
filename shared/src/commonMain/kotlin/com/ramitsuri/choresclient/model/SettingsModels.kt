@@ -1,7 +1,6 @@
 package com.ramitsuri.choresclient.model
 
 import com.ramitsuri.choresclient.data.ViewError
-import com.ramitsuri.choresclient.notification.NotificationActionInfo
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 
@@ -9,6 +8,8 @@ data class SettingsViewState(
     val syncViewState: SyncViewState,
     val filterViewState: FilterViewState = FilterViewState(),
     val notificationActionsViewState: NotificationActionsViewState = NotificationActionsViewState(),
+    val deviceId: String?,
+    val remoteLogging: Boolean,
     val timeZone: TimeZone,
     val error: ViewError? = null
 )

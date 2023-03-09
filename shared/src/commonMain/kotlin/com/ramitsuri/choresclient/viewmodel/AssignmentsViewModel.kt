@@ -4,7 +4,6 @@ import com.ramitsuri.choresclient.data.ProgressStatus
 import com.ramitsuri.choresclient.data.RepeatUnit
 import com.ramitsuri.choresclient.data.Result
 import com.ramitsuri.choresclient.data.TaskAssignment
-import com.ramitsuri.choresclient.data.settings.PrefManager
 import com.ramitsuri.choresclient.model.AssignmentsViewState
 import com.ramitsuri.choresclient.model.Filter
 import com.ramitsuri.choresclient.model.FilterItem
@@ -30,14 +29,12 @@ class AssignmentsViewModel(
     private val assignmentDetailsRepository: AssignmentDetailsRepository,
     private val repository: TaskAssignmentsRepository,
     private val filterHelper: FilterHelper,
-    private val prefManager: PrefManager,
     private val appHelper: AppHelper,
     private val dispatchers: DispatcherProvider,
     private val longLivingCoroutineScope: CoroutineScope
 ) : ViewModel(), KoinComponent {
 
     private val logger: LogHelper by inject()
-    private val userId = prefManager.getUserId() ?: ""
     private var filters = mutableListOf<Filter>()
     private val _state = MutableStateFlow(AssignmentsViewState(filters = filters))
     val state: StateFlow<AssignmentsViewState> = _state
@@ -91,12 +88,6 @@ class AssignmentsViewModel(
             assignmentDetailsRepository.onCompleteRequestedSuspend(id)
             getLocal(refreshFilters = false)
         }
-    }
-
-    fun toggleLogging() {
-        val currentlyEnabled = prefManager.getEnableRemoteLogging()
-        prefManager.setEnableRemoteLogging(!currentlyEnabled)
-        logger.enableRemoteLogging(!currentlyEnabled)
     }
 
     private fun getLocal(refreshFilters: Boolean) {

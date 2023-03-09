@@ -27,6 +27,7 @@ import com.ramitsuri.choresclient.repositories.TasksRepository
 import com.ramitsuri.choresclient.utils.AppHelper
 import com.ramitsuri.choresclient.utils.DispatcherProvider
 import com.ramitsuri.choresclient.utils.FilterHelper
+import com.ramitsuri.choresclient.utils.LogHelper
 import com.ramitsuri.choresclient.viewmodel.AddTaskViewModel
 import com.ramitsuri.choresclient.viewmodel.AssignmentDetailsViewModel
 import com.ramitsuri.choresclient.viewmodel.AssignmentsViewModel
@@ -44,11 +45,13 @@ class MainApplication : Application(), KoinComponent {
     private val notificationHandler: NotificationHandler by inject()
     private val prefManager: PrefManager by inject()
     private val pushMessageTokenUploader: PushMessageTokenUploader.Companion by inject()
+    private val logger: LogHelper by inject()
 
     override fun onCreate() {
         super.onCreate()
         DynamicColors.applyToActivitiesIfAvailable(this)
         initDependencyInjection()
+        logger.enableRemoteLogging(prefManager.getEnableRemoteLogging())
 
         createNotificationChannels()
         enqueueWorkers()
@@ -107,7 +110,6 @@ class MainApplication : Application(), KoinComponent {
                         get<AssignmentDetailsRepository>(),
                         get<TaskAssignmentsRepository>(),
                         get<FilterHelper>(),
-                        get<PrefManager>(),
                         get<AppHelper>(),
                         get<DispatcherProvider>(),
                         get<CoroutineScope>()
@@ -137,7 +139,8 @@ class MainApplication : Application(), KoinComponent {
                         get<SyncRepository>(),
                         get<FilterHelper>(),
                         get<PrefManager>(),
-                        get<DispatcherProvider>()
+                        get<DispatcherProvider>(),
+                        get<LogHelper>()
                     )
                 }
 
