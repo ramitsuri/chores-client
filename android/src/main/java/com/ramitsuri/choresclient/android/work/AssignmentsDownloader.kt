@@ -43,7 +43,7 @@ class AssignmentsDownloader(
 
     companion object {
         private const val WORK_TAG = "AssignmentsDownloader"
-        private const val REPEAT_HOURS: Long = 24
+        private const val REPEAT_HOURS: Long = 1
         private const val TAG = "AssignmentsDownloader"
 
         fun enqueuePeriodic(context: Context) {
