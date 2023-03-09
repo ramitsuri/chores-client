@@ -121,7 +121,7 @@ class AssignmentsViewModel(
         val onCompletionKey = TextValue.ForKey(LocalizedString.ON_COMPLETION)
         val todo = data.filter { it.progressStatus == ProgressStatus.TODO }
             .map {
-                val showCompleteButton = it.member.id == userId
+                val showCompleteButton = true
                 TaskAssignmentWrapper(it, showCompleteButton)
             }
             .sortedBy { it.assignment.dueDateTime }
