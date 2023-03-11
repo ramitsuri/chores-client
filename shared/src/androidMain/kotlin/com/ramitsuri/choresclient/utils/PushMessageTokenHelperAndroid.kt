@@ -6,12 +6,13 @@ import java.util.concurrent.TimeUnit
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-actual suspend fun getToken(): String? {
+actual suspend fun getToken(logger: LogHelper, tag: String): String? {
     return suspendCoroutine { continuation ->
         try {
             val value = Tasks.await(FirebaseMessaging.getInstance().token, 30, TimeUnit.SECONDS)
             continuation.resume(value)
         } catch (e: Exception) {
+            logger.v(tag, "Exception when getting token: ${e.printStackTrace()}")
             continuation.resume(null)
         }
     }

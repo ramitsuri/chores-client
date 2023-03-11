@@ -21,7 +21,7 @@ class PushMessageTokenRepository(
                 return Outcome.NOT_LOGGED_IN
             }
 
-            val token = getToken()
+            val token = getToken(logger, TAG)
             if (token == null) {
                 logger.v(TAG, "Token not available")
                 return Outcome.NO_TOKEN
