@@ -25,10 +25,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Generate Release APK
-        run: ./gradlew bundleRelease
+      - name: Generate Release bundle
+        run: ./gradlew android:bundleRelease
 
-      - name: Sign AAB
+      - name: Sign bundle
         uses: r0adkll/sign-android-release@v1
         id: sign_app
         with:
@@ -37,10 +37,12 @@ jobs:
           alias: ${{ secrets.ALIAS }}
           keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
           keyPassword: ${{ secrets.KEY_PASSWORD }}
-        env:
-          BUILD_TOOLS_VERSION: "30.0.2"
 
-      - uses: actions/upload-artifact@v2
+      - name: Publish to Play Console
+        uses: r0adkll/upload-google-play@v1.0.19
         with:
-          name: Signed app bundle
-          path: ${{steps.sign_app.outputs.signedReleaseFile}}
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_CONSOLE_SERVICE_ACCOUNT_JSON }}
+          packageName: com.ramitsuri.choresclient.android
+          releaseFiles: android/build/outputs/bundle/release/android-release.aab
+          track: internal
+          status: completed
