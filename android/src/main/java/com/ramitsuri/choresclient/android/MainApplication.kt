@@ -28,7 +28,7 @@ import com.ramitsuri.choresclient.utils.AppHelper
 import com.ramitsuri.choresclient.utils.DispatcherProvider
 import com.ramitsuri.choresclient.utils.FilterHelper
 import com.ramitsuri.choresclient.utils.LogHelper
-import com.ramitsuri.choresclient.viewmodel.AddTaskViewModel
+import com.ramitsuri.choresclient.viewmodel.AddEditTaskViewModel
 import com.ramitsuri.choresclient.viewmodel.AssignmentDetailsViewModel
 import com.ramitsuri.choresclient.viewmodel.AssignmentsViewModel
 import com.ramitsuri.choresclient.viewmodel.LoginViewModel
@@ -145,7 +145,7 @@ class MainApplication : Application(), KoinComponent {
                 }
 
                 viewModel {
-                    AddTaskViewModel(
+                    AddEditTaskViewModel(
                         get<TasksRepository>(),
                         get<TaskAssignmentsRepository>(),
                         get<SyncRepository>(),

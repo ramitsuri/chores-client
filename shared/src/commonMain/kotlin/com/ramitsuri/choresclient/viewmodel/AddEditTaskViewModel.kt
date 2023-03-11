@@ -4,7 +4,7 @@ import com.ramitsuri.choresclient.data.ActiveStatus
 import com.ramitsuri.choresclient.data.RepeatUnit
 import com.ramitsuri.choresclient.data.Result
 import com.ramitsuri.choresclient.data.TaskDto
-import com.ramitsuri.choresclient.model.AddTaskViewState
+import com.ramitsuri.choresclient.model.AddEditTaskViewState
 import com.ramitsuri.choresclient.model.HouseSelectionItem
 import com.ramitsuri.choresclient.model.MemberSelectionItem
 import com.ramitsuri.choresclient.repositories.SyncRepository
@@ -22,7 +22,7 @@ import kotlinx.datetime.LocalTime
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class AddTaskViewModel(
+class AddEditTaskViewModel(
     private val repository: TasksRepository,
     private val taskAssignmentsRepository: TaskAssignmentsRepository,
     private val syncRepository: SyncRepository,
@@ -31,8 +31,8 @@ class AddTaskViewModel(
 
     private val logger: LogHelper by inject()
 
-    private val _state = MutableStateFlow(AddTaskViewState())
-    val state: StateFlow<AddTaskViewState> = _state
+    private val _state = MutableStateFlow(AddEditTaskViewState())
+    val state: StateFlow<AddEditTaskViewState> = _state
 
     init {
         viewModelScope.launch(dispatchers.io) {

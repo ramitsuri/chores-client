@@ -1,10 +1,8 @@
 package com.ramitsuri.choresclient.model
 
 import com.ramitsuri.choresclient.data.RepeatUnit
-import com.ramitsuri.choresclient.data.Task
 import com.ramitsuri.choresclient.data.ViewError
 import com.ramitsuri.choresclient.utils.now
-import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
@@ -43,7 +41,7 @@ data class AssignmentDetails(
     val notificationTime: LocalDateTime?
 )
 
-data class AddTaskViewState(
+data class AddEditTaskViewState(
     val loading: Boolean = false,
     val taskName: String = "",
     val taskDescription: String = "",

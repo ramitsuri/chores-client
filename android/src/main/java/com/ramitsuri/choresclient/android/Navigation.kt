@@ -13,7 +13,7 @@ import androidx.navigation.navArgument
 import com.ramitsuri.choresclient.android.ui.assigments.AssignmentsScreen
 import com.ramitsuri.choresclient.android.ui.login.LoginScreen
 import com.ramitsuri.choresclient.android.ui.settings.SettingsScreen
-import com.ramitsuri.choresclient.android.ui.task.AddTasksScreen
+import com.ramitsuri.choresclient.android.ui.task.AddEditTasksScreen
 
 private object Screens {
     const val LOGIN = "login"
@@ -92,7 +92,7 @@ fun NavGraph(
             SettingsScreen(onBack = { navActions.navigateToAssignments(shouldRefreshFilter = true) })
         }
         composable(Destinations.ADD_TASK_ROUTE) {
-            AddTasksScreen(onBack = { navActions.navigateToAssignments(shouldRefreshFilter = false) })
+            AddEditTasksScreen(onBack = { navActions.navigateToAssignments(shouldRefreshFilter = false) })
         }
     }
 }

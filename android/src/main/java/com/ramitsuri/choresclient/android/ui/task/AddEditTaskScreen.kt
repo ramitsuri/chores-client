@@ -66,7 +66,7 @@ import com.ramitsuri.choresclient.model.SelectionItem
 import com.ramitsuri.choresclient.utils.formatPickedDate
 import com.ramitsuri.choresclient.utils.formatPickedTime
 import com.ramitsuri.choresclient.utils.now
-import com.ramitsuri.choresclient.viewmodel.AddTaskViewModel
+import com.ramitsuri.choresclient.viewmodel.AddEditTaskViewModel
 import com.vanpra.composematerialdialogs.MaterialDialog
 import com.vanpra.composematerialdialogs.MaterialDialogState
 import com.vanpra.composematerialdialogs.datetime.date.DatePickerDefaults
@@ -84,9 +84,9 @@ import kotlinx.datetime.toKotlinLocalTime
 import org.koin.androidx.compose.getViewModel
 
 @Composable
-fun AddTasksScreen(
+fun AddEditTasksScreen(
     modifier: Modifier = Modifier,
-    viewModel: AddTaskViewModel = getViewModel(),
+    viewModel: AddEditTaskViewModel = getViewModel(),
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     onBack: () -> Unit
 ) {
@@ -100,7 +100,7 @@ fun AddTasksScreen(
         return
     }
 
-    AddTaskContent(
+    AddEditTaskContent(
         snackbarHostState = snackbarHostState,
         onBack = onBack,
         isLoading = viewState.loading,
@@ -145,7 +145,7 @@ fun AddTasksScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddTaskContent(
+fun AddEditTaskContent(
     snackbarHostState: SnackbarHostState,
     onBack: () -> Unit,
     isLoading: Boolean,
@@ -622,7 +622,7 @@ fun SelectionMenu(
 fun PreviewAddTaskContent() {
     ChoresClientTheme {
         Surface {
-            AddTaskContent(
+            AddEditTaskContent(
                 snackbarHostState = SnackbarHostState(),
                 onBack = {},
                 isLoading = false,
@@ -659,7 +659,7 @@ fun PreviewAddTaskContent() {
 fun PreviewAddTaskContent_loading() {
     ChoresClientTheme {
         Surface {
-            AddTaskContent(
+            AddEditTaskContent(
                 snackbarHostState = SnackbarHostState(),
                 onBack = {},
                 isLoading = true,
