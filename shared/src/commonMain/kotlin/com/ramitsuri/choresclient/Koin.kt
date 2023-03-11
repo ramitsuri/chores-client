@@ -143,6 +143,7 @@ private val coreModule = module {
     factory<TasksRepository> {
         SystemTasksRepository(
             get<NetworkProvider>().provideTasksApi(),
+            get<TaskDao>(),
             get<DispatcherProvider>()
         )
     }

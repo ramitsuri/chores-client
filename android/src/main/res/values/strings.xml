@@ -11,6 +11,7 @@
     <string name="today">Today</string>
     <string name="tomorrow">Tomorrow</string>
     <string name="yesterday">Yesterday</string>
+    <string name="edit">Edit</string>
 
     <!-- Assignments -->
     <string name="assignment_due">Due %1$s</string>
@@ -71,8 +72,8 @@
     <string name="add_task_select_repeat_unit">Select repeat unit</string>
     <string name="add_task_select_member">Select member</string>
     <string name="add_task_select_house">Select house</string>
-    <string name="add_task_add">Add task</string>
-    <string name="add_task_rotate_member">Rotate</string>
+    <string name="add_task_add">Save task</string>
+    <string name="add_task_rotate_member">Rotate member</string>
 
     <!-- Errors -->
     <string name="error_network">No internet</string>

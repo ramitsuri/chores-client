@@ -120,6 +120,7 @@ fun AssignmentsScreen(
     viewModel: AssignmentsViewModel = getViewModel(),
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     onAddTaskClicked: () -> Unit,
+    onEditTaskClicked: (String?) -> Unit,
     onSettingsClicked: () -> Unit
 ) {
     // TODO use shouldRefreshFilter to refresh filters after changed in settings
@@ -154,6 +155,7 @@ fun AssignmentsScreen(
                 markAsDone = { id, progressStatus ->
                     viewModel.changeStateRequested(id, progressStatus)
                 },
+                onEditTaskClicked = onEditTaskClicked,
                 enableCompleteAndSnooze = enableCompleteAndSnooze
             )
         }) {

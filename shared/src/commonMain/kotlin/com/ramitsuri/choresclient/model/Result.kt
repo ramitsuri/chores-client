@@ -33,6 +33,7 @@ data class AssignmentDetailsViewState(
 
 data class AssignmentDetails(
     val id: String,
+    val taskId: String,
     val name: String,
     val member: String,
     val description: String,
@@ -59,8 +60,8 @@ data class AddEditTaskViewState(
     val isDatePicked: Boolean = false,
     val time: LocalTime = LocalDateTime.now().time,
     val isTimePicked: Boolean = false,
-    val taskAdded: Boolean = false,
-    val enableAddTask: Boolean = false,
+    val taskSaved: Boolean = false,
+    val enableSaveTask: Boolean = false,
     val rotateMember: Boolean = false,
     val error: ViewError? = null
 )

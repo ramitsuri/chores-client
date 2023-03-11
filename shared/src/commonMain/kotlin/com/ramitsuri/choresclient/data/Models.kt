@@ -77,18 +77,18 @@ data class Task(
 
 @Serializable
 data class TaskDto(
-    val name: String,
-    val description: String,
+    val name: String?,
+    val description: String?,
     @Serializable(with = LocalDateTimeSerializer::class)
-    val dueDateTime: LocalDateTime,
-    val repeatValue: Int,
+    val dueDateTime: LocalDateTime?,
+    val repeatValue: Int?,
     @Serializable(with = RepeatUnitSerializer::class)
-    val repeatUnit: RepeatUnit,
-    val houseId: String,
-    val memberId: String,
-    val rotateMember: Boolean,
+    val repeatUnit: RepeatUnit?,
+    val houseId: String?,
+    val memberId: String?,
+    val rotateMember: Boolean?,
     @Serializable(with = ActiveStatusSerializer::class)
-    val status: ActiveStatus
+    val status: ActiveStatus?
 )
 
 @Serializable
@@ -180,7 +180,7 @@ enum class ViewError {
     NETWORK,
     LOGIN_REQUEST_FAILED,
     LOGIN_NO_TOKEN,
-    ADD_TASK_ERROR
+    ADD_EDIT_TASK_ERROR
 }
 
 enum class RepeatUnit(val key: Int) {

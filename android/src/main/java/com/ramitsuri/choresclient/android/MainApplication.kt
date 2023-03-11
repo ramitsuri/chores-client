@@ -12,6 +12,7 @@ import com.ramitsuri.choresclient.android.reminder.ReminderSchedulerWorker
 import com.ramitsuri.choresclient.android.reminder.SystemAlarmHandler
 import com.ramitsuri.choresclient.android.work.PushMessageTokenUploader
 import com.ramitsuri.choresclient.data.entities.AlarmDao
+import com.ramitsuri.choresclient.data.entities.TaskDao
 import com.ramitsuri.choresclient.data.settings.PrefManager
 import com.ramitsuri.choresclient.initKoin
 import com.ramitsuri.choresclient.notification.Importance
@@ -148,6 +149,7 @@ class MainApplication : Application(), KoinComponent {
                     AddEditTaskViewModel(
                         get<TasksRepository>(),
                         get<TaskAssignmentsRepository>(),
+                        get<TaskDao>(),
                         get<SyncRepository>(),
                         get<DispatcherProvider>()
                     )

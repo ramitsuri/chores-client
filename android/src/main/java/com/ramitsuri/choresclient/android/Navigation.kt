@@ -19,14 +19,14 @@ private object Screens {
     const val LOGIN = "login"
     const val ASSIGNMENTS = "assignments"
     const val SETTINGS = "settings"
-    const val ADD_TASK = "add_task"
+    const val ADD_EDIT_TASK = "add_task"
 }
 
 object Destinations {
     const val LOGIN_ROUTE = Screens.LOGIN
     const val ASSIGNMENTS_ROUTE = Screens.ASSIGNMENTS
     const val SETTINGS_ROUTE = Screens.SETTINGS
-    const val ADD_TASK_ROUTE = Screens.ADD_TASK
+    const val ADD_EDIT_TASK_ROUTE = Screens.ADD_EDIT_TASK
 }
 
 class NavigationActions(private val navController: NavHostController) {
@@ -50,8 +50,8 @@ class NavigationActions(private val navController: NavHostController) {
         }
     }
 
-    fun navigateToAddTask() {
-        navController.navigate(Destinations.ADD_TASK_ROUTE) {
+    fun navigateToAddTask(taskId: String? = null) {
+        navController.navigate("${Destinations.ADD_EDIT_TASK_ROUTE}/${taskId}") {
             popUpTo(navController.graph.findStartDestination().id) {
                 saveState = true
             }
@@ -86,13 +86,19 @@ fun NavGraph(
             AssignmentsScreen(
                 shouldRefreshFilter,
                 onSettingsClicked = { navActions.navigateToSettings() },
-                onAddTaskClicked = { navActions.navigateToAddTask() })
+                onAddTaskClicked = { navActions.navigateToAddTask() },
+                onEditTaskClicked = { navActions.navigateToAddTask(it) })
         }
         composable(Destinations.SETTINGS_ROUTE) {
             SettingsScreen(onBack = { navActions.navigateToAssignments(shouldRefreshFilter = true) })
         }
-        composable(Destinations.ADD_TASK_ROUTE) {
-            AddEditTasksScreen(onBack = { navActions.navigateToAssignments(shouldRefreshFilter = false) })
+        composable(
+            "${Destinations.ADD_EDIT_TASK_ROUTE}/{taskId}",
+            arguments = listOf(navArgument("taskId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            AddEditTasksScreen(
+                taskId = backStackEntry.arguments?.getString("taskId"),
+                onBack = { navActions.navigateToAssignments(shouldRefreshFilter = false) })
         }
     }
 }

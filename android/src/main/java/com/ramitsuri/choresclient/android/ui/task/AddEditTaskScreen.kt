@@ -12,17 +12,18 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.Button
-import androidx.compose.material3.Checkbox
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -33,11 +34,12 @@ import androidx.compose.material3.SmallTopAppBar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusManager
@@ -52,8 +54,8 @@ import com.ramitsuri.choresclient.android.R
 import com.ramitsuri.choresclient.android.extensions.string
 import com.ramitsuri.choresclient.android.ui.theme.ChoresClientTheme
 import com.ramitsuri.choresclient.android.ui.theme.marginExtraLarge
+import com.ramitsuri.choresclient.android.ui.theme.marginLarge
 import com.ramitsuri.choresclient.android.ui.theme.marginMedium
-import com.ramitsuri.choresclient.android.ui.theme.marginSmall
 import com.ramitsuri.choresclient.android.ui.theme.paddingLarge
 import com.ramitsuri.choresclient.android.ui.theme.paddingMedium
 import com.ramitsuri.choresclient.android.ui.theme.paddingSmall
@@ -86,6 +88,7 @@ import org.koin.androidx.compose.getViewModel
 @Composable
 fun AddEditTasksScreen(
     modifier: Modifier = Modifier,
+    taskId: String?,
     viewModel: AddEditTaskViewModel = getViewModel(),
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     onBack: () -> Unit
@@ -95,9 +98,12 @@ fun AddEditTasksScreen(
     }
     val viewState = viewModel.state.collectAsState().value
 
-    if (viewState.taskAdded) {
+    if (viewState.taskSaved) {
         onBack()
         return
+    }
+    LaunchedEffect(key1 = taskId) {
+        viewModel.setTaskId(taskId)
     }
 
     AddEditTaskContent(
@@ -124,13 +130,13 @@ fun AddEditTasksScreen(
         memberSelected = viewModel::onMemberSelected,
         rotateMember = viewState.rotateMember,
         rotateMemberUpdated = viewModel::onRotateMemberUpdated,
-        onAddTaskRequested = viewModel::addTask,
-        canAddTask = viewState.enableAddTask,
+        onAddTaskRequested = viewModel::saveTask,
+        canAddTask = viewState.enableSaveTask,
         modifier = modifier
     )
     viewState.error?.let { error ->
         val snackbarText = when (error) {
-            ViewError.ADD_TASK_ERROR ->
+            ViewError.ADD_EDIT_TASK_ERROR ->
                 stringResource(id = R.string.error_add_task)
             else ->
                 stringResource(id = R.string.error_unknown)
@@ -229,8 +235,6 @@ fun AddEditTaskContent(
                     repeatValueUpdated = repeatValueUpdated,
                     repeatUnits = repeatUnits,
                     repeatUnitSelected = repeatUnitSelected,
-                    rotateMember = rotateMember,
-                    rotateMemberUpdated = rotateMemberUpdated,
                     focusManager = focusManager,
                     modifier = modifier
                 )
@@ -277,9 +281,16 @@ fun AddEditTaskContent(
                     )
                 }
 
+                Spacer(modifier = modifier.height(marginMedium))
+
+                RotateMember(
+                    rotateMember = rotateMember,
+                    rotateMemberUpdated = rotateMemberUpdated
+                )
+
                 Spacer(modifier = modifier.height(marginExtraLarge))
 
-                Button(
+                FilledTonalButton(
                     onClick = onAddTaskRequested,
                     modifier = modifier.fillMaxWidth(),
                     enabled = canAddTask
@@ -399,15 +410,13 @@ fun DateTime(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Repeat(
     repeatValue: Int,
     repeatValueUpdated: (String) -> Unit,
     repeatUnits: List<RepeatUnitSelectionItem>,
     repeatUnitSelected: (String) -> Unit,
-    rotateMember: Boolean,
-    rotateMemberUpdated: (Boolean) -> Unit,
     focusManager: FocusManager,
     modifier: Modifier = Modifier
 ) {
@@ -444,22 +453,43 @@ fun Repeat(
             },
             noSelectionResId = R.string.add_task_select_repeat_unit,
             modifier = modifier
-                .weight(2.5f)
+                .weight(2f)
         )
+    }
+}
 
-        Spacer(modifier = modifier.width(marginMedium))
-
-        Row(
-            modifier = modifier.weight(1.5f),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Checkbox(checked = rotateMember, onCheckedChange = rotateMemberUpdated)
-            Spacer(modifier = modifier.width(marginSmall))
-            Text(
-                text = stringResource(id = R.string.add_task_rotate_member),
-                style = MaterialTheme.typography.bodySmall
+@Composable
+fun RotateMember(
+    modifier: Modifier = Modifier,
+    rotateMember: Boolean,
+    rotateMemberUpdated: (Boolean) -> Unit
+) {
+    val icon: (@Composable () -> Unit)? = if (rotateMember) {
+        {
+            Icon(
+                imageVector = Icons.Filled.Check,
+                contentDescription = null,
+                modifier = Modifier.size(SwitchDefaults.IconSize),
             )
         }
+    } else {
+        null
+    }
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = stringResource(id = R.string.add_task_rotate_member),
+            style = MaterialTheme.typography.bodySmall
+        )
+        Spacer(modifier = modifier.width(marginLarge))
+        Switch(
+            checked = rotateMember,
+            onCheckedChange = rotateMemberUpdated,
+            thumbContent = icon
+        )
     }
 }
 

@@ -2,6 +2,7 @@ package com.ramitsuri.choresclient.android.ui.assigments
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,7 +13,12 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -52,7 +58,8 @@ fun AssignmentDetailsScreen(
     enableCompleteAndSnooze: Boolean,
     modalBottomSheetState: ModalBottomSheetState,
     viewModel: AssignmentDetailsViewModel = getViewModel(),
-    markAsDone: (String, ProgressStatus) -> Unit
+    markAsDone: (String, ProgressStatus) -> Unit,
+    onEditTaskClicked: (String?) -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
     val viewState = viewModel.state.collectAsState().value
@@ -90,6 +97,12 @@ fun AssignmentDetailsScreen(
                     coroutineScope.launch {
                         modalBottomSheetState.hide()
                     }
+                },
+                onEditRequested = { taskId ->
+                    onEditTaskClicked(taskId)
+                    coroutineScope.launch {
+                        modalBottomSheetState.hide()
+                    }
                 }
             )
         } ?: run {
@@ -100,6 +113,7 @@ fun AssignmentDetailsScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AssignmentDetailsContent(
     assignment: AssignmentDetails,
@@ -108,7 +122,8 @@ fun AssignmentDetailsContent(
     onComplete: () -> Unit,
     onSnoozeHour: () -> Unit,
     onSnoozeDay: () -> Unit,
-    onWontDo: () -> Unit
+    onWontDo: () -> Unit,
+    onEditRequested: (String?) -> Unit
 ) {
     Column(
         modifier = modifier
@@ -154,12 +169,26 @@ fun AssignmentDetailsContent(
                 .padding(all = paddingMedium)
         )
         Spacer(modifier = modifier.height(marginLarge))
-        FilledTonalButton(
-            onClick = onComplete,
-            enabled = enableCompleteAndSnooze,
+        Row(
             modifier = modifier.fillMaxWidth()
         ) {
-            Text(text = stringResource(id = R.string.assignment_details_button_done))
+            FilledTonalButton(
+                onClick = onComplete,
+                enabled = enableCompleteAndSnooze,
+                modifier = modifier.weight(1F)
+            ) {
+                Text(text = stringResource(id = R.string.assignment_details_button_done))
+            }
+            Spacer(modifier = modifier.height(marginLarge))
+            FilledTonalIconButton(
+                enabled = enableCompleteAndSnooze,
+                onClick = { onEditRequested(assignment.taskId) },
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Edit,
+                    contentDescription = stringResource(id = R.string.edit)
+                )
+            }
         }
         Spacer(modifier = modifier.height(marginLarge))
         LazyRow(
@@ -216,6 +245,7 @@ fun PreviewAssignmentDetailsContent() {
             AssignmentDetailsContent(
                 assignment = AssignmentDetails(
                     id = "",
+                    taskId = "",
                     name = "Clean kitchen",
                     member = "Paul",
                     description = "Clean kitchen now",
@@ -223,11 +253,12 @@ fun PreviewAssignmentDetailsContent() {
                     repeatUnit = RepeatUnit.DAY,
                     notificationTime = LocalDateTime.now(),
                 ),
+                enableCompleteAndSnooze = false,
                 onComplete = {},
                 onSnoozeHour = {},
                 onSnoozeDay = {},
                 onWontDo = {},
-                enableCompleteAndSnooze = false
+                onEditRequested = {}
             )
         }
     }

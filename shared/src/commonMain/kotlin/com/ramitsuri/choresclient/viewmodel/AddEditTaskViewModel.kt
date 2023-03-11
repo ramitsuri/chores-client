@@ -4,9 +4,11 @@ import com.ramitsuri.choresclient.data.ActiveStatus
 import com.ramitsuri.choresclient.data.RepeatUnit
 import com.ramitsuri.choresclient.data.Result
 import com.ramitsuri.choresclient.data.TaskDto
+import com.ramitsuri.choresclient.data.entities.TaskDao
 import com.ramitsuri.choresclient.model.AddEditTaskViewState
 import com.ramitsuri.choresclient.model.HouseSelectionItem
 import com.ramitsuri.choresclient.model.MemberSelectionItem
+import com.ramitsuri.choresclient.model.RepeatUnitSelectionItem
 import com.ramitsuri.choresclient.repositories.SyncRepository
 import com.ramitsuri.choresclient.repositories.TaskAssignmentsRepository
 import com.ramitsuri.choresclient.repositories.TasksRepository
@@ -25,6 +27,7 @@ import org.koin.core.component.inject
 class AddEditTaskViewModel(
     private val repository: TasksRepository,
     private val taskAssignmentsRepository: TaskAssignmentsRepository,
+    private val taskDao: TaskDao,
     private val syncRepository: SyncRepository,
     private val dispatchers: DispatcherProvider
 ) : ViewModel(), KoinComponent {
@@ -34,13 +37,49 @@ class AddEditTaskViewModel(
     private val _state = MutableStateFlow(AddEditTaskViewState())
     val state: StateFlow<AddEditTaskViewState> = _state
 
+    private var taskId: String? = null
+
     init {
         viewModelScope.launch(dispatchers.io) {
             populateSelectionItems()
         }
     }
 
-    fun addTask() {
+    fun setTaskId(taskId: String?) {
+        if (taskId == null) {
+            return
+        }
+        viewModelScope.launch {
+            val task = taskDao.get(taskId) ?: return@launch
+            this@AddEditTaskViewModel.taskId = task.id
+            _state.update { previousState ->
+                previousState.copy(
+                    taskName = task.name,
+                    taskDescription = task.description,
+                    repeatValue = task.repeatValue.toInt(),
+                    repeatUnits = RepeatUnit.values()
+                        .map { repeatUnit ->
+                            RepeatUnitSelectionItem(
+                                repeatUnit,
+                                selected = repeatUnit == task.repeatUnit
+                            )
+                        },
+                    houses = previousState.houses
+                        .map { it.duplicate(selected = it.getId() == task.houseId) },
+                    members = previousState.members
+                        .map { it.duplicate(selected = it.getId() == task.memberId) },
+                    date = task.dueDateTime.date,
+                    isDatePicked = true,
+                    time = task.dueDateTime.time,
+                    isTimePicked = true,
+                    rotateMember = task.rotateMember
+                )
+            }
+            updateCanAddTask()
+        }
+    }
+
+    fun saveTask() {
         val value = _state.value
         val house = value.houses.firstOrNull { it.getIsSelected() }
         val member = value.members.firstOrNull { it.getIsSelected() }
@@ -64,21 +103,21 @@ class AddEditTaskViewModel(
             repeatUnit = repeatUnit,
             houseId = house.getId(),
             memberId = member.getId(),
-            rotateMember = true,
+            rotateMember = value.rotateMember,
             status = ActiveStatus.ACTIVE
         )
 
-        logger.d(TAG, "Add task requested: $task")
+        logger.d(TAG, "Save task requested: $task")
         _state.update {
             it.copy(loading = true)
         }
         viewModelScope.launch(dispatchers.main) {
-            val result = repository.addTask(task)
+            val result = repository.saveTask(taskId, task)
             _state.update {
                 when (result) {
 
                     is Result.Success -> {
-                        it.copy(loading = false, taskAdded = true)
+                        it.copy(loading = false, taskSaved = true)
                     }
                     is Result.Failure -> {
                         it.copy(loading = false, error = result.error)
@@ -181,11 +220,11 @@ class AddEditTaskViewModel(
             !value.isDatePicked
         ) {
             _state.update {
-                it.copy(enableAddTask = false)
+                it.copy(enableSaveTask = false)
             }
         } else {
             _state.update {
-                it.copy(enableAddTask = true)
+                it.copy(enableSaveTask = true)
             }
         }
     }

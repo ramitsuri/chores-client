@@ -70,6 +70,7 @@ class AssignmentDetailsRepository(
         }
         return AssignmentDetails(
             id = assignmentId,
+            taskId = assignment.task.id,
             name = assignment.task.name,
             member = assignment.member.name,
             description = assignment.task.description,
