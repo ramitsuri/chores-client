@@ -59,7 +59,7 @@ fun AssignmentDetailsScreen(
     modalBottomSheetState: ModalBottomSheetState,
     viewModel: AssignmentDetailsViewModel = getViewModel(),
     markAsDone: (String, ProgressStatus) -> Unit,
-    onEditTaskClicked: (String?) -> Unit
+    onEditTaskClicked: (String) -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
     val viewState = viewModel.state.collectAsState().value
@@ -123,7 +123,7 @@ fun AssignmentDetailsContent(
     onSnoozeHour: () -> Unit,
     onSnoozeDay: () -> Unit,
     onWontDo: () -> Unit,
-    onEditRequested: (String?) -> Unit
+    onEditRequested: (String) -> Unit
 ) {
     Column(
         modifier = modifier

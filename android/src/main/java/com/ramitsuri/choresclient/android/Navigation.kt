@@ -19,14 +19,16 @@ private object Screens {
     const val LOGIN = "login"
     const val ASSIGNMENTS = "assignments"
     const val SETTINGS = "settings"
-    const val ADD_EDIT_TASK = "add_task"
+    const val ADD_TASK = "add_task"
+    const val EDIT_TASK = "edit_task"
 }
 
 object Destinations {
     const val LOGIN_ROUTE = Screens.LOGIN
     const val ASSIGNMENTS_ROUTE = Screens.ASSIGNMENTS
     const val SETTINGS_ROUTE = Screens.SETTINGS
-    const val ADD_EDIT_TASK_ROUTE = Screens.ADD_EDIT_TASK
+    const val ADD_TASK_ROUTE = Screens.ADD_TASK
+    const val EDIT_TASK_ROUTE = Screens.EDIT_TASK
 }
 
 class NavigationActions(private val navController: NavHostController) {
@@ -50,13 +52,23 @@ class NavigationActions(private val navController: NavHostController) {
         }
     }
 
-    fun navigateToAddTask(taskId: String? = null) {
-        navController.navigate("${Destinations.ADD_EDIT_TASK_ROUTE}/${taskId}") {
+    fun navigateToAddTask() {
+        navController.navigate(Destinations.ADD_TASK_ROUTE) {
             popUpTo(navController.graph.findStartDestination().id) {
                 saveState = true
             }
             launchSingleTop = true
             restoreState = true
+        }
+    }
+
+    fun navigateToEditTask(taskId: String) {
+        navController.navigate("${Destinations.EDIT_TASK_ROUTE}/$taskId") {
+            popUpTo(navController.graph.findStartDestination().id) {
+                saveState = true
+            }
+            launchSingleTop = true
+            restoreState = false
         }
     }
 }
@@ -87,13 +99,20 @@ fun NavGraph(
                 shouldRefreshFilter,
                 onSettingsClicked = { navActions.navigateToSettings() },
                 onAddTaskClicked = { navActions.navigateToAddTask() },
-                onEditTaskClicked = { navActions.navigateToAddTask(it) })
+                onEditTaskClicked = { navActions.navigateToEditTask(it) })
         }
         composable(Destinations.SETTINGS_ROUTE) {
             SettingsScreen(onBack = { navActions.navigateToAssignments(shouldRefreshFilter = true) })
         }
         composable(
-            "${Destinations.ADD_EDIT_TASK_ROUTE}/{taskId}",
+            Destinations.ADD_TASK_ROUTE
+        ) {
+            AddEditTasksScreen(
+                taskId = null,
+                onBack = { navActions.navigateToAssignments(shouldRefreshFilter = false) })
+        }
+        composable(
+            "${Destinations.EDIT_TASK_ROUTE}/{taskId}",
             arguments = listOf(navArgument("taskId") { type = NavType.StringType })
         ) { backStackEntry ->
             AddEditTasksScreen(

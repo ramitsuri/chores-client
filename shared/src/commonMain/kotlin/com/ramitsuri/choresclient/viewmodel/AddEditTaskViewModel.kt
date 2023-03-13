@@ -39,17 +39,15 @@ class AddEditTaskViewModel(
 
     private var taskId: String? = null
 
-    init {
-        viewModelScope.launch(dispatchers.io) {
-            populateSelectionItems()
-        }
-    }
-
     fun setTaskId(taskId: String?) {
-        if (taskId == null) {
-            return
-        }
         viewModelScope.launch {
+            if (taskId == null) {
+                _state.update {
+                    AddEditTaskViewState()
+                }
+                populateSelectionItems()
+                return@launch
+            }
             val task = taskDao.get(taskId) ?: return@launch
             this@AddEditTaskViewModel.taskId = task.id
             _state.update { previousState ->

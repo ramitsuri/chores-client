@@ -120,7 +120,7 @@ fun AssignmentsScreen(
     viewModel: AssignmentsViewModel = getViewModel(),
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     onAddTaskClicked: () -> Unit,
-    onEditTaskClicked: (String?) -> Unit,
+    onEditTaskClicked: (String) -> Unit,
     onSettingsClicked: () -> Unit
 ) {
     // TODO use shouldRefreshFilter to refresh filters after changed in settings
