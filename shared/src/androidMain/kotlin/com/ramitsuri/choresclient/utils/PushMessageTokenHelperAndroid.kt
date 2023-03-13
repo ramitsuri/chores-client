@@ -12,7 +12,7 @@ actual suspend fun getToken(logger: LogHelper, tag: String): String? {
             val value = Tasks.await(FirebaseMessaging.getInstance().token, 30, TimeUnit.SECONDS)
             continuation.resume(value)
         } catch (e: Exception) {
-            logger.v(tag, "Exception when getting token: ${e.printStackTrace()}")
+            logger.v(tag, "Exception when getting token: ${e.message}")
             continuation.resume(null)
         }
     }
