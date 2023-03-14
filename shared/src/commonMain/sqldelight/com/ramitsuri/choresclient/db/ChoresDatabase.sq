@@ -49,6 +49,10 @@ deleteTodo:
 DELETE FROM TaskAssignmentEntity
 WHERE progressStatus = 1;
 
+deleteAssignment:
+DELETE FROM TaskAssignmentEntity
+WHERE id IN (?);
+
 /**
  * MEMBER
  */

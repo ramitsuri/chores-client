@@ -60,6 +60,20 @@ class TaskAssignmentDao(
         }
     }
 
+    suspend fun delete(ids: List<String>) {
+        withContext(dispatcherProvider.io) {
+            dbQueries.transaction {
+                ids.forEach {
+                    delete(it)
+                }
+            }
+        }
+    }
+
+    private fun delete(id: String) {
+        dbQueries.deleteAssignment(id)
+    }
+
     private fun insert(taskAssignmentEntity: TaskAssignmentEntity) {
         dbQueries.insertAssignment(
             taskAssignmentEntity.id,

@@ -21,14 +21,14 @@ class PushMessageTokenUploader(
 
     override suspend fun doWork(): Result {
         when (repository.submitToken()) {
-            PushMessageTokenRepository.Outcome.NOT_LOGGED_IN,
-            PushMessageTokenRepository.Outcome.EXCEPTION -> {
+            PushMessageTokenRepository.Outcome.NOT_LOGGED_IN -> {
                 return Result.failure()
             }
 
             PushMessageTokenRepository.Outcome.NO_TOKEN,
             PushMessageTokenRepository.Outcome.NO_DEVICE_ID,
-            PushMessageTokenRepository.Outcome.UPLOAD_FAILED -> {
+            PushMessageTokenRepository.Outcome.UPLOAD_FAILED,
+            PushMessageTokenRepository.Outcome.EXCEPTION -> {
                 return Result.retry()
             }
 

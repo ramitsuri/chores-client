@@ -114,6 +114,10 @@ class TaskAssignmentDataSource(
         return toTaskAssignments(taskAssignmentDao.getForUpload())
     }
 
+    suspend fun delete(taskAssignmentIds: List<String>) {
+        taskAssignmentDao.delete(taskAssignmentIds)
+    }
+
     private suspend fun toTaskAssignments(
         taskAssignmentEntities: List<TaskAssignmentEntity>
     ): List<TaskAssignment> {

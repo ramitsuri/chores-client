@@ -25,7 +25,10 @@ class SystemTaskAssignmentsRepository(
     private val logger: LogHelper by inject()
     override suspend fun refresh(): Result<List<TaskAssignment>> {
         // Upload completed local assignments
-        uploadLocal()
+        val uploadedIds = uploadLocal()
+
+        // Delete assignments that have been confirmed to be uploaded
+        localDataSource.delete(uploadedIds)
 
         // Fetch from server and save locally. Return locally saved ones
         val fetchedAndSaved = fetchAndSave()
