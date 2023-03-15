@@ -33,11 +33,13 @@ dependencies {
     implementation("androidx.work:work-runtime-ktx:$workVersion")
 
     // Compose
-    implementation("androidx.compose.ui:ui:1.2.0")
-    implementation("androidx.compose.ui:ui-tooling-preview:1.2.0")
+    implementation("androidx.compose.ui:ui:1.2.1")
+    implementation("androidx.compose.ui:ui-tooling-preview:1.2.1")
+    implementation("androidx.compose.foundation:foundation:1.4.0-alpha04")
     implementation("androidx.compose.ui:ui-tooling:1.3.0-alpha02")
-    implementation("androidx.compose.material:material:1.2.0")
-    implementation("androidx.compose.material:material-icons-extended:1.2.0")
+    implementation("androidx.compose.material:material:1.2.1")
+    implementation("androidx.compose.material:material-icons-extended:1.2.1")
+    implementation("androidx.compose.runtime:runtime-livedata:1.3.3")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.5.1")
     implementation("androidx.activity:activity-compose:1.5.1")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.5.1")

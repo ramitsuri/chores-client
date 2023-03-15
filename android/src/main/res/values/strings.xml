@@ -98,6 +98,8 @@
     <string name="settings_remote_logging_subtitle_enabled">Currently enabled</string>
     <string name="settings_remote_logging_subtitle_disabled">Currently disabled</string>
     <string name="settings_device_id_title">Device ID</string>
+    <string name="settings_token_title">Firebase token</string>
+    <string name="settings_uploader_work_title">Token Uploader</string>
 
     <!-- Repeat Units -->
     <string name="repeat_unit_none">No repeat</string>

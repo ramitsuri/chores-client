@@ -1,6 +1,9 @@
 package com.ramitsuri.choresclient.android.ui.settings
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -46,16 +49,22 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ClipboardManager
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
+import androidx.work.WorkManager
 import com.ramitsuri.choresclient.android.R
 import com.ramitsuri.choresclient.android.extensions.string
 import com.ramitsuri.choresclient.android.ui.preview.FilterPreview
@@ -115,6 +124,7 @@ fun SettingsScreen(
         remoteLoggingEnabled = viewState.remoteLogging,
         onEnableRemoteLoggingClicked = viewModel::toggleLogging,
         deviceId = viewState.deviceId,
+        token = viewState.token,
         onBack = onBack,
         modifier = modifier
     )
@@ -140,7 +150,8 @@ private fun SettingsContent(
     onEnableRemoteLoggingClicked: () -> Unit,
     deviceId: String?,
     onBack: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    token: String?
 ) {
     val bottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     val bottomSheetType = remember { mutableStateOf(BottomSheetType.NONE) }
@@ -192,6 +203,14 @@ private fun SettingsContent(
                     .padding(paddingValues)
                     .padding(horizontal = paddingMedium)
             ) {
+                val context = LocalContext.current
+                val tokenUploaderState = WorkManager.getInstance(context)
+                    .getWorkInfosForUniqueWorkLiveData("PushMessageTokenUploader")
+                    .observeAsState()
+                    .value?.joinToString { "${it.runAttemptCount} - ${it.state}" }
+
+                val clipboardManager: ClipboardManager = LocalClipboardManager.current
+
                 LazyColumn(
                     modifier = modifier
                         .fillMaxWidth(),
@@ -244,6 +263,29 @@ private fun SettingsContent(
                             )
                         }
                     }
+                    if (token != null) {
+                        item {
+                            SettingsItem(
+                                title = stringResource(id = R.string.settings_token_title),
+                                subtitle = token,
+                                onClick = { },
+                                showProgress = false,
+                                onLongClick = {
+                                    clipboardManager.setText(AnnotatedString(token))
+                                }
+                            )
+                        }
+                    }
+                    if (tokenUploaderState != null) {
+                        item {
+                            SettingsItem(
+                                title = stringResource(id = R.string.settings_uploader_work_title),
+                                subtitle = tokenUploaderState,
+                                onClick = { },
+                                showProgress = false
+                            )
+                        }
+                    }
                 }
             }
 
@@ -263,20 +305,26 @@ private fun SettingsContent(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun SettingsItem(
     title: String,
     subtitle: String,
     onClick: () -> Unit,
     showProgress: Boolean,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onLongClick: (() -> Unit)? = null
 ) {
     Column(
         modifier = modifier
             .fillMaxWidth()
             .defaultMinSize(minHeight = minAssignmentItemHeight)
-            .clickable(onClick = onClick, enabled = !showProgress)
-            .padding(paddingCardView),
+            .padding(paddingCardView)
+            .combinedClickable(
+                enabled = !showProgress,
+                onLongClick = { onLongClick?.invoke() },
+                onClick = onClick
+            ),
         verticalArrangement = Arrangement.Center
     ) {
         Text(
@@ -290,8 +338,9 @@ fun SettingsItem(
         } else {
             Text(
                 text = subtitle,
+                maxLines = 1,
                 style = MaterialTheme.typography.bodySmall,
-                modifier = modifier.padding(horizontal = paddingSmall)
+                modifier = modifier.padding(horizontal = paddingSmall).basicMarquee()
             )
         }
     }
@@ -703,8 +752,9 @@ private fun PreviewSettingsContent(@PreviewParameter(FilterPreview::class) filte
                 onNotificationActionsSaveRequested = {},
                 remoteLoggingEnabled = false,
                 onEnableRemoteLoggingClicked = {},
-                onBack = { },
                 deviceId = "DeviceID12740923024",
+                onBack = { },
+                token = "Token",
             )
         }
     }
