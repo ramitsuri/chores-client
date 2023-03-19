@@ -11,7 +11,6 @@ data class SettingsViewState(
     val deviceId: String?,
     val remoteLogging: Boolean,
     val timeZone: TimeZone,
-    val token: String?,
     val error: ViewError? = null
 )
 

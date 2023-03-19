@@ -15,12 +15,10 @@ import com.ramitsuri.choresclient.resources.LocalizedString
 import com.ramitsuri.choresclient.utils.DispatcherProvider
 import com.ramitsuri.choresclient.utils.FilterHelper
 import com.ramitsuri.choresclient.utils.LogHelper
-import com.ramitsuri.choresclient.utils.getToken
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlinx.datetime.TimeZone
 import org.koin.core.component.KoinComponent
 
@@ -41,8 +39,7 @@ class SettingsViewModel(
                     actions = getNotificationActionList()
                 ),
                 deviceId = prefManager.getDeviceId(),
-                remoteLogging = prefManager.getEnableRemoteLogging(),
-                token = null
+                remoteLogging = prefManager.getEnableRemoteLogging()
             )
         )
     val state: StateFlow<SettingsViewState> = _state
@@ -52,13 +49,6 @@ class SettingsViewModel(
             val filters = filterHelper.get()
             _state.update {
                 it.copy(filterViewState = it.filterViewState.copy(filters = filters))
-            }
-
-            val token = withContext(dispatchers.io) {
-                getToken(logger, "SettingsVM")
-            }
-            _state.update {
-                it.copy(token = token)
             }
         }
     }
