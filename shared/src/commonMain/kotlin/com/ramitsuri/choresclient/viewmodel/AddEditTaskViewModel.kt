@@ -73,7 +73,7 @@ class AddEditTaskViewModel(
                     rotateMember = task.rotateMember
                 )
             }
-            updateCanAddTask()
+            updateCanAddEditTask()
         }
     }
 
@@ -172,7 +172,7 @@ class AddEditTaskViewModel(
                 }
             })
         }
-        updateCanAddTask()
+        updateCanAddEditTask()
     }
 
     fun onMemberSelected(newMemberId: String) {
@@ -185,21 +185,21 @@ class AddEditTaskViewModel(
                 }
             })
         }
-        updateCanAddTask()
+        updateCanAddEditTask()
     }
 
     fun onDatePicked(newLocalDate: LocalDate) {
         _state.update {
             it.copy(date = newLocalDate, isDatePicked = true)
         }
-        updateCanAddTask()
+        updateCanAddEditTask()
     }
 
     fun onTimePicked(newLocalTime: LocalTime) {
         _state.update {
             it.copy(time = newLocalTime, isTimePicked = true)
         }
-        updateCanAddTask()
+        updateCanAddEditTask()
     }
 
     fun onRotateMemberUpdated(newRotateMemberValue: Boolean) {
@@ -208,22 +208,23 @@ class AddEditTaskViewModel(
         }
     }
 
-    private fun updateCanAddTask() {
+    private fun updateCanAddEditTask() {
+        val isEditing = taskId != null
         val value = _state.value
         val house = value.houses.firstOrNull { it.getIsSelected() }
         val member = value.members.firstOrNull { it.getIsSelected() }
-        if (house == null ||
-            member == null ||
-            !value.isTimePicked ||
-            !value.isDatePicked
-        ) {
-            _state.update {
-                it.copy(enableSaveTask = false)
-            }
+
+        val canAddOrEdit = if (isEditing) {
+            true
         } else {
-            _state.update {
-                it.copy(enableSaveTask = true)
-            }
+            house != null &&
+                    member != null &&
+                    value.isTimePicked &&
+                    value.isDatePicked
+        }
+
+        _state.update {
+            it.copy(enableSaveTask = canAddOrEdit)
         }
     }
 
