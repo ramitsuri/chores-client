@@ -7,7 +7,6 @@ import com.ramitsuri.choresclient.data.entities.TaskDao
 import com.ramitsuri.choresclient.network.TasksApi
 import com.ramitsuri.choresclient.utils.DispatcherProvider
 import com.ramitsuri.choresclient.utils.LogHelper
-import io.ktor.client.utils.EmptyContent.status
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
@@ -34,7 +33,7 @@ class SystemTasksRepository(
             val existingTask = taskDao.get(taskId)
             if (existingTask == null) {
                 logger.v(TAG, "Existing task null, cannot edit")
-                return@withContext Result.Failure(ViewError.ADD_EDIT_TASK_ERROR)
+                return@withContext Result.Failure(ViewError.EDIT_TASK_ERROR)
             }
             val newTask = TaskDto(
                 name = existingTask.name.newOrNullIfSame(task.name),
@@ -61,7 +60,7 @@ class SystemTasksRepository(
                     Result.Success(Unit)
                 }
                 else -> {
-                    Result.Failure(ViewError.ADD_EDIT_TASK_ERROR)
+                    Result.Failure(ViewError.EDIT_TASK_ERROR)
                 }
             }
         }
@@ -82,7 +81,7 @@ class SystemTasksRepository(
                     Result.Success(Unit)
                 }
                 else -> {
-                    Result.Failure(ViewError.ADD_EDIT_TASK_ERROR)
+                    Result.Failure(ViewError.ADD_TASK_ERROR)
                 }
             }
         }

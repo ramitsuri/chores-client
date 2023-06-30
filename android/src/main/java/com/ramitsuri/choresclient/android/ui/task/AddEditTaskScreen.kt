@@ -136,8 +136,10 @@ fun AddEditTasksScreen(
     )
     viewState.error?.let { error ->
         val snackbarText = when (error) {
-            ViewError.ADD_EDIT_TASK_ERROR ->
+            ViewError.ADD_TASK_ERROR ->
                 stringResource(id = R.string.error_add_task)
+            ViewError.EDIT_TASK_ERROR ->
+                stringResource(id = R.string.error_edit_task)
             else ->
                 stringResource(id = R.string.error_unknown)
         }

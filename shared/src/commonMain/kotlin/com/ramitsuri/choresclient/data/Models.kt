@@ -180,7 +180,8 @@ enum class ViewError {
     NETWORK,
     LOGIN_REQUEST_FAILED,
     LOGIN_NO_TOKEN,
-    ADD_EDIT_TASK_ERROR
+    ADD_TASK_ERROR,
+    EDIT_TASK_ERROR
 }
 
 enum class RepeatUnit(val key: Int) {

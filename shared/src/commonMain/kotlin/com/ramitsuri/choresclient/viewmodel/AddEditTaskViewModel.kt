@@ -79,15 +79,6 @@ class AddEditTaskViewModel(
 
     fun saveTask() {
         val value = _state.value
-        val house = value.houses.firstOrNull { it.getIsSelected() }
-        val member = value.members.firstOrNull { it.getIsSelected() }
-        if (house == null ||
-            member == null ||
-            !value.isTimePicked ||
-            !value.isDatePicked
-        ) {
-            return
-        }
         val repeatUnit =
             RepeatUnit.fromKey(
                 value.repeatUnits.firstOrNull { it.getIsSelected() }?.getId()
@@ -99,8 +90,8 @@ class AddEditTaskViewModel(
             dueDateTime = LocalDateTime(value.date, value.time),
             repeatValue = value.repeatValue,
             repeatUnit = repeatUnit,
-            houseId = house.getId(),
-            memberId = member.getId(),
+            houseId = value.houses.firstOrNull { it.getIsSelected() }?.getId(),
+            memberId = value.members.firstOrNull { it.getIsSelected() }?.getId(),
             rotateMember = value.rotateMember,
             status = ActiveStatus.ACTIVE
         )
@@ -117,6 +108,7 @@ class AddEditTaskViewModel(
                     is Result.Success -> {
                         it.copy(loading = false, taskSaved = true)
                     }
+
                     is Result.Failure -> {
                         it.copy(loading = false, error = result.error)
                     }

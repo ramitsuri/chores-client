@@ -81,6 +81,7 @@
     <string name="error_no_token">Failed to login</string>
     <string name="error_unknown">Unknown error</string>
     <string name="error_add_task">Failed to add task</string>
+    <string name="error_edit_task">Failed to edit task</string>
 
     <!-- Settings -->
     <string name="settings_item_sync_last_time">Last synced at %1$s</string>
