@@ -47,11 +47,11 @@ dependencies {
     implementation("com.google.accompanist:accompanist-systemuicontroller:0.24.12-rc")
     // 2.5.1 is causing a crash - List contains no element matching the predicate
     implementation("androidx.navigation:navigation-compose:2.4.2")
-    implementation ("io.github.vanpra.compose-material-dialogs:datetime:0.9.0")
+    implementation("io.github.vanpra.compose-material-dialogs:datetime:0.9.0")
 
     // Firebase
     implementation(project.dependencies.platform("com.google.firebase:firebase-bom:30.1.0"))
-    implementation ("com.google.firebase:firebase-messaging-ktx")
+    implementation("com.google.firebase:firebase-messaging-ktx")
 
     // Testing
     testImplementation("junit:junit:4.13.2")
@@ -72,8 +72,8 @@ android {
         applicationId = "com.ramitsuri.choresclient.android"
         minSdk = 26
         targetSdk = 33
-        versionCode = 44
-        versionName = "5.9"
+        versionCode = 45
+        versionName = "6.0"
 
         kapt {
             arguments {
