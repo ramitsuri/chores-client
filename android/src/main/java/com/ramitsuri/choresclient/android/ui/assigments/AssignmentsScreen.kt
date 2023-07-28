@@ -153,7 +153,16 @@ fun AssignmentsScreen(
                 assignmentId = selectedAssignmentId,
                 modalBottomSheetState = modalBottomSheetState,
                 markAsDone = { id, progressStatus ->
-                    viewModel.changeStateRequested(id, progressStatus)
+                    viewModel.markAsDone(id, progressStatus)
+                },
+                markAsWontDo = { id, progressStatus ->
+                    viewModel.markAsWontDo(id, progressStatus)
+                },
+                onSnoozeDay = { id, assignmentName ->
+                    viewModel.onSnoozeDay(id, assignmentName)
+                },
+                onSnoozeHour = { id, assignmentName ->
+                    viewModel.onSnoozeHour(id, assignmentName)
                 },
                 onEditTaskClicked = onEditTaskClicked,
                 enableCompleteAndSnooze = enableCompleteAndSnooze
@@ -182,7 +191,7 @@ fun AssignmentsScreen(
                 assignments = viewState.assignments,
                 onItemClick = { taskAssignment, allowEdit, clickType ->
                     if (clickType == ClickType.CHANGE_STATUS) {
-                        viewModel.changeStateRequested(
+                        viewModel.markAsDone(
                             taskAssignment.id,
                             taskAssignment.progressStatus
                         )
@@ -445,6 +454,7 @@ fun FilterOption(
     val (optionIcon, contentDescription) = when (filter.getType()) {
         FilterType.PERSON ->
             Pair(Icons.Filled.Person, R.string.assignment_filter_person_content_description)
+
         FilterType.HOUSE ->
             Pair(Icons.Filled.House, R.string.assignment_filter_house_content_description)
     }

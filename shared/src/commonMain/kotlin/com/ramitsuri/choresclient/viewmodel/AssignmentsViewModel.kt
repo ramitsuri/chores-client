@@ -77,8 +77,8 @@ class AssignmentsViewModel(
         getLocal(refreshFilters = false)
     }
 
-    fun changeStateRequested(id: String, progressStatus: ProgressStatus) {
-        if (progressStatus != ProgressStatus.TODO) {
+    fun markAsDone(id: String, currentProgressStatus: ProgressStatus) {
+        if (currentProgressStatus != ProgressStatus.TODO) {
             return
         }
         _state.update {
@@ -88,6 +88,27 @@ class AssignmentsViewModel(
             assignmentDetailsRepository.onCompleteRequestedSuspend(id)
             getLocal(refreshFilters = false)
         }
+    }
+
+    fun markAsWontDo(id: String, currentProgressStatus: ProgressStatus) {
+        if (currentProgressStatus != ProgressStatus.TODO) {
+            return
+        }
+        _state.update {
+            it.copy(loading = true)
+        }
+        longLivingCoroutineScope.launch {
+            assignmentDetailsRepository.onWontDoRequestedSuspend(id)
+            getLocal(refreshFilters = false)
+        }
+    }
+
+    fun onSnoozeHour(id: String, assignmentName: String) {
+        assignmentDetailsRepository.onSnoozeHourRequested(id, assignmentName)
+    }
+
+    fun onSnoozeDay(id: String, assignmentName: String) {
+        assignmentDetailsRepository.onSnoozeDayRequested(id, assignmentName)
     }
 
     private fun getLocal(refreshFilters: Boolean) {

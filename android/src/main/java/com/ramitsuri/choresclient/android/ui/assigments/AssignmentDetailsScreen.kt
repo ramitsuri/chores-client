@@ -59,6 +59,9 @@ fun AssignmentDetailsScreen(
     modalBottomSheetState: ModalBottomSheetState,
     viewModel: AssignmentDetailsViewModel = getViewModel(),
     markAsDone: (String, ProgressStatus) -> Unit,
+    markAsWontDo: (String, ProgressStatus) -> Unit,
+    onSnoozeDay: (String, String) -> Unit,
+    onSnoozeHour: (String, String) -> Unit,
     onEditTaskClicked: (String) -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -75,25 +78,25 @@ fun AssignmentDetailsScreen(
                 modifier = modifier,
                 enableCompleteAndSnooze = enableCompleteAndSnooze,
                 onComplete = {
-                    coroutineScope.launch {
-                        markAsDone(assignmentId, ProgressStatus.TODO)
-                        modalBottomSheetState.hide()
-                    }
-                },
-                onSnoozeHour = {
-                    viewModel.onSnoozeHour()
-                    coroutineScope.launch {
-                        modalBottomSheetState.hide()
-                    }
-                },
-                onSnoozeDay = {
-                    viewModel.onSnoozeDay()
+                    markAsDone(assignmentId, ProgressStatus.TODO)
                     coroutineScope.launch {
                         modalBottomSheetState.hide()
                     }
                 },
                 onWontDo = {
-                    viewModel.onWontDo()
+                    markAsWontDo(assignmentId, ProgressStatus.TODO)
+                    coroutineScope.launch {
+                        modalBottomSheetState.hide()
+                    }
+                },
+                onSnoozeHour = {
+                    onSnoozeHour(assignmentId, it.name)
+                    coroutineScope.launch {
+                        modalBottomSheetState.hide()
+                    }
+                },
+                onSnoozeDay = {
+                    onSnoozeDay(assignmentId, it.name)
                     coroutineScope.launch {
                         modalBottomSheetState.hide()
                     }

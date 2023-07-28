@@ -12,16 +12,4 @@ class AssignmentDetailsCallbackViewModel(vm: AssignmentDetailsViewModel) : Callb
             viewModel.setAssignmentId(assignmentId)
         }
     }
-
-    fun onSnoozeHour() {
-        viewModel.onSnoozeHour()
-    }
-
-    fun onSnoozeDay() {
-        viewModel.onSnoozeDay()
-    }
-
-    fun onComplete() {
-        viewModel.onComplete()
-    }
 }

@@ -18,6 +18,6 @@ class AssignmentsCallbackViewModel(vm: AssignmentsViewModel) : CallbackViewModel
     }
 
     fun changeStateRequested(id: String, progressStatus: ProgressStatus) {
-        viewModel.changeStateRequested(id, progressStatus)
+        viewModel.markAsDone(id, progressStatus)
     }
 }

@@ -33,32 +33,4 @@ class AssignmentDetailsViewModel(
             }
         }
     }
-
-    fun onSnoozeHour() {
-        if (!this::details.isInitialized) {
-            return
-        }
-        assignmentDetailsRepository.onSnoozeHourRequested(details.id, details.name)
-    }
-
-    fun onSnoozeDay() {
-        if (!this::details.isInitialized) {
-            return
-        }
-        assignmentDetailsRepository.onSnoozeDayRequested(details.id, details.name)
-    }
-
-    fun onComplete() {
-        if (!this::details.isInitialized) {
-            return
-        }
-        assignmentDetailsRepository.onCompleteRequested(details.id)
-    }
-
-    fun onWontDo() {
-        if (!this::details.isInitialized) {
-            return
-        }
-        assignmentDetailsRepository.onWontDoRequested(details.id)
-    }
 }
