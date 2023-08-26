@@ -1,5 +1,6 @@
 package com.ramitsuri.choresclient.android.ui.login
 
+import android.content.Intent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -49,7 +50,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.ramitsuri.choresclient.android.R
-import com.ramitsuri.choresclient.android.extensions.getActivity
 import com.ramitsuri.choresclient.android.ui.theme.ChoresClientTheme
 import com.ramitsuri.choresclient.android.ui.theme.marginExtraLarge
 import com.ramitsuri.choresclient.android.ui.theme.marginLarge
@@ -58,7 +58,6 @@ import com.ramitsuri.choresclient.android.ui.theme.paddingMedium
 import com.ramitsuri.choresclient.data.ViewError
 import com.ramitsuri.choresclient.viewmodel.LoginViewModel
 import org.koin.androidx.compose.getViewModel
-import kotlin.system.exitProcess
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -94,10 +93,13 @@ fun LoginScreen(
             val snackbarText = when (error) {
                 ViewError.NETWORK ->
                     stringResource(id = R.string.error_network)
+
                 ViewError.LOGIN_REQUEST_FAILED ->
                     stringResource(id = R.string.error_login_failed)
+
                 ViewError.LOGIN_NO_TOKEN ->
                     stringResource(id = R.string.error_no_token)
+
                 else ->
                     stringResource(id = R.string.error_unknown)
             }
@@ -137,7 +139,10 @@ private fun LoginContent(
                 onValueChange = { idUpdated(it) },
                 label = { Text(stringResource(id = R.string.login_hint_id)) },
                 keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text, imeAction = ImeAction.Next),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Text,
+                    imeAction = ImeAction.Next
+                ),
                 modifier = modifier.fillMaxWidth()
             )
             Spacer(modifier = modifier.height(marginMedium))
@@ -148,7 +153,10 @@ private fun LoginContent(
                 label = { Text(stringResource(id = R.string.login_hint_key)) },
                 visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
                 keyboardActions = KeyboardActions(onDone = { onLoginButtonClick() }),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Password,
+                    imeAction = ImeAction.Done
+                ),
                 modifier = modifier.fillMaxWidth(),
                 trailingIcon = {
                     val icon = if (showPassword) {
@@ -209,12 +217,12 @@ private fun LoginDebugContent(
         Button(
             onClick = {
                 if (serverSet) {
-                    val activity = context.getActivity()
-                    val intent =
-                        activity?.packageManager?.getLaunchIntentForPackage(activity.packageName)
-                    activity?.finishAffinity()
-                    activity?.startActivity(intent)
-                    exitProcess(0)
+                    val packageManager = context.packageManager
+                    val intent = packageManager.getLaunchIntentForPackage(context.packageName)
+                    val componentName = intent?.component
+                    val mainIntent = Intent.makeRestartActivityTask(componentName)
+                    context.startActivity(mainIntent)
+                    Runtime.getRuntime().exit(0)
                 } else {
                     showDialog = true
                 }
