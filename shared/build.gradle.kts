@@ -10,7 +10,8 @@ plugins {
 version = "1.0"
 
 kotlin {
-    android()
+    jvmToolchain(8)
+    androidTarget()
     listOf(
         iosX64(),
         iosArm64(),
@@ -84,11 +85,11 @@ kotlin {
 
                 // Firebase
                 implementation(project.dependencies.platform("com.google.firebase:firebase-bom:30.1.0"))
-                implementation ("com.google.firebase:firebase-database-ktx")
-                implementation ("com.google.firebase:firebase-messaging-ktx")
+                implementation("com.google.firebase:firebase-database-ktx")
+                implementation("com.google.firebase:firebase-messaging-ktx")
             }
         }
-        val androidTest by getting {
+        val androidUnitTest by getting {
             dependencies {
                 implementation(kotlin("test-junit"))
                 implementation("junit:junit:4.13.2")
@@ -115,6 +116,7 @@ kotlin {
 }
 
 android {
+    namespace = "com.ramitsuri.choresclient"
     compileSdk = (findProperty("android.compileSdk") as String).toInt()
     defaultConfig {
         minSdk = (findProperty("android.minSdk") as String).toInt()
