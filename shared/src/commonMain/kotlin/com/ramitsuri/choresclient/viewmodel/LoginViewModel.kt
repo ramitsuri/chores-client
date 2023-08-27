@@ -2,6 +2,7 @@ package com.ramitsuri.choresclient.viewmodel
 
 import com.ramitsuri.choresclient.data.Result
 import com.ramitsuri.choresclient.data.settings.PrefManager
+import com.ramitsuri.choresclient.model.DebugButtonAction
 import com.ramitsuri.choresclient.model.LoginDebugViewState
 import com.ramitsuri.choresclient.model.LoginViewState
 import com.ramitsuri.choresclient.repositories.LoginRepository
@@ -29,7 +30,6 @@ class LoginViewModel(
             loginDebugViewState = getDebugViewState()
         )
     )
-
     val state: StateFlow<LoginViewState> = _state
 
     fun login() {
@@ -43,6 +43,7 @@ class LoginViewModel(
                         it.copy(loading = false, error = loginResult.error)
                     }
                 }
+
                 is Result.Success -> {
                     syncRepository.refresh()
                     taskAssignmentsRepository.refresh()
@@ -59,13 +60,24 @@ class LoginViewModel(
 
     fun onIdUpdated(newId: String) {
         _state.update {
-            it.copy(id = newId)
+            it.copy(id = newId, allowLogin = newId.isNotEmpty() && it.key.isNotEmpty())
         }
     }
 
     fun onKeyUpdated(newKey: String) {
         _state.update {
-            it.copy(key = newKey)
+            it.copy(key = newKey, allowLogin = it.id.isNotEmpty() && newKey.isNotEmpty())
+        }
+    }
+
+    fun onServerUrlUpdated(url: String) {
+        _state.update { previousState ->
+            previousState.copy(
+                loginDebugViewState =
+                previousState.loginDebugViewState?.copy(
+                    serverUrl = url,
+                )
+            )
         }
     }
 
@@ -76,17 +88,35 @@ class LoginViewModel(
     }
 
 
-    fun setDebugServer(newValue: String) {
-        _state.update {
-            it.copy(loginDebugViewState = it.loginDebugViewState?.copy(serverText = newValue))
+    fun setDebugServer() {
+        _state.update { previousState ->
+            previousState.copy(
+                loginDebugViewState = previousState.loginDebugViewState?.copy(
+                    debugButtonAction = DebugButtonAction.RESTART
+                )
+            )
         }
-        prefManager.setDebugServer(newValue)
+        prefManager.setDebugServer(_state.value.loginDebugViewState?.serverUrl ?: "")
     }
 
-    fun getServer() = prefManager.getDebugServer()
+    fun resetDebugServer() {
+        _state.update { previousState ->
+            previousState.copy(
+                loginDebugViewState = getDebugViewState()
+            )
+        }
+    }
 
     private fun getDebugViewState() = if (isDebug) {
-        LoginDebugViewState(serverText = prefManager.getDebugServer())
+        val savedDebugServer = prefManager.getDebugServer()
+        LoginDebugViewState(
+            serverUrl = savedDebugServer.ifEmpty { "http://" },
+            debugButtonAction = if (savedDebugServer.isEmpty()) {
+                DebugButtonAction.SET_SERVER
+            } else {
+                DebugButtonAction.UPDATE_SERVER
+            }
+        )
     } else {
         null
     }

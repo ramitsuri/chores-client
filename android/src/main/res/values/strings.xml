@@ -50,6 +50,10 @@
     <string name="login_hint_id">Id</string>
     <string name="login_hint_key">Key</string>
     <string name="login_server_alert_title">Enter Server URL</string>
+    <string name="login_debug_server_url">Server URL: %1$s</string>
+    <string name="login_debug_server_restart">Restart app</string>
+    <string name="login_debug_server_set">Set</string>
+    <string name="login_debug_server_update">Update</string>
 
     <!-- Assignment Details -->
     <string name="assignment_details_button_done">Done</string>

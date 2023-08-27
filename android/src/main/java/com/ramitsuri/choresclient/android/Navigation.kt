@@ -1,8 +1,10 @@
 package com.ramitsuri.choresclient.android
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -14,6 +16,8 @@ import com.ramitsuri.choresclient.android.ui.assigments.AssignmentsScreen
 import com.ramitsuri.choresclient.android.ui.login.LoginScreen
 import com.ramitsuri.choresclient.android.ui.settings.SettingsScreen
 import com.ramitsuri.choresclient.android.ui.task.AddEditTasksScreen
+import com.ramitsuri.choresclient.viewmodel.LoginViewModel
+import org.koin.androidx.compose.koinViewModel
 
 private object Screens {
     const val LOGIN = "login"
@@ -88,7 +92,18 @@ fun NavGraph(
         modifier = modifier
     ) {
         composable(Destinations.LOGIN_ROUTE) {
-            LoginScreen(onLoggedIn = { navActions.navigateToAssignments(shouldRefreshFilter = false) })
+            val viewModel = koinViewModel<LoginViewModel>()
+            val state by viewModel.state.collectAsStateWithLifecycle()
+            LoginScreen(
+                state = state,
+                onIdEntered = viewModel::onIdUpdated,
+                onKeyEntered = viewModel::onKeyUpdated,
+                onLoginClick = viewModel::login,
+                onErrorAcknowledged = viewModel::onErrorShown,
+                onServerEntered = viewModel::onServerUrlUpdated,
+                onServerSet = viewModel::setDebugServer,
+                onResetServer = viewModel::resetDebugServer
+            )
         }
         composable(
             "${Destinations.ASSIGNMENTS_ROUTE}/{refreshFilter}",

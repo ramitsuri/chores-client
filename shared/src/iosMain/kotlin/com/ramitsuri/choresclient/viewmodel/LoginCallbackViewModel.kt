@@ -5,13 +5,4 @@ class LoginCallbackViewModel(vm: LoginViewModel) : CallbackViewModel() {
 
     val state = viewModel.state.asCallbacks()
 
-    fun login(id: String, key: String) {
-        viewModel.login(id, key)
-    }
-
-    fun setDebugServer(server: String) {
-        viewModel.setDebugServer(server)
-    }
-
-    fun getServer() = viewModel.getServer()
 }
