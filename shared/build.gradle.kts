@@ -123,6 +123,9 @@ android {
         targetSdk = (findProperty("android.targetSdk") as String).toInt()
     }
     sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
+    buildFeatures {
+        buildConfig = true
+    }
 }
 
 sqldelight {
