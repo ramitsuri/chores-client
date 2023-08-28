@@ -117,7 +117,7 @@ fun LoginScreen(
                 else ->
                     stringResource(id = R.string.error_unknown)
             }
-            LaunchedEffect(state, error, snackbarText) {
+            LaunchedEffect(error, snackbarText) {
                 snackbarHostState.showSnackbar(snackbarText)
                 onErrorAcknowledged()
             }

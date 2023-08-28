@@ -9,7 +9,7 @@ data class SettingsViewState(
     val filterViewState: FilterViewState = FilterViewState(),
     val notificationActionsViewState: NotificationActionsViewState = NotificationActionsViewState(),
     val deviceId: String?,
-    val remoteLogging: Boolean,
+    val remoteLoggingEnabled: Boolean,
     val timeZone: TimeZone,
     val error: ViewError? = null
 )

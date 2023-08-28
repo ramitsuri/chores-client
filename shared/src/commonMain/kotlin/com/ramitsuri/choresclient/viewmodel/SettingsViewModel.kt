@@ -39,18 +39,13 @@ class SettingsViewModel(
                     actions = getNotificationActionList()
                 ),
                 deviceId = prefManager.getDeviceId(),
-                remoteLogging = prefManager.getEnableRemoteLogging()
+                remoteLoggingEnabled = prefManager.getEnableRemoteLogging()
             )
         )
     val state: StateFlow<SettingsViewState> = _state
 
     init {
-        viewModelScope.launch {
-            val filters = filterHelper.get()
-            _state.update {
-                it.copy(filterViewState = it.filterViewState.copy(filters = filters))
-            }
-        }
+        resetFilters()
     }
 
     fun syncRequested() {
@@ -69,6 +64,7 @@ class SettingsViewModel(
                         )
                     }
                 }
+
                 is Result.Failure -> {
                     _state.update {
                         it.copy(
@@ -101,9 +97,19 @@ class SettingsViewModel(
                     prefManager.setSavedPersonFilterIds(selectedIds)
 
                 }
+
                 FilterType.HOUSE -> {
                     prefManager.setSavedHouseFilterIds(selectedIds)
                 }
+            }
+        }
+    }
+
+    fun resetFilters() {
+        viewModelScope.launch {
+            val filters = filterHelper.get()
+            _state.update {
+                it.copy(filterViewState = it.filterViewState.copy(filters = filters))
             }
         }
     }
@@ -134,12 +140,24 @@ class SettingsViewModel(
         prefManager.setEnabledNotificationActions(actions.filter { it.selected }.map { it.action })
     }
 
+    fun resetNotificationActions() {
+        _state.update {
+            it.copy(
+                notificationActionsViewState = NotificationActionsViewState(
+                    actions = getNotificationActionList()
+                )
+            )
+        }
+        val actions = _state.value.notificationActionsViewState.actions
+        prefManager.setEnabledNotificationActions(actions.filter { it.selected }.map { it.action })
+    }
+
     fun toggleLogging() {
         val enabled = !prefManager.getEnableRemoteLogging()
         prefManager.setEnableRemoteLogging(enabled)
         logger.enableRemoteLogging(enabled)
         _state.update {
-            it.copy(remoteLogging = enabled)
+            it.copy(remoteLoggingEnabled = enabled)
         }
     }
 
