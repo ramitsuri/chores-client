@@ -78,6 +78,10 @@ class SystemTaskAssignmentsRepository(
         return withContext(dispatcherProvider.io) {
             val readyForUpload = localDataSource.getReadyForUpload()
             logger.v(TAG, "Ready for upload: ${readyForUpload.joinToString()}")
+            if (readyForUpload.isEmpty()) {
+                return@withContext listOf()
+            }
+
             val uploadResult = try {
                 api.updateTaskAssignments(readyForUpload)
             } catch (e: Exception) {
@@ -90,6 +94,7 @@ class SystemTaskAssignmentsRepository(
                     logger.v(TAG, "Uploaded: ${uploadedTaskAssignmentIds.joinToString()}")
                     uploadedTaskAssignmentIds
                 }
+
                 else -> {
                     listOf()
                 }
@@ -112,6 +117,7 @@ class SystemTaskAssignmentsRepository(
                     logger.v(TAG, "Fetched: ${taskAssignments.joinToString { it.id }}")
                     true
                 }
+
                 else -> {
                     false
                 }

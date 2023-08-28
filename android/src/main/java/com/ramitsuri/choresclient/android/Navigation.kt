@@ -1,6 +1,7 @@
 package com.ramitsuri.choresclient.android
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -95,6 +96,11 @@ fun NavGraph(
         composable(Destinations.LOGIN_ROUTE) {
             val viewModel = koinViewModel<LoginViewModel>()
             val state by viewModel.state.collectAsStateWithLifecycle()
+            LaunchedEffect(state) {
+                if (state.isLoggedIn) {
+                    navActions.navigateToAssignments(shouldRefreshFilter = true)
+                }
+            }
             LoginScreen(
                 state = state,
                 onIdEntered = viewModel::onIdUpdated,

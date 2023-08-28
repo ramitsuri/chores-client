@@ -1,3 +1,9 @@
 package com.ramitsuri.choresclient.utils
 
-expect suspend fun getToken(logger: LogHelper, tag: String): String?
+import kotlinx.coroutines.CoroutineDispatcher
+
+expect suspend fun getToken(
+    dispatcher: CoroutineDispatcher,
+    logger: LogHelper,
+    tag: String
+): String?
