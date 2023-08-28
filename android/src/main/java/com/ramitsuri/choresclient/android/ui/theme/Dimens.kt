@@ -1,19 +1,18 @@
 package com.ramitsuri.choresclient.android.ui.theme
 
+import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
-val marginSmall = 4.dp
-val marginMedium = 8.dp
-val marginLarge = 16.dp
-val marginExtraLarge = 32.dp
-
-val paddingSmall = marginSmall
-val paddingMedium = marginMedium
-val paddingLarge = marginLarge
-val paddingExtraLarge = marginExtraLarge
-val paddingCardView = 12.dp
-
-val minBottomSheetHeight = 264.dp
-val iconWidth = 48.dp
-val assignmentHeaderCornerRadius = 24.dp
-val minAssignmentItemHeight = 64.dp
+val LocalDimensions = staticCompositionLocalOf { Dimens() }
+data class Dimens(
+    val small: Dp = 4.dp,
+    val medium: Dp = 8.dp,
+    val large: Dp = 16.dp,
+    val extraLarge: Dp = 32.dp,
+    val paddingCardView: Dp = 12.dp,
+    val minBottomSheetHeight: Dp = 264.dp,
+    val iconWidth: Dp = 48.dp,
+    val assignmentHeaderCornerRadius: Dp = 24.dp,
+    val minAssignmentItemHeight: Dp = 64.dp,
+)

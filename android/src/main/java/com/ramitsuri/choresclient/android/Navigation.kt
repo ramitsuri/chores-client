@@ -17,6 +17,7 @@ import com.ramitsuri.choresclient.android.ui.login.LoginScreen
 import com.ramitsuri.choresclient.android.ui.settings.SettingsScreen
 import com.ramitsuri.choresclient.android.ui.task.AddEditTasksScreen
 import com.ramitsuri.choresclient.viewmodel.LoginViewModel
+import com.ramitsuri.choresclient.viewmodel.SettingsViewModel
 import org.koin.androidx.compose.koinViewModel
 
 private object Screens {
@@ -117,7 +118,21 @@ fun NavGraph(
                 onEditTaskClicked = { navActions.navigateToEditTask(it) })
         }
         composable(Destinations.SETTINGS_ROUTE) {
-            SettingsScreen(onBack = { navActions.navigateToAssignments(shouldRefreshFilter = true) })
+            val viewModel = koinViewModel<SettingsViewModel>()
+            val state by viewModel.state.collectAsStateWithLifecycle()
+            SettingsScreen(
+                onBack = { navActions.navigateToAssignments(shouldRefreshFilter = true) },
+                state = state,
+                onSyncClicked = viewModel::syncRequested,
+                onFilterSelected = viewModel::filter,
+                onFilterSaveRequested = viewModel::saveFilters,
+                onFilterResetRequested = viewModel::resetFilters,
+                onNotificationActionSelected = viewModel::onNotificationActionClicked,
+                onNotificationActionsSaveRequested = viewModel::saveNotificationActions,
+                onNotificationActionsResetRequested = viewModel::resetNotificationActions,
+                onEnableRemoteLoggingClicked = viewModel::toggleLogging,
+                onErrorAcknowledged = viewModel::onErrorShown,
+            )
         }
         composable(
             Destinations.ADD_TASK_ROUTE

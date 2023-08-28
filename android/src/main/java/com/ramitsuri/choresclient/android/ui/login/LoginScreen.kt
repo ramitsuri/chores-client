@@ -20,6 +20,7 @@ import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
@@ -52,10 +53,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.ramitsuri.choresclient.android.R
 import com.ramitsuri.choresclient.android.ui.theme.ChoresClientTheme
-import com.ramitsuri.choresclient.android.ui.theme.marginExtraLarge
-import com.ramitsuri.choresclient.android.ui.theme.marginLarge
-import com.ramitsuri.choresclient.android.ui.theme.marginMedium
-import com.ramitsuri.choresclient.android.ui.theme.paddingMedium
+import com.ramitsuri.choresclient.android.ui.theme.dimens
 import com.ramitsuri.choresclient.data.ViewError
 import com.ramitsuri.choresclient.model.DebugButtonAction
 import com.ramitsuri.choresclient.model.LoginDebugViewState
@@ -78,7 +76,7 @@ fun LoginScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(paddingMedium),
+            .padding(MaterialTheme.dimens.medium),
         verticalArrangement = Arrangement.Center
     ) {
         if (state.loading) {
@@ -162,7 +160,7 @@ private fun LoginContent(
             .fillMaxWidth()
             .focusRequester(focusRequester = focusRequester)
     )
-    Spacer(modifier = Modifier.height(marginMedium))
+    Spacer(modifier = Modifier.height(MaterialTheme.dimens.medium))
     OutlinedTextField(
         value = key,
         singleLine = true,
@@ -200,7 +198,7 @@ private fun LoginContent(
             }
         }
     )
-    Spacer(modifier = Modifier.height(marginExtraLarge))
+    Spacer(modifier = Modifier.height(MaterialTheme.dimens.extraLarge))
     FilledTonalButton(
         onClick = onLoginClick,
         enabled = enableLogin,
@@ -239,11 +237,11 @@ private fun DebugContent(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(paddingMedium),
+            .padding(MaterialTheme.dimens.medium),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(text = stringResource(id = R.string.login_debug_server_url, viewState.serverUrl))
-        Spacer(modifier = Modifier.height(marginLarge))
+        Spacer(modifier = Modifier.height(MaterialTheme.dimens.large))
         Button(
             onClick = {
                 when (viewState.debugButtonAction) {
@@ -313,7 +311,7 @@ private fun SetDebugServerDialog(
         )
     ) {
         Card {
-            Column(modifier = modifier.padding(paddingMedium)) {
+            Column(modifier = modifier.padding(MaterialTheme.dimens.medium)) {
                 OutlinedTextField(
                     value = text,
                     singleLine = true,
@@ -330,7 +328,7 @@ private fun SetDebugServerDialog(
                         .fillMaxWidth()
                         .focusRequester(focusRequester = focusRequester)
                 )
-                Spacer(modifier = Modifier.height(marginLarge))
+                Spacer(modifier = Modifier.height(MaterialTheme.dimens.large))
                 Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
                     TextButton(onClick = onSetServerRequested) {
                         Text(text = stringResource(id = R.string.ok))

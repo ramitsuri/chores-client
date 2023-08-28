@@ -51,13 +51,7 @@ import com.ramitsuri.choresclient.android.R
 import com.ramitsuri.choresclient.android.extensions.string
 import com.ramitsuri.choresclient.android.ui.preview.FilterPreview
 import com.ramitsuri.choresclient.android.ui.theme.ChoresClientTheme
-import com.ramitsuri.choresclient.android.ui.theme.marginMedium
-import com.ramitsuri.choresclient.android.ui.theme.marginSmall
-import com.ramitsuri.choresclient.android.ui.theme.minAssignmentItemHeight
-import com.ramitsuri.choresclient.android.ui.theme.paddingCardView
-import com.ramitsuri.choresclient.android.ui.theme.paddingLarge
-import com.ramitsuri.choresclient.android.ui.theme.paddingMedium
-import com.ramitsuri.choresclient.android.ui.theme.paddingSmall
+import com.ramitsuri.choresclient.android.ui.theme.dimens
 import com.ramitsuri.choresclient.data.ViewError
 import com.ramitsuri.choresclient.model.Filter
 import com.ramitsuri.choresclient.model.FilterItem
@@ -92,7 +86,7 @@ fun SettingsScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(paddingMedium)
+            .padding(MaterialTheme.dimens.medium)
     ) {
         IconButton(
             onClick = onBack
@@ -105,7 +99,7 @@ fun SettingsScreen(
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(marginMedium)
+            verticalArrangement = Arrangement.spacedBy(MaterialTheme.dimens.medium)
         ) {
             item {
                 SyncItem(
@@ -284,12 +278,12 @@ private fun FilterContent(
                 FilterOption(filter = filter, onItemClick = onItemClick, modifier = Modifier)
             }
         }
-        Spacer(modifier = Modifier.height(marginMedium))
+        Spacer(modifier = Modifier.height(MaterialTheme.dimens.medium))
         Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
             TextButton(onClick = onResetFiltersRequested) {
                 Text(text = stringResource(id = R.string.cancel))
             }
-            Spacer(modifier = Modifier.width(marginMedium))
+            Spacer(modifier = Modifier.width(MaterialTheme.dimens.medium))
             TextButton(onClick = onSaveFiltersRequested) {
                 Text(text = stringResource(id = R.string.ok))
             }
@@ -310,12 +304,12 @@ private fun FilterOption(
         FilterType.HOUSE ->
             R.string.assignment_filter_house
     }
-    Column(modifier = modifier.padding(paddingMedium)) {
+    Column(modifier = modifier.padding(MaterialTheme.dimens.medium)) {
         Text(
             text = stringResource(id = title).uppercase(),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(horizontal = paddingMedium),
+            modifier = Modifier.padding(horizontal = MaterialTheme.dimens.medium),
             color = MaterialTheme.colorScheme.onBackground
         )
         Row {
@@ -351,8 +345,8 @@ private fun FilterOptionItem(
             .clickable {
                 onItemClick(item)
             }
-            .defaultMinSize(minHeight = minAssignmentItemHeight)
-            .padding(paddingMedium)) {
+            .defaultMinSize(minHeight = MaterialTheme.dimens.minAssignmentItemHeight)
+            .padding(MaterialTheme.dimens.medium)) {
         Icon(
             imageVector = if (item.getIsSelected()) {
                 Icons.Filled.CheckBox
@@ -363,7 +357,7 @@ private fun FilterOptionItem(
             modifier = Modifier.size(FilterChipDefaults.IconSize),
             tint = MaterialTheme.colorScheme.onBackground
         )
-        Spacer(modifier = Modifier.width(marginSmall))
+        Spacer(modifier = Modifier.width(MaterialTheme.dimens.small))
         Text(
             text = item.getDisplayName().string(),
             style = MaterialTheme.typography.bodyMedium,
@@ -440,16 +434,16 @@ private fun NotificationActionContent(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(paddingLarge)
+            .padding(MaterialTheme.dimens.large)
             .systemBarsPadding()
     ) {
         Text(
             text = stringResource(id = R.string.settings_notification_action_select_3),
             style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(paddingMedium),
+            modifier = Modifier.padding(MaterialTheme.dimens.medium),
             color = MaterialTheme.colorScheme.onBackground
         )
-        Spacer(modifier = Modifier.height(marginMedium))
+        Spacer(modifier = Modifier.height(MaterialTheme.dimens.medium))
         LazyColumn {
             items(items = notificationActions, key = { it.action }) { notificationAction ->
                 NotificationActionOptionItem(
@@ -459,12 +453,12 @@ private fun NotificationActionContent(
                 )
             }
         }
-        Spacer(modifier = Modifier.height(marginMedium))
+        Spacer(modifier = Modifier.height(MaterialTheme.dimens.medium))
         Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
             TextButton(onClick = onResetNotificationActionsRequested) {
                 Text(text = stringResource(id = R.string.cancel))
             }
-            Spacer(modifier = Modifier.width(marginMedium))
+            Spacer(modifier = Modifier.width(MaterialTheme.dimens.medium))
             TextButton(onClick = onSaveNotificationActionsRequested) {
                 Text(text = stringResource(id = R.string.ok))
             }
@@ -485,8 +479,8 @@ private fun NotificationActionOptionItem(
             .clickable {
                 onItemClick(item)
             }
-            .defaultMinSize(minHeight = minAssignmentItemHeight)
-            .padding(paddingMedium)) {
+            .defaultMinSize(minHeight = MaterialTheme.dimens.minAssignmentItemHeight)
+            .padding(MaterialTheme.dimens.medium)) {
         Icon(
             imageVector = if (item.selected) {
                 Icons.Filled.CheckBox
@@ -497,7 +491,7 @@ private fun NotificationActionOptionItem(
             modifier = Modifier.size(FilterChipDefaults.IconSize),
             tint = MaterialTheme.colorScheme.onBackground
         )
-        Spacer(modifier = Modifier.width(marginSmall))
+        Spacer(modifier = Modifier.width(MaterialTheme.dimens.small))
         Text(
             text = item.name.string(),
             style = MaterialTheme.typography.bodyMedium,
@@ -517,24 +511,24 @@ private fun SettingsItem(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .defaultMinSize(minHeight = minAssignmentItemHeight)
+            .defaultMinSize(minHeight = MaterialTheme.dimens.minAssignmentItemHeight)
             .clickable(onClick = onClick, enabled = !showProgress)
-            .padding(paddingCardView),
+            .padding(MaterialTheme.dimens.paddingCardView),
         verticalArrangement = Arrangement.Center
     ) {
         Text(
             text = title,
             style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(paddingSmall)
+            modifier = Modifier.padding(MaterialTheme.dimens.small)
         )
         if (showProgress) {
-            Spacer(modifier = Modifier.height(marginMedium))
+            Spacer(modifier = Modifier.height(MaterialTheme.dimens.medium))
             LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
         } else {
             Text(
                 text = subtitle,
                 style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(horizontal = paddingSmall)
+                modifier = Modifier.padding(horizontal = MaterialTheme.dimens.small)
             )
         }
     }
@@ -551,9 +545,9 @@ private fun SettingsItemWithSwitch(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .defaultMinSize(minHeight = minAssignmentItemHeight)
+            .defaultMinSize(minHeight = MaterialTheme.dimens.minAssignmentItemHeight)
             .clickable(onClick = onClick)
-            .padding(paddingCardView),
+            .padding(MaterialTheme.dimens.paddingCardView),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Column(
@@ -563,12 +557,12 @@ private fun SettingsItemWithSwitch(
             Text(
                 text = title,
                 style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(paddingSmall)
+                modifier = Modifier.padding(MaterialTheme.dimens.small)
             )
             Text(
                 text = subtitle,
                 style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(horizontal = paddingSmall)
+                modifier = Modifier.padding(horizontal = MaterialTheme.dimens.small)
             )
         }
 

@@ -33,12 +33,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.ramitsuri.choresclient.android.R
 import com.ramitsuri.choresclient.android.ui.theme.ChoresClientTheme
-import com.ramitsuri.choresclient.android.ui.theme.marginExtraLarge
-import com.ramitsuri.choresclient.android.ui.theme.marginLarge
-import com.ramitsuri.choresclient.android.ui.theme.marginMedium
-import com.ramitsuri.choresclient.android.ui.theme.minBottomSheetHeight
-import com.ramitsuri.choresclient.android.ui.theme.paddingLarge
-import com.ramitsuri.choresclient.android.ui.theme.paddingMedium
+import com.ramitsuri.choresclient.android.ui.theme.dimens
 import com.ramitsuri.choresclient.android.utils.formatReminderAt
 import com.ramitsuri.choresclient.android.utils.formatRepeatUnit
 import com.ramitsuri.choresclient.data.ProgressStatus
@@ -130,7 +125,7 @@ fun AssignmentDetailsContent(
 ) {
     Column(
         modifier = modifier
-            .padding(paddingLarge)
+            .padding(MaterialTheme.dimens.large)
             .fillMaxWidth()
             .systemBarsPadding()
     ) {
@@ -139,7 +134,7 @@ fun AssignmentDetailsContent(
             style = MaterialTheme.typography.headlineMedium,
             modifier = modifier.align(CenterHorizontally)
         )
-        Spacer(modifier = modifier.height(marginMedium))
+        Spacer(modifier = modifier.height(MaterialTheme.dimens.medium))
         Text(
             text = formatRepeatUnit(
                 repeatValue = assignment.repeatValue,
@@ -147,20 +142,20 @@ fun AssignmentDetailsContent(
             ),
             style = MaterialTheme.typography.bodySmall,
             modifier = modifier
-                .padding(all = paddingMedium)
+                .padding(all = MaterialTheme.dimens.medium)
                 .align(CenterHorizontally)
         )
         Text(
             text = assignment.description,
             style = MaterialTheme.typography.bodyMedium,
             modifier = modifier
-                .padding(all = paddingMedium)
+                .padding(all = MaterialTheme.dimens.medium)
         )
         Text(
             text = formatReminderAt(toFormat = assignment.notificationTime),
             style = MaterialTheme.typography.bodyMedium,
             modifier = modifier
-                .padding(all = paddingMedium)
+                .padding(all = MaterialTheme.dimens.medium)
         )
         Text(
             text = stringResource(
@@ -169,9 +164,9 @@ fun AssignmentDetailsContent(
             ),
             style = MaterialTheme.typography.bodyMedium,
             modifier = modifier
-                .padding(all = paddingMedium)
+                .padding(all = MaterialTheme.dimens.medium)
         )
-        Spacer(modifier = modifier.height(marginLarge))
+        Spacer(modifier = modifier.height(MaterialTheme.dimens.large))
         Row(
             modifier = modifier.fillMaxWidth()
         ) {
@@ -182,7 +177,7 @@ fun AssignmentDetailsContent(
             ) {
                 Text(text = stringResource(id = R.string.assignment_details_button_done))
             }
-            Spacer(modifier = modifier.height(marginLarge))
+            Spacer(modifier = modifier.height(MaterialTheme.dimens.large))
             FilledTonalIconButton(
                 enabled = enableCompleteAndSnooze,
                 onClick = { onEditRequested(assignment.taskId) },
@@ -193,10 +188,10 @@ fun AssignmentDetailsContent(
                 )
             }
         }
-        Spacer(modifier = modifier.height(marginLarge))
+        Spacer(modifier = modifier.height(MaterialTheme.dimens.large))
         LazyRow(
             modifier = modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(marginMedium)
+            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.dimens.medium)
         ) {
             item {
                 OutlinedButton(
@@ -223,7 +218,7 @@ fun AssignmentDetailsContent(
                 }
             }
         }
-        Spacer(modifier = modifier.height(marginExtraLarge))
+        Spacer(modifier = modifier.height(MaterialTheme.dimens.extraLarge))
     }
 }
 
@@ -231,9 +226,9 @@ fun AssignmentDetailsContent(
 fun Loading(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
-            .padding(paddingLarge)
+            .padding(MaterialTheme.dimens.large)
             .fillMaxWidth()
-            .defaultMinSize(minHeight = minBottomSheetHeight),
+            .defaultMinSize(minHeight = MaterialTheme.dimens.minBottomSheetHeight),
         verticalArrangement = Arrangement.Center
     ) {
         LinearProgressIndicator(modifier = modifier.fillMaxWidth())

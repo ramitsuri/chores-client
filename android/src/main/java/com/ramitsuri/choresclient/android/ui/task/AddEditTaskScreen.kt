@@ -53,12 +53,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.ramitsuri.choresclient.android.R
 import com.ramitsuri.choresclient.android.extensions.string
 import com.ramitsuri.choresclient.android.ui.theme.ChoresClientTheme
-import com.ramitsuri.choresclient.android.ui.theme.marginExtraLarge
-import com.ramitsuri.choresclient.android.ui.theme.marginLarge
-import com.ramitsuri.choresclient.android.ui.theme.marginMedium
-import com.ramitsuri.choresclient.android.ui.theme.paddingLarge
-import com.ramitsuri.choresclient.android.ui.theme.paddingMedium
-import com.ramitsuri.choresclient.android.ui.theme.paddingSmall
+import com.ramitsuri.choresclient.android.ui.theme.dimens
 import com.ramitsuri.choresclient.data.RepeatUnit
 import com.ramitsuri.choresclient.data.ViewError
 import com.ramitsuri.choresclient.model.HouseSelectionItem
@@ -208,7 +203,7 @@ fun AddEditTaskContent(
             modifier = modifier
                 .fillMaxWidth()
                 .padding(paddingValues)
-                .padding(paddingMedium),
+                .padding(MaterialTheme.dimens.medium),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             if (isLoading) {
@@ -221,7 +216,7 @@ fun AddEditTaskContent(
                     modifier = modifier
                 )
 
-                Spacer(modifier = modifier.height(marginMedium))
+                Spacer(modifier = modifier.height(MaterialTheme.dimens.medium))
 
                 Description(
                     taskDescription = taskDescription,
@@ -230,7 +225,7 @@ fun AddEditTaskContent(
                     modifier = modifier
                 )
 
-                Spacer(modifier = modifier.height(marginMedium))
+                Spacer(modifier = modifier.height(MaterialTheme.dimens.medium))
 
                 Repeat(
                     repeatValue = repeatValue,
@@ -241,7 +236,7 @@ fun AddEditTaskContent(
                     modifier = modifier
                 )
 
-                Spacer(modifier = modifier.height(marginMedium))
+                Spacer(modifier = modifier.height(MaterialTheme.dimens.medium))
 
                 DateTime(
                     date = date,
@@ -253,7 +248,7 @@ fun AddEditTaskContent(
                     modifier = modifier
                 )
 
-                Spacer(modifier = modifier.height(marginMedium))
+                Spacer(modifier = modifier.height(MaterialTheme.dimens.medium))
 
                 Row(
                     modifier = modifier.fillMaxWidth(),
@@ -270,7 +265,7 @@ fun AddEditTaskContent(
                             .weight(1.5f)
                     )
 
-                    Spacer(modifier = modifier.width(marginMedium))
+                    Spacer(modifier = modifier.width(MaterialTheme.dimens.medium))
 
                     SelectionMenu(
                         items = members,
@@ -283,14 +278,14 @@ fun AddEditTaskContent(
                     )
                 }
 
-                Spacer(modifier = modifier.height(marginMedium))
+                Spacer(modifier = modifier.height(MaterialTheme.dimens.medium))
 
                 RotateMember(
                     rotateMember = rotateMember,
                     rotateMemberUpdated = rotateMemberUpdated
                 )
 
-                Spacer(modifier = modifier.height(marginExtraLarge))
+                Spacer(modifier = modifier.height(MaterialTheme.dimens.extraLarge))
 
                 FilledTonalButton(
                     onClick = onAddTaskRequested,
@@ -380,7 +375,7 @@ fun DateTime(
             )
         }
 
-        Spacer(modifier = modifier.width(marginMedium))
+        Spacer(modifier = modifier.width(MaterialTheme.dimens.medium))
 
         TextButton(
             onClick = {
@@ -446,7 +441,7 @@ fun Repeat(
                 .weight(1f)
         )
 
-        Spacer(modifier = modifier.width(marginMedium))
+        Spacer(modifier = modifier.width(MaterialTheme.dimens.medium))
 
         SelectionMenu(
             items = repeatUnits,
@@ -486,7 +481,7 @@ fun RotateMember(
             text = stringResource(id = R.string.add_task_rotate_member),
             style = MaterialTheme.typography.bodySmall
         )
-        Spacer(modifier = modifier.width(marginLarge))
+        Spacer(modifier = modifier.width(MaterialTheme.dimens.large))
         Switch(
             checked = rotateMember,
             onCheckedChange = rotateMemberUpdated,
@@ -534,7 +529,7 @@ fun DatePicker(
         Row(
             modifier = modifier
                 .fillMaxWidth()
-                .padding(horizontal = paddingLarge),
+                .padding(horizontal = MaterialTheme.dimens.large),
             horizontalArrangement = Arrangement.End
         ) {
             TextButton(onClick = {
@@ -542,7 +537,7 @@ fun DatePicker(
             }) {
                 Text(text = stringResource(id = R.string.cancel))
             }
-            Spacer(modifier = modifier.width(marginMedium))
+            Spacer(modifier = modifier.width(MaterialTheme.dimens.medium))
             TextButton(onClick = {
                 onDatePicked(pickedDate.toKotlinLocalDate())
                 this@MaterialDialog.dialogState.hide()
@@ -590,7 +585,7 @@ fun TimePicker(
         Row(
             modifier = modifier
                 .fillMaxWidth()
-                .padding(horizontal = paddingLarge),
+                .padding(horizontal = MaterialTheme.dimens.large),
             horizontalArrangement = Arrangement.End
         ) {
             TextButton(onClick = {
@@ -598,7 +593,7 @@ fun TimePicker(
             }) {
                 Text(text = stringResource(id = R.string.cancel))
             }
-            Spacer(modifier = modifier.width(marginMedium))
+            Spacer(modifier = modifier.width(MaterialTheme.dimens.medium))
             TextButton(onClick = {
                 onTimePicked(pickedTime.toKotlinLocalTime())
                 this@MaterialDialog.dialogState.hide()
@@ -624,7 +619,7 @@ fun SelectionMenu(
             },
             modifier = modifier
                 .fillMaxWidth()
-                .padding(paddingSmall)
+                .padding(MaterialTheme.dimens.small)
         ) {
             Text(
                 text = items.firstOrNull { it.getIsSelected() }?.getDisplayName()?.string()

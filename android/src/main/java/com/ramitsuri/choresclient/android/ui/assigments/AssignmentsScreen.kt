@@ -80,14 +80,7 @@ import com.ramitsuri.choresclient.android.R
 import com.ramitsuri.choresclient.android.extensions.string
 import com.ramitsuri.choresclient.android.ui.preview.AssignmentsPreview
 import com.ramitsuri.choresclient.android.ui.theme.ChoresClientTheme
-import com.ramitsuri.choresclient.android.ui.theme.assignmentHeaderCornerRadius
-import com.ramitsuri.choresclient.android.ui.theme.iconWidth
-import com.ramitsuri.choresclient.android.ui.theme.marginExtraLarge
-import com.ramitsuri.choresclient.android.ui.theme.marginMedium
-import com.ramitsuri.choresclient.android.ui.theme.minAssignmentItemHeight
-import com.ramitsuri.choresclient.android.ui.theme.paddingCardView
-import com.ramitsuri.choresclient.android.ui.theme.paddingMedium
-import com.ramitsuri.choresclient.android.ui.theme.paddingSmall
+import com.ramitsuri.choresclient.android.ui.theme.dimens
 import com.ramitsuri.choresclient.android.utils.formatRepeatUnit
 import com.ramitsuri.choresclient.android.utils.observeAsState
 import com.ramitsuri.choresclient.data.ActiveStatus
@@ -112,7 +105,7 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDateTime
 import org.koin.androidx.compose.getViewModel
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun AssignmentsScreen(
     shouldRefreshFilter: Boolean,
@@ -234,7 +227,7 @@ private fun AssignmentsContent(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(horizontal = paddingMedium)
+            .padding(horizontal = MaterialTheme.dimens.medium)
     ) {
         FilterRow(
             filters,
@@ -255,7 +248,7 @@ private fun AssignmentsContent(
                 LazyColumn(
                     modifier = modifier
                         .fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(marginMedium)
+                    verticalArrangement = Arrangement.spacedBy(MaterialTheme.dimens.medium)
                 ) {
                     assignments.forEach { (header, assignments) ->
                         stickyHeader {
@@ -270,8 +263,8 @@ private fun AssignmentsContent(
                         }
                     }
                     item {
-                        Spacer(modifier = modifier.height(marginExtraLarge))
-                        Spacer(modifier = modifier.height(marginExtraLarge))
+                        Spacer(modifier = modifier.height(MaterialTheme.dimens.extraLarge))
+                        Spacer(modifier = modifier.height(MaterialTheme.dimens.extraLarge))
                     }
                 }
             }
@@ -285,7 +278,7 @@ private fun AssignmentHeader(text: String, modifier: Modifier = Modifier) {
         modifier = modifier
             .fillMaxWidth()
             .background(color = MaterialTheme.colorScheme.background)
-            .padding(vertical = paddingSmall)
+            .padding(vertical = MaterialTheme.dimens.small)
     ) {
         Text(
             text = text,
@@ -294,11 +287,11 @@ private fun AssignmentHeader(text: String, modifier: Modifier = Modifier) {
                 .background(
                     MaterialTheme.colorScheme.secondaryContainer,
                     shape = RoundedCornerShape(
-                        topEnd = assignmentHeaderCornerRadius,
-                        bottomEnd = assignmentHeaderCornerRadius
+                        topEnd = MaterialTheme.dimens.assignmentHeaderCornerRadius,
+                        bottomEnd = MaterialTheme.dimens.assignmentHeaderCornerRadius
                     )
                 )
-                .padding(paddingMedium)
+                .padding(MaterialTheme.dimens.medium)
         )
     }
 }
@@ -322,17 +315,17 @@ private fun AssignmentItem(
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically,
             modifier = modifier
-                .defaultMinSize(minHeight = minAssignmentItemHeight)
-                .padding(paddingCardView)
+                .defaultMinSize(minHeight = MaterialTheme.dimens.minAssignmentItemHeight)
+                .padding(MaterialTheme.dimens.paddingCardView)
         ) {
-            Spacer(modifier = modifier.width(marginMedium))
+            Spacer(modifier = modifier.width(MaterialTheme.dimens.medium))
             FilledTonalIconButton(
                 colors = IconButtonDefaults.filledTonalIconButtonColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer
                 ),
                 onClick = { onItemClick(assignment, showCompletedButton, ClickType.CHANGE_STATUS) },
                 modifier = modifier
-                    .width(iconWidth)
+                    .width(MaterialTheme.dimens.iconWidth)
                     .align(alignment = Alignment.CenterVertically),
                 enabled = showCompletedButton
             ) {
@@ -341,7 +334,7 @@ private fun AssignmentItem(
                     contentDescription = stringResource(id = R.string.ok)
                 )
             }
-            Spacer(modifier = modifier.width(marginMedium))
+            Spacer(modifier = modifier.width(MaterialTheme.dimens.medium))
             Column(
                 modifier = modifier.weight(1f),
                 verticalArrangement = Arrangement.Center
@@ -350,7 +343,7 @@ private fun AssignmentItem(
                 Text(
                     text = task.name,
                     style = MaterialTheme.typography.headlineSmall,
-                    modifier = modifier.padding(paddingSmall)
+                    modifier = modifier.padding(MaterialTheme.dimens.small)
                 )
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -364,7 +357,7 @@ private fun AssignmentItem(
                                 shape = RoundedCornerShape(8.dp),
                                 color = MaterialTheme.colorScheme.secondaryContainer
                             )
-                            .padding(paddingSmall)
+                            .padding(MaterialTheme.dimens.small)
                     )
                     if (task.repeatUnit != RepeatUnit.NONE) {
                         Text(
@@ -373,7 +366,7 @@ private fun AssignmentItem(
                                 repeatUnit = task.repeatUnit
                             ),
                             style = MaterialTheme.typography.bodySmall,
-                            modifier = modifier.padding(horizontal = paddingSmall)
+                            modifier = modifier.padding(horizontal = MaterialTheme.dimens.small)
                         )
                     }
                 }
@@ -433,7 +426,7 @@ fun FilterRow(
 ) {
     Row(modifier = modifier.fillMaxWidth()) {
         LazyRow(
-            horizontalArrangement = Arrangement.spacedBy(marginMedium),
+            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.dimens.medium),
             modifier = modifier.weight(1F)
         ) {
             items(filters, key = { it.getKey() }) { item ->
@@ -520,8 +513,8 @@ fun MoreMenu(
                 expanded = !expanded
             },
             modifier = modifier
-                .size(iconWidth)
-                .padding(paddingSmall)
+                .size(MaterialTheme.dimens.iconWidth)
+                .padding(MaterialTheme.dimens.small)
         ) {
             Icon(
                 imageVector = Icons.Filled.MoreVert,
