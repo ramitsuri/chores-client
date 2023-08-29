@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
+import app.cash.sqldelight.driver.android.AndroidSqliteDriver
 import com.ramitsuri.choresclient.data.db.Database
 import com.ramitsuri.choresclient.data.settings.PrefManager
 import com.ramitsuri.choresclient.data.settings.SettingsKeyValueStore
@@ -12,7 +13,6 @@ import com.ramitsuri.choresclient.utils.AppHelper
 import com.ramitsuri.choresclient.utils.DispatcherProvider
 import com.ramitsuri.choresclient.utils.LogHelper
 import com.russhwolf.settings.AndroidSettings
-import com.squareup.sqldelight.android.AndroidSqliteDriver
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.engine.android.Android
 import org.koin.dsl.module

@@ -3,7 +3,7 @@ plugins {
     kotlin("native.cocoapods")
     kotlin("plugin.serialization")
     id("com.android.library")
-    id("com.squareup.sqldelight")
+    id("app.cash.sqldelight")
     id("kotlin-parcelize")
 }
 
@@ -58,7 +58,7 @@ kotlin {
                 api("com.russhwolf:multiplatform-settings:$settings")
 
                 // SQL
-                implementation("com.squareup.sqldelight:coroutines-extensions:$sqlDelight")
+                implementation("app.cash.sqldelight:coroutines-extensions:$sqlDelight")
             }
         }
         val commonTest by getting {
@@ -73,7 +73,7 @@ kotlin {
                 implementation("androidx.security:security-crypto:1.1.0-alpha03")
 
                 // SQL
-                implementation("com.squareup.sqldelight:android-driver:$sqlDelight")
+                implementation("app.cash.sqldelight:android-driver:$sqlDelight")
 
                 // Network
                 implementation("io.ktor:ktor-client-okhttp:$ktor")
@@ -81,7 +81,7 @@ kotlin {
                 implementation("io.ktor:ktor-client-android:$ktor")
 
                 // ViewModel
-                implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1")
+                implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1")
 
                 // Firebase
                 implementation(project.dependencies.platform("com.google.firebase:firebase-bom:30.1.0"))
@@ -106,7 +106,7 @@ kotlin {
             iosSimulatorArm64Main.dependsOn(this)
             dependencies {
                 // SQL
-                implementation("com.squareup.sqldelight:native-driver:$sqlDelight")
+                implementation("app.cash.sqldelight:native-driver:$sqlDelight")
 
                 // Network
                 implementation("io.ktor:ktor-client-ios:$ktor")
@@ -129,7 +129,9 @@ android {
 }
 
 sqldelight {
-    database("ChoresDatabase") {
-        packageName = "com.ramitsuri.choresclient.db"
+    databases {
+        create("ChoresDatabase") {
+            packageName.set("com.ramitsuri.choresclient.db")
+        }
     }
 }

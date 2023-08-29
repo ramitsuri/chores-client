@@ -16,8 +16,8 @@ import com.ramitsuri.choresclient.db.MemberEntity
 import com.ramitsuri.choresclient.db.TaskAssignmentEntity
 import com.ramitsuri.choresclient.db.TaskEntity
 import com.ramitsuri.choresclient.utils.DispatcherProvider
-import com.squareup.sqldelight.ColumnAdapter
-import com.squareup.sqldelight.db.SqlDriver
+import app.cash.sqldelight.ColumnAdapter
+import app.cash.sqldelight.db.SqlDriver
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 

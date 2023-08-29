@@ -1,5 +1,6 @@
 package com.ramitsuri.choresclient
 
+import app.cash.sqldelight.driver.native.NativeSqliteDriver
 import com.ramitsuri.choresclient.data.db.Database
 import com.ramitsuri.choresclient.data.settings.PrefManager
 import com.ramitsuri.choresclient.data.settings.SettingsKeyValueStore
@@ -18,7 +19,6 @@ import com.ramitsuri.choresclient.viewmodel.LoginViewModel
 import com.russhwolf.settings.AppleSettings
 import com.russhwolf.settings.ExperimentalSettingsImplementation
 import com.russhwolf.settings.KeychainSettings
-import com.squareup.sqldelight.drivers.native.NativeSqliteDriver
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.engine.darwin.Darwin
 import kotlinx.coroutines.CoroutineScope
