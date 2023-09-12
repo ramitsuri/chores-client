@@ -169,7 +169,9 @@ fun NavGraph(
                 onRotateMemberClicked = viewModel::onRotateMemberUpdated,
                 onRepeatEndDatePicked = viewModel::onRepeatEndDatePicked,
                 onResetRepeatInfo = viewModel::onResetRepeatInfo,
-                onEditTaskRequested = viewModel::editTaskRequested
+                onEditTaskRequested = viewModel::editTaskRequested,
+                onActiveStatusSelected = viewModel::onActiveStatusSelected,
+                onResetActiveStatus = viewModel::onResetActiveStatus,
             )
         }
     }

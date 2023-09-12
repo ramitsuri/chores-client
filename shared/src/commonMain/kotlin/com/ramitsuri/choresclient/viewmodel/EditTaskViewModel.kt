@@ -2,6 +2,7 @@ package com.ramitsuri.choresclient.viewmodel
 
 import com.ramitsuri.choresclient.model.Result
 import com.ramitsuri.choresclient.model.entities.Task
+import com.ramitsuri.choresclient.model.enums.ActiveStatus
 import com.ramitsuri.choresclient.model.enums.RepeatUnit
 import com.ramitsuri.choresclient.model.error.EditTaskError
 import com.ramitsuri.choresclient.model.view.EditTaskViewState
@@ -212,6 +213,19 @@ class EditTaskViewModel(
     fun onTimePicked(hour: Int, minute: Int) {
         _state.update {
             it.copy(time = LocalTime(hour = hour, minute = minute))
+        }
+    }
+
+    fun onActiveStatusSelected(status: ActiveStatus) {
+        _state.update {
+            it.copy(status = status)
+        }
+    }
+
+    fun onResetActiveStatus() {
+        val task = task ?: return
+        _state.update {
+            it.copy(status = task.status)
         }
     }
 

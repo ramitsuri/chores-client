@@ -95,6 +95,13 @@
 
     <!-- Edit Task -->
     <string name="edit_task_edit">Edit</string>
+    <string name="edit_task_active_status_title">Active status</string>
+    <string name="edit_task_active_status_active">Active</string>
+    <string name="edit_task_active_status_active_hint">New occurrences will be created.</string>
+    <string name="edit_task_active_status_pause">Paused</string>
+    <string name="edit_task_active_status_pause_hint">New occurrences won\'t be created until you change the status back to active. Use it when going on a vacation.</string>
+    <string name="edit_task_active_status_inactive">Stopped</string>
+    <string name="edit_task_active_status_inactive_hint">New occurrences won\'t be created anymore. Use it when done with this task.</string>
 
     <!-- Errors -->
     <string name="error_network">No internet</string>

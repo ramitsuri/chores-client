@@ -83,9 +83,11 @@ fun AddTaskScreen(
     val keyboard = LocalSoftwareKeyboardController.current
 
     LaunchedEffect(focusRequester) {
-        delay(100)
-        focusRequester.requestFocus()
-        keyboard?.show()
+        if (!viewState.loading) {
+            delay(100)
+            focusRequester.requestFocus()
+            keyboard?.show()
+        }
     }
     Surface {
         Column(
