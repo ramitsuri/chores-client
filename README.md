@@ -12,9 +12,8 @@ Things to do
 - [x] Center progress in assignments screen
 - [x] Flow for alarm data 
 - [x] Predictive back
-- [ ] Test with real data 
+- [x] Test with real data 
 - [ ] Allow Task Pause/Inactive
 - [ ] Content behind system bars
-- [ ] Swipe to dismiss
-- [ ] Edit Task active status
-- [ ] Tabs for which list (hide if only one)
+- [ ] Swipe to complete task item
+- [ ] Tabs for which list/house (hide if only one)
