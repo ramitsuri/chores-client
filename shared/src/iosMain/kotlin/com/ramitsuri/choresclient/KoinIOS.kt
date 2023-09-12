@@ -5,13 +5,10 @@ import com.ramitsuri.choresclient.data.db.Database
 import com.ramitsuri.choresclient.data.settings.PrefManager
 import com.ramitsuri.choresclient.data.settings.SettingsKeyValueStore
 import com.ramitsuri.choresclient.db.ChoresDatabase
-import com.ramitsuri.choresclient.repositories.AssignmentDetailsRepository
 import com.ramitsuri.choresclient.repositories.LoginRepository
 import com.ramitsuri.choresclient.repositories.TaskAssignmentsRepository
-import com.ramitsuri.choresclient.utils.AppHelper
 import com.ramitsuri.choresclient.utils.DispatcherProvider
 import com.ramitsuri.choresclient.viewmodel.AssignmentDetailsCallbackViewModel
-import com.ramitsuri.choresclient.viewmodel.AssignmentDetailsViewModel
 import com.ramitsuri.choresclient.viewmodel.AssignmentsCallbackViewModel
 import com.ramitsuri.choresclient.viewmodel.AssignmentsViewModel
 import com.ramitsuri.choresclient.viewmodel.LoginCallbackViewModel

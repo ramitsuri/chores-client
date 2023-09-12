@@ -1,9 +1,6 @@
 package com.ramitsuri.choresclient.model.filter
 
-import com.ramitsuri.choresclient.model.Filter
-import com.ramitsuri.choresclient.model.FilterItem
-import com.ramitsuri.choresclient.model.FilterType
-import com.ramitsuri.choresclient.model.TextValue
+import com.ramitsuri.choresclient.model.view.TextValue
 
 data class HouseFilter(
     private val text: TextValue,

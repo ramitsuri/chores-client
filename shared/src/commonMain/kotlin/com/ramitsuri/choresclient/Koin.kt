@@ -1,32 +1,31 @@
 package com.ramitsuri.choresclient
 
 import com.ramitsuri.choresclient.data.db.Database
-import com.ramitsuri.choresclient.data.entities.AlarmDao
-import com.ramitsuri.choresclient.data.entities.HouseDao
-import com.ramitsuri.choresclient.data.entities.MemberDao
-import com.ramitsuri.choresclient.data.entities.TaskAssignmentDao
-import com.ramitsuri.choresclient.data.entities.TaskDao
-import com.ramitsuri.choresclient.data.notification.ReminderScheduler
+import com.ramitsuri.choresclient.data.db.dao.AlarmDao
+import com.ramitsuri.choresclient.data.db.dao.HouseDao
+import com.ramitsuri.choresclient.data.db.dao.MemberDao
+import com.ramitsuri.choresclient.data.db.dao.MemberHouseAssociationDao
+import com.ramitsuri.choresclient.data.db.dao.TaskAssignmentDao
+import com.ramitsuri.choresclient.data.db.dao.TaskDao
 import com.ramitsuri.choresclient.data.settings.PrefManager
 import com.ramitsuri.choresclient.network.NetworkProvider
-import com.ramitsuri.choresclient.notification.NotificationHandler
 import com.ramitsuri.choresclient.reminder.AlarmHandler
-import com.ramitsuri.choresclient.repositories.AssignmentDetailsRepository
-import com.ramitsuri.choresclient.repositories.HouseDataSource
+import com.ramitsuri.choresclient.reminder.ReminderScheduler
+import com.ramitsuri.choresclient.repositories.DefaultTaskAssignmentsRepository
+import com.ramitsuri.choresclient.repositories.DefaultTasksRepository
 import com.ramitsuri.choresclient.repositories.LoginRepository
 import com.ramitsuri.choresclient.repositories.PushMessageTokenRepository
 import com.ramitsuri.choresclient.repositories.SyncRepository
-import com.ramitsuri.choresclient.repositories.SystemTaskAssignmentsRepository
-import com.ramitsuri.choresclient.repositories.SystemTasksRepository
-import com.ramitsuri.choresclient.repositories.TaskAssignmentDataSource
 import com.ramitsuri.choresclient.repositories.TaskAssignmentsRepository
 import com.ramitsuri.choresclient.repositories.TasksRepository
+import com.ramitsuri.choresclient.utils.ContentDownloader
 import com.ramitsuri.choresclient.utils.DispatcherProvider
 import com.ramitsuri.choresclient.utils.FilterHelper
 import com.ramitsuri.choresclient.utils.LogHelper
 import io.ktor.client.engine.HttpClientEngine
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.datetime.Clock
 import org.koin.core.KoinApplication
 import org.koin.core.context.startKoin
 import org.koin.core.module.Module
@@ -55,15 +54,22 @@ private val coreModule = module {
 
     single<ReminderScheduler> {
         ReminderScheduler(
-            get<TaskAssignmentsRepository>(),
             get<AlarmHandler>(),
             get<PrefManager>(),
-            get<DispatcherProvider>()
         )
     }
 
     single<CoroutineScope> {
         CoroutineScope(SupervisorJob())
+    }
+
+    single<ContentDownloader> {
+        ContentDownloader(
+            get<TaskAssignmentsRepository>(),
+            get<SyncRepository>(),
+            get<PrefManager>(),
+            get<AppInfo>().isDebug,
+        )
     }
 
     factory<TaskAssignmentDao> {
@@ -86,65 +92,48 @@ private val coreModule = module {
         get<Database>().houseDao
     }
 
-    factory<TaskAssignmentDataSource> {
-        TaskAssignmentDataSource(
+    factory<MemberHouseAssociationDao> {
+        get<Database>().memberHouseAssociationDao
+    }
+
+    single<TaskAssignmentsRepository> {
+        DefaultTaskAssignmentsRepository(
+            get<NetworkProvider>().provideAssignmentsApi(),
             get<TaskAssignmentDao>(),
             get<MemberDao>(),
-            get<TaskDao>()
-        )
-    }
-
-    factory<HouseDataSource> {
-        HouseDataSource(get<HouseDao>())
-    }
-
-    factory<TaskAssignmentsRepository> {
-        SystemTaskAssignmentsRepository(
-            get<NetworkProvider>().provideAssignmentsApi(),
-            get<TaskAssignmentDataSource>(),
-            get<DispatcherProvider>()
-        )
-    }
-
-    factory<AssignmentDetailsRepository> {
-        AssignmentDetailsRepository(
-            get<CoroutineScope>(),
-            get<DispatcherProvider>(),
-            get<TaskAssignmentsRepository>(),
+            get<TaskDao>(),
+            get<ReminderScheduler>(),
             get<AlarmHandler>(),
-            get<NotificationHandler>()
         )
     }
 
     factory<LoginRepository> {
         get<NetworkProvider>().provideLoginRepository(
             prefManager = get<PrefManager>(),
-            dispatcherProvider = get<DispatcherProvider>()
         )
     }
 
     factory<SyncRepository> {
         SyncRepository(
-            get<HouseDataSource>(),
+            get<HouseDao>(),
+            get<MemberHouseAssociationDao>(),
+            get<MemberDao>(),
             get<NetworkProvider>().provideSyncApi(),
             get<PrefManager>(),
-            get<DispatcherProvider>()
         )
     }
 
     factory<FilterHelper> {
         FilterHelper(
-            get<TaskAssignmentsRepository>(),
             get<SyncRepository>(),
             get<PrefManager>()
         )
     }
 
     factory<TasksRepository> {
-        SystemTasksRepository(
+        DefaultTasksRepository(
             get<NetworkProvider>().provideTasksApi(),
             get<TaskDao>(),
-            get<DispatcherProvider>()
         )
     }
 
@@ -155,6 +144,10 @@ private val coreModule = module {
             get<DispatcherProvider>(),
             get<LogHelper>()
         )
+    }
+
+    single<Clock> {
+        Clock.System
     }
 }
 

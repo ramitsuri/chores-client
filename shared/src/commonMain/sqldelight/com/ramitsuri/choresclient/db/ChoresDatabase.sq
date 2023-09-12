@@ -1,7 +1,7 @@
-import com.ramitsuri.choresclient.data.ActiveStatus;
-import com.ramitsuri.choresclient.data.CreateType;
-import com.ramitsuri.choresclient.data.ProgressStatus;
-import com.ramitsuri.choresclient.data.RepeatUnit;
+import com.ramitsuri.choresclient.model.enums.ActiveStatus;
+import com.ramitsuri.choresclient.model.enums.CreateType;
+import com.ramitsuri.choresclient.model.enums.ProgressStatus;
+import com.ramitsuri.choresclient.model.enums.RepeatUnit;
 import kotlin.Boolean;
 import kotlinx.datetime.Instant;
 import kotlinx.datetime.LocalDateTime;
@@ -30,7 +30,7 @@ SELECT * FROM TaskAssignmentEntity;
 
 selectAssignment:
 SELECT * FROM TaskAssignmentEntity
-WHERE id = :id;
+WHERE id = ?;
 
 selectAssignmentsForUpload:
 SELECT * FROM TaskAssignmentEntity
@@ -59,18 +59,20 @@ WHERE id IN (?);
  */
 CREATE TABLE IF NOT EXISTS MemberEntity (
     id TEXT NOT NULL PRIMARY KEY,
-    name TEXT NOT NULL,
-    createdDate INTEGER AS Instant NOT NULL
+    name TEXT NOT NULL
 );
 
 selectMember:
 SELECT * FROM MemberEntity
 WHERE id = ?;
 
+selectMembers:
+SELECT * FROM MemberEntity;
+
 insertMember:
 INSERT OR REPLACE INTO
-MemberEntity (id, name, createdDate)
-VALUES (?, ?, ?);
+MemberEntity (id, name)
+VALUES (?, ?);
 
 deleteMembers:
 DELETE FROM MemberEntity;
@@ -85,6 +87,7 @@ CREATE TABLE IF NOT EXISTS TaskEntity (
     dueDateTime TEXT AS LocalDateTime NOT NULL,
     repeatValue INTEGER NOT NULL,
     repeatUnit INTEGER AS RepeatUnit NOT NULL,
+    repeatEndDateTime TEXT AS LocalDateTime,
     houseId TEXT NOT NULL,
     memberId TEXT NOT NULL,
     rotateMember INTEGER AS Boolean NOT NULL,
@@ -98,8 +101,8 @@ WHERE id = ?;
 
 insertTask:
 INSERT OR REPLACE INTO
-TaskEntity (id, name, description, dueDateTime, repeatValue, repeatUnit, houseId, memberId, rotateMember, createdDate, status)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+TaskEntity (id, name, description, dueDateTime, repeatValue, repeatUnit, repeatEndDateTime, houseId, memberId, rotateMember, createdDate, status)
+VALUES (?, ?, ?, ?, ?, ?, ?,?, ?, ?, ?, ?);
 
 deleteTasks:
 DELETE FROM TaskEntity;
@@ -108,9 +111,9 @@ DELETE FROM TaskEntity;
  * ALARM
  */
 CREATE TABLE IF NOT EXISTS AlarmEntity (
-    assignmentId TEXT NOT NULL PRIMARY KEY,
-    showAtTime TEXT AS LocalDateTime NOT NULL,
-    systemNotificationId INTEGER NOT NULL
+    systemNotificationId INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    assignmentId TEXT NOT NULL UNIQUE,
+    showAtTime TEXT AS LocalDateTime NOT NULL
 );
 
 selectAlarms:
@@ -122,8 +125,8 @@ WHERE assignmentId = ?;
 
 insertAlarm:
 INSERT OR REPLACE INTO
-AlarmEntity (assignmentId, showAtTime, systemNotificationId)
-VALUES (?, ?, ?);
+AlarmEntity (assignmentId, showAtTime)
+VALUES (?, ?);
 
 deleteAlarm:
 DELETE FROM AlarmEntity
@@ -154,3 +157,24 @@ VALUES (?, ?, ?, ?, ?);
 
 deleteHouses:
 DELETE FROM HouseEntity;
+
+/**
+ * MEMBER HOUSE (List) assocication
+ */
+CREATE TABLE IF NOT EXISTS MemberHouseEntity (
+    id TEXT NOT NULL PRIMARY KEY,
+    memberId TEXT NOT NULL,
+    houseId TEXT NOT NULL
+);
+
+selectMemberHouseAssociationsForHouse:
+SELECT * FROM MemberHouseEntity
+WHERE houseId = ?;
+
+insertMemberHouseAssociation:
+INSERT OR REPLACE INTO
+MemberHouseEntity(id, memberId, houseId)
+VALUES(?, ?,?);
+
+deleteAllMemberHouseAssociations:
+DELETE FROM MemberHouseEntity;

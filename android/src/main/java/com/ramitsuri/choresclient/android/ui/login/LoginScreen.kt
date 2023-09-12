@@ -1,6 +1,11 @@
 package com.ramitsuri.choresclient.android.ui.login
 
+import android.Manifest
 import android.content.Intent
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -34,7 +40,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.autofill.AutofillType
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -54,10 +62,13 @@ import androidx.compose.ui.window.DialogProperties
 import com.ramitsuri.choresclient.android.R
 import com.ramitsuri.choresclient.android.ui.theme.ChoresClientTheme
 import com.ramitsuri.choresclient.android.ui.theme.dimens
-import com.ramitsuri.choresclient.data.ViewError
-import com.ramitsuri.choresclient.model.DebugButtonAction
-import com.ramitsuri.choresclient.model.LoginDebugViewState
-import com.ramitsuri.choresclient.model.LoginViewState
+import com.ramitsuri.choresclient.android.utils.autofill
+import com.ramitsuri.choresclient.model.error.EditTaskError
+import com.ramitsuri.choresclient.model.error.Error
+import com.ramitsuri.choresclient.model.error.PushTokenError
+import com.ramitsuri.choresclient.model.view.DebugButtonAction
+import com.ramitsuri.choresclient.model.view.LoginDebugViewState
+import com.ramitsuri.choresclient.model.view.LoginViewState
 import kotlinx.coroutines.delay
 
 @Composable
@@ -73,56 +84,68 @@ fun LoginScreen(
     onResetServer: () -> Unit,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
 ) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(MaterialTheme.dimens.medium),
-        verticalArrangement = Arrangement.Center
-    ) {
-        if (state.loading) {
-            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-        } else {
-            LoginContent(
-                id = state.id,
-                key = state.key,
-                enableLogin = state.allowLogin,
-                onIdEntered = onIdEntered,
-                onKeyEntered = onKeyEntered,
-                onLoginClick = onLoginClick
-            )
-            val debugViewState = state.loginDebugViewState
-            if (debugViewState != null) {
-                DebugContent(
-                    viewState = debugViewState,
-                    onServerUrlEntered = onServerEntered,
-                    onSetServerRequested = onServerSet,
-                    onResetServerRequested = onResetServer,
-                    modifier = Modifier.fillMaxWidth()
+    Surface {
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(MaterialTheme.dimens.medium)
+                .systemBarsPadding(),
+            verticalArrangement = Arrangement.Center
+        ) {
+            if (state.loading) {
+                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+            } else {
+                LoginContent(
+                    id = state.id,
+                    key = state.key,
+                    enableLogin = state.allowLogin,
+                    onIdEntered = onIdEntered,
+                    onKeyEntered = onKeyEntered,
+                    onLoginClick = onLoginClick
                 )
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    Spacer(modifier = Modifier.height(MaterialTheme.dimens.medium))
+                    PermissionsContent()
+                    Spacer(modifier = Modifier.height(MaterialTheme.dimens.medium))
+                }
+                val debugViewState = state.loginDebugViewState
+                if (debugViewState != null) {
+                    DebugContent(
+                        viewState = debugViewState,
+                        onServerUrlEntered = onServerEntered,
+                        onSetServerRequested = onServerSet,
+                        onResetServerRequested = onResetServer,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
             }
-        }
-        state.error?.let { error ->
-            val snackbarText = when (error) {
-                ViewError.NETWORK ->
-                    stringResource(id = R.string.error_network)
+            state.error?.let { error ->
+                val snackbarText = when (error) {
+                    is Error.NoInternet -> stringResource(id = R.string.error_network)
+                    is PushTokenError.NoDeviceId,
+                    is PushTokenError.NoToken,
+                    is PushTokenError.NotLoggedIn,
+                    is Error.Server,
+                    is Error.Unknown -> {
+                        stringResource(id = R.string.error_unknown)
+                    }
 
-                ViewError.LOGIN_REQUEST_FAILED ->
-                    stringResource(id = R.string.error_login_failed)
+                    EditTaskError.TaskNotFound -> {
+                        // Not possible here
+                        return@let
+                    }
 
-                ViewError.LOGIN_NO_TOKEN ->
-                    stringResource(id = R.string.error_no_token)
-
-                else ->
-                    stringResource(id = R.string.error_unknown)
-            }
-            LaunchedEffect(error, snackbarText) {
-                snackbarHostState.showSnackbar(snackbarText)
-                onErrorAcknowledged()
+                }
+                LaunchedEffect(error, snackbarText) {
+                    snackbarHostState.showSnackbar(snackbarText)
+                    onErrorAcknowledged()
+                }
             }
         }
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun LoginContent(
     id: String,
@@ -159,6 +182,10 @@ private fun LoginContent(
         modifier = Modifier
             .fillMaxWidth()
             .focusRequester(focusRequester = focusRequester)
+            .autofill(
+                autofillTypes = listOf(AutofillType.Username),
+                onFill = onIdEntered
+            )
     )
     Spacer(modifier = Modifier.height(MaterialTheme.dimens.medium))
     OutlinedTextField(
@@ -181,7 +208,12 @@ private fun LoginContent(
             keyboardType = KeyboardType.Password,
             imeAction = ImeAction.Done
         ),
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .autofill(
+                autofillTypes = listOf(AutofillType.Password),
+                onFill = onKeyEntered
+            ),
         trailingIcon = {
             val icon = if (showPassword) {
                 Icons.Default.VisibilityOff
@@ -206,6 +238,28 @@ private fun LoginContent(
             .fillMaxWidth()
     ) {
         Text(stringResource(id = R.string.login_button_login))
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
+@Composable
+fun PermissionsContent(modifier: Modifier = Modifier) {
+    val permissionRequest = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = { },
+    )
+
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        TextButton(onClick = {
+            permissionRequest.launch(
+                Manifest.permission.POST_NOTIFICATIONS,
+            )
+        }) {
+            Text(text = stringResource(R.string.login_grant_permissions))
+        }
     }
 }
 
@@ -363,6 +417,29 @@ private fun LoadingPreview() {
 @Preview
 @Composable
 private fun EmptyFieldsPreview() {
+    ChoresClientTheme {
+        Surface {
+            LoginScreen(
+                state = LoginViewState(
+                    loading = false,
+                    id = "",
+                    key = "",
+                ),
+                onIdEntered = { },
+                onKeyEntered = { },
+                onLoginClick = { },
+                onErrorAcknowledged = { },
+                onServerEntered = {},
+                onServerSet = { },
+                onResetServer = { }
+            )
+        }
+    }
+}
+
+@Preview(apiLevel = Build.VERSION_CODES.TIRAMISU)
+@Composable
+private fun EmptyFieldsPreviewApi33() {
     ChoresClientTheme {
         Surface {
             LoginScreen(

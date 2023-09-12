@@ -1,14 +1,17 @@
 package com.ramitsuri.choresclient.utils
 
-import com.ramitsuri.choresclient.model.TextValue
+import com.ramitsuri.choresclient.model.view.TextValue
 import com.ramitsuri.choresclient.resources.LocalizedString
 import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
+@Suppress("JoinDeclarationAndAssignment")
 class DateTimeKtTest {
 
     private val timeZone = TimeZone.of("America/New_York")
@@ -89,13 +92,43 @@ class DateTimeKtTest {
     }
 
     @Test
+    fun testFormatDate() {
+        val timeZone = TimeZone.of("America/New_York")
+        val now = Instant.fromEpochMilliseconds(1660125600000L) // 2022-08-10, 6AM NYC
+
+        var date = LocalDate.parse("2022-08-10") // 2022-08-10 NYC
+        assertEquals("Wed, Aug 10", formatDate(date, now, timeZone))
+
+        date = LocalDate.parse("2021-08-10") // 2021-08-10 NYC
+        assertEquals("Tue, Aug 10, 2021", formatDate(date, now, timeZone))
+    }
+
+    @Test
+    fun testFormatTime() {
+        val timeZone = TimeZone.of("America/New_York")
+        val now = Instant.fromEpochMilliseconds(1660125600000L) // 2022-08-10, 6AM NYC
+
+        var time = LocalTime.parse("16:00:00") // 4PM
+        assertEquals("4 PM", formatTime(time, now, timeZone))
+
+        time = LocalTime.parse("16:30:00") // 4:30PM
+        assertEquals("4:30 PM", formatTime(time, now, timeZone))
+
+        time = LocalTime.parse("06:00:00") // 6AM
+        assertEquals("6 AM", formatTime(time, now, timeZone))
+
+        time = LocalTime.parse("06:01:00") // 6:01AM
+        assertEquals("6:01 AM", formatTime(time, now, timeZone))
+    }
+
+    @Test
     fun testGetDay() {
         val timeZone = TimeZone.of("America/New_York")
         val now = LocalDateTime.parse("2022-11-25T11:00:00").toInstant(timeZone)
 
         val assertLocalized: (LocalizedString, LocalDateTime) -> Unit = { key, inputDateTime ->
-                assertEquals(TextValue.ForKey(key), getDay(inputDateTime, now, timeZone))
-            }
+            assertEquals(TextValue.ForKey(key), getDay(inputDateTime, now, timeZone))
+        }
         val assertString: (String, LocalDateTime) -> Unit = { string, inputDateTime ->
             assertEquals(TextValue.ForString(string), getDay(inputDateTime, now, timeZone))
         }
@@ -159,5 +192,41 @@ class DateTimeKtTest {
 
         toFormat = LocalDateTime.parse("2023-11-27T23:59:59")
         assertString("Nov 27, 2023", toFormat)
+    }
+
+    @Test
+    fun testCompareDay() {
+        val now = LocalDateTime.parse("2022-11-25T11:00:00")
+        var toCompare: LocalDateTime
+
+        toCompare = LocalDateTime.parse("2022-11-25T11:00:00")
+        assertEquals(0, differenceInDays(toCompare, now))
+
+        toCompare = LocalDateTime.parse("2022-11-25T00:00:00")
+        assertEquals(0, differenceInDays(toCompare, now))
+
+        toCompare = LocalDateTime.parse("2022-11-25T23:59:59")
+        assertEquals(0, differenceInDays(toCompare, now))
+
+        toCompare = LocalDateTime.parse("2022-11-24T11:00:00")
+        assertEquals(-1, differenceInDays(toCompare, now))
+
+        toCompare = LocalDateTime.parse("2022-11-24T00:00:00")
+        assertEquals(-1, differenceInDays(toCompare, now))
+
+        toCompare = LocalDateTime.parse("2022-11-24T23:59:59")
+        assertEquals(-1, differenceInDays(toCompare, now))
+
+        toCompare = LocalDateTime.parse("2022-11-26T11:00:00")
+        assertEquals(1, differenceInDays(toCompare, now))
+
+        toCompare = LocalDateTime.parse("2022-11-26T00:00:00")
+        assertEquals(1, differenceInDays(toCompare, now))
+
+        toCompare = LocalDateTime.parse("2022-11-26T23:59:59")
+        assertEquals(1, differenceInDays(toCompare, now))
+
+        toCompare = LocalDateTime.parse("2022-11-28T23:59:59")
+        assertEquals(3, differenceInDays(toCompare, now))
     }
 }

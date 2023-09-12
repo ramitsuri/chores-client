@@ -3,6 +3,11 @@ package com.ramitsuri.choresclient.network
 import co.touchlab.kermit.StaticConfig
 import co.touchlab.kermit.platformLogWriter
 import com.ramitsuri.choresclient.data.settings.PrefManager
+import com.ramitsuri.choresclient.network.api.LoginApi
+import com.ramitsuri.choresclient.network.api.PushMessageTokenApi
+import com.ramitsuri.choresclient.network.api.SyncApi
+import com.ramitsuri.choresclient.network.api.TaskAssignmentsApi
+import com.ramitsuri.choresclient.network.api.TasksApi
 import com.ramitsuri.choresclient.repositories.LoginRepository
 import com.ramitsuri.choresclient.utils.Base
 import com.ramitsuri.choresclient.utils.DispatcherProvider
@@ -31,7 +36,7 @@ class NetworkProvider(
     private val prefManager: PrefManager,
     private val isDebug: Boolean,
     clientEngine: HttpClientEngine,
-    dispatcherProvider: DispatcherProvider
+    private val dispatcherProvider: DispatcherProvider
 ) {
 
     private val log: KermitLogger = KermitLogger(
@@ -78,8 +83,8 @@ class NetworkProvider(
                 refreshTokens {
                     log.d("Token expired, refreshing")
                     val api = provideLoginApi(tokenClient)
-                    val repo = provideLoginRepository(api, prefManager, dispatcherProvider)
-                    repo.login(prefManager.getUserId() ?: "", prefManager.getKey() ?: "")
+                    val repo = provideLoginRepository(api, prefManager)
+                    repo.login(prefManager.getLoggedInMemberId() ?: "", prefManager.getKey() ?: "")
                     BearerTokens(
                         accessToken = prefManager.getToken() ?: "",
                         refreshToken = ""
@@ -111,29 +116,27 @@ class NetworkProvider(
     fun provideLoginRepository(
         api: LoginApi = provideLoginApi(client),
         prefManager: PrefManager,
-        dispatcherProvider: DispatcherProvider
     ): LoginRepository {
         return LoginRepository(
             api,
             prefManager,
-            dispatcherProvider
         )
     }
 
     fun provideAssignmentsApi() =
-        TaskAssignmentsApi(client, provideBaseApiUrl())
+        TaskAssignmentsApi(client, provideBaseApiUrl(), dispatcherProvider.io)
 
     fun provideSyncApi() =
-        SyncApi(client, provideBaseApiUrl())
+        SyncApi(client, provideBaseApiUrl(), dispatcherProvider.io)
 
     fun provideTasksApi() =
-        TasksApi(client, provideBaseApiUrl())
+        TasksApi(client, provideBaseApiUrl(), dispatcherProvider.io)
 
     fun providePushMessageTokenApi(httpClient: HttpClient = client) =
-        PushMessageTokenApi(httpClient, provideBaseApiUrl())
+        PushMessageTokenApi(httpClient, provideBaseApiUrl(), dispatcherProvider.io)
 
     private fun provideLoginApi(httpClient: HttpClient = client) =
-        LoginApi(httpClient, provideBaseApiUrl())
+        LoginApi(httpClient, provideBaseApiUrl(), dispatcherProvider.io)
 
     private fun provideBaseApiUrl() =
         if (isDebug) prefManager.getDebugServer() else Base.API_BASE_URL

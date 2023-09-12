@@ -1,37 +1,29 @@
 package com.ramitsuri.choresclient.utils
 
-import com.ramitsuri.choresclient.data.Result
 import com.ramitsuri.choresclient.data.settings.PrefManager
-import com.ramitsuri.choresclient.model.Filter
-import com.ramitsuri.choresclient.model.FilterItem
-import com.ramitsuri.choresclient.model.FilterType
-import com.ramitsuri.choresclient.model.TextValue
+import com.ramitsuri.choresclient.model.filter.Filter
+import com.ramitsuri.choresclient.model.filter.FilterItem
+import com.ramitsuri.choresclient.model.filter.FilterType
 import com.ramitsuri.choresclient.model.filter.HouseFilter
 import com.ramitsuri.choresclient.model.filter.HouseFilterItem
 import com.ramitsuri.choresclient.model.filter.PersonFilter
 import com.ramitsuri.choresclient.model.filter.PersonFilterItem
+import com.ramitsuri.choresclient.model.view.TextValue
 import com.ramitsuri.choresclient.repositories.SyncRepository
-import com.ramitsuri.choresclient.repositories.TaskAssignmentsRepository
 import com.ramitsuri.choresclient.resources.LocalizedString
 
 class FilterHelper(
-    private val taskAssignmentsRepository: TaskAssignmentsRepository,
     private val syncRepository: SyncRepository,
     private val prefManager: PrefManager
 ) {
-    suspend fun get(): List<Filter> {
-        // Always use all existing assignments to create filters
-        val assignments = (taskAssignmentsRepository.getLocal(listOf()) as Result.Success).data
-        val houses = syncRepository.getLocal()
+    suspend fun getBaseFilters(): List<Filter> {
+        val houses = syncRepository.getHouses()
+        val members = syncRepository.getMembers()
         val filters = mutableListOf<Filter>()
 
         // Person filter
         val savedPersonFilterIds = prefManager.getSavedPersonFilterIds()
-        val personFilterItems = assignments
-            .map { // Get members for assignments
-                it.member
-            }
-            .distinct() // Remove duplicates
+        val personFilterItems = members
             .map { member -> // Create person filter items
                 PersonFilterItem(
                     id = member.id,
@@ -54,15 +46,7 @@ class FilterHelper(
 
         // House filter
         val savedHouseFilterIds = prefManager.getSavedHouseFilterIds()
-        val houseFilterItems = assignments.asSequence().map {
-            it.task.houseId
-        }
-            .distinct()
-            .mapNotNull { houseId ->
-                houses.find { house ->
-                    house.id == houseId
-                }
-            }
+        val houseFilterItems = houses
             .map { house ->
                 HouseFilterItem(
                     id = house.id,
@@ -83,10 +67,10 @@ class FilterHelper(
             filters.add(HouseFilter(text = text, houseFilterItems))
         }
 
-        return filters
+        return filters.sortedBy { it.getType().index }
     }
 
-    fun onFilterItemSelected(filter: Filter, filterItem: FilterItem): Filter {
+    fun onFilterItemClicked(filter: Filter, filterItem: FilterItem): Filter {
         val items: List<FilterItem>
         val text: TextValue
         val unselectedText = getUnselectedText(filter.getType())
@@ -184,6 +168,7 @@ class FilterHelper(
             FilterType.PERSON -> {
                 PersonFilter(text, items.map { it as PersonFilterItem })
             }
+
             FilterType.HOUSE -> {
                 HouseFilter(text, items.map { it as HouseFilterItem })
             }
@@ -198,10 +183,12 @@ class FilterHelper(
             0 -> {
                 TextValue.ForKey(unselectedText)
             }
+
             1 -> {
                 items.find { it.getIsSelected() }
                     ?.getDisplayName() ?: TextValue.ForString("")
             }
+
             else -> {
                 val firstSelectionText =
                     items.firstOrNull() { it.getIsSelected() }?.getDisplayName()
@@ -216,6 +203,7 @@ class FilterHelper(
             FilterType.PERSON -> {
                 LocalizedString.PERSON_FILTER
             }
+
             FilterType.HOUSE -> {
                 LocalizedString.HOUSE_FILTER
             }

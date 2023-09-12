@@ -12,7 +12,7 @@ data class Dimens(
     val extraLarge: Dp = 32.dp,
     val paddingCardView: Dp = 12.dp,
     val minBottomSheetHeight: Dp = 264.dp,
-    val iconWidth: Dp = 48.dp,
-    val assignmentHeaderCornerRadius: Dp = 24.dp,
+    val iconWidthSmall: Dp = 16.dp,
+    val iconWidthLarge: Dp = 48.dp,
     val minAssignmentItemHeight: Dp = 64.dp,
 )

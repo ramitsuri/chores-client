@@ -1,17 +1,17 @@
 package com.ramitsuri.choresclient.viewmodel
 
-import com.ramitsuri.choresclient.data.Result
 import com.ramitsuri.choresclient.data.settings.PrefManager
-import com.ramitsuri.choresclient.model.Filter
-import com.ramitsuri.choresclient.model.FilterItem
-import com.ramitsuri.choresclient.model.FilterType
-import com.ramitsuri.choresclient.model.NotificationActionWrapper
-import com.ramitsuri.choresclient.model.NotificationActionsViewState
-import com.ramitsuri.choresclient.model.SettingsViewState
-import com.ramitsuri.choresclient.model.SyncViewState
-import com.ramitsuri.choresclient.model.TextValue
-import com.ramitsuri.choresclient.repositories.SyncRepository
+import com.ramitsuri.choresclient.model.filter.Filter
+import com.ramitsuri.choresclient.model.filter.FilterItem
+import com.ramitsuri.choresclient.model.filter.FilterType
+import com.ramitsuri.choresclient.model.view.FilterViewState
+import com.ramitsuri.choresclient.model.view.NotificationActionWrapper
+import com.ramitsuri.choresclient.model.view.NotificationActionsViewState
+import com.ramitsuri.choresclient.model.view.SettingsViewState
+import com.ramitsuri.choresclient.model.view.SyncViewState
+import com.ramitsuri.choresclient.model.view.TextValue
 import com.ramitsuri.choresclient.resources.LocalizedString
+import com.ramitsuri.choresclient.utils.ContentDownloadRequestHandler
 import com.ramitsuri.choresclient.utils.DispatcherProvider
 import com.ramitsuri.choresclient.utils.FilterHelper
 import com.ramitsuri.choresclient.utils.LogHelper
@@ -23,7 +23,7 @@ import kotlinx.datetime.TimeZone
 import org.koin.core.component.KoinComponent
 
 class SettingsViewModel(
-    private val syncRepository: SyncRepository,
+    private val contentDownloadRequestHandler: ContentDownloadRequestHandler,
     private val filterHelper: FilterHelper,
     private val prefManager: PrefManager,
     private val dispatchers: DispatcherProvider,
@@ -39,7 +39,9 @@ class SettingsViewModel(
                     actions = getNotificationActionList()
                 ),
                 deviceId = prefManager.getDeviceId(),
-                remoteLoggingEnabled = prefManager.getEnableRemoteLogging()
+                remoteLoggingEnabled = prefManager.getEnableRemoteLogging(),
+                remindPastDueEnabled = prefManager.remindPastDue(),
+                useNewStyleEnabled = prefManager.useNewStyle(),
             )
         )
     val state: StateFlow<SettingsViewState> = _state
@@ -53,32 +55,21 @@ class SettingsViewModel(
             it.copy(syncViewState = it.syncViewState.copy(loading = true))
         }
         viewModelScope.launch(dispatchers.io) {
-            when (val syncResult = syncRepository.refresh()) {
-                is Result.Success -> {
-                    _state.update {
-                        it.copy(
-                            syncViewState = it.syncViewState.copy(
-                                loading = false,
-                                lastSyncTime = prefManager.getLastSyncTime()
-                            )
+            contentDownloadRequestHandler.requestImmediateDownload().collect { running ->
+                _state.update {
+                    it.copy(
+                        syncViewState = it.syncViewState.copy(
+                            loading = running,
+                            lastSyncTime = prefManager.getLastSyncTime()
                         )
-                    }
-                }
-
-                is Result.Failure -> {
-                    _state.update {
-                        it.copy(
-                            syncViewState = it.syncViewState.copy(loading = false),
-                            error = syncResult.error
-                        )
-                    }
+                    )
                 }
             }
         }
     }
 
     fun filter(filter: Filter, filterItem: FilterItem) {
-        val newFilter = filterHelper.onFilterItemSelected(filter, filterItem)
+        val newFilter = filterHelper.onFilterItemClicked(filter, filterItem)
         val filters = _state.value.filterViewState.filters.toMutableList()
         filters.removeAll { it.getType() == filter.getType() }
         filters.add(newFilter)
@@ -107,7 +98,7 @@ class SettingsViewModel(
 
     fun resetFilters() {
         viewModelScope.launch {
-            val filters = filterHelper.get()
+            val filters = filterHelper.getBaseFilters()
             _state.update {
                 it.copy(filterViewState = it.filterViewState.copy(filters = filters))
             }
@@ -158,6 +149,22 @@ class SettingsViewModel(
         logger.enableRemoteLogging(enabled)
         _state.update {
             it.copy(remoteLoggingEnabled = enabled)
+        }
+    }
+
+    fun toggleUseNewStyle() {
+        val enabled = !prefManager.useNewStyle()
+        prefManager.setUseNewStyle(enabled)
+        _state.update {
+            it.copy(useNewStyleEnabled = enabled)
+        }
+    }
+
+    fun toggleRemindPastDue() {
+        val enabled = !prefManager.remindPastDue()
+        prefManager.setRemindPastDue(enabled)
+        _state.update {
+            it.copy(remindPastDueEnabled = enabled)
         }
     }
 

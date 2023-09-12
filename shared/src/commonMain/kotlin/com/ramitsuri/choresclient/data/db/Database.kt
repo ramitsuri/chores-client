@@ -1,14 +1,14 @@
 package com.ramitsuri.choresclient.data.db
 
-import com.ramitsuri.choresclient.data.ActiveStatus
-import com.ramitsuri.choresclient.data.CreateType
-import com.ramitsuri.choresclient.data.ProgressStatus
-import com.ramitsuri.choresclient.data.RepeatUnit
-import com.ramitsuri.choresclient.data.entities.AlarmDao
-import com.ramitsuri.choresclient.data.entities.HouseDao
-import com.ramitsuri.choresclient.data.entities.MemberDao
-import com.ramitsuri.choresclient.data.entities.TaskAssignmentDao
-import com.ramitsuri.choresclient.data.entities.TaskDao
+import com.ramitsuri.choresclient.model.enums.ActiveStatus
+import com.ramitsuri.choresclient.model.enums.CreateType
+import com.ramitsuri.choresclient.model.enums.ProgressStatus
+import com.ramitsuri.choresclient.model.enums.RepeatUnit
+import com.ramitsuri.choresclient.data.db.dao.AlarmDao
+import com.ramitsuri.choresclient.data.db.dao.HouseDao
+import com.ramitsuri.choresclient.data.db.dao.MemberDao
+import com.ramitsuri.choresclient.data.db.dao.TaskAssignmentDao
+import com.ramitsuri.choresclient.data.db.dao.TaskDao
 import com.ramitsuri.choresclient.db.AlarmEntity
 import com.ramitsuri.choresclient.db.ChoresDatabase
 import com.ramitsuri.choresclient.db.HouseEntity
@@ -18,6 +18,7 @@ import com.ramitsuri.choresclient.db.TaskEntity
 import com.ramitsuri.choresclient.utils.DispatcherProvider
 import app.cash.sqldelight.ColumnAdapter
 import app.cash.sqldelight.db.SqlDriver
+import com.ramitsuri.choresclient.data.db.dao.MemberHouseAssociationDao
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 
@@ -37,12 +38,10 @@ class Database(
         AlarmEntityAdapter = AlarmEntity.Adapter(
             showAtTimeAdapter = localDateTimeConverter
         ),
-        MemberEntityAdapter = MemberEntity.Adapter(
-            createdDateAdapter = instantConverter
-        ),
         TaskEntityAdapter = TaskEntity.Adapter(
             dueDateTimeAdapter = localDateTimeConverter,
             repeatUnitAdapter = repeatUnitConverter,
+            repeatEndDateTimeAdapter = localDateTimeConverter,
             createdDateAdapter = instantConverter,
             statusAdapter = statusConverter
         ),
@@ -57,6 +56,7 @@ class Database(
     val memberDao = MemberDao(dbQuery, dispatcherProvider)
     val alarmDao = AlarmDao(dbQuery, dispatcherProvider)
     val houseDao = HouseDao(dbQuery, dispatcherProvider)
+    val memberHouseAssociationDao = MemberHouseAssociationDao(dbQuery, dispatcherProvider)
 }
 
 private val progressStatusConverter = object : ColumnAdapter<ProgressStatus, Long> {

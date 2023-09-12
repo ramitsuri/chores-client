@@ -1,8 +1,8 @@
 package com.ramitsuri.choresclient.android.ui.preview
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
-import com.ramitsuri.choresclient.model.Filter
-import com.ramitsuri.choresclient.model.TextValue
+import com.ramitsuri.choresclient.model.filter.Filter
+import com.ramitsuri.choresclient.model.view.TextValue
 import com.ramitsuri.choresclient.model.filter.HouseFilter
 import com.ramitsuri.choresclient.model.filter.HouseFilterItem
 import com.ramitsuri.choresclient.model.filter.PersonFilter

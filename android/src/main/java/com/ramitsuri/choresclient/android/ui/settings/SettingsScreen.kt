@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.displayCutoutPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -52,15 +53,17 @@ import com.ramitsuri.choresclient.android.extensions.string
 import com.ramitsuri.choresclient.android.ui.preview.FilterPreview
 import com.ramitsuri.choresclient.android.ui.theme.ChoresClientTheme
 import com.ramitsuri.choresclient.android.ui.theme.dimens
-import com.ramitsuri.choresclient.data.ViewError
-import com.ramitsuri.choresclient.model.Filter
-import com.ramitsuri.choresclient.model.FilterItem
-import com.ramitsuri.choresclient.model.FilterType
-import com.ramitsuri.choresclient.model.FilterViewState
-import com.ramitsuri.choresclient.model.NotificationActionWrapper
-import com.ramitsuri.choresclient.model.NotificationActionsViewState
-import com.ramitsuri.choresclient.model.SettingsViewState
-import com.ramitsuri.choresclient.model.SyncViewState
+import com.ramitsuri.choresclient.model.error.EditTaskError
+import com.ramitsuri.choresclient.model.error.Error
+import com.ramitsuri.choresclient.model.error.PushTokenError
+import com.ramitsuri.choresclient.model.filter.Filter
+import com.ramitsuri.choresclient.model.filter.FilterItem
+import com.ramitsuri.choresclient.model.filter.FilterType
+import com.ramitsuri.choresclient.model.view.FilterViewState
+import com.ramitsuri.choresclient.model.view.NotificationActionWrapper
+import com.ramitsuri.choresclient.model.view.NotificationActionsViewState
+import com.ramitsuri.choresclient.model.view.SettingsViewState
+import com.ramitsuri.choresclient.model.view.SyncViewState
 import com.ramitsuri.choresclient.utils.formatSyncTime
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
@@ -80,88 +83,123 @@ fun SettingsScreen(
     onNotificationActionsSaveRequested: () -> Unit,
     onNotificationActionsResetRequested: () -> Unit,
     onEnableRemoteLoggingClicked: () -> Unit,
+    onEnableNewStyleClicked: () -> Unit,
+    onEnableRemindPastDueClicked: () -> Unit,
     onErrorAcknowledged: () -> Unit,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
 ) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(MaterialTheme.dimens.medium)
-    ) {
-        IconButton(
-            onClick = onBack
+    Surface {
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .systemBarsPadding()
+                .displayCutoutPadding(),
         ) {
-            Icon(
-                Icons.Filled.ArrowBack,
-                contentDescription = stringResource(id = R.string.back)
-            )
-        }
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(MaterialTheme.dimens.medium)
-        ) {
-            item {
-                SyncItem(
-                    onClick = onSyncClicked,
-                    syncViewState = state.syncViewState,
-                    timeZone = state.timeZone,
+            IconButton(
+                onClick = onBack
+            ) {
+                Icon(
+                    Icons.Filled.ArrowBack,
+                    contentDescription = stringResource(id = R.string.back)
                 )
             }
-            item {
-                FilterItem(
-                    filterViewState = state.filterViewState,
-                    onFilterSelected = onFilterSelected,
-                    onFilterSaveRequested = onFilterSaveRequested,
-                    onFilterResetRequested = onFilterResetRequested,
-                )
-            }
-            item {
-                NotificationActionItem(
-                    viewState = state.notificationActionsViewState,
-                    onItemClick = onNotificationActionSelected,
-                    onSaveNotificationActionsRequested = onNotificationActionsSaveRequested,
-                    onResetNotificationActionsRequested = onNotificationActionsResetRequested,
-                )
-            }
-            item {
-                SettingsItemWithSwitch(
-                    title = stringResource(id = R.string.settings_remote_logging_title),
-                    subtitle = if (state.remoteLoggingEnabled) {
-                        stringResource(id = R.string.settings_remote_logging_subtitle_enabled)
-                    } else {
-                        stringResource(id = R.string.settings_remote_logging_subtitle_disabled)
-                    },
-                    checked = state.remoteLoggingEnabled,
-                    onClick = onEnableRemoteLoggingClicked
-                )
-            }
-            val deviceId = state.deviceId
-            if (deviceId != null) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(MaterialTheme.dimens.medium)
+            ) {
                 item {
-                    SettingsItem(
-                        title = stringResource(id = R.string.settings_device_id_title),
-                        subtitle = deviceId,
-                        onClick = { },
-                        showProgress = false
+                    SyncItem(
+                        onClick = onSyncClicked,
+                        syncViewState = state.syncViewState,
+                        timeZone = state.timeZone,
                     )
                 }
-            }
-        }
-
-        state.error?.let { error ->
-            val snackbarText = when (error) {
-                ViewError.NETWORK -> {
-                    stringResource(id = R.string.error_network)
+                item {
+                    SettingsItemWithSwitch(
+                        title = stringResource(id = R.string.settings_new_style_title),
+                        subtitle = if (state.useNewStyleEnabled) {
+                            stringResource(id = R.string.settings_new_style_subtitle_enabled)
+                        } else {
+                            stringResource(id = R.string.settings_new_style_subtitle_disabled)
+                        },
+                        checked = state.useNewStyleEnabled,
+                        onClick = onEnableNewStyleClicked
+                    )
                 }
-
-                else -> {
-                    stringResource(id = R.string.error_unknown)
+                item {
+                    SettingsItemWithSwitch(
+                        title = stringResource(id = R.string.settings_remind_past_due_title),
+                        subtitle = if (state.remindPastDueEnabled) {
+                            stringResource(id = R.string.settings_remind_past_due_subtitle_enabled)
+                        } else {
+                            stringResource(id = R.string.settings_remind_past_due_subtitle_disabled)
+                        },
+                        checked = state.remindPastDueEnabled,
+                        onClick = onEnableRemindPastDueClicked
+                    )
+                }
+                item {
+                    FilterItem(
+                        filterViewState = state.filterViewState,
+                        onFilterSelected = onFilterSelected,
+                        onFilterSaveRequested = onFilterSaveRequested,
+                        onFilterResetRequested = onFilterResetRequested,
+                    )
+                }
+                item {
+                    NotificationActionItem(
+                        viewState = state.notificationActionsViewState,
+                        onItemClick = onNotificationActionSelected,
+                        onSaveNotificationActionsRequested = onNotificationActionsSaveRequested,
+                        onResetNotificationActionsRequested = onNotificationActionsResetRequested,
+                    )
+                }
+                item {
+                    SettingsItemWithSwitch(
+                        title = stringResource(id = R.string.settings_remote_logging_title),
+                        subtitle = if (state.remoteLoggingEnabled) {
+                            stringResource(id = R.string.settings_remote_logging_subtitle_enabled)
+                        } else {
+                            stringResource(id = R.string.settings_remote_logging_subtitle_disabled)
+                        },
+                        checked = state.remoteLoggingEnabled,
+                        onClick = onEnableRemoteLoggingClicked
+                    )
+                }
+                val deviceId = state.deviceId
+                if (deviceId != null) {
+                    item {
+                        SettingsItem(
+                            title = stringResource(id = R.string.settings_device_id_title),
+                            subtitle = deviceId,
+                            onClick = { },
+                            showProgress = false
+                        )
+                    }
                 }
             }
-            LaunchedEffect(error, snackbarText) {
-                snackbarHostState.showSnackbar(snackbarText)
-                onErrorAcknowledged()
+
+            state.error?.let { error ->
+                val snackbarText = when (error) {
+                    is Error.NoInternet -> stringResource(id = R.string.error_network)
+                    is PushTokenError.NoDeviceId,
+                    is PushTokenError.NoToken,
+                    is PushTokenError.NotLoggedIn,
+                    is Error.Server,
+                    is Error.Unknown -> {
+                        stringResource(id = R.string.error_unknown)
+                    }
+
+                    EditTaskError.TaskNotFound -> {
+                        // Not possible here
+                        return@let
+                    }
+                }
+                LaunchedEffect(error, snackbarText) {
+                    snackbarHostState.showSnackbar(snackbarText)
+                    onErrorAcknowledged()
+                }
             }
         }
     }
@@ -605,9 +643,10 @@ private fun SettingsScreenPreview(
                 ),
                 deviceId = null,
                 remoteLoggingEnabled = false,
+                useNewStyleEnabled = false,
+                remindPastDueEnabled = false,
                 timeZone = TimeZone.currentSystemDefault(),
                 error = null
-
             )
             SettingsScreen(
                 state = state,
@@ -621,6 +660,8 @@ private fun SettingsScreenPreview(
                 onNotificationActionsResetRequested = {},
                 onEnableRemoteLoggingClicked = {},
                 onErrorAcknowledged = {},
+                onEnableNewStyleClicked = {},
+                onEnableRemindPastDueClicked = {},
             )
         }
     }

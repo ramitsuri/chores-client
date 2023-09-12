@@ -3,10 +3,8 @@ package com.ramitsuri.choresclient.android
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -16,12 +14,20 @@ import androidx.navigation.navArgument
 import com.ramitsuri.choresclient.android.ui.assigments.AssignmentsScreen
 import com.ramitsuri.choresclient.android.ui.login.LoginScreen
 import com.ramitsuri.choresclient.android.ui.settings.SettingsScreen
-import com.ramitsuri.choresclient.android.ui.task.AddEditTasksScreen
+import com.ramitsuri.choresclient.android.ui.task.AddTaskScreen
+import com.ramitsuri.choresclient.android.ui.task.EditTaskScreen
+import com.ramitsuri.choresclient.viewmodel.AddTaskViewModel
+import com.ramitsuri.choresclient.viewmodel.AssignmentsViewModel
+import com.ramitsuri.choresclient.viewmodel.EditTaskViewModel
 import com.ramitsuri.choresclient.viewmodel.LoginViewModel
 import com.ramitsuri.choresclient.viewmodel.SettingsViewModel
 import org.koin.androidx.compose.koinViewModel
 
-private object Screens {
+private object Args {
+    const val TASK_ID = "taskId"
+}
+
+object Destinations {
     const val LOGIN = "login"
     const val ASSIGNMENTS = "assignments"
     const val SETTINGS = "settings"
@@ -29,78 +35,31 @@ private object Screens {
     const val EDIT_TASK = "edit_task"
 }
 
-object Destinations {
-    const val LOGIN_ROUTE = Screens.LOGIN
-    const val ASSIGNMENTS_ROUTE = Screens.ASSIGNMENTS
-    const val SETTINGS_ROUTE = Screens.SETTINGS
-    const val ADD_TASK_ROUTE = Screens.ADD_TASK
-    const val EDIT_TASK_ROUTE = Screens.EDIT_TASK
-}
-
-class NavigationActions(private val navController: NavHostController) {
-    fun navigateToAssignments(shouldRefreshFilter: Boolean) {
-        navController.navigate("${Destinations.ASSIGNMENTS_ROUTE}/$shouldRefreshFilter") {
-            popUpTo(navController.graph.findStartDestination().id) {
-                saveState = true
-            }
-            launchSingleTop = true
-            restoreState = true
-        }
-    }
-
-    fun navigateToSettings() {
-        navController.navigate(Destinations.SETTINGS_ROUTE) {
-            popUpTo(navController.graph.findStartDestination().id) {
-                saveState = true
-            }
-            launchSingleTop = true
-            restoreState = true
-        }
-    }
-
-    fun navigateToAddTask() {
-        navController.navigate(Destinations.ADD_TASK_ROUTE) {
-            popUpTo(navController.graph.findStartDestination().id) {
-                saveState = true
-            }
-            launchSingleTop = true
-            restoreState = true
-        }
-    }
-
-    fun navigateToEditTask(taskId: String) {
-        navController.navigate("${Destinations.EDIT_TASK_ROUTE}/$taskId") {
-            popUpTo(navController.graph.findStartDestination().id) {
-                saveState = true
-            }
-            launchSingleTop = true
-            restoreState = false
-        }
-    }
-}
-
 @Composable
 fun NavGraph(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
-    startDestination: String = Destinations.LOGIN_ROUTE,
-    navActions: NavigationActions = remember(navController) {
-        NavigationActions(navController)
-    }
+    startDestination: String = Destinations.LOGIN,
 ) {
     NavHost(
         navController = navController,
         startDestination = startDestination,
         modifier = modifier
     ) {
-        composable(Destinations.LOGIN_ROUTE) {
+        composable(Destinations.LOGIN) {
             val viewModel = koinViewModel<LoginViewModel>()
-            val state by viewModel.state.collectAsStateWithLifecycle()
-            LaunchedEffect(state) {
-                if (state.isLoggedIn) {
-                    navActions.navigateToAssignments(shouldRefreshFilter = true)
+            val isLoggedIn by viewModel.isLoggedIn.collectAsStateWithLifecycle()
+            LaunchedEffect(isLoggedIn) {
+                if (isLoggedIn) {
+                    navController.navigate(Destinations.ASSIGNMENTS) {
+                        popUpTo(Destinations.LOGIN) {
+                            inclusive = true
+                        }
+                    }
                 }
             }
+
+            val state by viewModel.state.collectAsStateWithLifecycle()
             LoginScreen(
                 state = state,
                 onIdEntered = viewModel::onIdUpdated,
@@ -112,22 +71,30 @@ fun NavGraph(
                 onResetServer = viewModel::resetDebugServer
             )
         }
-        composable(
-            "${Destinations.ASSIGNMENTS_ROUTE}/{refreshFilter}",
-            arguments = listOf(navArgument("refreshFilter") { type = NavType.BoolType })
-        ) { backStackEntry ->
-            val shouldRefreshFilter = backStackEntry.arguments?.getBoolean("refreshFilter") ?: false
+
+        composable(Destinations.ASSIGNMENTS) {
+            val viewModel = koinViewModel<AssignmentsViewModel>()
+            val state by viewModel.state.collectAsStateWithLifecycle()
             AssignmentsScreen(
-                shouldRefreshFilter,
-                onSettingsClicked = { navActions.navigateToSettings() },
-                onAddTaskClicked = { navActions.navigateToAddTask() },
-                onEditTaskClicked = { navActions.navigateToEditTask(it) })
+                onSettingsClicked = { navController.navigate(Destinations.SETTINGS) },
+                onAddTaskClicked = { navController.navigate(Destinations.ADD_TASK) },
+                onEditTaskClicked = {
+                    navController.navigate("${Destinations.EDIT_TASK}/$it")
+                },
+                viewState = state,
+                onMarkAsDone = viewModel::markAsDone,
+                onMarkAsWontDo = viewModel::markAsWontDo,
+                onSnoozeHour = viewModel::onSnoozeHour,
+                onSnoozeDay = viewModel::onSnoozeDay,
+                onFilterItemClicked = viewModel::onFilterItemClicked
+            )
         }
-        composable(Destinations.SETTINGS_ROUTE) {
+
+        composable(Destinations.SETTINGS) {
             val viewModel = koinViewModel<SettingsViewModel>()
             val state by viewModel.state.collectAsStateWithLifecycle()
             SettingsScreen(
-                onBack = { navActions.navigateToAssignments(shouldRefreshFilter = true) },
+                onBack = { navController.navigateUp() },
                 state = state,
                 onSyncClicked = viewModel::syncRequested,
                 onFilterSelected = viewModel::filter,
@@ -138,22 +105,72 @@ fun NavGraph(
                 onNotificationActionsResetRequested = viewModel::resetNotificationActions,
                 onEnableRemoteLoggingClicked = viewModel::toggleLogging,
                 onErrorAcknowledged = viewModel::onErrorShown,
+                onEnableNewStyleClicked = viewModel::toggleUseNewStyle,
+                onEnableRemindPastDueClicked = viewModel::toggleRemindPastDue,
             )
         }
-        composable(
-            Destinations.ADD_TASK_ROUTE
-        ) {
-            AddEditTasksScreen(
-                taskId = null,
-                onBack = { navActions.navigateToAssignments(shouldRefreshFilter = false) })
+
+        composable(Destinations.ADD_TASK) {
+            val viewModel = koinViewModel<AddTaskViewModel>()
+
+            val taskAdded by viewModel.taskAdded.collectAsStateWithLifecycle()
+            LaunchedEffect(taskAdded) {
+                if (taskAdded) {
+                    navController.navigateUp()
+                }
+            }
+
+            val state by viewModel.state.collectAsStateWithLifecycle()
+            AddTaskScreen(
+                onBack = { navController.navigateUp() },
+                viewState = state,
+                onTaskNameUpdate = viewModel::onTaskNameUpdated,
+                onHouseItemSelected = { viewModel.onHouseSelected(it.getId()) },
+                onMemberItemSelected = { viewModel.onMemberSelected(it.getId()) },
+                onDatePicked = viewModel::onDatePicked,
+                onTimePicked = viewModel::onTimePicked,
+                onRepeatValueUpdated = viewModel::onRepeatValueUpdated,
+                onRepeatUnitSelected = { viewModel.onRepeatUnitSelected(it.getId()) },
+                onRotateMemberClicked = viewModel::onRotateMemberUpdated,
+                onRepeatEndDatePicked = viewModel::onRepeatEndDatePicked,
+                onResetRepeatInfo = viewModel::onResetRepeatInfo,
+                onAddTaskRequested = viewModel::addTaskRequested
+            )
         }
+
         composable(
-            "${Destinations.EDIT_TASK_ROUTE}/{taskId}",
-            arguments = listOf(navArgument("taskId") { type = NavType.StringType })
+            "${Destinations.EDIT_TASK}/{${Args.TASK_ID}}",
+            arguments = listOf(navArgument(Args.TASK_ID) { type = NavType.StringType })
         ) { backStackEntry ->
-            AddEditTasksScreen(
-                taskId = backStackEntry.arguments?.getString("taskId"),
-                onBack = { navActions.navigateToAssignments(shouldRefreshFilter = false) })
+            val viewModel = koinViewModel<EditTaskViewModel>()
+            val taskId = backStackEntry.arguments?.getString(Args.TASK_ID)
+            LaunchedEffect(taskId) {
+                if (taskId != null) {
+                    viewModel.setTaskId(taskId)
+                }
+            }
+
+            val taskEdited by viewModel.taskEdited.collectAsStateWithLifecycle()
+            LaunchedEffect(taskEdited) {
+                if (taskEdited) {
+                    navController.navigateUp()
+                }
+            }
+
+            val state by viewModel.state.collectAsStateWithLifecycle()
+            EditTaskScreen(
+                onBack = { navController.navigateUp() },
+                viewState = state,
+                onTaskNameUpdate = viewModel::onTaskNameUpdated,
+                onDatePicked = viewModel::onDatePicked,
+                onTimePicked = viewModel::onTimePicked,
+                onRepeatValueUpdated = viewModel::onRepeatValueUpdated,
+                onRepeatUnitSelected = { viewModel.onRepeatUnitSelected(it.getId()) },
+                onRotateMemberClicked = viewModel::onRotateMemberUpdated,
+                onRepeatEndDatePicked = viewModel::onRepeatEndDatePicked,
+                onResetRepeatInfo = viewModel::onResetRepeatInfo,
+                onEditTaskRequested = viewModel::editTaskRequested
+            )
         }
     }
 }

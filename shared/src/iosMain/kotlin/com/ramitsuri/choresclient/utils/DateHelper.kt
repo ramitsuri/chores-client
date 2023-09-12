@@ -1,6 +1,6 @@
 package com.ramitsuri.choresclient.utils
 
-import com.ramitsuri.choresclient.model.TextValue
+import com.ramitsuri.choresclient.model.view.TextValue
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone

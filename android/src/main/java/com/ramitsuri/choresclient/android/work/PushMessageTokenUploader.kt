@@ -8,9 +8,13 @@ import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
+import com.ramitsuri.choresclient.model.error.EditTaskError
+import com.ramitsuri.choresclient.model.error.Error
+import com.ramitsuri.choresclient.model.error.PushTokenError
 import com.ramitsuri.choresclient.repositories.PushMessageTokenRepository
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import com.ramitsuri.choresclient.model.Result as InternalResult
 
 class PushMessageTokenUploader(
     context: Context,
@@ -20,21 +24,27 @@ class PushMessageTokenUploader(
     private val repository: PushMessageTokenRepository by inject()
 
     override suspend fun doWork(): Result {
-        when (repository.submitToken()) {
-            PushMessageTokenRepository.Outcome.NOT_LOGGED_IN -> {
-                return Result.failure()
+        return when (val submitResult = repository.submitToken()) {
+            is InternalResult.Failure -> {
+                when (submitResult.error) {
+                    is PushTokenError.NotLoggedIn -> Result.failure()
+
+                    is PushTokenError.NoDeviceId,
+                    is PushTokenError.NoToken,
+                    is Error.NoInternet,
+                    is Error.Server,
+                    is Error.Unknown -> {
+                        Result.retry()
+                    }
+
+                    EditTaskError.TaskNotFound -> {
+                        // Not possible here
+                        Result.failure()
+                    }
+                }
             }
 
-            PushMessageTokenRepository.Outcome.NO_TOKEN,
-            PushMessageTokenRepository.Outcome.NO_DEVICE_ID,
-            PushMessageTokenRepository.Outcome.UPLOAD_FAILED,
-            PushMessageTokenRepository.Outcome.EXCEPTION -> {
-                return Result.retry()
-            }
-
-            PushMessageTokenRepository.Outcome.SUCCESS -> {
-                return Result.success()
-            }
+            is InternalResult.Success -> Result.success()
         }
     }
 

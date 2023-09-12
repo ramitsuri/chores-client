@@ -1,9 +1,11 @@
 package com.ramitsuri.choresclient.android.extensions
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
 import com.ramitsuri.choresclient.android.R
-import com.ramitsuri.choresclient.model.TextValue
+import com.ramitsuri.choresclient.model.view.TextValue
 import com.ramitsuri.choresclient.resources.LocalizedString
 
 @Composable
@@ -41,3 +43,6 @@ private fun getResId(key: LocalizedString): Int {
         LocalizedString.NOTIFICATION_ACTION_WONT_DO -> R.string.settings_notification_action_wont_do
     }
 }
+
+@Composable
+fun Dp.toPx() = with(LocalDensity.current) { this@toPx.toPx() }

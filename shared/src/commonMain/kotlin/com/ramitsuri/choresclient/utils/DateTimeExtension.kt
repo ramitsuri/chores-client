@@ -13,10 +13,10 @@ fun LocalDateTime.Companion.now(
 ) = Clock.System.now().toLocalDateTime(timeZone)
 
 fun LocalDateTime.plus(
-    second: Int = 0,
+    seconds: Int = 0,
     timeZone: TimeZone = TimeZone.currentSystemDefault()
 ): LocalDateTime {
-    return toInstant(timeZone).plus(second.seconds).toLocalDateTime(timeZone)
+    return toInstant(timeZone).plus(seconds.seconds).toLocalDateTime(timeZone)
 }
 
 fun LocalDateTime.minus(

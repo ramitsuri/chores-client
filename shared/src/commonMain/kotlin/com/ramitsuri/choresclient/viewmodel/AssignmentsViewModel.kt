@@ -1,169 +1,235 @@
 package com.ramitsuri.choresclient.viewmodel
 
-import com.ramitsuri.choresclient.data.ProgressStatus
-import com.ramitsuri.choresclient.data.RepeatUnit
-import com.ramitsuri.choresclient.data.Result
-import com.ramitsuri.choresclient.data.TaskAssignment
-import com.ramitsuri.choresclient.model.AssignmentsViewState
-import com.ramitsuri.choresclient.model.Filter
-import com.ramitsuri.choresclient.model.FilterItem
-import com.ramitsuri.choresclient.model.TaskAssignmentWrapper
-import com.ramitsuri.choresclient.model.TextValue
-import com.ramitsuri.choresclient.repositories.AssignmentDetailsRepository
+import com.ramitsuri.choresclient.data.settings.PrefManager
+import com.ramitsuri.choresclient.model.enums.ProgressStatus
+import com.ramitsuri.choresclient.model.enums.RepeatUnit
+import com.ramitsuri.choresclient.model.filter.Filter
+import com.ramitsuri.choresclient.model.filter.FilterItem
+import com.ramitsuri.choresclient.model.filter.FilterType
+import com.ramitsuri.choresclient.model.view.Assignments
+import com.ramitsuri.choresclient.model.view.AssignmentsViewState
+import com.ramitsuri.choresclient.model.view.TaskAssignmentDetails
+import com.ramitsuri.choresclient.model.view.TextValue
 import com.ramitsuri.choresclient.repositories.TaskAssignmentsRepository
 import com.ramitsuri.choresclient.resources.LocalizedString
-import com.ramitsuri.choresclient.utils.AppHelper
-import com.ramitsuri.choresclient.utils.DispatcherProvider
 import com.ramitsuri.choresclient.utils.FilterHelper
-import com.ramitsuri.choresclient.utils.LogHelper
+import com.ramitsuri.choresclient.utils.differenceInDays
 import com.ramitsuri.choresclient.utils.getDay
+import com.ramitsuri.choresclient.utils.now
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import kotlinx.datetime.Clock
+import kotlinx.datetime.LocalDateTime
 
 class AssignmentsViewModel(
-    private val assignmentDetailsRepository: AssignmentDetailsRepository,
     private val repository: TaskAssignmentsRepository,
     private val filterHelper: FilterHelper,
-    private val appHelper: AppHelper,
-    private val dispatchers: DispatcherProvider,
+    private val prefManager: PrefManager,
     private val longLivingCoroutineScope: CoroutineScope
-) : ViewModel(), KoinComponent {
+) : ViewModel() {
 
-    private val logger: LogHelper by inject()
-    private var filters = mutableListOf<Filter>()
-    private val _state = MutableStateFlow(AssignmentsViewState(filters = filters))
+    private var collectJob: Job? = null
+
+    private val _state = MutableStateFlow(AssignmentsViewState())
     val state: StateFlow<AssignmentsViewState> = _state
 
     init {
-        fetchAssignments(true)
-    }
-
-    fun fetchAssignments(getLocal: Boolean = false) {
-        val isWorkerRunning = appHelper.isWorkerRunning()
-        val shouldRefresh = !(getLocal || isWorkerRunning)
-        logger.d(
-            "AssignmentsViewModel",
-            "Will refresh: $shouldRefresh - getLocal($getLocal) || workerRunning($isWorkerRunning)"
-        )
-        _state.update {
-            it.copy(loading = true)
-        }
-        // We want this to be run in long living scope so that the refresh operation isn't cancelled
-        // while assignments have been uploaded but not deleted locally for example. Or are being
-        // uploaded still
-        longLivingCoroutineScope.launch(dispatchers.main) {
-            if (shouldRefresh) {
-                repository.refresh()
-                getLocal(refreshFilters = true)
-            } else {
-                getLocal(refreshFilters = false)
-            }
-        }
-    }
-
-    fun filter(filter: Filter, filterItem: FilterItem) {
-        val newFilter = filterHelper.onFilterItemSelected(filter, filterItem)
-        filters.removeAll { it.getType() == filter.getType() }
-        filters.add(newFilter)
-        filters.sortBy { it.getType().index }
-        _state.update {
-            it.copy(filters = filters, loading = true)
-        }
-        getLocal(refreshFilters = false)
-    }
-
-    fun markAsDone(id: String, currentProgressStatus: ProgressStatus) {
-        if (currentProgressStatus != ProgressStatus.TODO) {
-            return
-        }
-        _state.update {
-            it.copy(loading = true)
-        }
-        longLivingCoroutineScope.launch {
-            assignmentDetailsRepository.onCompleteRequestedSuspend(id)
-            getLocal(refreshFilters = false)
-        }
-    }
-
-    fun markAsWontDo(id: String, currentProgressStatus: ProgressStatus) {
-        if (currentProgressStatus != ProgressStatus.TODO) {
-            return
-        }
-        _state.update {
-            it.copy(loading = true)
-        }
-        longLivingCoroutineScope.launch {
-            assignmentDetailsRepository.onWontDoRequestedSuspend(id)
-            getLocal(refreshFilters = false)
-        }
-    }
-
-    fun onSnoozeHour(id: String, assignmentName: String) {
-        assignmentDetailsRepository.onSnoozeHourRequested(id, assignmentName)
-    }
-
-    fun onSnoozeDay(id: String, assignmentName: String) {
-        assignmentDetailsRepository.onSnoozeDayRequested(id, assignmentName)
-    }
-
-    private fun getLocal(refreshFilters: Boolean) {
-        viewModelScope.launch(dispatchers.main) {
-            refreshFilters(refreshFilters)
-            val assignmentsResult =
-                repository.getLocal(filters) as Result.Success
-            val assignmentsState = AssignmentsViewState(
-                loading = false,
-                getAssignmentsForDisplay(assignmentsResult.data),
-                filters
-            )
+        viewModelScope.launch {
             _state.update {
-                assignmentsState
+                it.copy(filters = filterHelper.getBaseFilters())
+            }
+            onFilterUpdated()
+        }
+    }
+
+    fun onFilterItemClicked(filter: Filter, clickedFilterItem: FilterItem) {
+        val existingFilters = _state.value.filters
+        val newClickedFilter = filterHelper.onFilterItemClicked(filter, clickedFilterItem)
+        val newFilters = existingFilters
+            .filter {
+                it.getType() != filter.getType()
+            }
+            .plus(newClickedFilter)
+            .sortedBy { it.getType().index }
+        _state.update {
+            it.copy(filters = newFilters)
+        }
+        onFilterUpdated()
+    }
+
+    fun markAsDone(id: String) {
+        longLivingCoroutineScope.launch {
+            repository.markTaskAssignmentDone(id, Clock.System.now())
+        }
+    }
+
+    fun markAsWontDo(id: String) {
+        longLivingCoroutineScope.launch {
+            repository.markTaskAssignmentWontDo(id, Clock.System.now())
+        }
+    }
+
+    fun onSnoozeHour(id: String) {
+        longLivingCoroutineScope.launch {
+            repository.onSnoozeHourRequested(id)
+        }
+    }
+
+    fun onSnoozeDay(id: String) {
+        longLivingCoroutineScope.launch {
+            repository.onSnoozeDayRequested(id)
+        }
+    }
+
+    private fun onFilterUpdated() {
+        collectJob?.cancel()
+
+        val loggedInMemberId = prefManager.getLoggedInMemberId() ?: ""
+
+        val filters = _state.value.filters
+        collectJob = viewModelScope.launch {
+            repository.getLocalFlow(loggedInMemberId).collect { taskAssignmentDetails ->
+                val filtered = taskAssignmentDetails
+                    .filter { it.taskAssignment.progressStatus == ProgressStatus.TODO }
+                    .toMutableList()
+                filters.forEach { filter ->
+                    when (filter.getType()) {
+                        FilterType.PERSON -> {
+                            if (filter.getItems()
+                                    .any { it.getIsSelected() && it.getId() == Filter.ALL_ID }
+                            ) {
+                                // All selected, remove nothing
+                            } else {
+                                val selectedMemberIds =
+                                    filter.getItems().filter { it.getIsSelected() }
+                                        .map { it.getId() }
+                                filtered
+                                    .removeAll {
+                                        !selectedMemberIds.contains(it.taskAssignment.memberId)
+                                    }
+                            }
+                        }
+
+                        FilterType.HOUSE -> {
+                            if (filter.getItems()
+                                    .any { it.getIsSelected() && it.getId() == Filter.ALL_ID }
+                            ) {
+                                // All selected, remove nothing
+                            } else {
+                                val selectedHouseIds =
+                                    filter.getItems().filter { it.getIsSelected() }
+                                        .map { it.getId() }
+                                filtered
+                                    .removeAll {
+                                        !selectedHouseIds.contains(it.taskAssignment.houseId)
+                                    }
+                            }
+                        }
+                    }
+                }
+                // Apply sorting
+                val (onCompletion, notOnCompletion) = filtered
+                    .partition {
+                        it.taskAssignment.repeatInfo.repeatUnit == RepeatUnit.ON_COMPLETE
+                    }
+
+                val assignments = onCompletion
+                    .plus(notOnCompletion
+                        .sortedBy {
+                            it.taskAssignment.dueDateTime
+                        }
+                    )
+                    .getInStyle(prefManager.getLoggedInMemberId(), prefManager.useNewStyle())
+
+                _state.update {
+                    it.copy(
+                        loading = false,
+                        assignments = assignments
+                    )
+                }
             }
         }
     }
 
-    private fun getAssignmentsForDisplay(
-        data: List<TaskAssignment>
-    ): Map<TextValue, List<TaskAssignmentWrapper>> {
-        val onCompletionKey = TextValue.ForKey(LocalizedString.ON_COMPLETION)
-        val todo = data.filter { it.progressStatus == ProgressStatus.TODO }
-            .map {
-                val showCompleteButton = true
-                TaskAssignmentWrapper(it, showCompleteButton)
-            }
-            .sortedBy { it.assignment.dueDateTime }
-            .groupBy {
-                if (it.assignment.task.repeatUnit == RepeatUnit.ON_COMPLETE) {
-                    onCompletionKey
-                } else {
-                    getDay(it.assignment.dueDateTime)
+    private fun List<TaskAssignmentDetails>.getInStyle(
+        loggedInMemberId: String?,
+        useNewStyle: Boolean,
+        now: LocalDateTime = LocalDateTime.now()
+    ): Assignments {
+        return if (useNewStyle) {
+            val assignments = mutableListOf<TaskAssignmentDetails>()
+            val counts = mutableMapOf<String, Int>()
+            val grouped = filter { it.taskAssignment.progressStatus == ProgressStatus.TODO }
+                .groupBy { it.taskAssignment.taskId }
+            grouped.forEach { (_, assignmentsForTask) ->
+                val (ownAssignments, othersAssignments) = assignmentsForTask
+                    .partition { it.taskAssignment.memberId == loggedInMemberId }
+
+                val ownAssignmentToShow =
+                    ownAssignments.minByOrNull { it.taskAssignment.dueDateTime }
+                if (ownAssignmentToShow != null) {
+                    assignments.add(ownAssignmentToShow)
+                    counts[ownAssignmentToShow.taskAssignment.id] = ownAssignments.size - 1
+                }
+
+                val othersAssignmentToShow =
+                    othersAssignments.minByOrNull { it.taskAssignment.dueDateTime }
+                if (othersAssignmentToShow != null) {
+                    assignments.add(othersAssignmentToShow)
+                    counts[othersAssignmentToShow.taskAssignment.id] = othersAssignments.size - 1
                 }
             }
 
-        // Move "On Completion" to top
-        val onCompletion = todo[onCompletionKey]
-        val ordered = if (onCompletion != null) {
-            mapOf(onCompletionKey to onCompletion).plus(todo.minus(onCompletionKey))
-        } else {
-            todo
-        }
-        return ordered
-    }
+            // Move "On Completion" to top
+            val (onCompletion, others) = assignments
+                .partition { it.taskAssignment.repeatInfo.repeatUnit == RepeatUnit.ON_COMPLETE }
 
-    private suspend fun refreshFilters(refreshFilters: Boolean) {
-        if (filters.isNotEmpty() && !refreshFilters) { // Refresh only if no filters available already
-            return
-        }
-        filters.clear()
-        filters.addAll(filterHelper.get())
-        filters.sortBy { it.getType().index }
-        _state.update {
-            it.copy(filters = filters)
+            val pastDue = mutableListOf<TaskAssignmentDetails>()
+            val dueToday = mutableListOf<TaskAssignmentDetails>()
+            val dueInFuture = mutableListOf<TaskAssignmentDetails>()
+            others
+                .sortedBy { it.taskAssignment.dueDateTime }
+                .forEach { taskAssignment ->
+                    val difference =
+                        differenceInDays(taskAssignment.taskAssignment.dueDateTime, now)
+                    if (difference < 0) {
+                        pastDue.add(taskAssignment)
+                    } else if (difference == 0) {
+                        dueToday.add(taskAssignment)
+                    } else {
+                        dueInFuture.add(taskAssignment)
+                    }
+                }
+            Assignments.NewStyle(
+                onCompletion = onCompletion,
+                pastDue = pastDue,
+                dueToday = dueToday,
+                dueInFuture = dueInFuture,
+                otherAssignmentsCount = counts
+            )
+        } else {
+            val onCompletionKey = TextValue.ForKey(LocalizedString.ON_COMPLETION)
+            val grouped = filter { it.taskAssignment.progressStatus == ProgressStatus.TODO }
+                .groupBy {
+                    if (it.taskAssignment.repeatInfo.repeatUnit == RepeatUnit.ON_COMPLETE) {
+                        onCompletionKey
+                    } else {
+                        getDay(it.taskAssignment.dueDateTime)
+                    }
+                }
+
+            // Move "On Completion" to top
+            val onCompletion = grouped[onCompletionKey]
+            val ordered = if (onCompletion != null) {
+                mapOf(onCompletionKey to onCompletion).plus(grouped.minus(onCompletionKey))
+            } else {
+                grouped
+            }
+            Assignments.OldStyle(ordered)
         }
     }
 }

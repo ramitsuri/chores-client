@@ -1,8 +1,6 @@
 package com.ramitsuri.choresclient.data.settings
 
-import com.ramitsuri.choresclient.model.Filter
-import com.ramitsuri.choresclient.utils.Lock
-import com.ramitsuri.choresclient.utils.use
+import com.ramitsuri.choresclient.model.filter.Filter
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 
@@ -15,15 +13,13 @@ class PrefManager(
         deleteLegacyPrefs()
     }
 
-    private val notificationIdLock = Lock()
-
-    fun setUserId(userId: String) {
-        val key = Key.USER_ID
+    fun setLoggedInMemberId(userId: String) {
+        val key = Key.LOGGED_IN_MEMBER_ID
         putString(key, userId)
     }
 
-    fun getUserId(default: String? = null): String? {
-        val key = Key.USER_ID
+    fun getLoggedInMemberId(default: String? = null): String? {
+        val key = Key.LOGGED_IN_MEMBER_ID
         return getString(key, default)
     }
 
@@ -65,15 +61,6 @@ class PrefManager(
     fun getEnableRemoteLogging(): Boolean {
         val key = Key.ENABLE_REMOTE_LOGGING
         return getBoolean(key, false)
-    }
-
-    fun generateNewNotificationId(): Int {
-        val key = Key.PREV_NOTIFICATION_ID
-        notificationIdLock.use {
-            val newId = getInt(key, 0) + 1
-            putInt(key, newId)
-            return newId
-        }
     }
 
     fun getLastSyncTime(): Instant {
@@ -134,9 +121,29 @@ class PrefManager(
         putString(key, value)
     }
 
+    fun remindPastDue(): Boolean {
+        val key = Key.REMIND_PAST_DUE
+        return getBoolean(key, true)
+    }
+
+    fun setRemindPastDue(value: Boolean) {
+        val key = Key.REMIND_PAST_DUE
+        putBoolean(key, value)
+    }
+
+    fun useNewStyle(): Boolean {
+        val key = Key.USE_NEW_STYLE
+        return getBoolean(key, true)
+    }
+
+    fun setUseNewStyle(value: Boolean) {
+        val key = Key.USE_NEW_STYLE
+        putBoolean(key, value)
+    }
+
     fun isLoggedIn(): Boolean {
         return (getKey().isNullOrEmpty() ||
-                getUserId().isNullOrEmpty() ||
+                getLoggedInMemberId().isNullOrEmpty() ||
                 getToken().isNullOrEmpty()).not()
     }
 
@@ -213,13 +220,14 @@ class PrefManager(
         private const val SKV = "SKV"
 
         private val legacyPrefs = mapOf(
-            "worker_running" to KV
+            "worker_running" to KV,
+            "prev_notification_id" to KV
         )
 
         private enum class Key(val key: String, val isSecure: Boolean) {
 
-            USER_ID(
-                key = "user_id",
+            LOGGED_IN_MEMBER_ID(
+                key = "logged_in_member_id",
                 isSecure = false
             ),
 
@@ -240,11 +248,6 @@ class PrefManager(
 
             ENABLE_REMOTE_LOGGING(
                 key = "enable_remote_logging",
-                isSecure = false
-            ),
-
-            PREV_NOTIFICATION_ID(
-                key = "prev_notification_id",
                 isSecure = false
             ),
 
@@ -270,6 +273,16 @@ class PrefManager(
 
             DEVICE_ID(
                 key = "device_id",
+                isSecure = false
+            ),
+
+            REMIND_PAST_DUE(
+                key = "remind_past_due",
+                isSecure = false
+            ),
+
+            USE_NEW_STYLE(
+                key = "use_new_style",
                 isSecure = false
             )
         }

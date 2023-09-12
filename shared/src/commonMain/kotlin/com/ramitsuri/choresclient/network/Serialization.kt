@@ -1,9 +1,9 @@
 package com.ramitsuri.choresclient.network
 
-import com.ramitsuri.choresclient.data.ActiveStatus
-import com.ramitsuri.choresclient.data.CreateType
-import com.ramitsuri.choresclient.data.ProgressStatus
-import com.ramitsuri.choresclient.data.RepeatUnit
+import com.ramitsuri.choresclient.model.enums.ActiveStatus
+import com.ramitsuri.choresclient.model.enums.CreateType
+import com.ramitsuri.choresclient.model.enums.ProgressStatus
+import com.ramitsuri.choresclient.model.enums.RepeatUnit
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.KSerializer

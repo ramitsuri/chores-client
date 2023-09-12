@@ -1,8 +1,9 @@
 package com.ramitsuri.choresclient.android.testutils
 
-import com.ramitsuri.choresclient.data.entities.AssignmentAlarm
+import com.ramitsuri.choresclient.model.entities.AssignmentAlarm
 import com.ramitsuri.choresclient.db.AlarmEntity
 import com.ramitsuri.choresclient.reminder.AlarmHandler
+import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.LocalDateTime
 
 class FakeAlarmHandler : AlarmHandler {
@@ -11,9 +12,9 @@ class FakeAlarmHandler : AlarmHandler {
     override suspend fun getExisting(): List<AlarmEntity> {
         return alarms.values.map {
             AlarmEntity(
-                it.assignmentId,
-                it.showAtTime,
-                it.systemNotificationId.toLong()
+                assignmentId = it.assignmentId,
+                showAtTime = it.showAtTime,
+                systemNotificationId = it.systemNotificationId.toLong()
             )
         }
     }
@@ -23,12 +24,17 @@ class FakeAlarmHandler : AlarmHandler {
             it.assignmentId == assignmentId
         }.map {
             AlarmEntity(
-                it.assignmentId,
-                it.showAtTime,
-                it.systemNotificationId.toLong()
+                assignmentId = it.assignmentId,
+                showAtTime = it.showAtTime,
+                systemNotificationId = it.systemNotificationId.toLong()
             )
         }.firstOrNull()
     }
+
+    override fun getExistingFlow(): Flow<List<AlarmEntity>> {
+        TODO("Not yet implemented")
+    }
+
 
     override suspend fun schedule(assignmentAlarms: List<AssignmentAlarm>) {
         assignmentAlarms.forEach { assignmentAlarm ->
@@ -37,17 +43,12 @@ class FakeAlarmHandler : AlarmHandler {
                     assignmentAlarm.assignmentId,
                     assignmentAlarm.showAtTime,
                     assignmentAlarm.systemNotificationId,
-                    assignmentAlarm.systemNotificationText
                 )
 
         }
     }
 
-    override suspend fun reschedule(
-        assignmentId: String,
-        showAtTime: LocalDateTime,
-        notificationText: String
-    ) {
+    override suspend fun reschedule(assignmentId: String, showAtTime: LocalDateTime) {
         TODO("Not yet implemented")
     }
 
@@ -56,7 +57,6 @@ class FakeAlarmHandler : AlarmHandler {
             alarms.remove(assignmentId)
         }
     }
-
 
     fun get(assignmentId: String): AssignmentAlarm? = alarms[assignmentId]
 }

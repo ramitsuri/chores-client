@@ -5,24 +5,24 @@ import com.ramitsuri.choresclient.android.R
 
 enum class NotificationAction(val action: String, val requestCode: Int, @StringRes val text: Int) {
     SNOOZE_HOUR(
-        "SNOOZE_HOUR",
-        1,
-        R.string.notification_reminder_action_snooze_hours
+        action = "SNOOZE_HOUR",
+        requestCode = 1,
+        text = R.string.notification_reminder_action_snooze_hours
     ),
     SNOOZE_DAY(
-        "SNOOZE_DAY",
-        2,
-        R.string.notification_reminder_action_snooze_day
+        action = "SNOOZE_DAY",
+        requestCode = 2,
+        text = R.string.notification_reminder_action_snooze_day
     ),
     COMPLETE(
-        "COMPLETE",
-        3,
-        R.string.notification_reminder_action_complete
+        action = "COMPLETE",
+        requestCode = 3,
+        text = R.string.notification_reminder_action_complete
     ),
     WONT_DO(
-        "WONT_DO",
-        4,
-        R.string.notification_reminder_action_wont_do
+        action = "WONT_DO",
+        requestCode = 4,
+        text = R.string.notification_reminder_action_wont_do
     );
 
     companion object {
@@ -31,12 +31,15 @@ enum class NotificationAction(val action: String, val requestCode: Int, @StringR
                 SNOOZE_DAY.action -> {
                     SNOOZE_DAY
                 }
+
                 WONT_DO.action -> {
                     WONT_DO
                 }
+
                 COMPLETE.action -> {
                     COMPLETE
                 }
+
                 else -> {
                     SNOOZE_HOUR
                 }
@@ -47,6 +50,4 @@ enum class NotificationAction(val action: String, val requestCode: Int, @StringR
 
 object NotificationActionExtra {
     const val KEY_ASSIGNMENT_ID = "NOTIFICATION_ACTION_KEY_ASSIGNMENT_ID"
-    const val KEY_NOTIFICATION_ID = "NOTIFICATION_ACTION_KEY_NOTIFICATION_ID"
-    const val KEY_NOTIFICATION_TEXT = "NOTIFICATION_ACTION_KEY_NOTIFICATION_TEXT"
 }

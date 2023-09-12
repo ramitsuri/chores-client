@@ -9,7 +9,6 @@ import com.ramitsuri.choresclient.data.db.Database
 import com.ramitsuri.choresclient.data.settings.PrefManager
 import com.ramitsuri.choresclient.data.settings.SettingsKeyValueStore
 import com.ramitsuri.choresclient.db.ChoresDatabase
-import com.ramitsuri.choresclient.utils.AppHelper
 import com.ramitsuri.choresclient.utils.DispatcherProvider
 import com.ramitsuri.choresclient.utils.LogHelper
 import com.russhwolf.settings.AndroidSettings
@@ -58,10 +57,6 @@ actual val platformModule = module {
         val secureKeyValueStore = SettingsKeyValueStore(AndroidSettings(secureSharedPrefs))
 
         PrefManager(keyValueStore, secureKeyValueStore)
-    }
-
-    single<AppHelper> {
-        AppHelper()
     }
 
     single<LogHelper> {

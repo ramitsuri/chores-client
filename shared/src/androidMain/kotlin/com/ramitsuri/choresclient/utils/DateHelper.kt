@@ -1,6 +1,6 @@
 package com.ramitsuri.choresclient.utils
 
-import com.ramitsuri.choresclient.model.TextValue
+import com.ramitsuri.choresclient.model.view.TextValue
 import com.ramitsuri.choresclient.resources.LocalizedString
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
@@ -10,6 +10,7 @@ import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toJavaInstant
 import kotlinx.datetime.toJavaLocalDateTime
+import kotlinx.datetime.toJavaLocalTime
 import kotlinx.datetime.toJavaZoneId
 import kotlinx.datetime.toLocalDateTime
 import java.time.Duration
@@ -34,16 +35,28 @@ actual fun getDay(
         0L -> {
             TextValue.ForKey(LocalizedString.TODAY)
         }
+
         1L -> {
             TextValue.ForKey(LocalizedString.TOMORROW)
         }
+
         -1L -> {
             TextValue.ForKey(LocalizedString.YESTERDAY)
         }
+
         else -> {
             TextValue.ForString(format(toFormat, now, timeZone, "MMM d", "MMM d, uuuu"))
         }
     }
+}
+
+actual fun differenceInDays(
+    toCompare: LocalDateTime,
+    now: LocalDateTime
+): Int {
+    val nowTruncated = now.toJavaLocalDateTime().truncatedTo(ChronoUnit.DAYS)
+    val toCompareTruncated = toCompare.toJavaLocalDateTime().truncatedTo(ChronoUnit.DAYS)
+    return Duration.between(nowTruncated, toCompareTruncated).toDays().toInt()
 }
 
 fun formatReminderTime(
@@ -75,6 +88,45 @@ fun formatSyncTime(
     )
 }
 
+// Mon, Jan 5
+// Mon, Jan 5, 2021
+fun formatDate(
+    toFormat: LocalDate,
+    now: Instant = Clock.System.now(),
+    timeZone: TimeZone = TimeZone.currentSystemDefault()
+): String {
+    val (formatSameYear, formatDifferentYear) = Pair("EEE, MMM d", "EEE, MMM d, uuuu")
+    return format(
+        LocalDateTime(date = toFormat, time = LocalDateTime.now(timeZone).time),
+        now,
+        timeZone,
+        formatSameYear,
+        formatDifferentYear
+    )
+}
+
+// 4 PM
+// 4:30 PM
+fun formatTime(
+    toFormat: LocalTime,
+    now: Instant = Clock.System.now(),
+    timeZone: TimeZone = TimeZone.currentSystemDefault()
+): String {
+    val jvmToFormat = toFormat.toJavaLocalTime()
+    val (formatSameYear, formatDifferentYear) = if (jvmToFormat.minute == 0) {
+        Pair("K a", "K a")
+    } else {
+        Pair("K:mm a", "K:mm a")
+    }
+    return format(
+        LocalDateTime(date = LocalDateTime.now(timeZone).date, time = toFormat),
+        now,
+        timeZone,
+        formatSameYear,
+        formatDifferentYear
+    )
+}
+
 fun formatLogTime(
     toFormat: LocalDateTime = LocalDateTime.now(),
     now: Instant = Clock.System.now(),
@@ -89,24 +141,6 @@ fun formatLogParent(
     timeZone: TimeZone = TimeZone.UTC
 ): String {
     return format(toFormat, now, timeZone, "uuuu-MM-dd", "uuuu-MM-dd")
-}
-
-fun formatPickedDate(
-    toFormat: LocalDate,
-    now: Instant = Clock.System.now(),
-    timeZone: TimeZone = TimeZone.currentSystemDefault()
-): String {
-    val toFormatDateTime = LocalDateTime(date = toFormat, time = LocalDateTime.now(timeZone).time)
-    return format(toFormatDateTime, now, timeZone, "E, MMM dd, yyyy", "E, MMM dd, yyyy")
-}
-
-fun formatPickedTime(
-    toFormat: LocalTime,
-    now: Instant = Clock.System.now(),
-    timeZone: TimeZone = TimeZone.currentSystemDefault()
-): String {
-    val toFormatDateTime = LocalDateTime(date = LocalDateTime.now(timeZone).date, time = toFormat)
-    return format(toFormatDateTime, now, timeZone, "K:mm a", "K:mm a")
 }
 
 private fun format(

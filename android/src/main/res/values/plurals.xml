@@ -24,4 +24,33 @@
         <item quantity="one">Repeats every year</item>
         <item quantity="other">Repeats every %d years</item>
     </plurals>
+
+    <plurals name="assignment_repeats_hours_compact">
+        <item quantity="one">Hour</item>
+        <item quantity="other">%d hours</item>
+    </plurals>
+
+    <plurals name="assignment_repeats_days_compact">
+        <item quantity="one">Day</item>
+        <item quantity="other">%d days</item>
+    </plurals>
+
+    <plurals name="assignment_repeats_weeks_compact">
+        <item quantity="one">Week</item>
+        <item quantity="other">%d weeks</item>
+    </plurals>
+
+    <plurals name="assignment_repeats_months_compact">
+        <item quantity="one">Month</item>
+        <item quantity="other">%d months</item>
+    </plurals>
+
+    <plurals name="assignment_repeats_years_compact">
+        <item quantity="one">Year</item>
+        <item quantity="other">%d years</item>
+    </plurals>
+    <plurals name="assignment_iterations_more">
+        <item quantity="one">+%d occurrence</item>
+        <item quantity="other">+%d occurrences</item>
+    </plurals>
 </resources>

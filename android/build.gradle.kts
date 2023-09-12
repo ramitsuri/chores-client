@@ -29,7 +29,7 @@ dependencies {
     implementation("io.insert-koin:koin-androidx-compose:$koin")
 
     // Work
-    val workVersion = "2.8.1"
+    val workVersion = "2.9.0-alpha02"
     implementation("androidx.work:work-runtime-ktx:$workVersion")
 
     // Compose
@@ -51,8 +51,10 @@ dependencies {
     implementation("io.github.vanpra.compose-material-dialogs:datetime:0.9.0")
 
     // Firebase
-    implementation(project.dependencies.platform("com.google.firebase:firebase-bom:30.1.0"))
+    implementation(project.dependencies.platform("com.google.firebase:firebase-bom:32.2.3"))
     implementation("com.google.firebase:firebase-messaging-ktx")
+
+    implementation("androidx.core:core-splashscreen:1.0.0-beta02")
 
     // Testing
     testImplementation("junit:junit:4.13.2")
@@ -86,12 +88,15 @@ android {
     }
     buildTypes {
         getByName("release") {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro")
         }
         debug {
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-debug"
             isDebuggable = true
+            isMinifyEnabled = true
+            proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro")
         }
     }
     compileOptions {
