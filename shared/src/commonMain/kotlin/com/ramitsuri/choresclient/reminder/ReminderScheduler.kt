@@ -15,6 +15,11 @@ class ReminderScheduler(
     private val prefManager: PrefManager
 ) {
 
+
+    /**
+     * Schedules reminders for passed in assignments but filters out assignments that are not for
+     * the logged in member or have repeat unit as on_completion.
+     */
     suspend fun scheduleReminders(
         assignments: List<TaskAssignment>,
         now: LocalDateTime = LocalDateTime.now()
@@ -25,7 +30,8 @@ class ReminderScheduler(
 
         val (inFuture, pastDue) = assignments
             .filter {
-                it.memberId == memberId
+                it.memberId == memberId &&
+                        it.repeatInfo.repeatUnit != RepeatUnit.ON_COMPLETE
             }
             .partition {
                 it.dueDateTime > now
@@ -63,11 +69,6 @@ class ReminderScheduler(
         val assignmentAlarms = mutableListOf<AssignmentAlarm>()
 
         inFuture.forEach { assignment ->
-            if (assignment.repeatInfo.repeatUnit == RepeatUnit.ON_COMPLETE) {
-                // Don't schedule reminder for on complete ones unless requested by user
-                // (which will be taken care of in past due)
-                return@forEach
-            }
             if (existingAlarms.find { assignment.id == it.assignmentId } != null) {
                 return@forEach
             }
