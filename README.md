@@ -13,7 +13,7 @@ Things to do
 - [x] Flow for alarm data 
 - [x] Predictive back
 - [x] Test with real data 
-- [ ] Allow Task Pause/Inactive
+- [x] Allow Task Pause/Inactive
 - [ ] Content behind system bars
 - [ ] Swipe to complete task item
 - [ ] Tabs for which list/house (hide if only one)
