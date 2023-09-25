@@ -544,181 +544,171 @@ private fun AssignmentItemNewStyle(
         modifier = modifier
             .animateContentSize()
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .defaultMinSize(minHeight = MaterialTheme.dimens.minAssignmentItemHeight)
-        ) {
-            Row(
+        Row {
+            Spacer(modifier = Modifier.width(MaterialTheme.dimens.medium))
+            FilledTonalIconButton(
+                colors = IconButtonDefaults.filledTonalIconButtonColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                ),
+                onClick = { onMarkAsDone(details.taskAssignment.id) },
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = MaterialTheme.dimens.medium),
-                horizontalArrangement = Arrangement.SpaceBetween
+                    .width(MaterialTheme.dimens.iconWidthLarge)
+                    .align(alignment = Alignment.CenterVertically),
             ) {
-                Text(
-                    text = details.taskAssignment.taskName,
-                    style = MaterialTheme.typography.headlineSmall,
-                    modifier = Modifier.padding(
-                        horizontal = MaterialTheme.dimens.small,
-                        vertical = MaterialTheme.dimens.medium
-                    )
+                Icon(
+                    imageVector = Icons.Default.Check,
+                    contentDescription = stringResource(id = R.string.ok)
                 )
-                if (details.taskAssignment.repeatInfo.repeatUnit
-                    != RepeatUnit.ON_COMPLETE
-                ) {
-                    Text(
-                        text = getDay(details.taskAssignment.dueDateTime).string(),
-                        style = MaterialTheme.typography.labelSmall,
-                        modifier = Modifier
-                            .background(
-                                MaterialTheme.colorScheme.secondaryContainer,
-                                shape = RoundedCornerShape(
-                                    bottomStart = 8.dp,
-                                    bottomEnd = 8.dp
-                                )
-                            )
-                            .padding(MaterialTheme.dimens.small)
-                    )
-                }
             }
-            Row(
+            Spacer(modifier = Modifier.width(MaterialTheme.dimens.medium))
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = MaterialTheme.dimens.medium),
-                horizontalArrangement = Arrangement.Start,
-                verticalAlignment = Alignment.CenterVertically,
+                    .fillMaxSize()
+                    .defaultMinSize(minHeight = MaterialTheme.dimens.minAssignmentItemHeight)
             ) {
-                val text = details.taskAssignment.memberName
-                LabelWithIcon(text = text, icon = Icons.Filled.Person)
-                if (details.taskAssignment.repeatInfo.repeatUnit != RepeatUnit.NONE
-                    && details.taskAssignment.repeatInfo.repeatValue != 0
-                ) {
-                    Spacer(modifier = Modifier.width(MaterialTheme.dimens.small))
-                    val repeatTextValue = formatRepeatUnitCompact(
-                        repeatValue = details.taskAssignment.repeatInfo.repeatValue,
-                        repeatUnit = details.taskAssignment.repeatInfo.repeatUnit
-                    )
-                    LabelWithIcon(text = repeatTextValue, icon = Icons.Filled.Repeat)
-                }
-                if (otherAssignmentsCount > 0) {
-                    Spacer(modifier = Modifier.width(MaterialTheme.dimens.small))
-                    LabelWithIcon(
-                        text = pluralStringResource(
-                            id = R.plurals.assignment_iterations_more,
-                            count = otherAssignmentsCount,
-                            otherAssignmentsCount
-                        ),
-                        icon = Icons.Filled.GroupWork
-                    )
-                }
-                Spacer(modifier = Modifier.weight(1f))
-                IconButton(
-                    onClick = { showDetails = !showDetails },
-                    modifier = Modifier
-                        .padding(MaterialTheme.dimens.medium)
-                        .width(MaterialTheme.dimens.iconWidthSmall)
-                        .height(MaterialTheme.dimens.iconWidthSmall)
-                        .align(alignment = Alignment.CenterVertically),
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.KeyboardArrowDown,
-                        contentDescription = stringResource(id = R.string.ok)
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.height(MaterialTheme.dimens.medium))
-            if (showDetails) {
-                if (details.willReminderBeSet && details.reminderTime != null) {
-                    Row(Modifier.padding(horizontal = MaterialTheme.dimens.medium)) {
-                        LabelWithIcon(
-                            text = formatReminderAt(toFormat = details.reminderTime),
-                            icon = Icons.Filled.Alarm
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(MaterialTheme.dimens.large))
-                }
-                LazyRow(
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = MaterialTheme.dimens.medium),
-                    horizontalArrangement = Arrangement.spacedBy(MaterialTheme.dimens.medium)
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    item {
-                        FilledTonalButton(
-                            onClick = { onMarkAsDone(details.taskAssignment.id) },
-                            contentPadding = PaddingValues(MaterialTheme.dimens.medium)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Check,
-                                modifier = Modifier.size(MaterialTheme.dimens.iconWidthSmall),
-                                contentDescription = stringResource(id = R.string.edit)
-                            )
-                            Spacer(modifier = Modifier.width(MaterialTheme.dimens.small))
-                            Text(text = stringResource(id = R.string.assignment_details_button_done))
-                        }
-                    }
-                    item {
-                        FilledTonalButton(
-                            onClick = { onEditTaskClicked(details.taskAssignment.taskId) },
-                            contentPadding = PaddingValues(MaterialTheme.dimens.medium)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Edit,
-                                modifier = Modifier.size(MaterialTheme.dimens.iconWidthSmall),
-                                contentDescription = stringResource(id = R.string.edit)
-                            )
-                            Spacer(modifier = Modifier.width(MaterialTheme.dimens.small))
-                            Text(text = stringResource(id = R.string.edit))
-                        }
-                    }
-                    item {
-                        OutlinedButton(
-                            onClick = { onSnoozeHour(details.taskAssignment.id) },
-                            contentPadding = PaddingValues(MaterialTheme.dimens.medium),
-                            enabled = details.enableSnooze
-                        ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    imageVector = Icons.Default.AlarmAdd,
-                                    modifier = Modifier.size(MaterialTheme.dimens.iconWidthSmall),
-                                    contentDescription = stringResource(id = R.string.assignment_details_button_snooze_hours)
+                    Text(
+                        text = details.taskAssignment.taskName,
+                        style = MaterialTheme.typography.headlineSmall,
+                        modifier = Modifier.padding(
+                            horizontal = MaterialTheme.dimens.small,
+                            vertical = MaterialTheme.dimens.medium
+                        )
+                    )
+                    if (details.taskAssignment.repeatInfo.repeatUnit
+                        != RepeatUnit.ON_COMPLETE
+                    ) {
+                        Text(
+                            text = getDay(details.taskAssignment.dueDateTime).string(),
+                            style = MaterialTheme.typography.labelSmall,
+                            modifier = Modifier
+                                .background(
+                                    MaterialTheme.colorScheme.secondaryContainer,
+                                    shape = RoundedCornerShape(
+                                        bottomStart = 8.dp,
+                                        bottomEnd = 8.dp
+                                    )
                                 )
-                                Spacer(modifier = Modifier.width(MaterialTheme.dimens.small))
-                                Text(text = stringResource(id = R.string.assignment_details_button_snooze_hours))
-                            }
-                        }
+                                .padding(MaterialTheme.dimens.small)
+                        )
                     }
-                    item {
-                        OutlinedButton(
-                            onClick = { onSnoozeDay(details.taskAssignment.id) },
-                            contentPadding = PaddingValues(MaterialTheme.dimens.medium),
-                            enabled = details.enableSnooze
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.AlarmAdd,
-                                modifier = Modifier.size(MaterialTheme.dimens.iconWidthSmall),
-                                contentDescription = stringResource(id = R.string.assignment_details_button_snooze_day)
-                            )
-                            Spacer(modifier = Modifier.width(MaterialTheme.dimens.small))
-                            Text(text = stringResource(id = R.string.assignment_details_button_snooze_day))
-                        }
+                }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = MaterialTheme.dimens.medium),
+                    horizontalArrangement = Arrangement.Start,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    val text = details.taskAssignment.memberName
+                    LabelWithIcon(text = text, icon = Icons.Filled.Person)
+                    if (details.taskAssignment.repeatInfo.repeatUnit != RepeatUnit.NONE
+                        && details.taskAssignment.repeatInfo.repeatValue != 0
+                    ) {
+                        Spacer(modifier = Modifier.width(MaterialTheme.dimens.small))
+                        val repeatTextValue = formatRepeatUnitCompact(
+                            repeatValue = details.taskAssignment.repeatInfo.repeatValue,
+                            repeatUnit = details.taskAssignment.repeatInfo.repeatUnit
+                        )
+                        LabelWithIcon(text = repeatTextValue, icon = Icons.Filled.Repeat)
                     }
-                    item {
-                        OutlinedButton(
-                            onClick = { onMarkAsWontDo(details.taskAssignment.id) },
-                            contentPadding = PaddingValues(MaterialTheme.dimens.medium)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Clear,
-                                modifier = Modifier.size(MaterialTheme.dimens.iconWidthSmall),
-                                contentDescription = stringResource(id = R.string.assignment_details_button_wont_do)
-                            )
-                            Spacer(modifier = Modifier.width(MaterialTheme.dimens.small))
-                            Text(text = stringResource(id = R.string.assignment_details_button_wont_do))
-                        }
+                    if (otherAssignmentsCount > 0) {
+                        Spacer(modifier = Modifier.width(MaterialTheme.dimens.small))
+                        LabelWithIcon(
+                            text = pluralStringResource(
+                                id = R.plurals.assignment_iterations_more,
+                                count = otherAssignmentsCount,
+                                otherAssignmentsCount
+                            ),
+                            icon = Icons.Filled.GroupWork
+                        )
                     }
                 }
                 Spacer(modifier = Modifier.height(MaterialTheme.dimens.medium))
+                if (showDetails) {
+                    if (details.willReminderBeSet && details.reminderTime != null) {
+                        Row(Modifier.padding(horizontal = MaterialTheme.dimens.medium)) {
+                            LabelWithIcon(
+                                text = formatReminderAt(toFormat = details.reminderTime),
+                                icon = Icons.Filled.Alarm
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(MaterialTheme.dimens.large))
+                    }
+                    LazyRow(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = MaterialTheme.dimens.medium),
+                        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.dimens.medium)
+                    ) {
+                        item {
+                            FilledTonalButton(
+                                onClick = { onEditTaskClicked(details.taskAssignment.taskId) },
+                                contentPadding = PaddingValues(MaterialTheme.dimens.medium)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Edit,
+                                    modifier = Modifier.size(MaterialTheme.dimens.iconWidthSmall),
+                                    contentDescription = stringResource(id = R.string.edit)
+                                )
+                                Spacer(modifier = Modifier.width(MaterialTheme.dimens.small))
+                                Text(text = stringResource(id = R.string.edit))
+                            }
+                        }
+                        item {
+                            OutlinedButton(
+                                onClick = { onSnoozeHour(details.taskAssignment.id) },
+                                contentPadding = PaddingValues(MaterialTheme.dimens.medium),
+                                enabled = details.enableSnooze
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        imageVector = Icons.Default.AlarmAdd,
+                                        modifier = Modifier.size(MaterialTheme.dimens.iconWidthSmall),
+                                        contentDescription = stringResource(id = R.string.assignment_details_button_snooze_hours)
+                                    )
+                                    Spacer(modifier = Modifier.width(MaterialTheme.dimens.small))
+                                    Text(text = stringResource(id = R.string.assignment_details_button_snooze_hours))
+                                }
+                            }
+                        }
+                        item {
+                            OutlinedButton(
+                                onClick = { onSnoozeDay(details.taskAssignment.id) },
+                                contentPadding = PaddingValues(MaterialTheme.dimens.medium),
+                                enabled = details.enableSnooze
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.AlarmAdd,
+                                    modifier = Modifier.size(MaterialTheme.dimens.iconWidthSmall),
+                                    contentDescription = stringResource(id = R.string.assignment_details_button_snooze_day)
+                                )
+                                Spacer(modifier = Modifier.width(MaterialTheme.dimens.small))
+                                Text(text = stringResource(id = R.string.assignment_details_button_snooze_day))
+                            }
+                        }
+                        item {
+                            OutlinedButton(
+                                onClick = { onMarkAsWontDo(details.taskAssignment.id) },
+                                contentPadding = PaddingValues(MaterialTheme.dimens.medium)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Clear,
+                                    modifier = Modifier.size(MaterialTheme.dimens.iconWidthSmall),
+                                    contentDescription = stringResource(id = R.string.assignment_details_button_wont_do)
+                                )
+                                Spacer(modifier = Modifier.width(MaterialTheme.dimens.small))
+                                Text(text = stringResource(id = R.string.assignment_details_button_wont_do))
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(MaterialTheme.dimens.medium))
+                }
             }
         }
     }
