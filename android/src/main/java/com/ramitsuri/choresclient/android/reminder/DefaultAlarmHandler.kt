@@ -38,7 +38,7 @@ class DefaultAlarmHandler(
     override suspend fun schedule(assignmentAlarms: List<AssignmentAlarm>) {
         alarmDao.insert(assignmentAlarms.map {
             AlarmEntity(
-                systemNotificationId = 0, // Auto generated
+                systemNotificationId = it.systemNotificationId.toLong(),
                 assignmentId = it.assignmentId,
                 showAtTime = it.showAtTime,
             )

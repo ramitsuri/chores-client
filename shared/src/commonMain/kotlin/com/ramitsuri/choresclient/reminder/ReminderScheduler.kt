@@ -95,6 +95,7 @@ class ReminderScheduler(
                     AssignmentAlarm(
                         assignment.id,
                         showAtTime,
+                        existingNotification?.systemNotificationId?.toInt() ?: -1,
                     )
                 )
             }

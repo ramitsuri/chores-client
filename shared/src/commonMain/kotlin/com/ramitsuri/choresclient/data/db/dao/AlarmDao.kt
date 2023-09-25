@@ -52,9 +52,20 @@ class AlarmDao(
     }
 
     private fun insert(alarm: AlarmEntity) {
-        dbQueries.insertAlarm(
-            alarm.assignmentId,
-            alarm.showAtTime,
-        )
+        // If system notification id is being sent as -1, intention is to auto generate it.
+        // Otherwise, a row for assignment id already exists and we want to replace just the
+        // showAtTime and keep the same system notification id
+        if (alarm.systemNotificationId == -1L) {
+            dbQueries.insertAlarm(
+                alarm.assignmentId,
+                alarm.showAtTime,
+            )
+        } else {
+            dbQueries.insertAlarmWithReplace(
+                alarm.systemNotificationId,
+                alarm.assignmentId,
+                alarm.showAtTime,
+            )
+        }
     }
 }

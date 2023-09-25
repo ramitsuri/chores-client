@@ -123,8 +123,13 @@ selectAlarm:
 SELECT * FROM AlarmEntity
 WHERE assignmentId = ?;
 
-insertAlarm:
+insertAlarmWithReplace:
 INSERT OR REPLACE INTO
+AlarmEntity (systemNotificationId, assignmentId, showAtTime)
+VALUES (?,?, ?);
+
+insertAlarm:
+INSERT INTO
 AlarmEntity (assignmentId, showAtTime)
 VALUES (?, ?);
 
