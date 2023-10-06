@@ -9,6 +9,7 @@ import com.ramitsuri.choresclient.data.db.dao.TaskAssignmentDao
 import com.ramitsuri.choresclient.data.db.dao.TaskDao
 import com.ramitsuri.choresclient.data.settings.PrefManager
 import com.ramitsuri.choresclient.network.NetworkProvider
+import com.ramitsuri.choresclient.notification.CompletedByOthersNotificationHandler
 import com.ramitsuri.choresclient.reminder.AlarmHandler
 import com.ramitsuri.choresclient.reminder.ReminderScheduler
 import com.ramitsuri.choresclient.repositories.DefaultTaskAssignmentsRepository
@@ -18,10 +19,13 @@ import com.ramitsuri.choresclient.repositories.PushMessageTokenRepository
 import com.ramitsuri.choresclient.repositories.SyncRepository
 import com.ramitsuri.choresclient.repositories.TaskAssignmentsRepository
 import com.ramitsuri.choresclient.repositories.TasksRepository
+import com.ramitsuri.choresclient.utils.AppLifecycleObserver
+import com.ramitsuri.choresclient.utils.ContentDownloadRequestHandler
 import com.ramitsuri.choresclient.utils.ContentDownloader
 import com.ramitsuri.choresclient.utils.DispatcherProvider
 import com.ramitsuri.choresclient.utils.FilterHelper
 import com.ramitsuri.choresclient.utils.LogHelper
+import com.ramitsuri.choresclient.utils.PushMessageProcessor
 import io.ktor.client.engine.HttpClientEngine
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -104,6 +108,7 @@ private val coreModule = module {
             get<TaskDao>(),
             get<ReminderScheduler>(),
             get<AlarmHandler>(),
+            get<ContentDownloadRequestHandler>(),
         )
     }
 
@@ -148,6 +153,14 @@ private val coreModule = module {
 
     single<Clock> {
         Clock.System
+    }
+
+    single<PushMessageProcessor> {
+        PushMessageProcessor(
+            get<CompletedByOthersNotificationHandler>(),
+            get<ContentDownloadRequestHandler>(),
+            get<AppLifecycleObserver>(),
+        )
     }
 }
 

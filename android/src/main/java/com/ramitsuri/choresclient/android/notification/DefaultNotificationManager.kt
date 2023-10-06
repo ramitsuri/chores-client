@@ -40,6 +40,12 @@ class DefaultNotificationManager(context: Context) : NotificationManager, KoinCo
             if (!notificationInfo.body.isNullOrEmpty()) {
                 setContentText(notificationInfo.body)
             }
+            if (!notificationInfo.additionalText.isNullOrEmpty()) {
+                setStyle(
+                    NotificationCompat.BigTextStyle()
+                        .bigText(notificationInfo.additionalText)
+                )
+            }
             notificationInfo.actions?.let {
                 for ((index, action) in it.withIndex()) {
                     addAction(

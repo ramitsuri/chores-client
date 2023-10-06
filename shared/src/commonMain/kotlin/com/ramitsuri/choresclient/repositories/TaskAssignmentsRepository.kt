@@ -15,6 +15,7 @@ import com.ramitsuri.choresclient.network.model.toTaskAssignmentEntity
 import com.ramitsuri.choresclient.network.model.toTaskEntity
 import com.ramitsuri.choresclient.reminder.AlarmHandler
 import com.ramitsuri.choresclient.reminder.ReminderScheduler
+import com.ramitsuri.choresclient.utils.ContentDownloadRequestHandler
 import com.ramitsuri.choresclient.utils.LogHelper
 import com.ramitsuri.choresclient.utils.getNewReminderTimeSnoozeDay
 import com.ramitsuri.choresclient.utils.getNewReminderTimeSnoozeHour
@@ -32,6 +33,7 @@ class DefaultTaskAssignmentsRepository(
     private val taskDao: TaskDao,
     private val reminderScheduler: ReminderScheduler,
     private val alarmHandler: AlarmHandler,
+    private val contentDownloadRequestHandler: ContentDownloadRequestHandler,
 ) : TaskAssignmentsRepository, KoinComponent {
 
     private val logger: LogHelper by inject()
@@ -95,6 +97,7 @@ class DefaultTaskAssignmentsRepository(
         )
         taskAssignmentDao.update(taskAssignment)
         alarmHandler.cancel(listOf(taskAssignmentId))
+        contentDownloadRequestHandler.requestDelayedDownload()
     }
 
     override suspend fun markTaskAssignmentWontDo(taskAssignmentId: String, wontDoTime: Instant) {
@@ -106,6 +109,7 @@ class DefaultTaskAssignmentsRepository(
         )
         taskAssignmentDao.update(taskAssignment)
         alarmHandler.cancel(listOf(taskAssignmentId))
+        contentDownloadRequestHandler.requestDelayedDownload()
     }
 
     override suspend fun onSnoozeHourRequested(

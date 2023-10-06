@@ -4,4 +4,6 @@ import kotlinx.coroutines.flow.Flow
 
 interface ContentDownloadRequestHandler {
     fun requestImmediateDownload(): Flow<Boolean>
+
+    fun requestDelayedDownload()
 }

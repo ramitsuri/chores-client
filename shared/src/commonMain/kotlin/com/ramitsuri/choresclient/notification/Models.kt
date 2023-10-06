@@ -15,6 +15,7 @@ data class NotificationInfo(
     val priority: Priority,
     val title: String,
     val body: String?,
+    val additionalText: String?,
     val iconResId: Int,
     val actions: List<NotificationActionInfo>? = null,
     val actionExtras: Map<String, Any>? = null

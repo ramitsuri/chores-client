@@ -48,6 +48,13 @@
     <string name="notification_worker_name">High Priority Tasks</string>
     <string name="notification_worker_description">Notifications when high priority tasks are running</string>
     <string name="notification_worker_title">Downloading chores</string>
+    <string name="notification_by_others_id">completed_by_others</string>
+    <string name="notification_by_others_name">Completed by others</string>
+    <string name="notification_by_others_description">Notifications when others complete your tasks</string>
+    <string name="notification_by_others_title">Tasks completed</string>
+    <string name="notification_by_others_body">Some tasks were completed by other members in the house</string>
+    <string name="notification_by_others_done">Done:</string>
+    <string name="notification_by_others_wont_do">Skipped:</string>
     <string name="notification_reminder_action_snooze_hours">6 hours</string>
     <string name="notification_reminder_action_snooze_day">Tomorrow</string>
     <string name="notification_reminder_action_complete">Done</string>

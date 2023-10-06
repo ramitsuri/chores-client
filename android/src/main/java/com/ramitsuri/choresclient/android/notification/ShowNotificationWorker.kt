@@ -80,6 +80,7 @@ class ShowNotificationWorker(
                 priority = Priority.HIGH,
                 title = assignment.taskName,
                 body = null,
+                additionalText = null,
                 iconResId = R.drawable.ic_notification,
                 actions = notificationActions,
                 actionExtras = mapOf(

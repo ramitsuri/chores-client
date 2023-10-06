@@ -5,14 +5,17 @@ import android.content.Context
 import android.os.Build
 import com.google.android.material.color.DynamicColors
 import com.ramitsuri.choresclient.AppInfo
+import com.ramitsuri.choresclient.android.notification.AndroidCompletedByOthersNotificationHandler
 import com.ramitsuri.choresclient.android.notification.DefaultNotificationManager
 import com.ramitsuri.choresclient.android.notification.ShowNotificationWorker
 import com.ramitsuri.choresclient.android.reminder.DefaultAlarmHandler
+import com.ramitsuri.choresclient.android.utils.DefaultAppLifecycleObserver
 import com.ramitsuri.choresclient.android.work.ContentDownloadWorker
 import com.ramitsuri.choresclient.android.work.PushMessageTokenUploader
 import com.ramitsuri.choresclient.data.db.dao.AlarmDao
 import com.ramitsuri.choresclient.data.settings.PrefManager
 import com.ramitsuri.choresclient.initKoin
+import com.ramitsuri.choresclient.notification.CompletedByOthersNotificationHandler
 import com.ramitsuri.choresclient.notification.Importance
 import com.ramitsuri.choresclient.notification.NotificationChannelInfo
 import com.ramitsuri.choresclient.notification.NotificationManager
@@ -21,6 +24,7 @@ import com.ramitsuri.choresclient.repositories.LoginRepository
 import com.ramitsuri.choresclient.repositories.SyncRepository
 import com.ramitsuri.choresclient.repositories.TaskAssignmentsRepository
 import com.ramitsuri.choresclient.repositories.TasksRepository
+import com.ramitsuri.choresclient.utils.AppLifecycleObserver
 import com.ramitsuri.choresclient.utils.ContentDownloadRequestHandler
 import com.ramitsuri.choresclient.utils.ContentDownloader
 import com.ramitsuri.choresclient.utils.DispatcherProvider
@@ -44,11 +48,13 @@ class MainApplication : Application(), KoinComponent {
     private val notificationManager: NotificationManager by inject()
     private val prefManager: PrefManager by inject()
     private val logger: LogHelper by inject()
+    private val appLifecycleObserver: AppLifecycleObserver by inject()
 
     override fun onCreate() {
         super.onCreate()
         DynamicColors.applyToActivitiesIfAvailable(this)
         initDependencyInjection()
+        appLifecycleObserver.init()
         logger.enableRemoteLogging(prefManager.getEnableRemoteLogging())
 
         createNotificationChannels()
@@ -71,7 +77,13 @@ class MainApplication : Application(), KoinComponent {
                     name = getString(R.string.notification_worker_name),
                     description = getString(R.string.notification_worker_description),
                     Importance.MIN
-                )
+                ),
+                NotificationChannelInfo(
+                    id = getString(R.string.notification_by_others_id),
+                    name = getString(R.string.notification_by_others_name),
+                    description = getString(R.string.notification_by_others_description),
+                    Importance.HIGH
+                ),
             )
         )
     }
@@ -103,12 +115,23 @@ class MainApplication : Application(), KoinComponent {
                     )
                 }
 
+                single<AppLifecycleObserver> {
+                    DefaultAppLifecycleObserver()
+                }
+
                 factory<AppInfo> {
                     AndroidAppInfo()
                 }
 
                 factory<ContentDownloadRequestHandler> {
                     ContentDownloadWorker
+                }
+
+                factory<CompletedByOthersNotificationHandler> {
+                    AndroidCompletedByOthersNotificationHandler(
+                        get<Context>(),
+                        get<NotificationManager>(),
+                    )
                 }
 
                 viewModel {

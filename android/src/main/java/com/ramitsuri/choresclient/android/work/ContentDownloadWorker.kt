@@ -24,6 +24,7 @@ import kotlinx.datetime.Clock
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import org.koin.core.component.inject
+import java.time.Duration
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -92,6 +93,10 @@ class ContentDownloadWorker(
             return enqueue(get<Context>(), expedite = true)
         }
 
+        override fun requestDelayedDownload() {
+            enqueue(get<Context>(), expedite = false)
+        }
+
         private fun enqueue(context: Context, expedite: Boolean = false): Flow<Boolean> {
             val builder = OneTimeWorkRequest
                 .Builder(ContentDownloadWorker::class.java)
@@ -100,6 +105,8 @@ class ContentDownloadWorker(
                 .apply {
                     if (expedite) {
                         setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+                    } else {
+                        setInitialDelay(Duration.ofMinutes(1))
                     }
                 }
 
