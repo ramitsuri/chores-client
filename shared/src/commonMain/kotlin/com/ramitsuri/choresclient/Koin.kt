@@ -124,7 +124,6 @@ private val coreModule = module {
             get<MemberHouseAssociationDao>(),
             get<MemberDao>(),
             get<NetworkProvider>().provideSyncApi(),
-            get<PrefManager>(),
         )
     }
 

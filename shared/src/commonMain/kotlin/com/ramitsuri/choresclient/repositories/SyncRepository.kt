@@ -22,7 +22,6 @@ class SyncRepository(
     private val memberHouseAssociationDao: MemberHouseAssociationDao,
     private val memberDao: MemberDao,
     private val syncApi: SyncApi,
-    private val prefManager: PrefManager,
 ) {
 
     suspend fun refresh(): Result<Unit> {
@@ -48,7 +47,6 @@ class SyncRepository(
                             it.toMemberEntity()
                         }
                 )
-                prefManager.setLastSyncTime()
                 Result.Success(Unit)
             }
 

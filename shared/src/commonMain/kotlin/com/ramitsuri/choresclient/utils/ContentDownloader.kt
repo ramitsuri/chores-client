@@ -27,6 +27,7 @@ class ContentDownloader(
             }
 
             taskAssignmentsRepository.refresh()
+            prefManager.setLastSyncTime()
         } catch (e: Exception) {
             logger.v(TAG, e.message ?: e.toString())
         }
