@@ -405,7 +405,11 @@ private fun AssignmentItem(
                         != RepeatUnit.ON_COMPLETE
                     ) {
                         Text(
-                            text = getDay(details.taskAssignment.dueDateTime).string(),
+                            text = getDay(
+                                toFormat = details.taskAssignment.dueDateTime,
+                                simplifyToday = false,
+                                simplifyTomorrow = false
+                            ).string(),
                             style = MaterialTheme.typography.labelSmall,
                             modifier = Modifier
                                 .background(

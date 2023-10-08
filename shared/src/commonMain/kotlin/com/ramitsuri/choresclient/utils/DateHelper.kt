@@ -9,7 +9,9 @@ import kotlinx.datetime.TimeZone
 expect fun getDay(
     toFormat: LocalDateTime,
     now: Instant = Clock.System.now(),
-    timeZone: TimeZone = TimeZone.currentSystemDefault()
+    timeZone: TimeZone = TimeZone.currentSystemDefault(),
+    simplifyToday: Boolean = true,
+    simplifyTomorrow: Boolean = true,
 ): TextValue
 
 /**

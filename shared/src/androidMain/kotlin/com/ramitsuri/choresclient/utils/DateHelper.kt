@@ -25,7 +25,9 @@ import java.time.LocalDateTime as JvmLocalDateTime
 actual fun getDay(
     toFormat: LocalDateTime,
     now: Instant,
-    timeZone: TimeZone
+    timeZone: TimeZone,
+    simplifyToday: Boolean,
+    simplifyTomorrow: Boolean,
 ): TextValue {
     val nowTruncated =
         now.toLocalDateTime(timeZone).toJavaLocalDateTime().truncatedTo(ChronoUnit.DAYS)
@@ -33,11 +35,19 @@ actual fun getDay(
     val daysBetweenNowAndToFormat = Duration.between(nowTruncated, toFormatTruncated).toDays()
     return when (daysBetweenNowAndToFormat) {
         0L -> {
-            TextValue.ForKey(LocalizedString.TODAY)
+            if (simplifyToday) {
+                TextValue.ForKey(LocalizedString.TODAY)
+            } else {
+                TextValue.ForString(format(toFormat, now, timeZone, "MMM d", "MMM d, uuuu"))
+            }
         }
 
         1L -> {
-            TextValue.ForKey(LocalizedString.TOMORROW)
+            if (simplifyTomorrow) {
+                TextValue.ForKey(LocalizedString.TOMORROW)
+            } else {
+                TextValue.ForString(format(toFormat, now, timeZone, "MMM d", "MMM d, uuuu"))
+            }
         }
 
         -1L -> {
