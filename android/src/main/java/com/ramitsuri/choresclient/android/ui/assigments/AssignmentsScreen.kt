@@ -10,15 +10,21 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.displayCutoutPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -35,7 +41,6 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.GroupWork
 import androidx.compose.material.icons.filled.House
-import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Person
@@ -110,10 +115,9 @@ fun AssignmentsScreen(
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         modifier = modifier
-            .fillMaxSize()
-            .statusBarsPadding()
-            .displayCutoutPadding(),
+            .fillMaxSize(),
         floatingActionButton = {
             FloatingActionButton(
                 onClick = onAddTaskClicked,
@@ -133,7 +137,15 @@ fun AssignmentsScreen(
             onSnoozeHour = onSnoozeHour,
             onSnoozeDay = onSnoozeDay,
             onEditTaskClicked = onEditTaskClicked,
-            modifier = Modifier.padding(paddingValues),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .consumeWindowInsets(paddingValues)
+                .windowInsetsPadding(
+                    WindowInsets.safeDrawing.only(
+                        WindowInsetsSides.Horizontal,
+                    ),
+                ),
             filters = viewState.filters,
             onFilterSelected = onFilterItemClicked,
             menu = menu
@@ -165,6 +177,11 @@ private fun AssignmentsContent(
             .fillMaxSize()
             .padding(horizontal = MaterialTheme.dimens.medium)
     ) {
+        Spacer(
+            modifier = Modifier.height(
+                WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+            )
+        )
         FilterRow(
             filters,
             onFilterSelected = onFilterSelected,

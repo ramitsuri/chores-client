@@ -14,6 +14,6 @@ Things to do
 - [x] Predictive back
 - [x] Test with real data 
 - [x] Allow Task Pause/Inactive
-- [ ] Content behind system bars
+- [x] Content behind system bars
 - [ ] Swipe to complete task item
 - [ ] Tabs for which list/house (hide if only one)

@@ -39,15 +39,12 @@ dependencies {
     implementation("androidx.compose.material:material:1.5.0")
     implementation("androidx.compose.material:material-icons-extended:1.5.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
-    implementation("androidx.activity:activity-compose:1.7.2")
+    implementation("androidx.activity:activity-compose:1.8.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.6.1")
     implementation("androidx.lifecycle:lifecycle-process:2.6.1")
     implementation("androidx.compose.material3:material3:1.2.0-alpha06")
     implementation("androidx.compose.material3:material3-window-size-class:1.2.0-alpha06")
-    implementation("com.google.accompanist:accompanist-swiperefresh:0.28.0")
-    implementation("com.google.accompanist:accompanist-systemuicontroller:0.28.0")
-    // 2.5.1 is causing a crash - List contains no element matching the predicate
     implementation("androidx.navigation:navigation-compose:2.7.1")
     implementation("io.github.vanpra.compose-material-dialogs:datetime:0.9.0")
 
