@@ -78,6 +78,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.ramitsuri.choresclient.android.R
@@ -330,16 +331,8 @@ private fun AssignmentHeader(text: String, modifier: Modifier = Modifier) {
     ) {
         Text(
             text = text,
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = modifier
-                .background(
-                    MaterialTheme.colorScheme.secondaryContainer,
-                    shape = RoundedCornerShape(
-                        topEnd = MaterialTheme.dimens.paddingCardView,
-                        bottomEnd = MaterialTheme.dimens.paddingCardView
-                    )
-                )
-                .padding(MaterialTheme.dimens.medium)
+            style = MaterialTheme.typography.bodySmall,
+            fontWeight = FontWeight.Bold,
         )
     }
 }
