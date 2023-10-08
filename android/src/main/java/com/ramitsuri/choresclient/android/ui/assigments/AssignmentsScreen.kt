@@ -32,6 +32,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.filled.AlarmAdd
@@ -43,7 +44,6 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.GroupWork
 import androidx.compose.material.icons.filled.House
-import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Repeat
@@ -698,7 +698,7 @@ fun MoreMenu(
 @Composable
 fun PreviewIcon() {
     Icon(
-        imageVector = Icons.Filled.List,
+        imageVector = Icons.AutoMirrored.Filled.List,
         contentDescription = stringResource(id = R.string.assignment_filter_person_content_description),
         modifier = Modifier.size(64.dp)
     )

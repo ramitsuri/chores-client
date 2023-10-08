@@ -17,7 +17,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckBox
 import androidx.compose.material.icons.filled.CheckBoxOutlineBlank
@@ -98,7 +98,7 @@ fun SettingsScreen(
                 onClick = onBack
             ) {
                 Icon(
-                    Icons.Filled.ArrowBack,
+                    Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = stringResource(id = R.string.back)
                 )
             }
