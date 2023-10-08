@@ -186,6 +186,7 @@ class AssignmentsViewModel(
 
         val pastDue = mutableListOf<TaskAssignmentDetails>()
         val dueToday = mutableListOf<TaskAssignmentDetails>()
+        val dueTomorrow = mutableListOf<TaskAssignmentDetails>()
         val dueInFuture = mutableListOf<TaskAssignmentDetails>()
         others
             .sortedBy { it.taskAssignment.dueDateTime }
@@ -196,6 +197,8 @@ class AssignmentsViewModel(
                     pastDue.add(taskAssignment)
                 } else if (difference == 0) {
                     dueToday.add(taskAssignment)
+                } else if (difference == 1) {
+                    dueTomorrow.add(taskAssignment)
                 } else {
                     dueInFuture.add(taskAssignment)
                 }
@@ -204,6 +207,7 @@ class AssignmentsViewModel(
             onCompletion = onCompletion,
             pastDue = pastDue,
             dueToday = dueToday,
+            dueTomorrow = dueTomorrow,
             dueInFuture = dueInFuture,
             otherAssignmentsCount = counts
         )

@@ -1,5 +1,6 @@
 package com.ramitsuri.choresclient.android.ui.assigments
 
+import androidx.annotation.StringRes
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -26,6 +27,7 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -217,7 +219,6 @@ private fun AssignmentsContent(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun AssignmentsList(
     assignments: Assignments,
@@ -232,77 +233,89 @@ private fun AssignmentsList(
             .fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(MaterialTheme.dimens.medium)
     ) {
-        if (assignments.onCompletion.isNotEmpty()) {
-            stickyHeader {
-                AssignmentHeader(stringResource(id = R.string.assignment_header_on_completion))
-            }
-            items(assignments.onCompletion, key = { it.taskAssignment.id }) { item ->
-                AssignmentItem(
-                    details = item,
-                    otherAssignmentsCount = assignments.otherAssignmentsCount[item.taskAssignment.id]
-                        ?: 0,
-                    onMarkAsDone = onMarkAsDone,
-                    onMarkAsWontDo = onMarkAsWontDo,
-                    onSnoozeHour = onSnoozeHour,
-                    onSnoozeDay = onSnoozeDay,
-                    onEditTaskClicked = onEditTaskClicked,
-                )
-            }
-        }
-        if (assignments.pastDue.isNotEmpty()) {
-            stickyHeader {
-                AssignmentHeader(stringResource(id = R.string.assignment_header_past_due))
-            }
-            items(assignments.pastDue, key = { it.taskAssignment.id }) { item ->
-                AssignmentItem(
-                    details = item,
-                    otherAssignmentsCount = assignments.otherAssignmentsCount[item.taskAssignment.id]
-                        ?: 0,
-                    onMarkAsDone = onMarkAsDone,
-                    onMarkAsWontDo = onMarkAsWontDo,
-                    onSnoozeHour = onSnoozeHour,
-                    onSnoozeDay = onSnoozeDay,
-                    onEditTaskClicked = onEditTaskClicked,
-                )
-            }
-        }
-        if (assignments.dueToday.isNotEmpty()) {
-            stickyHeader {
-                AssignmentHeader(stringResource(id = R.string.assignment_header_due_today))
-            }
-            items(assignments.dueToday, key = { it.taskAssignment.id }) { item ->
-                AssignmentItem(
-                    details = item,
-                    otherAssignmentsCount = assignments.otherAssignmentsCount[item.taskAssignment.id]
-                        ?: 0,
-                    onMarkAsDone = onMarkAsDone,
-                    onMarkAsWontDo = onMarkAsWontDo,
-                    onSnoozeHour = onSnoozeHour,
-                    onSnoozeDay = onSnoozeDay,
-                    onEditTaskClicked = onEditTaskClicked,
-                )
-            }
-        }
-        if (assignments.dueInFuture.isNotEmpty()) {
-            stickyHeader {
-                AssignmentHeader(stringResource(id = R.string.assignment_header_due_in_future))
-            }
-            items(assignments.dueInFuture, key = { it.taskAssignment.id }) { item ->
-                AssignmentItem(
-                    details = item,
-                    otherAssignmentsCount = assignments.otherAssignmentsCount[item.taskAssignment.id]
-                        ?: 0,
-                    onMarkAsDone = onMarkAsDone,
-                    onMarkAsWontDo = onMarkAsWontDo,
-                    onSnoozeHour = onSnoozeHour,
-                    onSnoozeDay = onSnoozeDay,
-                    onEditTaskClicked = onEditTaskClicked,
-                )
-            }
-        }
+        assignmentsGroup(
+            headerRes = R.string.assignment_header_on_completion,
+            assignments = assignments.onCompletion,
+            otherAssignmentsCount = assignments.otherAssignmentsCount,
+            onMarkAsDone = onMarkAsDone,
+            onMarkAsWontDo = onMarkAsWontDo,
+            onSnoozeHour = onSnoozeHour,
+            onSnoozeDay = onSnoozeDay,
+            onEditTaskClicked = onEditTaskClicked,
+        )
+        assignmentsGroup(
+            headerRes = R.string.assignment_header_past_due,
+            assignments = assignments.pastDue,
+            otherAssignmentsCount = assignments.otherAssignmentsCount,
+            onMarkAsDone = onMarkAsDone,
+            onMarkAsWontDo = onMarkAsWontDo,
+            onSnoozeHour = onSnoozeHour,
+            onSnoozeDay = onSnoozeDay,
+            onEditTaskClicked = onEditTaskClicked,
+        )
+        assignmentsGroup(
+            headerRes = R.string.assignment_header_due_today,
+            assignments = assignments.dueToday,
+            otherAssignmentsCount = assignments.otherAssignmentsCount,
+            onMarkAsDone = onMarkAsDone,
+            onMarkAsWontDo = onMarkAsWontDo,
+            onSnoozeHour = onSnoozeHour,
+            onSnoozeDay = onSnoozeDay,
+            onEditTaskClicked = onEditTaskClicked,
+        )
+        assignmentsGroup(
+            headerRes = R.string.assignment_header_due_tomorrow,
+            assignments = assignments.dueTomorrow,
+            otherAssignmentsCount = assignments.otherAssignmentsCount,
+            onMarkAsDone = onMarkAsDone,
+            onMarkAsWontDo = onMarkAsWontDo,
+            onSnoozeHour = onSnoozeHour,
+            onSnoozeDay = onSnoozeDay,
+            onEditTaskClicked = onEditTaskClicked,
+        )
+        assignmentsGroup(
+            headerRes = R.string.assignment_header_due_in_future,
+            assignments = assignments.dueInFuture,
+            otherAssignmentsCount = assignments.otherAssignmentsCount,
+            onMarkAsDone = onMarkAsDone,
+            onMarkAsWontDo = onMarkAsWontDo,
+            onSnoozeHour = onSnoozeHour,
+            onSnoozeDay = onSnoozeDay,
+            onEditTaskClicked = onEditTaskClicked,
+        )
         item {
             Spacer(modifier = Modifier.height(MaterialTheme.dimens.extraLarge))
             Spacer(modifier = Modifier.height(MaterialTheme.dimens.extraLarge))
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+private fun LazyListScope.assignmentsGroup(
+    @StringRes headerRes: Int,
+    assignments: List<TaskAssignmentDetails>,
+    otherAssignmentsCount: Map<String, Int>,
+    onMarkAsDone: (String) -> Unit,
+    onMarkAsWontDo: (String) -> Unit,
+    onSnoozeHour: (String) -> Unit,
+    onSnoozeDay: (String) -> Unit,
+    onEditTaskClicked: (String) -> Unit,
+) {
+    if (assignments.isNotEmpty()) {
+        stickyHeader {
+            AssignmentHeader(stringResource(id = headerRes))
+        }
+        items(assignments, key = { it.taskAssignment.id }) { item ->
+            AssignmentItem(
+                details = item,
+                otherAssignmentsCount = otherAssignmentsCount[item.taskAssignment.id]
+                    ?: 0,
+                onMarkAsDone = onMarkAsDone,
+                onMarkAsWontDo = onMarkAsWontDo,
+                onSnoozeHour = onSnoozeHour,
+                onSnoozeDay = onSnoozeDay,
+                onEditTaskClicked = onEditTaskClicked,
+            )
         }
     }
 }

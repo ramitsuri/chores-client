@@ -37,6 +37,7 @@
     <string name="assignment_header_on_completion">On Completion</string>
     <string name="assignment_header_past_due">Past</string>
     <string name="assignment_header_due_today">Today</string>
+    <string name="assignment_header_due_tomorrow">Tomorrow</string>
     <string name="assignment_header_due_in_future">Future</string>
     <string name="assignment_add_task_content_description">Add task</string>
 

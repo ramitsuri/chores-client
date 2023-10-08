@@ -12,6 +12,7 @@ data class Assignments(
     val onCompletion: List<TaskAssignmentDetails>,
     val pastDue: List<TaskAssignmentDetails>,
     val dueToday: List<TaskAssignmentDetails>,
+    val dueTomorrow: List<TaskAssignmentDetails>,
     val dueInFuture: List<TaskAssignmentDetails>,
     val otherAssignmentsCount: Map<String, Int>
 ) {
@@ -19,13 +20,14 @@ data class Assignments(
         return onCompletion.isEmpty() &&
                 pastDue.isEmpty() &&
                 dueToday.isEmpty() &&
+                dueTomorrow.isEmpty() &&
                 dueInFuture.isEmpty()
 
     }
 
     companion object {
         fun default(): Assignments {
-            return Assignments(listOf(), listOf(), listOf(), listOf(), mapOf())
+            return Assignments(listOf(), listOf(), listOf(), listOf(), listOf(), mapOf())
         }
     }
 }
