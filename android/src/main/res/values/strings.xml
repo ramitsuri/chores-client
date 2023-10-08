@@ -133,9 +133,6 @@
     <string name="settings_remote_logging_title">Remote logging</string>
     <string name="settings_remote_logging_subtitle_enabled">Currently enabled</string>
     <string name="settings_remote_logging_subtitle_disabled">Currently disabled</string>
-    <string name="settings_new_style_title">Use new style</string>
-    <string name="settings_new_style_subtitle_enabled">Currently using new style</string>
-    <string name="settings_new_style_subtitle_disabled">Currently using old style</string>
     <string name="settings_remind_past_due_title">Remind about old tasks</string>
     <string name="settings_remind_past_due_subtitle_enabled">Currently reminding</string>
     <string name="settings_remind_past_due_subtitle_disabled">Currently not reminding</string>

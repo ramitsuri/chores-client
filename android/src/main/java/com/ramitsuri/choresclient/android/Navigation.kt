@@ -105,7 +105,6 @@ fun NavGraph(
                 onNotificationActionsResetRequested = viewModel::resetNotificationActions,
                 onEnableRemoteLoggingClicked = viewModel::toggleLogging,
                 onErrorAcknowledged = viewModel::onErrorShown,
-                onEnableNewStyleClicked = viewModel::toggleUseNewStyle,
                 onEnableRemindPastDueClicked = viewModel::toggleRemindPastDue,
             )
         }

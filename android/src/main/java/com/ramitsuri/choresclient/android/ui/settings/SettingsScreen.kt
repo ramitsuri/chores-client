@@ -83,7 +83,6 @@ fun SettingsScreen(
     onNotificationActionsSaveRequested: () -> Unit,
     onNotificationActionsResetRequested: () -> Unit,
     onEnableRemoteLoggingClicked: () -> Unit,
-    onEnableNewStyleClicked: () -> Unit,
     onEnableRemindPastDueClicked: () -> Unit,
     onErrorAcknowledged: () -> Unit,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
@@ -113,18 +112,6 @@ fun SettingsScreen(
                         onClick = onSyncClicked,
                         syncViewState = state.syncViewState,
                         timeZone = state.timeZone,
-                    )
-                }
-                item {
-                    SettingsItemWithSwitch(
-                        title = stringResource(id = R.string.settings_new_style_title),
-                        subtitle = if (state.useNewStyleEnabled) {
-                            stringResource(id = R.string.settings_new_style_subtitle_enabled)
-                        } else {
-                            stringResource(id = R.string.settings_new_style_subtitle_disabled)
-                        },
-                        checked = state.useNewStyleEnabled,
-                        onClick = onEnableNewStyleClicked
                     )
                 }
                 item {
@@ -643,7 +630,6 @@ private fun SettingsScreenPreview(
                 ),
                 deviceId = null,
                 remoteLoggingEnabled = false,
-                useNewStyleEnabled = false,
                 remindPastDueEnabled = false,
                 timeZone = TimeZone.currentSystemDefault(),
                 error = null
@@ -660,7 +646,6 @@ private fun SettingsScreenPreview(
                 onNotificationActionsResetRequested = {},
                 onEnableRemoteLoggingClicked = {},
                 onErrorAcknowledged = {},
-                onEnableNewStyleClicked = {},
                 onEnableRemindPastDueClicked = {},
             )
         }

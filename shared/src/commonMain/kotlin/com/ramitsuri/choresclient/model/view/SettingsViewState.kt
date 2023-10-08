@@ -12,7 +12,6 @@ data class SettingsViewState(
     val deviceId: String?,
     val remoteLoggingEnabled: Boolean,
     val remindPastDueEnabled: Boolean,
-    val useNewStyleEnabled: Boolean,
     val timeZone: TimeZone,
     val error: Error? = null
 )

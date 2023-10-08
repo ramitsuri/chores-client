@@ -8,37 +8,24 @@ data class AssignmentsViewState(
     val filters: List<Filter> = listOf()
 )
 
-sealed class Assignments {
-    data class OldStyle(
-        val groups: Map<TextValue, List<TaskAssignmentDetails>>
-    ) : Assignments()
-
-    data class NewStyle(
-        val onCompletion: List<TaskAssignmentDetails>,
-        val pastDue: List<TaskAssignmentDetails>,
-        val dueToday: List<TaskAssignmentDetails>,
-        val dueInFuture: List<TaskAssignmentDetails>,
-        val otherAssignmentsCount: Map<String, Int>
-    ) : Assignments()
-
+data class Assignments(
+    val onCompletion: List<TaskAssignmentDetails>,
+    val pastDue: List<TaskAssignmentDetails>,
+    val dueToday: List<TaskAssignmentDetails>,
+    val dueInFuture: List<TaskAssignmentDetails>,
+    val otherAssignmentsCount: Map<String, Int>
+) {
     fun isEmpty(): Boolean {
-        return when (this) {
-            is NewStyle -> {
-                onCompletion.isEmpty() &&
-                        pastDue.isEmpty() &&
-                        dueToday.isEmpty() &&
-                        dueInFuture.isEmpty()
-            }
+        return onCompletion.isEmpty() &&
+                pastDue.isEmpty() &&
+                dueToday.isEmpty() &&
+                dueInFuture.isEmpty()
 
-            is OldStyle -> {
-                groups.isEmpty()
-            }
-        }
     }
 
     companion object {
         fun default(): Assignments {
-            return NewStyle(listOf(), listOf(), listOf(), listOf(), mapOf())
+            return Assignments(listOf(), listOf(), listOf(), listOf(), mapOf())
         }
     }
 }

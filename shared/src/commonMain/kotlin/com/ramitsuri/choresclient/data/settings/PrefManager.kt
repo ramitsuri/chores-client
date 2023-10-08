@@ -131,16 +131,6 @@ class PrefManager(
         putBoolean(key, value)
     }
 
-    fun useNewStyle(): Boolean {
-        val key = Key.USE_NEW_STYLE
-        return getBoolean(key, true)
-    }
-
-    fun setUseNewStyle(value: Boolean) {
-        val key = Key.USE_NEW_STYLE
-        putBoolean(key, value)
-    }
-
     fun isLoggedIn(): Boolean {
         return (getKey().isNullOrEmpty() ||
                 getLoggedInMemberId().isNullOrEmpty() ||
@@ -221,7 +211,8 @@ class PrefManager(
 
         private val legacyPrefs = mapOf(
             "worker_running" to KV,
-            "prev_notification_id" to KV
+            "prev_notification_id" to KV,
+            "use_new_style" to KV
         )
 
         private enum class Key(val key: String, val isSecure: Boolean) {
@@ -278,11 +269,6 @@ class PrefManager(
 
             REMIND_PAST_DUE(
                 key = "remind_past_due",
-                isSecure = false
-            ),
-
-            USE_NEW_STYLE(
-                key = "use_new_style",
                 isSecure = false
             )
         }

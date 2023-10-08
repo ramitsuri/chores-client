@@ -4,7 +4,6 @@ import com.ramitsuri.choresclient.data.settings.PrefManager
 import com.ramitsuri.choresclient.model.filter.Filter
 import com.ramitsuri.choresclient.model.filter.FilterItem
 import com.ramitsuri.choresclient.model.filter.FilterType
-import com.ramitsuri.choresclient.model.view.FilterViewState
 import com.ramitsuri.choresclient.model.view.NotificationActionWrapper
 import com.ramitsuri.choresclient.model.view.NotificationActionsViewState
 import com.ramitsuri.choresclient.model.view.SettingsViewState
@@ -41,7 +40,6 @@ class SettingsViewModel(
                 deviceId = prefManager.getDeviceId(),
                 remoteLoggingEnabled = prefManager.getEnableRemoteLogging(),
                 remindPastDueEnabled = prefManager.remindPastDue(),
-                useNewStyleEnabled = prefManager.useNewStyle(),
             )
         )
     val state: StateFlow<SettingsViewState> = _state
@@ -149,14 +147,6 @@ class SettingsViewModel(
         logger.enableRemoteLogging(enabled)
         _state.update {
             it.copy(remoteLoggingEnabled = enabled)
-        }
-    }
-
-    fun toggleUseNewStyle() {
-        val enabled = !prefManager.useNewStyle()
-        prefManager.setUseNewStyle(enabled)
-        _state.update {
-            it.copy(useNewStyleEnabled = enabled)
         }
     }
 

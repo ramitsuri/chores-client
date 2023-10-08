@@ -204,25 +204,14 @@ private fun AssignmentsContent(
                 modifier = Modifier
                     .fillMaxSize()
             ) {
-                when (assignments) {
-                    is Assignments.NewStyle -> AssignmentsListNewStyle(
-                        assignments = assignments,
-                        onMarkAsDone = onMarkAsDone,
-                        onMarkAsWontDo = onMarkAsWontDo,
-                        onSnoozeHour = onSnoozeHour,
-                        onSnoozeDay = onSnoozeDay,
-                        onEditTaskClicked = onEditTaskClicked,
-                    )
-
-                    is Assignments.OldStyle -> AssignmentsListOldStyle(
-                        assignments = assignments,
-                        onMarkAsDone = onMarkAsDone,
-                        onMarkAsWontDo = onMarkAsWontDo,
-                        onSnoozeHour = onSnoozeHour,
-                        onSnoozeDay = onSnoozeDay,
-                        onEditTaskClicked = onEditTaskClicked,
-                    )
-                }
+                AssignmentsList(
+                    assignments = assignments,
+                    onMarkAsDone = onMarkAsDone,
+                    onMarkAsWontDo = onMarkAsWontDo,
+                    onSnoozeHour = onSnoozeHour,
+                    onSnoozeDay = onSnoozeDay,
+                    onEditTaskClicked = onEditTaskClicked,
+                )
             }
         }
     }
@@ -230,8 +219,8 @@ private fun AssignmentsContent(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun AssignmentsListNewStyle(
-    assignments: Assignments.NewStyle,
+private fun AssignmentsList(
+    assignments: Assignments,
     onMarkAsDone: (String) -> Unit,
     onMarkAsWontDo: (String) -> Unit,
     onSnoozeHour: (String) -> Unit,
@@ -248,7 +237,7 @@ private fun AssignmentsListNewStyle(
                 AssignmentHeader(stringResource(id = R.string.assignment_header_on_completion))
             }
             items(assignments.onCompletion, key = { it.taskAssignment.id }) { item ->
-                AssignmentItemNewStyle(
+                AssignmentItem(
                     details = item,
                     otherAssignmentsCount = assignments.otherAssignmentsCount[item.taskAssignment.id]
                         ?: 0,
@@ -265,7 +254,7 @@ private fun AssignmentsListNewStyle(
                 AssignmentHeader(stringResource(id = R.string.assignment_header_past_due))
             }
             items(assignments.pastDue, key = { it.taskAssignment.id }) { item ->
-                AssignmentItemNewStyle(
+                AssignmentItem(
                     details = item,
                     otherAssignmentsCount = assignments.otherAssignmentsCount[item.taskAssignment.id]
                         ?: 0,
@@ -282,7 +271,7 @@ private fun AssignmentsListNewStyle(
                 AssignmentHeader(stringResource(id = R.string.assignment_header_due_today))
             }
             items(assignments.dueToday, key = { it.taskAssignment.id }) { item ->
-                AssignmentItemNewStyle(
+                AssignmentItem(
                     details = item,
                     otherAssignmentsCount = assignments.otherAssignmentsCount[item.taskAssignment.id]
                         ?: 0,
@@ -299,47 +288,10 @@ private fun AssignmentsListNewStyle(
                 AssignmentHeader(stringResource(id = R.string.assignment_header_due_in_future))
             }
             items(assignments.dueInFuture, key = { it.taskAssignment.id }) { item ->
-                AssignmentItemNewStyle(
+                AssignmentItem(
                     details = item,
                     otherAssignmentsCount = assignments.otherAssignmentsCount[item.taskAssignment.id]
                         ?: 0,
-                    onMarkAsDone = onMarkAsDone,
-                    onMarkAsWontDo = onMarkAsWontDo,
-                    onSnoozeHour = onSnoozeHour,
-                    onSnoozeDay = onSnoozeDay,
-                    onEditTaskClicked = onEditTaskClicked,
-                )
-            }
-        }
-        item {
-            Spacer(modifier = Modifier.height(MaterialTheme.dimens.extraLarge))
-            Spacer(modifier = Modifier.height(MaterialTheme.dimens.extraLarge))
-        }
-    }
-}
-
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-private fun AssignmentsListOldStyle(
-    assignments: Assignments.OldStyle,
-    onMarkAsDone: (String) -> Unit,
-    onMarkAsWontDo: (String) -> Unit,
-    onSnoozeHour: (String) -> Unit,
-    onSnoozeDay: (String) -> Unit,
-    onEditTaskClicked: (String) -> Unit,
-) {
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(MaterialTheme.dimens.medium)
-    ) {
-        assignments.groups.forEach { (header, assignments) ->
-            stickyHeader {
-                AssignmentHeader(text = header.string())
-            }
-            items(assignments, key = { it.taskAssignment.id }) { item ->
-                AssignmentItemOldStyle(
-                    details = item,
                     onMarkAsDone = onMarkAsDone,
                     onMarkAsWontDo = onMarkAsWontDo,
                     onSnoozeHour = onSnoozeHour,
@@ -381,168 +333,7 @@ private fun AssignmentHeader(text: String, modifier: Modifier = Modifier) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun AssignmentItemOldStyle(
-    details: TaskAssignmentDetails,
-    onMarkAsDone: (String) -> Unit,
-    onMarkAsWontDo: (String) -> Unit,
-    onSnoozeHour: (String) -> Unit,
-    onSnoozeDay: (String) -> Unit,
-    onEditTaskClicked: (String) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    var showDetails by remember { mutableStateOf(false) }
-
-    Card(
-        onClick = { showDetails = !showDetails },
-        border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background),
-        modifier = modifier
-            .animateContentSize()
-    ) {
-        Row(
-            horizontalArrangement = Arrangement.Start,
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .defaultMinSize(minHeight = MaterialTheme.dimens.minAssignmentItemHeight)
-                .padding(MaterialTheme.dimens.paddingCardView)
-        ) {
-            Spacer(modifier = Modifier.width(MaterialTheme.dimens.medium))
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    text = details.taskAssignment.taskName,
-                    style = MaterialTheme.typography.headlineSmall,
-                    modifier = Modifier.padding(MaterialTheme.dimens.small)
-                )
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    val text = details.taskAssignment.memberName
-                    LabelWithIcon(text = text, icon = Icons.Filled.Person)
-                    if (details.taskAssignment.repeatInfo.repeatUnit != RepeatUnit.NONE &&
-                        details.taskAssignment.repeatInfo.repeatValue != 0
-                    ) {
-                        Spacer(modifier = Modifier.width(MaterialTheme.dimens.small))
-                        val repeatTextValue = formatRepeatUnitCompact(
-                            repeatValue = details.taskAssignment.repeatInfo.repeatValue,
-                            repeatUnit = details.taskAssignment.repeatInfo.repeatUnit
-                        )
-                        LabelWithIcon(text = repeatTextValue, icon = Icons.Filled.Repeat)
-                    }
-                }
-            }
-            Spacer(modifier = Modifier.width(MaterialTheme.dimens.medium))
-            FilledTonalIconButton(
-                colors = IconButtonDefaults.filledTonalIconButtonColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer
-                ),
-                onClick = { onMarkAsDone(details.taskAssignment.id) },
-                modifier = Modifier
-                    .width(MaterialTheme.dimens.iconWidthLarge)
-                    .align(alignment = Alignment.CenterVertically),
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Check,
-                    contentDescription = stringResource(id = R.string.ok)
-                )
-            }
-            Spacer(modifier = Modifier.width(MaterialTheme.dimens.medium))
-        }
-        if (showDetails) {
-            if (details.willReminderBeSet && details.reminderTime != null) {
-                Row(Modifier.padding(horizontal = MaterialTheme.dimens.medium)) {
-                    Spacer(
-                        modifier = Modifier
-                            .width(
-                                MaterialTheme.dimens.medium
-                                    .plus(MaterialTheme.dimens.small)
-                            )
-                    )
-                    LabelWithIcon(
-                        text = formatReminderAt(toFormat = details.reminderTime),
-                        icon = Icons.Filled.Alarm
-                    )
-                }
-                Spacer(modifier = Modifier.height(MaterialTheme.dimens.large))
-            }
-            LazyRow(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = MaterialTheme.dimens.medium),
-                horizontalArrangement = Arrangement.spacedBy(MaterialTheme.dimens.medium)
-            ) {
-                item {
-                    FilledTonalButton(
-                        onClick = { onEditTaskClicked(details.taskAssignment.taskId) },
-                        contentPadding = PaddingValues(MaterialTheme.dimens.medium)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Edit,
-                            modifier = Modifier.size(MaterialTheme.dimens.iconWidthSmall),
-                            contentDescription = stringResource(id = R.string.edit)
-                        )
-                        Spacer(modifier = Modifier.width(MaterialTheme.dimens.small))
-                        Text(text = stringResource(id = R.string.edit))
-                    }
-                }
-                item {
-                    OutlinedButton(
-                        onClick = { onSnoozeHour(details.taskAssignment.id) },
-                        contentPadding = PaddingValues(MaterialTheme.dimens.medium),
-                        enabled = details.enableSnooze
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Default.AlarmAdd,
-                                modifier = Modifier.size(MaterialTheme.dimens.iconWidthSmall),
-                                contentDescription = stringResource(id = R.string.assignment_details_button_snooze_hours)
-                            )
-                            Spacer(modifier = Modifier.width(MaterialTheme.dimens.small))
-                            Text(text = stringResource(id = R.string.assignment_details_button_snooze_hours))
-                        }
-                    }
-                }
-                item {
-                    OutlinedButton(
-                        onClick = { onSnoozeDay(details.taskAssignment.id) },
-                        contentPadding = PaddingValues(MaterialTheme.dimens.medium),
-                        enabled = details.enableSnooze
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.AlarmAdd,
-                            modifier = Modifier.size(MaterialTheme.dimens.iconWidthSmall),
-                            contentDescription = stringResource(id = R.string.assignment_details_button_snooze_day)
-                        )
-                        Spacer(modifier = Modifier.width(MaterialTheme.dimens.small))
-                        Text(text = stringResource(id = R.string.assignment_details_button_snooze_day))
-                    }
-                }
-                item {
-                    OutlinedButton(
-                        onClick = { onMarkAsWontDo(details.taskAssignment.id) },
-                        contentPadding = PaddingValues(MaterialTheme.dimens.medium)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Clear,
-                            modifier = Modifier.size(MaterialTheme.dimens.iconWidthSmall),
-                            contentDescription = stringResource(id = R.string.assignment_details_button_wont_do)
-                        )
-                        Spacer(modifier = Modifier.width(MaterialTheme.dimens.small))
-                        Text(text = stringResource(id = R.string.assignment_details_button_wont_do))
-                    }
-                }
-            }
-            Spacer(modifier = Modifier.height(MaterialTheme.dimens.medium))
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun AssignmentItemNewStyle(
+private fun AssignmentItem(
     details: TaskAssignmentDetails,
     otherAssignmentsCount: Int,
     onMarkAsDone: (String) -> Unit,

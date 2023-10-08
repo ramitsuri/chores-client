@@ -9,12 +9,9 @@ import com.ramitsuri.choresclient.model.filter.FilterType
 import com.ramitsuri.choresclient.model.view.Assignments
 import com.ramitsuri.choresclient.model.view.AssignmentsViewState
 import com.ramitsuri.choresclient.model.view.TaskAssignmentDetails
-import com.ramitsuri.choresclient.model.view.TextValue
 import com.ramitsuri.choresclient.repositories.TaskAssignmentsRepository
-import com.ramitsuri.choresclient.resources.LocalizedString
 import com.ramitsuri.choresclient.utils.FilterHelper
 import com.ramitsuri.choresclient.utils.differenceInDays
-import com.ramitsuri.choresclient.utils.getDay
 import com.ramitsuri.choresclient.utils.now
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -143,7 +140,7 @@ class AssignmentsViewModel(
                             it.taskAssignment.dueDateTime
                         }
                     )
-                    .getInStyle(prefManager.getLoggedInMemberId(), prefManager.useNewStyle())
+                    .toAssignments(prefManager.getLoggedInMemberId())
 
                 _state.update {
                     it.copy(
@@ -155,81 +152,60 @@ class AssignmentsViewModel(
         }
     }
 
-    private fun List<TaskAssignmentDetails>.getInStyle(
+    private fun List<TaskAssignmentDetails>.toAssignments(
         loggedInMemberId: String?,
-        useNewStyle: Boolean,
         now: LocalDateTime = LocalDateTime.now()
     ): Assignments {
-        return if (useNewStyle) {
-            val assignments = mutableListOf<TaskAssignmentDetails>()
-            val counts = mutableMapOf<String, Int>()
-            val grouped = filter { it.taskAssignment.progressStatus == ProgressStatus.TODO }
-                .groupBy { it.taskAssignment.taskId }
-            grouped.forEach { (_, assignmentsForTask) ->
-                val (ownAssignments, othersAssignments) = assignmentsForTask
-                    .partition { it.taskAssignment.memberId == loggedInMemberId }
 
-                val ownAssignmentToShow =
-                    ownAssignments.minByOrNull { it.taskAssignment.dueDateTime }
-                if (ownAssignmentToShow != null) {
-                    assignments.add(ownAssignmentToShow)
-                    counts[ownAssignmentToShow.taskAssignment.id] = ownAssignments.size - 1
-                }
+        val assignments = mutableListOf<TaskAssignmentDetails>()
+        val counts = mutableMapOf<String, Int>()
+        val grouped = filter { it.taskAssignment.progressStatus == ProgressStatus.TODO }
+            .groupBy { it.taskAssignment.taskId }
+        grouped.forEach { (_, assignmentsForTask) ->
+            val (ownAssignments, othersAssignments) = assignmentsForTask
+                .partition { it.taskAssignment.memberId == loggedInMemberId }
 
-                val othersAssignmentToShow =
-                    othersAssignments.minByOrNull { it.taskAssignment.dueDateTime }
-                if (othersAssignmentToShow != null) {
-                    assignments.add(othersAssignmentToShow)
-                    counts[othersAssignmentToShow.taskAssignment.id] = othersAssignments.size - 1
-                }
+            val ownAssignmentToShow =
+                ownAssignments.minByOrNull { it.taskAssignment.dueDateTime }
+            if (ownAssignmentToShow != null) {
+                assignments.add(ownAssignmentToShow)
+                counts[ownAssignmentToShow.taskAssignment.id] = ownAssignments.size - 1
             }
 
-            // Move "On Completion" to top
-            val (onCompletion, others) = assignments
-                .partition { it.taskAssignment.repeatInfo.repeatUnit == RepeatUnit.ON_COMPLETE }
-
-            val pastDue = mutableListOf<TaskAssignmentDetails>()
-            val dueToday = mutableListOf<TaskAssignmentDetails>()
-            val dueInFuture = mutableListOf<TaskAssignmentDetails>()
-            others
-                .sortedBy { it.taskAssignment.dueDateTime }
-                .forEach { taskAssignment ->
-                    val difference =
-                        differenceInDays(taskAssignment.taskAssignment.dueDateTime, now)
-                    if (difference < 0) {
-                        pastDue.add(taskAssignment)
-                    } else if (difference == 0) {
-                        dueToday.add(taskAssignment)
-                    } else {
-                        dueInFuture.add(taskAssignment)
-                    }
-                }
-            Assignments.NewStyle(
-                onCompletion = onCompletion,
-                pastDue = pastDue,
-                dueToday = dueToday,
-                dueInFuture = dueInFuture,
-                otherAssignmentsCount = counts
-            )
-        } else {
-            val onCompletionKey = TextValue.ForKey(LocalizedString.ON_COMPLETION)
-            val grouped = filter { it.taskAssignment.progressStatus == ProgressStatus.TODO }
-                .groupBy {
-                    if (it.taskAssignment.repeatInfo.repeatUnit == RepeatUnit.ON_COMPLETE) {
-                        onCompletionKey
-                    } else {
-                        getDay(it.taskAssignment.dueDateTime)
-                    }
-                }
-
-            // Move "On Completion" to top
-            val onCompletion = grouped[onCompletionKey]
-            val ordered = if (onCompletion != null) {
-                mapOf(onCompletionKey to onCompletion).plus(grouped.minus(onCompletionKey))
-            } else {
-                grouped
+            val othersAssignmentToShow =
+                othersAssignments.minByOrNull { it.taskAssignment.dueDateTime }
+            if (othersAssignmentToShow != null) {
+                assignments.add(othersAssignmentToShow)
+                counts[othersAssignmentToShow.taskAssignment.id] = othersAssignments.size - 1
             }
-            Assignments.OldStyle(ordered)
         }
+
+        // Move "On Completion" to top
+        val (onCompletion, others) = assignments
+            .partition { it.taskAssignment.repeatInfo.repeatUnit == RepeatUnit.ON_COMPLETE }
+
+        val pastDue = mutableListOf<TaskAssignmentDetails>()
+        val dueToday = mutableListOf<TaskAssignmentDetails>()
+        val dueInFuture = mutableListOf<TaskAssignmentDetails>()
+        others
+            .sortedBy { it.taskAssignment.dueDateTime }
+            .forEach { taskAssignment ->
+                val difference =
+                    differenceInDays(taskAssignment.taskAssignment.dueDateTime, now)
+                if (difference < 0) {
+                    pastDue.add(taskAssignment)
+                } else if (difference == 0) {
+                    dueToday.add(taskAssignment)
+                } else {
+                    dueInFuture.add(taskAssignment)
+                }
+            }
+        return Assignments(
+            onCompletion = onCompletion,
+            pastDue = pastDue,
+            dueToday = dueToday,
+            dueInFuture = dueInFuture,
+            otherAssignmentsCount = counts
+        )
     }
 }
