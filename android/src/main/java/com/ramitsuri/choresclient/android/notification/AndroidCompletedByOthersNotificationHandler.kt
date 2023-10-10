@@ -6,6 +6,7 @@ import com.ramitsuri.choresclient.notification.NotificationInfo
 import com.ramitsuri.choresclient.notification.NotificationManager
 import com.ramitsuri.choresclient.notification.Priority
 import com.ramitsuri.choresclient.android.R
+import com.ramitsuri.choresclient.android.utils.NotificationId
 
 class AndroidCompletedByOthersNotificationHandler(
     private val context: Context,
@@ -43,7 +44,7 @@ class AndroidCompletedByOthersNotificationHandler(
         }
 
         val notificationInfo = NotificationInfo(
-            id = Int.MAX_VALUE,
+            id = NotificationId.COMPLETED_BY_OTHERS,
             channelId = context.getString(R.string.notification_by_others_id),
             priority = Priority.HIGH,
             title = context.getString(R.string.notification_by_others_title),

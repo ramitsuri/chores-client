@@ -2,7 +2,6 @@ package com.ramitsuri.choresclient.data.db.dao
 
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
-import app.cash.sqldelight.coroutines.mapToOneOrNull
 import com.ramitsuri.choresclient.db.ChoresDatabaseQueries
 import com.ramitsuri.choresclient.db.TaskAssignmentEntity
 import com.ramitsuri.choresclient.model.entities.TaskAssignmentUpdate
@@ -19,6 +18,14 @@ class TaskAssignmentDao(
             .selectAssignments()
             .asFlow()
             .mapToList(dispatcherProvider.io)
+    }
+
+    suspend fun getAll(): List<TaskAssignmentEntity> {
+        return withContext(dispatcherProvider.io) {
+            dbQueries
+                .selectAssignments()
+                .executeAsList()
+        }
     }
 
     suspend fun get(id: String): TaskAssignmentEntity? {

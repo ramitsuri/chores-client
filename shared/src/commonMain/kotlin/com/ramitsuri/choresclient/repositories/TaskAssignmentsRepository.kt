@@ -37,7 +37,7 @@ class DefaultTaskAssignmentsRepository(
 ) : TaskAssignmentsRepository, KoinComponent {
 
     private val logger: LogHelper by inject()
-    override suspend fun refresh(): Result<Unit> {
+    override suspend fun refresh(forceRemindPastDue: Boolean) {
         // Upload completed local assignments
         val uploadedIds = uploadLocal()
 
@@ -45,17 +45,15 @@ class DefaultTaskAssignmentsRepository(
         taskAssignmentDao.delete(uploadedIds)
 
         // Fetch from server and save locally
-        val fetchAndSaveResult = fetchAndSave()
-        return when (fetchAndSaveResult) {
-            is Result.Failure -> {
-                fetchAndSaveResult
-            }
+        fetchAndSave()
 
-            is Result.Success -> {
-                reminderScheduler.scheduleReminders(fetchAndSaveResult.data)
-                Result.Success(Unit)
-            }
-        }
+        // Schedule reminder for all locally available
+        reminderScheduler.scheduleReminders(
+            toTaskAssignments(taskAssignmentDao.getAll()
+                .filter { it.progressStatus == ProgressStatus.TODO }
+            ),
+            forceRemindPastDue = forceRemindPastDue
+        )
     }
 
     override suspend fun getLocalFlow(loggedInMemberId: String): Flow<List<TaskAssignmentDetails>> {
@@ -147,31 +145,24 @@ class DefaultTaskAssignmentsRepository(
         }
     }
 
-    private suspend fun fetchAndSave(): Result<List<TaskAssignment>> {
+    private suspend fun fetchAndSave() {
         val result = api.getTaskAssignments()
 
-        return when (result) {
-            is Result.Failure -> {
-                Result.Failure(result.error)
-            }
+        if (result is Result.Success) {
+            result.data
+                .map {
+                    it.task.toTaskEntity()
+                }.also { tasks ->
+                    taskDao.clearAndInsert(tasks)
+                }
 
-            is Result.Success -> {
-                result.data
-                    .map {
-                        it.task.toTaskEntity()
-                    }.also { tasks ->
-                        taskDao.clearAndInsert(tasks)
-                    }
+            val taskAssignmentEntities = result.data
+                .map {
+                    it.toTaskAssignmentEntity(shouldUpload = false)
+                }
+            taskAssignmentDao.clearTodoAndInsert(taskAssignmentEntities)
 
-                val taskAssignmentEntities = result.data
-                    .map {
-                        it.toTaskAssignmentEntity(shouldUpload = false)
-                    }
-                taskAssignmentDao.clearTodoAndInsert(taskAssignmentEntities)
-
-                logger.v(TAG, "Fetched: ${result.data.joinToString { it.id }}")
-                Result.Success(toTaskAssignments(taskAssignmentEntities))
-            }
+            logger.v(TAG, "Fetched: ${result.data.joinToString { it.id }}")
         }
     }
 
@@ -208,7 +199,7 @@ class DefaultTaskAssignmentsRepository(
 }
 
 interface TaskAssignmentsRepository {
-    suspend fun refresh(): Result<Unit>
+    suspend fun refresh(forceRemindPastDue: Boolean = false)
 
     suspend fun getLocalFlow(loggedInMemberId: String): Flow<List<TaskAssignmentDetails>>
 

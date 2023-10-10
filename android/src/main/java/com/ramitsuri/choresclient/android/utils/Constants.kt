@@ -51,3 +51,8 @@ enum class NotificationAction(val action: String, val requestCode: Int, @StringR
 object NotificationActionExtra {
     const val KEY_ASSIGNMENT_ID = "NOTIFICATION_ACTION_KEY_ASSIGNMENT_ID"
 }
+
+object NotificationId {
+    const val COMPLETED_BY_OTHERS = Int.MAX_VALUE
+    const val CONTENT_DOWNLOAD_FOREGROUND_WORKER = Int.MAX_VALUE - 1
+}

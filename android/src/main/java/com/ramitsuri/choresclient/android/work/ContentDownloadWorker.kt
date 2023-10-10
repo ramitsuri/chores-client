@@ -15,6 +15,7 @@ import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.ramitsuri.choresclient.android.R
+import com.ramitsuri.choresclient.android.utils.NotificationId
 import com.ramitsuri.choresclient.utils.ContentDownloadRequestHandler
 import com.ramitsuri.choresclient.utils.ContentDownloader
 import com.ramitsuri.choresclient.utils.LogHelper
@@ -42,8 +43,12 @@ class ContentDownloadWorker(
                 logger.v(TAG, "Already running, will retry")
                 return Result.retry()
             }
+            val forceRemindPastDue = inputData.getBoolean(FORCE_REMIND_PAST_DUE_ARG, false)
             setProgress(workDataOf(RUNNING_STATUS to true))
-            contentDownloader.download(now = Clock.System.now())
+            contentDownloader.download(
+                now = Clock.System.now(),
+                forceRemindPastDue = forceRemindPastDue
+            )
             logger.v(TAG, "Run complete")
         } finally {
             isRunning.set(false)
@@ -70,8 +75,10 @@ class ContentDownloadWorker(
         private const val REPEAT_HOURS: Long = 4
         private const val WORK_NAME_ONE_TIME = "AssignmentsDownloader_OneTime"
         private const val TAG = "AssignmentsDownloader"
-        private const val NOTIFICATION_ID = Int.MAX_VALUE
+        private const val NOTIFICATION_ID = NotificationId.CONTENT_DOWNLOAD_FOREGROUND_WORKER
         private const val RUNNING_STATUS = "running_status"
+        private const val FORCE_REMIND_PAST_DUE_ARG = "force_remind_past_due"
+
         private val isRunning = AtomicBoolean(false)
 
         fun enqueuePeriodic(context: Context) {
@@ -89,19 +96,27 @@ class ContentDownloadWorker(
                 )
         }
 
-        override fun requestImmediateDownload(): Flow<Boolean> {
-            return enqueue(get<Context>(), expedite = true)
+        override fun requestImmediateDownload(forceRemindPastDue: Boolean): Flow<Boolean> {
+            return enqueue(get<Context>(), forceRemindPastDue = forceRemindPastDue, expedite = true)
         }
 
-        override fun requestDelayedDownload() {
-            enqueue(get<Context>(), expedite = false)
+        override fun requestDelayedDownload(forceRemindPastDue: Boolean) {
+            enqueue(get<Context>(), forceRemindPastDue = forceRemindPastDue, expedite = false)
         }
 
-        private fun enqueue(context: Context, expedite: Boolean = false): Flow<Boolean> {
+        private fun enqueue(
+            context: Context,
+            forceRemindPastDue: Boolean,
+            expedite: Boolean = false,
+        ): Flow<Boolean> {
+            val inputData = workDataOf(
+                FORCE_REMIND_PAST_DUE_ARG to forceRemindPastDue,
+            )
             val builder = OneTimeWorkRequest
                 .Builder(ContentDownloadWorker::class.java)
                 .addTag(WORK_NAME_ONE_TIME)
                 .setConstraints(getConstraints())
+                .setInputData(inputData)
                 .apply {
                     if (expedite) {
                         setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)

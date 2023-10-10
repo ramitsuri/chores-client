@@ -17,7 +17,11 @@ class ContentDownloader(
 ) : KoinComponent {
 
     private val logger: LogHelper by inject()
-    suspend fun download(now: Instant, forceDownload: Boolean = false) {
+    suspend fun download(
+        now: Instant,
+        forceDownload: Boolean = false,
+        forceRemindPastDue: Boolean = false,
+    ) {
         try {
             val shouldDownloadSyncStuff = isDebug
                 .or(forceDownload)
@@ -26,7 +30,9 @@ class ContentDownloader(
                 syncRepository.refresh()
             }
 
-            taskAssignmentsRepository.refresh()
+            taskAssignmentsRepository.refresh(
+                forceRemindPastDue = forceRemindPastDue
+            )
             prefManager.setLastSyncTime()
         } catch (e: Exception) {
             logger.v(TAG, e.message ?: e.toString())

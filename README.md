@@ -15,5 +15,6 @@ Things to do
 - [x] Test with real data 
 - [x] Allow Task Pause/Inactive
 - [x] Content behind system bars
+- [x] Show past due right away when app updated or phone restarted
 - [ ] Swipe to complete task item
 - [ ] Tabs for which list/house (hide if only one)

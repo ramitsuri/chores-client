@@ -15,17 +15,17 @@ class ReminderScheduler(
     private val prefManager: PrefManager
 ) {
 
-
     /**
      * Schedules reminders for passed in assignments but filters out assignments that are not for
      * the logged in member or have repeat unit as on_completion.
      */
     suspend fun scheduleReminders(
         assignments: List<TaskAssignment>,
+        forceRemindPastDue: Boolean = false,
         now: LocalDateTime = LocalDateTime.now()
     ) {
         val memberId = prefManager.getLoggedInMemberId() ?: return
-        val remindPastDue = prefManager.remindPastDue()
+        val remindPastDue = prefManager.remindPastDue() || forceRemindPastDue
         val existingAlarms = alarmHandler.getExisting()
 
         val (inFuture, pastDue) = assignments
@@ -43,6 +43,7 @@ class ReminderScheduler(
             existingAlarms = existingAlarms,
             now = now,
             remindPastDue = remindPastDue,
+            forceRemindPastDue = forceRemindPastDue,
         )
         alarmHandler.schedule(alarmsToSchedule)
 
@@ -65,6 +66,7 @@ class ReminderScheduler(
         existingAlarms: List<AlarmEntity>,
         now: LocalDateTime,
         remindPastDue: Boolean,
+        forceRemindPastDue: Boolean,
     ): List<AssignmentAlarm> {
         val assignmentAlarms = mutableListOf<AssignmentAlarm>()
 
@@ -87,8 +89,9 @@ class ReminderScheduler(
                     assignment.id == notificationEntity.assignmentId
                 }
                 val lastNotifiedTime = existingNotification?.showAtTime
-                if (lastNotifiedTime != null && now.minus(days = 1) < lastNotifiedTime) {
-                    // It's been less than 1 day since the notification was last shown
+                if (lastNotifiedTime.lessThanOneDaySinceLastNotified(now) && !forceRemindPastDue) {
+                    // It's been less than 1 day since the notification was last shown and
+                    // reminder for past due not forced
                     return@forEach
                 }
                 assignmentAlarms.add(
@@ -102,5 +105,12 @@ class ReminderScheduler(
         }
 
         return assignmentAlarms
+    }
+
+    private fun LocalDateTime?.lessThanOneDaySinceLastNotified(now: LocalDateTime): Boolean {
+        if (this == null) {
+            return false
+        }
+        return now.minus(days = 1) < this
     }
 }
