@@ -76,8 +76,8 @@ android {
         applicationId = "com.ramitsuri.choresclient.android"
         minSdk = (findProperty("android.minSdk") as String).toInt()
         targetSdk = (findProperty("android.targetSdk") as String).toInt()
-        versionCode = 68
-        versionName = "6.8"
+        versionCode = 69
+        versionName = "6.9"
 
         kapt {
             arguments {
