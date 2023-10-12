@@ -74,7 +74,8 @@ class DefaultTaskAssignmentsRepository(
                             } else {
                                 assignment.repeatInfo.repeatUnit != RepeatUnit.ON_COMPLETE &&
                                         assignment.memberId == loggedInMemberId
-                            }
+                            },
+                            assignedToLoggedInUser = assignment.memberId == loggedInMemberId
                         )
                     )
                 }

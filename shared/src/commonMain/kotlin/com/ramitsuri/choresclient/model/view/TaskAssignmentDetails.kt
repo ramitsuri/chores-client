@@ -8,4 +8,5 @@ data class TaskAssignmentDetails(
     val reminderTime: LocalDateTime?,
     val enableSnooze: Boolean,
     val willReminderBeSet: Boolean,
+    val assignedToLoggedInUser: Boolean,
 )

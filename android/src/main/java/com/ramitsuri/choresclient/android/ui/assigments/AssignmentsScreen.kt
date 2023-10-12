@@ -31,6 +31,7 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ContentAlpha
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Add
@@ -87,6 +88,9 @@ import com.ramitsuri.choresclient.android.ui.theme.ChoresClientTheme
 import com.ramitsuri.choresclient.android.ui.theme.dimens
 import com.ramitsuri.choresclient.android.utils.formatReminderAt
 import com.ramitsuri.choresclient.android.utils.formatRepeatUnitCompact
+import com.ramitsuri.choresclient.model.entities.RepeatInfo
+import com.ramitsuri.choresclient.model.entities.TaskAssignment
+import com.ramitsuri.choresclient.model.enums.ProgressStatus
 import com.ramitsuri.choresclient.model.enums.RepeatUnit
 import com.ramitsuri.choresclient.model.filter.Filter
 import com.ramitsuri.choresclient.model.filter.FilterItem
@@ -99,6 +103,9 @@ import com.ramitsuri.choresclient.model.view.AssignmentsViewState
 import com.ramitsuri.choresclient.model.view.TaskAssignmentDetails
 import com.ramitsuri.choresclient.model.view.TextValue
 import com.ramitsuri.choresclient.utils.getDay
+import com.ramitsuri.choresclient.utils.now
+import kotlinx.datetime.Clock
+import kotlinx.datetime.LocalDateTime
 
 @Composable
 fun AssignmentsScreen(
@@ -353,7 +360,14 @@ private fun AssignmentItem(
 
     Card(
         onClick = { showDetails = !showDetails },
-        border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline),
+        border = if (details.assignedToLoggedInUser) {
+            BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+        } else {
+            BorderStroke(
+                0.5.dp,
+                MaterialTheme.colorScheme.outline.copy(alpha = ContentAlpha.medium)
+            )
+        },
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background),
         modifier = modifier
             .animateContentSize()
@@ -763,5 +777,172 @@ fun PreviewAssignmentContentContentEmpty() {
 fun PreviewEmptyContent() {
     Surface {
         EmptyContent()
+    }
+}
+
+@Preview
+@Composable
+private fun PreviewAssignmentContent() {
+    val viewState = AssignmentsViewState(
+        loading = false,
+        assignments = Assignments(
+            onCompletion = listOf(
+                TaskAssignmentDetails(
+                    taskAssignment = TaskAssignment(
+                        id = "1",
+                        progressStatus = ProgressStatus.TODO,
+                        progressStatusDate = Clock.System.now(),
+                        taskId = "taskId",
+                        taskName = "Task",
+                        houseId = "houseId",
+                        repeatInfo = RepeatInfo(
+                            repeatValue = 1,
+                            repeatUnit = RepeatUnit.ON_COMPLETE,
+                            repeatEndDateTime = null
+                        ),
+                        memberId = "memberId",
+                        memberName = "Member",
+                        dueDateTime = LocalDateTime.now()
+                    ),
+                    reminderTime = null,
+                    enableSnooze = false,
+                    willReminderBeSet = false,
+                    assignedToLoggedInUser = false,
+                )
+            ),
+            pastDue = listOf(
+                TaskAssignmentDetails(
+                    taskAssignment = TaskAssignment(
+                        id = "2",
+                        progressStatus = ProgressStatus.TODO,
+                        progressStatusDate = Clock.System.now(),
+                        taskId = "taskId",
+                        taskName = "Task",
+                        houseId = "houseId",
+                        repeatInfo = RepeatInfo(
+                            repeatValue = 1,
+                            repeatUnit = RepeatUnit.DAY,
+                            repeatEndDateTime = null
+                        ),
+                        memberId = "memberId",
+                        memberName = "Member",
+                        dueDateTime = LocalDateTime.now()
+                    ),
+                    reminderTime = null,
+                    enableSnooze = false,
+                    willReminderBeSet = false,
+                    assignedToLoggedInUser = false,
+                ),
+                TaskAssignmentDetails(
+                    taskAssignment = TaskAssignment(
+                        id = "3",
+                        progressStatus = ProgressStatus.TODO,
+                        progressStatusDate = Clock.System.now(),
+                        taskId = "taskId",
+                        taskName = "Task",
+                        houseId = "houseId",
+                        repeatInfo = RepeatInfo(
+                            repeatValue = 1,
+                            repeatUnit = RepeatUnit.DAY,
+                            repeatEndDateTime = null
+                        ),
+                        memberId = "memberId",
+                        memberName = "Member",
+                        dueDateTime = LocalDateTime.now()
+                    ),
+                    reminderTime = null,
+                    enableSnooze = false,
+                    willReminderBeSet = false,
+                    assignedToLoggedInUser = true,
+                )
+            ),
+            dueToday = listOf(
+                TaskAssignmentDetails(
+                    taskAssignment = TaskAssignment(
+                        id = "4",
+                        progressStatus = ProgressStatus.TODO,
+                        progressStatusDate = Clock.System.now(),
+                        taskId = "taskId",
+                        taskName = "Task",
+                        houseId = "houseId",
+                        repeatInfo = RepeatInfo(
+                            repeatValue = 1,
+                            repeatUnit = RepeatUnit.DAY,
+                            repeatEndDateTime = null
+                        ),
+                        memberId = "memberId",
+                        memberName = "Member",
+                        dueDateTime = LocalDateTime.now()
+                    ),
+                    reminderTime = null,
+                    enableSnooze = false,
+                    willReminderBeSet = false,
+                    assignedToLoggedInUser = true,
+                )
+            ),
+            dueTomorrow = listOf(
+                TaskAssignmentDetails(
+                    taskAssignment = TaskAssignment(
+                        id = "5",
+                        progressStatus = ProgressStatus.TODO,
+                        progressStatusDate = Clock.System.now(),
+                        taskId = "taskId",
+                        taskName = "Task",
+                        houseId = "houseId",
+                        repeatInfo = RepeatInfo(
+                            repeatValue = 1,
+                            repeatUnit = RepeatUnit.DAY,
+                            repeatEndDateTime = null
+                        ),
+                        memberId = "memberId",
+                        memberName = "Member",
+                        dueDateTime = LocalDateTime.now()
+                    ),
+                    reminderTime = null,
+                    enableSnooze = false,
+                    willReminderBeSet = false,
+                    assignedToLoggedInUser = false,
+                )
+            ),
+            dueInFuture = listOf(
+                TaskAssignmentDetails(
+                    taskAssignment = TaskAssignment(
+                        id = "6",
+                        progressStatus = ProgressStatus.TODO,
+                        progressStatusDate = Clock.System.now(),
+                        taskId = "taskId",
+                        taskName = "Task",
+                        houseId = "houseId",
+                        repeatInfo = RepeatInfo(
+                            repeatValue = 1,
+                            repeatUnit = RepeatUnit.DAY,
+                            repeatEndDateTime = null
+                        ),
+                        memberId = "memberId",
+                        memberName = "Member",
+                        dueDateTime = LocalDateTime.now()
+                    ),
+                    reminderTime = null,
+                    enableSnooze = false,
+                    willReminderBeSet = false,
+                    assignedToLoggedInUser = true,
+                )
+            ),
+            otherAssignmentsCount = mapOf()
+        ),
+        filters = listOf()
+    )
+    Surface {
+        AssignmentsScreen(
+            viewState = viewState,
+            onMarkAsDone = { },
+            onMarkAsWontDo = { },
+            onSnoozeHour = { },
+            onSnoozeDay = { },
+            onFilterItemClicked = { _, _ -> },
+            onAddTaskClicked = { },
+            onEditTaskClicked = { },
+            onSettingsClicked = { },
+        )
     }
 }
