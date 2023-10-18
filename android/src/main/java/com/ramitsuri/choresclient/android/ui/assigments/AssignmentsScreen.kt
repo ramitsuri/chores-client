@@ -364,8 +364,8 @@ private fun AssignmentItem(
             BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
         } else {
             BorderStroke(
-                0.5.dp,
-                MaterialTheme.colorScheme.outline.copy(alpha = ContentAlpha.medium)
+                0.1.dp,
+                MaterialTheme.colorScheme.outline.copy(alpha = ContentAlpha.disabled)
             )
         },
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background),

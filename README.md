@@ -16,5 +16,7 @@ Things to do
 - [x] Allow Task Pause/Inactive
 - [x] Content behind system bars
 - [x] Show past due right away when app updated or phone restarted
+- [x] Make own tasks more prominent 
+- [ ] Multiple options for reminder and not just 6 hours and tomorrow 
 - [ ] Swipe to complete task item
 - [ ] Tabs for which list/house (hide if only one)
