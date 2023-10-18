@@ -32,12 +32,11 @@ import java.util.concurrent.atomic.AtomicBoolean
 class ContentDownloadWorker(
     context: Context,
     workerParams: WorkerParameters
-) : CoroutineWorker(context, workerParams), KoinComponent {
-
-    private val logger: LogHelper by inject()
+) : CoroutineWorker(context, workerParams) {
     private val contentDownloader: ContentDownloader by inject()
 
     override suspend fun doWork(): Result {
+        logger.v(TAG, "Doing work")
         try {
             if (!isRunning.compareAndSet(false, true)) {
                 logger.v(TAG, "Already running, will retry")
@@ -81,6 +80,8 @@ class ContentDownloadWorker(
 
         private val isRunning = AtomicBoolean(false)
 
+        private val logger: LogHelper by inject()
+
         fun enqueuePeriodic(context: Context) {
             val builder = PeriodicWorkRequest
                 .Builder(ContentDownloadWorker::class.java, REPEAT_HOURS, TimeUnit.HOURS)
@@ -97,10 +98,12 @@ class ContentDownloadWorker(
         }
 
         override fun requestImmediateDownload(forceRemindPastDue: Boolean): Flow<Boolean> {
+            logger.v(TAG, "Immediate download scheduled")
             return enqueue(get<Context>(), forceRemindPastDue = forceRemindPastDue, expedite = true)
         }
 
         override fun requestDelayedDownload(forceRemindPastDue: Boolean) {
+            logger.v(TAG, "Delayed download scheduled")
             enqueue(get<Context>(), forceRemindPastDue = forceRemindPastDue, expedite = false)
         }
 
