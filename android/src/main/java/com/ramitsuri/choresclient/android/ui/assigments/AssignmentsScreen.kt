@@ -498,57 +498,56 @@ private fun AssignmentItem(
                                 Text(text = stringResource(id = R.string.edit))
                             }
                         }
-                        item {
-                            OutlinedButton(
-                                onClick = { onSnoozeHour(details.taskAssignment.id) },
-                                contentPadding = PaddingValues(MaterialTheme.dimens.medium),
-                                enabled = details.enableSnooze
-                            ) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(
-                                        imageVector = Icons.Default.AlarmAdd,
-                                        modifier = Modifier.size(MaterialTheme.dimens.iconWidthSmall),
-                                        contentDescription = stringResource(id = R.string.assignment_details_button_snooze_hours)
-                                    )
-                                    Spacer(modifier = Modifier.width(MaterialTheme.dimens.small))
-                                    Text(text = stringResource(id = R.string.assignment_details_button_snooze_hours))
-                                }
-                            }
-                        }
-                        item {
-                            OutlinedButton(
-                                onClick = { onSnoozeDay(details.taskAssignment.id) },
-                                contentPadding = PaddingValues(MaterialTheme.dimens.medium),
-                                enabled = details.enableSnooze
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.AlarmAdd,
-                                    modifier = Modifier.size(MaterialTheme.dimens.iconWidthSmall),
-                                    contentDescription = stringResource(id = R.string.assignment_details_button_snooze_day)
+                        if (details.enableSnooze) {
+                            item {
+                                SecondaryButton(
+                                    icon = Icons.Default.AlarmAdd,
+                                    textResId = R.string.assignment_details_button_snooze_hours,
+                                    onClick = { onSnoozeHour(details.taskAssignment.id) },
                                 )
-                                Spacer(modifier = Modifier.width(MaterialTheme.dimens.small))
-                                Text(text = stringResource(id = R.string.assignment_details_button_snooze_day))
+                            }
+                        }
+                        if (details.enableSnooze) {
+                            item {
+                                SecondaryButton(
+                                    icon = Icons.Default.AlarmAdd,
+                                    textResId = R.string.assignment_details_button_snooze_day,
+                                    onClick = { onSnoozeDay(details.taskAssignment.id) },
+                                )
                             }
                         }
                         item {
-                            OutlinedButton(
+                            SecondaryButton(
+                                icon = Icons.Default.Clear,
+                                textResId = R.string.assignment_details_button_wont_do,
                                 onClick = { onMarkAsWontDo(details.taskAssignment.id) },
-                                contentPadding = PaddingValues(MaterialTheme.dimens.medium)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Clear,
-                                    modifier = Modifier.size(MaterialTheme.dimens.iconWidthSmall),
-                                    contentDescription = stringResource(id = R.string.assignment_details_button_wont_do)
-                                )
-                                Spacer(modifier = Modifier.width(MaterialTheme.dimens.small))
-                                Text(text = stringResource(id = R.string.assignment_details_button_wont_do))
-                            }
+                            )
                         }
                     }
                     Spacer(modifier = Modifier.height(MaterialTheme.dimens.medium))
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun SecondaryButton(
+    icon: ImageVector,
+    @StringRes textResId: Int,
+    onClick: () -> Unit,
+) {
+    OutlinedButton(
+        onClick = onClick,
+        contentPadding = PaddingValues(MaterialTheme.dimens.medium),
+    ) {
+        Icon(
+            imageVector = icon,
+            modifier = Modifier.size(MaterialTheme.dimens.iconWidthSmall),
+            contentDescription = stringResource(id = textResId)
+        )
+        Spacer(modifier = Modifier.width(MaterialTheme.dimens.small))
+        Text(text = stringResource(id = textResId))
     }
 }
 
