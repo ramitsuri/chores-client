@@ -1,5 +1,6 @@
 package com.ramitsuri.choresclient.android.ui.assigments
 
+import android.view.HapticFeedbackConstants
 import androidx.annotation.StringRes
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.BorderStroke
@@ -77,6 +78,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -357,6 +359,7 @@ private fun AssignmentItem(
     modifier: Modifier = Modifier
 ) {
     var showDetails by remember { mutableStateOf(false) }
+    val view = LocalView.current
 
     Card(
         onClick = { showDetails = !showDetails },
@@ -378,7 +381,10 @@ private fun AssignmentItem(
                 colors = IconButtonDefaults.filledTonalIconButtonColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer
                 ),
-                onClick = { onMarkAsDone(details.taskAssignment.id) },
+                onClick = {
+                    view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                    onMarkAsDone(details.taskAssignment.id)
+                },
                 modifier = Modifier
                     .width(MaterialTheme.dimens.iconWidthLarge)
                     .align(alignment = Alignment.CenterVertically),
