@@ -94,6 +94,7 @@ import com.ramitsuri.choresclient.model.entities.RepeatInfo
 import com.ramitsuri.choresclient.model.entities.TaskAssignment
 import com.ramitsuri.choresclient.model.enums.ProgressStatus
 import com.ramitsuri.choresclient.model.enums.RepeatUnit
+import com.ramitsuri.choresclient.model.enums.SnoozeType
 import com.ramitsuri.choresclient.model.filter.Filter
 import com.ramitsuri.choresclient.model.filter.FilterItem
 import com.ramitsuri.choresclient.model.filter.FilterType
@@ -116,8 +117,7 @@ fun AssignmentsScreen(
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     onMarkAsDone: (String) -> Unit,
     onMarkAsWontDo: (String) -> Unit,
-    onSnoozeHour: (String) -> Unit,
-    onSnoozeDay: (String) -> Unit,
+    onSnooze: (String, SnoozeType) -> Unit,
     onFilterItemClicked: (Filter, FilterItem) -> Unit,
     onAddTaskClicked: () -> Unit,
     onEditTaskClicked: (String) -> Unit,
@@ -146,8 +146,7 @@ fun AssignmentsScreen(
             assignments = viewState.assignments,
             onMarkAsDone = onMarkAsDone,
             onMarkAsWontDo = onMarkAsWontDo,
-            onSnoozeHour = onSnoozeHour,
-            onSnoozeDay = onSnoozeDay,
+            onSnooze = onSnooze,
             onEditTaskClicked = onEditTaskClicked,
             modifier = Modifier
                 .fillMaxSize()
@@ -175,8 +174,7 @@ private fun AssignmentsContent(
     assignments: Assignments,
     onMarkAsDone: (String) -> Unit,
     onMarkAsWontDo: (String) -> Unit,
-    onSnoozeHour: (String) -> Unit,
-    onSnoozeDay: (String) -> Unit,
+    onSnooze: (String, SnoozeType) -> Unit,
     onEditTaskClicked: (String) -> Unit,
     filters: List<Filter>,
     onFilterSelected: (Filter, FilterItem) -> Unit,
@@ -220,8 +218,7 @@ private fun AssignmentsContent(
                     assignments = assignments,
                     onMarkAsDone = onMarkAsDone,
                     onMarkAsWontDo = onMarkAsWontDo,
-                    onSnoozeHour = onSnoozeHour,
-                    onSnoozeDay = onSnoozeDay,
+                    onSnooze = onSnooze,
                     onEditTaskClicked = onEditTaskClicked,
                 )
             }
@@ -234,8 +231,7 @@ private fun AssignmentsList(
     assignments: Assignments,
     onMarkAsDone: (String) -> Unit,
     onMarkAsWontDo: (String) -> Unit,
-    onSnoozeHour: (String) -> Unit,
-    onSnoozeDay: (String) -> Unit,
+    onSnooze: (String, SnoozeType) -> Unit,
     onEditTaskClicked: (String) -> Unit,
 ) {
     LazyColumn(
@@ -249,8 +245,7 @@ private fun AssignmentsList(
             otherAssignmentsCount = assignments.otherAssignmentsCount,
             onMarkAsDone = onMarkAsDone,
             onMarkAsWontDo = onMarkAsWontDo,
-            onSnoozeHour = onSnoozeHour,
-            onSnoozeDay = onSnoozeDay,
+            onSnooze = onSnooze,
             onEditTaskClicked = onEditTaskClicked,
         )
         assignmentsGroup(
@@ -259,8 +254,7 @@ private fun AssignmentsList(
             otherAssignmentsCount = assignments.otherAssignmentsCount,
             onMarkAsDone = onMarkAsDone,
             onMarkAsWontDo = onMarkAsWontDo,
-            onSnoozeHour = onSnoozeHour,
-            onSnoozeDay = onSnoozeDay,
+            onSnooze = onSnooze,
             onEditTaskClicked = onEditTaskClicked,
         )
         assignmentsGroup(
@@ -269,8 +263,7 @@ private fun AssignmentsList(
             otherAssignmentsCount = assignments.otherAssignmentsCount,
             onMarkAsDone = onMarkAsDone,
             onMarkAsWontDo = onMarkAsWontDo,
-            onSnoozeHour = onSnoozeHour,
-            onSnoozeDay = onSnoozeDay,
+            onSnooze = onSnooze,
             onEditTaskClicked = onEditTaskClicked,
         )
         assignmentsGroup(
@@ -279,8 +272,7 @@ private fun AssignmentsList(
             otherAssignmentsCount = assignments.otherAssignmentsCount,
             onMarkAsDone = onMarkAsDone,
             onMarkAsWontDo = onMarkAsWontDo,
-            onSnoozeHour = onSnoozeHour,
-            onSnoozeDay = onSnoozeDay,
+            onSnooze = onSnooze,
             onEditTaskClicked = onEditTaskClicked,
         )
         assignmentsGroup(
@@ -289,8 +281,7 @@ private fun AssignmentsList(
             otherAssignmentsCount = assignments.otherAssignmentsCount,
             onMarkAsDone = onMarkAsDone,
             onMarkAsWontDo = onMarkAsWontDo,
-            onSnoozeHour = onSnoozeHour,
-            onSnoozeDay = onSnoozeDay,
+            onSnooze = onSnooze,
             onEditTaskClicked = onEditTaskClicked,
         )
         item {
@@ -307,8 +298,7 @@ private fun LazyListScope.assignmentsGroup(
     otherAssignmentsCount: Map<String, Int>,
     onMarkAsDone: (String) -> Unit,
     onMarkAsWontDo: (String) -> Unit,
-    onSnoozeHour: (String) -> Unit,
-    onSnoozeDay: (String) -> Unit,
+    onSnooze: (String, SnoozeType) -> Unit,
     onEditTaskClicked: (String) -> Unit,
 ) {
     if (assignments.isNotEmpty()) {
@@ -322,8 +312,7 @@ private fun LazyListScope.assignmentsGroup(
                     ?: 0,
                 onMarkAsDone = onMarkAsDone,
                 onMarkAsWontDo = onMarkAsWontDo,
-                onSnoozeHour = onSnoozeHour,
-                onSnoozeDay = onSnoozeDay,
+                onSnooze = onSnooze,
                 onEditTaskClicked = onEditTaskClicked,
             )
         }
@@ -353,8 +342,7 @@ private fun AssignmentItem(
     otherAssignmentsCount: Int,
     onMarkAsDone: (String) -> Unit,
     onMarkAsWontDo: (String) -> Unit,
-    onSnoozeHour: (String) -> Unit,
-    onSnoozeDay: (String) -> Unit,
+    onSnooze: (String, SnoozeType) -> Unit,
     onEditTaskClicked: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -500,20 +488,9 @@ private fun AssignmentItem(
                         }
                         if (details.enableSnooze) {
                             item {
-                                SecondaryButton(
-                                    icon = Icons.Default.AlarmAdd,
-                                    textResId = R.string.assignment_details_button_snooze_hours,
-                                    onClick = { onSnoozeHour(details.taskAssignment.id) },
-                                )
-                            }
-                        }
-                        if (details.enableSnooze) {
-                            item {
-                                SecondaryButton(
-                                    icon = Icons.Default.AlarmAdd,
-                                    textResId = R.string.assignment_details_button_snooze_day,
-                                    onClick = { onSnoozeDay(details.taskAssignment.id) },
-                                )
+                                SnoozeButton(onSnooze = { snoozeType ->
+                                    onSnooze(details.taskAssignment.id, snoozeType)
+                                })
                             }
                         }
                         item {
@@ -548,6 +525,50 @@ private fun SecondaryButton(
         )
         Spacer(modifier = Modifier.width(MaterialTheme.dimens.small))
         Text(text = stringResource(id = textResId))
+    }
+}
+
+@Composable
+private fun SnoozeButton(
+    onSnooze: (SnoozeType) -> Unit,
+) {
+    var expanded by remember { mutableStateOf(false) }
+    SecondaryButton(
+        icon = Icons.Default.AlarmAdd,
+        textResId = R.string.assignment_details_button_snooze,
+        onClick = { expanded = true },
+    )
+
+    DropdownMenu(
+        expanded = expanded,
+        onDismissRequest = { expanded = false },
+    ) {
+        DropdownMenuItem(
+            text = {
+                Text(
+                    stringResource(
+                        id = R.string.assignment_details_button_snooze_six_hours
+                    )
+                )
+            },
+            onClick = {
+                expanded = false
+                onSnooze(SnoozeType.SixHours)
+            }
+        )
+        DropdownMenuItem(
+            text = {
+                Text(
+                    stringResource(
+                        id = R.string.assignment_details_button_snooze_tomorrow_morning
+                    )
+                )
+            },
+            onClick = {
+                expanded = false
+                onSnooze(SnoozeType.TomorrowMorning)
+            }
+        )
     }
 }
 
@@ -764,8 +785,7 @@ fun PreviewAssignmentContentContentEmpty() {
                 assignments = Assignments.default(),
                 onMarkAsDone = { },
                 onMarkAsWontDo = { },
-                onSnoozeHour = { },
-                onSnoozeDay = { },
+                onSnooze = { _, _ -> },
                 onEditTaskClicked = { },
                 filters = listOf(),
                 onFilterSelected = { _, _ -> },
@@ -942,8 +962,7 @@ private fun PreviewAssignmentContent() {
             viewState = viewState,
             onMarkAsDone = { },
             onMarkAsWontDo = { },
-            onSnoozeHour = { },
-            onSnoozeDay = { },
+            onSnooze = { _, _ -> },
             onFilterItemClicked = { _, _ -> },
             onAddTaskClicked = { },
             onEditTaskClicked = { },

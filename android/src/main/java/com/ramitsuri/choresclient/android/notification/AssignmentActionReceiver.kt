@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import com.ramitsuri.choresclient.android.utils.NotificationAction
 import com.ramitsuri.choresclient.android.utils.NotificationActionExtra
+import com.ramitsuri.choresclient.model.enums.SnoozeType
 import com.ramitsuri.choresclient.repositories.TaskAssignmentsRepository
 import com.ramitsuri.choresclient.utils.LogHelper
 import kotlinx.coroutines.CoroutineScope
@@ -24,13 +25,19 @@ class AssignmentActionReceiver : BroadcastReceiver(), KoinComponent {
         when (action) {
             NotificationAction.SNOOZE_HOUR.action -> {
                 coroutineScope.launch {
-                    repository.onSnoozeHourRequested(assignmentId)
+                    repository.onSnoozeRequested(
+                        assignmentId,
+                        snoozeType = SnoozeType.SixHours
+                    )
                 }
             }
 
             NotificationAction.SNOOZE_DAY.action -> {
                 coroutineScope.launch {
-                    repository.onSnoozeDayRequested(assignmentId)
+                    repository.onSnoozeRequested(
+                        assignmentId,
+                        snoozeType = SnoozeType.TomorrowMorning
+                    )
                 }
             }
 

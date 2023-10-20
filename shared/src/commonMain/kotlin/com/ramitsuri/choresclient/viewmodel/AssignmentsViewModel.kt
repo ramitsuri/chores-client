@@ -3,6 +3,7 @@ package com.ramitsuri.choresclient.viewmodel
 import com.ramitsuri.choresclient.data.settings.PrefManager
 import com.ramitsuri.choresclient.model.enums.ProgressStatus
 import com.ramitsuri.choresclient.model.enums.RepeatUnit
+import com.ramitsuri.choresclient.model.enums.SnoozeType
 import com.ramitsuri.choresclient.model.filter.Filter
 import com.ramitsuri.choresclient.model.filter.FilterItem
 import com.ramitsuri.choresclient.model.filter.FilterType
@@ -70,15 +71,9 @@ class AssignmentsViewModel(
         }
     }
 
-    fun onSnoozeHour(id: String) {
+    fun onSnooze(id: String, type: SnoozeType) {
         longLivingCoroutineScope.launch {
-            repository.onSnoozeHourRequested(id)
-        }
-    }
-
-    fun onSnoozeDay(id: String) {
-        longLivingCoroutineScope.launch {
-            repository.onSnoozeDayRequested(id)
+            repository.onSnoozeRequested(id, type)
         }
     }
 

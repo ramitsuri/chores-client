@@ -9,6 +9,7 @@ import com.ramitsuri.choresclient.model.entities.TaskAssignment
 import com.ramitsuri.choresclient.model.entities.TaskAssignmentUpdate
 import com.ramitsuri.choresclient.model.enums.ProgressStatus
 import com.ramitsuri.choresclient.model.enums.RepeatUnit
+import com.ramitsuri.choresclient.model.enums.SnoozeType
 import com.ramitsuri.choresclient.model.view.TaskAssignmentDetails
 import com.ramitsuri.choresclient.network.api.TaskAssignmentsApi
 import com.ramitsuri.choresclient.network.model.toTaskAssignmentEntity
@@ -17,8 +18,7 @@ import com.ramitsuri.choresclient.reminder.AlarmHandler
 import com.ramitsuri.choresclient.reminder.ReminderScheduler
 import com.ramitsuri.choresclient.utils.ContentDownloadRequestHandler
 import com.ramitsuri.choresclient.utils.LogHelper
-import com.ramitsuri.choresclient.utils.getNewReminderTimeSnoozeDay
-import com.ramitsuri.choresclient.utils.getNewReminderTimeSnoozeHour
+import com.ramitsuri.choresclient.utils.getNewReminderTimeSnoozeType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.datetime.Instant
@@ -111,17 +111,11 @@ class DefaultTaskAssignmentsRepository(
         contentDownloadRequestHandler.requestDelayedDownload()
     }
 
-    override suspend fun onSnoozeHourRequested(
+    override suspend fun onSnoozeRequested(
         assignmentId: String,
+        snoozeType: SnoozeType,
     ) {
-        val showAtTime = getNewReminderTimeSnoozeHour()
-        alarmHandler.reschedule(assignmentId, showAtTime)
-    }
-
-    override suspend fun onSnoozeDayRequested(
-        assignmentId: String,
-    ) {
-        val showAtTime = getNewReminderTimeSnoozeDay()
+        val showAtTime = getNewReminderTimeSnoozeType(snoozeType)
         alarmHandler.reschedule(assignmentId, showAtTime)
     }
 
@@ -210,8 +204,5 @@ interface TaskAssignmentsRepository {
 
     suspend fun markTaskAssignmentWontDo(taskAssignmentId: String, wontDoTime: Instant)
 
-    suspend fun onSnoozeHourRequested(assignmentId: String)
-
-    suspend fun onSnoozeDayRequested(assignmentId: String)
-
+    suspend fun onSnoozeRequested(assignmentId: String, snoozeType: SnoozeType)
 }

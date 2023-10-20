@@ -84,8 +84,7 @@ fun NavGraph(
                 viewState = state,
                 onMarkAsDone = viewModel::markAsDone,
                 onMarkAsWontDo = viewModel::markAsWontDo,
-                onSnoozeHour = viewModel::onSnoozeHour,
-                onSnoozeDay = viewModel::onSnoozeDay,
+                onSnooze = viewModel::onSnooze,
                 onFilterItemClicked = viewModel::onFilterItemClicked
             )
         }

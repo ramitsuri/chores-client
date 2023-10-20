@@ -75,8 +75,9 @@
 
     <!-- Assignment Details -->
     <string name="assignment_details_button_done">Done</string>
-    <string name="assignment_details_button_snooze_hours">6 hours</string>
-    <string name="assignment_details_button_snooze_day">Tomorrow</string>
+    <string name="assignment_details_button_snooze">Snooze</string>
+    <string name="assignment_details_button_snooze_six_hours">6 hours</string>
+    <string name="assignment_details_button_snooze_tomorrow_morning">Tomorrow</string>
     <string name="assignment_details_button_wont_do">Skip</string>
     <string name="assignment_details_reminder_time">Reminder set for %1$s</string>
     <string name="assignment_details_reminder_time_unavailable">Reminder will be set in some time</string>
