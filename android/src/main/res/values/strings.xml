@@ -78,10 +78,14 @@
     <string name="assignment_details_button_snooze">Snooze</string>
     <string name="assignment_details_button_snooze_six_hours">6 hours</string>
     <string name="assignment_details_button_snooze_tomorrow_morning">Tomorrow</string>
+    <string name="assignment_details_button_snooze_custom">Custom</string>
+    <string name="assignment_details_button_snooze_hours">Hours</string>
+    <string name="assignment_details_button_snooze_minutes">Minutes</string>
     <string name="assignment_details_button_wont_do">Skip</string>
     <string name="assignment_details_reminder_time">Reminder set for %1$s</string>
     <string name="assignment_details_reminder_time_unavailable">Reminder will be set in some time</string>
     <string name="assignment_details_assigned_to_format">Assigned to %1$s</string>
+    <string name="assignment_details_snooze_max_time_message">Maximum snooze time allowed is 23 hours and 59 minutes</string>
 
     <!-- Add Task -->
     <string name="add_task_hint_name">Task name</string>

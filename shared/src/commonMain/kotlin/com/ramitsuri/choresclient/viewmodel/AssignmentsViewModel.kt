@@ -22,6 +22,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDateTime
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.minutes
 
 class AssignmentsViewModel(
     private val repository: TaskAssignmentsRepository,
@@ -74,6 +76,45 @@ class AssignmentsViewModel(
     fun onSnooze(id: String, type: SnoozeType) {
         longLivingCoroutineScope.launch {
             repository.onSnoozeRequested(id, type)
+        }
+    }
+
+    fun onCustomSnoozeHoursEntered(hours: String) {
+        if (hours.any { !it.isDigit() }) {
+            return
+        }
+        if ((hours.toIntOrNull() ?: 0) > 23) {
+            return
+        }
+        _state.update {
+            it.copy(customSnoozeHours = hours)
+        }
+    }
+
+    fun onCustomSnoozeMinutesEntered(minutes: String) {
+        if (minutes.any { !it.isDigit() }) {
+            return
+        }
+        if ((minutes.toIntOrNull() ?: 0) > 59) {
+            return
+        }
+        _state.update {
+            it.copy(customSnoozeMinutes = minutes)
+        }
+    }
+
+    fun onCustomSnoozeSet(id: String) {
+        val currentState = _state.value
+        val hours = currentState.customSnoozeHours.toIntOrNull() ?: 0
+        val minutes = currentState.customSnoozeMinutes.toIntOrNull() ?: 0
+        onSnooze(id, SnoozeType.Custom(hours.hours + minutes.minutes))
+        // To reset the state values for next invocation of custom snooze view
+        onCustomSnoozeCanceled()
+    }
+
+    fun onCustomSnoozeCanceled() {
+        _state.update {
+            it.copy(customSnoozeHours = "", customSnoozeMinutes = "")
         }
     }
 

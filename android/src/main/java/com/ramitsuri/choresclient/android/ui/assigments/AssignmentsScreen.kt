@@ -9,6 +9,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -32,6 +33,8 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
@@ -49,6 +52,8 @@ import androidx.compose.material.icons.filled.House
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Repeat
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
@@ -65,23 +70,33 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.ramitsuri.choresclient.android.R
@@ -107,6 +122,7 @@ import com.ramitsuri.choresclient.model.view.TaskAssignmentDetails
 import com.ramitsuri.choresclient.model.view.TextValue
 import com.ramitsuri.choresclient.utils.getDay
 import com.ramitsuri.choresclient.utils.now
+import kotlinx.coroutines.delay
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDateTime
 
@@ -121,7 +137,11 @@ fun AssignmentsScreen(
     onFilterItemClicked: (Filter, FilterItem) -> Unit,
     onAddTaskClicked: () -> Unit,
     onEditTaskClicked: (String) -> Unit,
-    onSettingsClicked: () -> Unit
+    onSettingsClicked: () -> Unit,
+    onCustomHoursEntered: (String) -> Unit,
+    onCustomMinutesEntered: (String) -> Unit,
+    onCustomTimeSet: (String) -> Unit,
+    onCustomTimeCanceled: () -> Unit,
 ) {
     val menu = listOf(AssignmentsMenuItem.SETTINGS)
 
@@ -159,12 +179,19 @@ fun AssignmentsScreen(
                 ),
             filters = viewState.filters,
             onFilterSelected = onFilterItemClicked,
-            menu = menu
-        ) { menuItem ->
-            if (menuItem.id == AssignmentsMenuItem.SETTINGS.id) {
-                onSettingsClicked()
+            menu = menu,
+            customSnoozeHours = viewState.customSnoozeHours,
+            customSnoozeMinutes = viewState.customSnoozeMinutes,
+            onCustomHoursEntered = onCustomHoursEntered,
+            onCustomMinutesEntered = onCustomMinutesEntered,
+            onCustomTimeSet = onCustomTimeSet,
+            onCustomTimeCanceled = onCustomTimeCanceled,
+            onMenuSelected = { menuItem ->
+                if (menuItem.id == AssignmentsMenuItem.SETTINGS.id) {
+                    onSettingsClicked()
+                }
             }
-        }
+        )
     }
 }
 
@@ -180,7 +207,13 @@ private fun AssignmentsContent(
     onFilterSelected: (Filter, FilterItem) -> Unit,
     modifier: Modifier = Modifier,
     menu: List<AssignmentsMenuItem>,
-    onMenuSelected: (AssignmentsMenuItem) -> Unit
+    onMenuSelected: (AssignmentsMenuItem) -> Unit,
+    customSnoozeHours: String,
+    customSnoozeMinutes: String,
+    onCustomHoursEntered: (String) -> Unit,
+    onCustomMinutesEntered: (String) -> Unit,
+    onCustomTimeSet: (String) -> Unit,
+    onCustomTimeCanceled: () -> Unit,
 ) {
     Column(
         modifier = modifier
@@ -220,6 +253,12 @@ private fun AssignmentsContent(
                     onMarkAsWontDo = onMarkAsWontDo,
                     onSnooze = onSnooze,
                     onEditTaskClicked = onEditTaskClicked,
+                    customSnoozeHours = customSnoozeHours,
+                    customSnoozeMinutes = customSnoozeMinutes,
+                    onCustomHoursEntered = onCustomHoursEntered,
+                    onCustomMinutesEntered = onCustomMinutesEntered,
+                    onCustomTimeSet = onCustomTimeSet,
+                    onCustomTimeCanceled = onCustomTimeCanceled,
                 )
             }
         }
@@ -233,6 +272,12 @@ private fun AssignmentsList(
     onMarkAsWontDo: (String) -> Unit,
     onSnooze: (String, SnoozeType) -> Unit,
     onEditTaskClicked: (String) -> Unit,
+    customSnoozeHours: String,
+    customSnoozeMinutes: String,
+    onCustomHoursEntered: (String) -> Unit,
+    onCustomMinutesEntered: (String) -> Unit,
+    onCustomTimeSet: (String) -> Unit,
+    onCustomTimeCanceled: () -> Unit,
 ) {
     LazyColumn(
         modifier = Modifier
@@ -247,7 +292,14 @@ private fun AssignmentsList(
             onMarkAsWontDo = onMarkAsWontDo,
             onSnooze = onSnooze,
             onEditTaskClicked = onEditTaskClicked,
-        )
+            customSnoozeHours = customSnoozeHours,
+            customSnoozeMinutes = customSnoozeMinutes,
+            onCustomHoursEntered = onCustomHoursEntered,
+            onCustomMinutesEntered = onCustomMinutesEntered,
+            onCustomTimeSet = onCustomTimeSet,
+            onCustomTimeCanceled = onCustomTimeCanceled,
+
+            )
         assignmentsGroup(
             headerRes = R.string.assignment_header_past_due,
             assignments = assignments.pastDue,
@@ -256,6 +308,12 @@ private fun AssignmentsList(
             onMarkAsWontDo = onMarkAsWontDo,
             onSnooze = onSnooze,
             onEditTaskClicked = onEditTaskClicked,
+            customSnoozeHours = customSnoozeHours,
+            customSnoozeMinutes = customSnoozeMinutes,
+            onCustomHoursEntered = onCustomHoursEntered,
+            onCustomMinutesEntered = onCustomMinutesEntered,
+            onCustomTimeSet = onCustomTimeSet,
+            onCustomTimeCanceled = onCustomTimeCanceled,
         )
         assignmentsGroup(
             headerRes = R.string.assignment_header_due_today,
@@ -265,6 +323,12 @@ private fun AssignmentsList(
             onMarkAsWontDo = onMarkAsWontDo,
             onSnooze = onSnooze,
             onEditTaskClicked = onEditTaskClicked,
+            customSnoozeHours = customSnoozeHours,
+            customSnoozeMinutes = customSnoozeMinutes,
+            onCustomHoursEntered = onCustomHoursEntered,
+            onCustomMinutesEntered = onCustomMinutesEntered,
+            onCustomTimeSet = onCustomTimeSet,
+            onCustomTimeCanceled = onCustomTimeCanceled,
         )
         assignmentsGroup(
             headerRes = R.string.assignment_header_due_tomorrow,
@@ -274,6 +338,12 @@ private fun AssignmentsList(
             onMarkAsWontDo = onMarkAsWontDo,
             onSnooze = onSnooze,
             onEditTaskClicked = onEditTaskClicked,
+            customSnoozeHours = customSnoozeHours,
+            customSnoozeMinutes = customSnoozeMinutes,
+            onCustomHoursEntered = onCustomHoursEntered,
+            onCustomMinutesEntered = onCustomMinutesEntered,
+            onCustomTimeSet = onCustomTimeSet,
+            onCustomTimeCanceled = onCustomTimeCanceled,
         )
         assignmentsGroup(
             headerRes = R.string.assignment_header_due_in_future,
@@ -283,6 +353,12 @@ private fun AssignmentsList(
             onMarkAsWontDo = onMarkAsWontDo,
             onSnooze = onSnooze,
             onEditTaskClicked = onEditTaskClicked,
+            customSnoozeHours = customSnoozeHours,
+            customSnoozeMinutes = customSnoozeMinutes,
+            onCustomHoursEntered = onCustomHoursEntered,
+            onCustomMinutesEntered = onCustomMinutesEntered,
+            onCustomTimeSet = onCustomTimeSet,
+            onCustomTimeCanceled = onCustomTimeCanceled,
         )
         item {
             Spacer(modifier = Modifier.height(MaterialTheme.dimens.extraLarge))
@@ -300,6 +376,12 @@ private fun LazyListScope.assignmentsGroup(
     onMarkAsWontDo: (String) -> Unit,
     onSnooze: (String, SnoozeType) -> Unit,
     onEditTaskClicked: (String) -> Unit,
+    customSnoozeHours: String,
+    customSnoozeMinutes: String,
+    onCustomHoursEntered: (String) -> Unit,
+    onCustomMinutesEntered: (String) -> Unit,
+    onCustomTimeSet: (String) -> Unit,
+    onCustomTimeCanceled: () -> Unit,
 ) {
     if (assignments.isNotEmpty()) {
         stickyHeader {
@@ -314,6 +396,12 @@ private fun LazyListScope.assignmentsGroup(
                 onMarkAsWontDo = onMarkAsWontDo,
                 onSnooze = onSnooze,
                 onEditTaskClicked = onEditTaskClicked,
+                customSnoozeHours = customSnoozeHours,
+                customSnoozeMinutes = customSnoozeMinutes,
+                onCustomHoursEntered = onCustomHoursEntered,
+                onCustomMinutesEntered = onCustomMinutesEntered,
+                onCustomTimeSet = onCustomTimeSet,
+                onCustomTimeCanceled = onCustomTimeCanceled,
             )
         }
     }
@@ -344,6 +432,12 @@ private fun AssignmentItem(
     onMarkAsWontDo: (String) -> Unit,
     onSnooze: (String, SnoozeType) -> Unit,
     onEditTaskClicked: (String) -> Unit,
+    customSnoozeHours: String,
+    customSnoozeMinutes: String,
+    onCustomHoursEntered: (String) -> Unit,
+    onCustomMinutesEntered: (String) -> Unit,
+    onCustomTimeSet: (String) -> Unit,
+    onCustomTimeCanceled: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var showDetails by remember { mutableStateOf(false) }
@@ -488,9 +582,19 @@ private fun AssignmentItem(
                         }
                         if (details.enableSnooze) {
                             item {
-                                SnoozeButton(onSnooze = { snoozeType ->
-                                    onSnooze(details.taskAssignment.id, snoozeType)
-                                })
+                                SnoozeButton(
+                                    onSnooze = { snoozeType ->
+                                        onSnooze(details.taskAssignment.id, snoozeType)
+                                    },
+                                    hours = customSnoozeHours,
+                                    minutes = customSnoozeMinutes,
+                                    onCustomHoursEntered = onCustomHoursEntered,
+                                    onCustomMinutesEntered = onCustomMinutesEntered,
+                                    onCustomTimeSet = {
+                                        onCustomTimeSet(details.taskAssignment.id)
+                                    },
+                                    onCustomTimeCanceled = onCustomTimeCanceled,
+                                )
                             }
                         }
                         item {
@@ -530,9 +634,16 @@ private fun SecondaryButton(
 
 @Composable
 private fun SnoozeButton(
+    hours: String,
+    minutes: String,
+    onCustomHoursEntered: (String) -> Unit,
+    onCustomMinutesEntered: (String) -> Unit,
+    onCustomTimeSet: () -> Unit,
+    onCustomTimeCanceled: () -> Unit,
     onSnooze: (SnoozeType) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
+    var showCustomSnoozeDialog by remember { mutableStateOf(false) }
     SecondaryButton(
         icon = Icons.Default.AlarmAdd,
         textResId = R.string.assignment_details_button_snooze,
@@ -569,6 +680,143 @@ private fun SnoozeButton(
                 onSnooze(SnoozeType.TomorrowMorning)
             }
         )
+        DropdownMenuItem(
+            text = {
+                Text(
+                    stringResource(
+                        id = R.string.assignment_details_button_snooze_custom
+                    )
+                )
+            },
+            onClick = {
+                expanded = false
+                showCustomSnoozeDialog = true
+            }
+        )
+    }
+
+    if (showCustomSnoozeDialog) {
+        CustomSnoozeDialog(
+            hours = hours,
+            minutes = minutes,
+            onCustomHoursEntered = onCustomHoursEntered,
+            onCustomMinutesEntered = onCustomMinutesEntered,
+            onCustomTimeSet = {
+                onCustomTimeSet()
+                showCustomSnoozeDialog = false
+            },
+            onDismissRequested = {
+                onCustomTimeCanceled()
+                showCustomSnoozeDialog = false
+            },
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun CustomSnoozeDialog(
+    hours: String,
+    minutes: String,
+    onCustomHoursEntered: (String) -> Unit,
+    onCustomMinutesEntered: (String) -> Unit,
+    onCustomTimeSet: () -> Unit,
+    onDismissRequested: () -> Unit,
+) {
+    val focusManager = LocalFocusManager.current
+    val focusRequester = remember { FocusRequester() }
+    val keyboard = LocalSoftwareKeyboardController.current
+    LaunchedEffect(focusRequester) {
+        delay(100)
+        focusRequester.requestFocus()
+        keyboard?.show()
+    }
+    AlertDialog(
+        onDismissRequest = onDismissRequested,
+    ) {
+        Surface(
+            shape = MaterialTheme.shapes.extraLarge,
+            modifier = Modifier
+                .width(IntrinsicSize.Min)
+                .height(IntrinsicSize.Min)
+                .background(
+                    shape = MaterialTheme.shapes.extraLarge,
+                    color = MaterialTheme.colorScheme.surface
+                ),
+            tonalElevation = AlertDialogDefaults.TonalElevation
+        ) {
+            Column(
+                modifier = Modifier.padding(MaterialTheme.dimens.large),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                OutlinedTextField(
+                    value = hours,
+                    singleLine = true,
+                    onValueChange = onCustomHoursEntered,
+                    label = {
+                        Text(stringResource(id = R.string.assignment_details_button_snooze_hours))
+                    },
+                    keyboardActions = KeyboardActions(
+                        onNext = {
+                            focusManager.moveFocus(FocusDirection.Down)
+                        }
+                    ),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Number,
+                        imeAction = ImeAction.Next
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .focusRequester(focusRequester = focusRequester)
+                )
+                Spacer(modifier = Modifier.height(MaterialTheme.dimens.medium))
+                OutlinedTextField(
+                    value = minutes,
+                    singleLine = true,
+                    onValueChange = onCustomMinutesEntered,
+                    label = {
+                        Text(stringResource(id = R.string.assignment_details_button_snooze_minutes))
+                    },
+                    keyboardActions = KeyboardActions(
+                        onDone = {
+                            focusManager.clearFocus()
+                            onCustomTimeSet()
+                            onDismissRequested()
+                        }
+                    ),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Number,
+                        imeAction = ImeAction.Done
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(MaterialTheme.dimens.medium))
+                Text(
+                    text = stringResource(id = R.string.assignment_details_snooze_max_time_message),
+                    style = MaterialTheme.typography.bodySmall
+                )
+                Spacer(modifier = Modifier.height(MaterialTheme.dimens.large))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+                    Spacer(modifier = Modifier.weight(1f))
+                    TextButton(
+                        onClick = {
+                            onDismissRequested()
+                        }
+                    ) { Text(stringResource(id = R.string.cancel)) }
+                    TextButton(
+                        onClick = {
+                            focusManager.clearFocus()
+                            onCustomTimeSet()
+                            onDismissRequested()
+                        }
+                    ) { Text(stringResource(id = R.string.ok)) }
+                }
+            }
+        }
     }
 }
 
@@ -789,7 +1037,13 @@ fun PreviewAssignmentContentContentEmpty() {
                 onEditTaskClicked = { },
                 filters = listOf(),
                 onFilterSelected = { _, _ -> },
-                menu = listOf(AssignmentsMenuItem.SETTINGS)
+                menu = listOf(AssignmentsMenuItem.SETTINGS),
+                onMenuSelected = {},
+                customSnoozeHours = "",
+                customSnoozeMinutes = "",
+                onCustomHoursEntered = {},
+                onCustomMinutesEntered = {},
+                onCustomTimeSet = {}
             ) {
 
             }
@@ -967,6 +1221,10 @@ private fun PreviewAssignmentContent() {
             onAddTaskClicked = { },
             onEditTaskClicked = { },
             onSettingsClicked = { },
+            onCustomHoursEntered = {},
+            onCustomMinutesEntered = {},
+            onCustomTimeSet = {},
+            onCustomTimeCanceled = {}
         )
     }
 }
