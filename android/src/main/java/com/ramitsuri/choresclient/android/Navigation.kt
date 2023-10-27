@@ -89,7 +89,8 @@ fun NavGraph(
                 onCustomHoursEntered = viewModel::onCustomSnoozeHoursEntered,
                 onCustomMinutesEntered = viewModel::onCustomSnoozeMinutesEntered,
                 onCustomTimeSet = viewModel::onCustomSnoozeSet,
-                onCustomTimeCanceled = viewModel::onCustomSnoozeCanceled
+                onCustomTimeCanceled = viewModel::onCustomSnoozeCanceled,
+                onItemClicked = viewModel::onItemClicked,
             )
         }
 

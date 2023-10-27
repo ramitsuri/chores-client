@@ -118,6 +118,19 @@ class AssignmentsViewModel(
         }
     }
 
+    fun onItemClicked(assignmentId: String) {
+        val currentState = _state.value
+        if (currentState.expandedAssignmentId == assignmentId) { // Collapse if already expanded
+            _state.update {
+                it.copy(expandedAssignmentId = null)
+            }
+        } else {
+            _state.update {
+                it.copy(expandedAssignmentId = assignmentId)
+            }
+        }
+    }
+
     private fun onFilterUpdated() {
         collectJob?.cancel()
 

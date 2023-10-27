@@ -142,6 +142,7 @@ fun AssignmentsScreen(
     onCustomMinutesEntered: (String) -> Unit,
     onCustomTimeSet: (String) -> Unit,
     onCustomTimeCanceled: () -> Unit,
+    onItemClicked: (String) -> Unit,
 ) {
     val menu = listOf(AssignmentsMenuItem.SETTINGS)
 
@@ -164,6 +165,7 @@ fun AssignmentsScreen(
         AssignmentsContent(
             isLoading = viewState.loading,
             assignments = viewState.assignments,
+            expandedAssignmentId = viewState.expandedAssignmentId,
             onMarkAsDone = onMarkAsDone,
             onMarkAsWontDo = onMarkAsWontDo,
             onSnooze = onSnooze,
@@ -190,7 +192,8 @@ fun AssignmentsScreen(
                 if (menuItem.id == AssignmentsMenuItem.SETTINGS.id) {
                     onSettingsClicked()
                 }
-            }
+            },
+            onItemClicked = onItemClicked,
         )
     }
 }
@@ -199,6 +202,7 @@ fun AssignmentsScreen(
 private fun AssignmentsContent(
     isLoading: Boolean,
     assignments: Assignments,
+    expandedAssignmentId: String?,
     onMarkAsDone: (String) -> Unit,
     onMarkAsWontDo: (String) -> Unit,
     onSnooze: (String, SnoozeType) -> Unit,
@@ -214,6 +218,7 @@ private fun AssignmentsContent(
     onCustomMinutesEntered: (String) -> Unit,
     onCustomTimeSet: (String) -> Unit,
     onCustomTimeCanceled: () -> Unit,
+    onItemClicked: (String) -> Unit,
 ) {
     Column(
         modifier = modifier
@@ -249,6 +254,7 @@ private fun AssignmentsContent(
             ) {
                 AssignmentsList(
                     assignments = assignments,
+                    expandedAssignmentId = expandedAssignmentId,
                     onMarkAsDone = onMarkAsDone,
                     onMarkAsWontDo = onMarkAsWontDo,
                     onSnooze = onSnooze,
@@ -259,6 +265,7 @@ private fun AssignmentsContent(
                     onCustomMinutesEntered = onCustomMinutesEntered,
                     onCustomTimeSet = onCustomTimeSet,
                     onCustomTimeCanceled = onCustomTimeCanceled,
+                    onItemClicked = onItemClicked,
                 )
             }
         }
@@ -268,6 +275,7 @@ private fun AssignmentsContent(
 @Composable
 private fun AssignmentsList(
     assignments: Assignments,
+    expandedAssignmentId: String?,
     onMarkAsDone: (String) -> Unit,
     onMarkAsWontDo: (String) -> Unit,
     onSnooze: (String, SnoozeType) -> Unit,
@@ -278,6 +286,7 @@ private fun AssignmentsList(
     onCustomMinutesEntered: (String) -> Unit,
     onCustomTimeSet: (String) -> Unit,
     onCustomTimeCanceled: () -> Unit,
+    onItemClicked: (String) -> Unit,
 ) {
     LazyColumn(
         modifier = Modifier
@@ -287,6 +296,7 @@ private fun AssignmentsList(
         assignmentsGroup(
             headerRes = R.string.assignment_header_on_completion,
             assignments = assignments.onCompletion,
+            expandedAssignmentId = expandedAssignmentId,
             otherAssignmentsCount = assignments.otherAssignmentsCount,
             onMarkAsDone = onMarkAsDone,
             onMarkAsWontDo = onMarkAsWontDo,
@@ -298,11 +308,12 @@ private fun AssignmentsList(
             onCustomMinutesEntered = onCustomMinutesEntered,
             onCustomTimeSet = onCustomTimeSet,
             onCustomTimeCanceled = onCustomTimeCanceled,
-
-            )
+            onItemClicked = onItemClicked,
+        )
         assignmentsGroup(
             headerRes = R.string.assignment_header_past_due,
             assignments = assignments.pastDue,
+            expandedAssignmentId = expandedAssignmentId,
             otherAssignmentsCount = assignments.otherAssignmentsCount,
             onMarkAsDone = onMarkAsDone,
             onMarkAsWontDo = onMarkAsWontDo,
@@ -314,10 +325,12 @@ private fun AssignmentsList(
             onCustomMinutesEntered = onCustomMinutesEntered,
             onCustomTimeSet = onCustomTimeSet,
             onCustomTimeCanceled = onCustomTimeCanceled,
+            onItemClicked = onItemClicked,
         )
         assignmentsGroup(
             headerRes = R.string.assignment_header_due_today,
             assignments = assignments.dueToday,
+            expandedAssignmentId = expandedAssignmentId,
             otherAssignmentsCount = assignments.otherAssignmentsCount,
             onMarkAsDone = onMarkAsDone,
             onMarkAsWontDo = onMarkAsWontDo,
@@ -329,10 +342,12 @@ private fun AssignmentsList(
             onCustomMinutesEntered = onCustomMinutesEntered,
             onCustomTimeSet = onCustomTimeSet,
             onCustomTimeCanceled = onCustomTimeCanceled,
+            onItemClicked = onItemClicked,
         )
         assignmentsGroup(
             headerRes = R.string.assignment_header_due_tomorrow,
             assignments = assignments.dueTomorrow,
+            expandedAssignmentId = expandedAssignmentId,
             otherAssignmentsCount = assignments.otherAssignmentsCount,
             onMarkAsDone = onMarkAsDone,
             onMarkAsWontDo = onMarkAsWontDo,
@@ -344,10 +359,12 @@ private fun AssignmentsList(
             onCustomMinutesEntered = onCustomMinutesEntered,
             onCustomTimeSet = onCustomTimeSet,
             onCustomTimeCanceled = onCustomTimeCanceled,
+            onItemClicked = onItemClicked,
         )
         assignmentsGroup(
             headerRes = R.string.assignment_header_due_in_future,
             assignments = assignments.dueInFuture,
+            expandedAssignmentId = expandedAssignmentId,
             otherAssignmentsCount = assignments.otherAssignmentsCount,
             onMarkAsDone = onMarkAsDone,
             onMarkAsWontDo = onMarkAsWontDo,
@@ -359,6 +376,7 @@ private fun AssignmentsList(
             onCustomMinutesEntered = onCustomMinutesEntered,
             onCustomTimeSet = onCustomTimeSet,
             onCustomTimeCanceled = onCustomTimeCanceled,
+            onItemClicked = onItemClicked,
         )
         item {
             Spacer(modifier = Modifier.height(MaterialTheme.dimens.extraLarge))
@@ -371,6 +389,7 @@ private fun AssignmentsList(
 private fun LazyListScope.assignmentsGroup(
     @StringRes headerRes: Int,
     assignments: List<TaskAssignmentDetails>,
+    expandedAssignmentId: String?,
     otherAssignmentsCount: Map<String, Int>,
     onMarkAsDone: (String) -> Unit,
     onMarkAsWontDo: (String) -> Unit,
@@ -382,6 +401,7 @@ private fun LazyListScope.assignmentsGroup(
     onCustomMinutesEntered: (String) -> Unit,
     onCustomTimeSet: (String) -> Unit,
     onCustomTimeCanceled: () -> Unit,
+    onItemClicked: (String) -> Unit,
 ) {
     if (assignments.isNotEmpty()) {
         stickyHeader {
@@ -390,6 +410,7 @@ private fun LazyListScope.assignmentsGroup(
         items(assignments, key = { it.taskAssignment.id }) { item ->
             AssignmentItem(
                 details = item,
+                expanded = expandedAssignmentId == item.taskAssignment.id,
                 otherAssignmentsCount = otherAssignmentsCount[item.taskAssignment.id]
                     ?: 0,
                 onMarkAsDone = onMarkAsDone,
@@ -402,6 +423,7 @@ private fun LazyListScope.assignmentsGroup(
                 onCustomMinutesEntered = onCustomMinutesEntered,
                 onCustomTimeSet = onCustomTimeSet,
                 onCustomTimeCanceled = onCustomTimeCanceled,
+                onItemClicked = onItemClicked,
             )
         }
     }
@@ -427,6 +449,7 @@ private fun AssignmentHeader(text: String, modifier: Modifier = Modifier) {
 @Composable
 private fun AssignmentItem(
     details: TaskAssignmentDetails,
+    expanded: Boolean,
     otherAssignmentsCount: Int,
     onMarkAsDone: (String) -> Unit,
     onMarkAsWontDo: (String) -> Unit,
@@ -438,13 +461,13 @@ private fun AssignmentItem(
     onCustomMinutesEntered: (String) -> Unit,
     onCustomTimeSet: (String) -> Unit,
     onCustomTimeCanceled: () -> Unit,
+    onItemClicked: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var showDetails by remember { mutableStateOf(false) }
     val view = LocalView.current
 
     Card(
-        onClick = { showDetails = !showDetails },
+        onClick = { onItemClicked(details.taskAssignment.id) },
         border = if (details.assignedToLoggedInUser) {
             BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
         } else {
@@ -550,7 +573,7 @@ private fun AssignmentItem(
                     }
                 }
                 Spacer(modifier = Modifier.height(MaterialTheme.dimens.medium))
-                if (showDetails) {
+                if (expanded) {
                     if (details.willReminderBeSet && details.reminderTime != null) {
                         Row(Modifier.padding(horizontal = MaterialTheme.dimens.medium)) {
                             LabelWithIcon(
@@ -1031,6 +1054,7 @@ fun PreviewAssignmentContentContentEmpty() {
             AssignmentsContent(
                 isLoading = false,
                 assignments = Assignments.default(),
+                expandedAssignmentId = null,
                 onMarkAsDone = { },
                 onMarkAsWontDo = { },
                 onSnooze = { _, _ -> },
@@ -1043,10 +1067,10 @@ fun PreviewAssignmentContentContentEmpty() {
                 customSnoozeMinutes = "",
                 onCustomHoursEntered = {},
                 onCustomMinutesEntered = {},
-                onCustomTimeSet = {}
-            ) {
-
-            }
+                onCustomTimeSet = {},
+                onCustomTimeCanceled = {},
+                onItemClicked = {},
+            )
         }
     }
 }
@@ -1224,7 +1248,8 @@ private fun PreviewAssignmentContent() {
             onCustomHoursEntered = {},
             onCustomMinutesEntered = {},
             onCustomTimeSet = {},
-            onCustomTimeCanceled = {}
+            onCustomTimeCanceled = {},
+            onItemClicked = {}
         )
     }
 }

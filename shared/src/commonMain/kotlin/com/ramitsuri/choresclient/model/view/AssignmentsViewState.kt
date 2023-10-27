@@ -6,6 +6,7 @@ data class AssignmentsViewState(
     val loading: Boolean = true,
     val assignments: Assignments = Assignments.default(),
     val filters: List<Filter> = listOf(),
+    val expandedAssignmentId: String? = null,
     val customSnoozeHours: String = "",
     val customSnoozeMinutes: String = "",
 )
