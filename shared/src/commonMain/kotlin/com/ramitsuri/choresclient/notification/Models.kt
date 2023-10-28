@@ -17,6 +17,7 @@ data class NotificationInfo(
     val body: String?,
     val additionalText: String?,
     val iconResId: Int,
+    val clickDeepLinkUri:String,
     val actions: List<NotificationActionInfo>? = null,
     val actionExtras: Map<String, Any>? = null
 )

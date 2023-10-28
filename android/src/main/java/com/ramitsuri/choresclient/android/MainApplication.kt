@@ -134,8 +134,9 @@ class MainApplication : Application(), KoinComponent {
                     )
                 }
 
-                viewModel {
+                viewModel { parameters ->
                     AssignmentsViewModel(
+                        assignmentId = parameters.getOrNull(),
                         get<TaskAssignmentsRepository>(),
                         get<FilterHelper>(),
                         get<PrefManager>(),

@@ -11,6 +11,8 @@ import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.ramitsuri.choresclient.android.R
+import com.ramitsuri.choresclient.android.model.DeepLink
+import com.ramitsuri.choresclient.android.uriWithArgsValues
 import com.ramitsuri.choresclient.android.utils.NotificationAction
 import com.ramitsuri.choresclient.android.utils.NotificationActionExtra
 import com.ramitsuri.choresclient.data.settings.PrefManager
@@ -85,7 +87,8 @@ class ShowNotificationWorker(
                 actions = notificationActions,
                 actionExtras = mapOf(
                     NotificationActionExtra.KEY_ASSIGNMENT_ID to assignmentId,
-                )
+                ),
+                clickDeepLinkUri = DeepLink.ASSIGNMENT.uriWithArgsValues(listOf(assignmentId))
             )
         )
         return success()

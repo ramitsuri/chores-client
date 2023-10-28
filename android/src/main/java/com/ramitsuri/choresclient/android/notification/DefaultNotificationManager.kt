@@ -3,13 +3,14 @@ package com.ramitsuri.choresclient.android.notification
 import android.Manifest
 import android.app.NotificationChannel
 import android.app.PendingIntent
+import android.app.TaskStackBuilder
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import com.ramitsuri.choresclient.android.main.MainActivity
+import androidx.core.net.toUri
 import com.ramitsuri.choresclient.notification.Importance
 import com.ramitsuri.choresclient.notification.NotificationActionInfo
 import com.ramitsuri.choresclient.notification.NotificationChannelInfo
@@ -59,7 +60,21 @@ class DefaultNotificationManager(context: Context) : NotificationManager, KoinCo
                 }
             }
             setAutoCancel(true)
-            setContentIntent(getTapPendingIntent(MainActivity::class.java))
+            val contentIntent = TaskStackBuilder.create(context).run {
+                addNextIntentWithParentStack(
+                    Intent(
+                        Intent.ACTION_VIEW,
+                        notificationInfo.clickDeepLinkUri.toUri()
+                    )
+                )
+                val flags = PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+                // Android uses request code (along with Intent) to uniquely identify pendingIntents.
+                // If multiple notification pendingIntents have the same requestCode and same
+                // Intent, they're considered the same. So need to use unique request code with
+                // each notification and `notificationId` serves that purpose.
+                getPendingIntent(notificationInfo.id, flags)
+            }
+            setContentIntent(contentIntent)
         }
         val notification = builder.build()
         if (ActivityCompat.checkSelfPermission(

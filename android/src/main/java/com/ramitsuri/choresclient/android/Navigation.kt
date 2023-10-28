@@ -5,12 +5,15 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavDeepLink
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.navigation.navDeepLink
+import com.ramitsuri.choresclient.android.model.DeepLink
 import com.ramitsuri.choresclient.android.ui.assigments.AssignmentsScreen
 import com.ramitsuri.choresclient.android.ui.login.LoginScreen
 import com.ramitsuri.choresclient.android.ui.settings.SettingsScreen
@@ -22,9 +25,11 @@ import com.ramitsuri.choresclient.viewmodel.EditTaskViewModel
 import com.ramitsuri.choresclient.viewmodel.LoginViewModel
 import com.ramitsuri.choresclient.viewmodel.SettingsViewModel
 import org.koin.androidx.compose.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 private object Args {
     const val TASK_ID = "taskId"
+    const val ASSIGNMENT_ID = "assignmentId"
 }
 
 object Destinations {
@@ -72,8 +77,16 @@ fun NavGraph(
             )
         }
 
-        composable(Destinations.ASSIGNMENTS) {
-            val viewModel = koinViewModel<AssignmentsViewModel>()
+        composable(
+            route = Destinations.ASSIGNMENTS,
+            deepLinks = listOf(
+                DeepLink.ASSIGNMENT.uriWithArgNames(),
+                DeepLink.COMPLETED_BY_OTHERS.uriWithArgNames()
+            )
+        ) { backStackEntry ->
+            val assignmentId = backStackEntry.arguments?.getString(Args.ASSIGNMENT_ID)
+            val viewModel =
+                koinViewModel<AssignmentsViewModel>(parameters = { parametersOf(assignmentId) })
             val state by viewModel.state.collectAsStateWithLifecycle()
             AssignmentsScreen(
                 onSettingsClicked = { navController.navigate(Destinations.SETTINGS) },
@@ -177,5 +190,32 @@ fun NavGraph(
                 onResetActiveStatus = viewModel::onResetActiveStatus,
             )
         }
+    }
+}
+
+fun DeepLink.uriWithArgsValues(args: List<String> = listOf()): String {
+    return when (this) {
+        DeepLink.ASSIGNMENT -> {
+            uri.plus("/").plus(args.joinToString("/"))
+        }
+
+        DeepLink.COMPLETED_BY_OTHERS -> {
+            uri
+        }
+    }
+}
+
+fun DeepLink.uriWithArgNames(): NavDeepLink {
+    val pattern = when (this) {
+        DeepLink.ASSIGNMENT -> {
+            uri.plus("/").plus("{${Args.ASSIGNMENT_ID}}")
+        }
+
+        DeepLink.COMPLETED_BY_OTHERS -> {
+            uri
+        }
+    }
+    return navDeepLink {
+        uriPattern = pattern
     }
 }

@@ -1,12 +1,14 @@
 package com.ramitsuri.choresclient.android.notification
 
 import android.content.Context
+import com.ramitsuri.choresclient.android.R
+import com.ramitsuri.choresclient.android.model.DeepLink
+import com.ramitsuri.choresclient.android.uriWithArgsValues
+import com.ramitsuri.choresclient.android.utils.NotificationId
 import com.ramitsuri.choresclient.notification.CompletedByOthersNotificationHandler
 import com.ramitsuri.choresclient.notification.NotificationInfo
 import com.ramitsuri.choresclient.notification.NotificationManager
 import com.ramitsuri.choresclient.notification.Priority
-import com.ramitsuri.choresclient.android.R
-import com.ramitsuri.choresclient.android.utils.NotificationId
 
 class AndroidCompletedByOthersNotificationHandler(
     private val context: Context,
@@ -51,6 +53,7 @@ class AndroidCompletedByOthersNotificationHandler(
             body = null,
             additionalText = additionalText,
             iconResId = R.drawable.ic_notification,
+            clickDeepLinkUri = DeepLink.COMPLETED_BY_OTHERS.uriWithArgsValues()
         )
         notificationManager.showNotification(notificationInfo)
     }

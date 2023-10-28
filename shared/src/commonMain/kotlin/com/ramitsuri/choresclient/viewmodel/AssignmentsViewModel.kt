@@ -26,6 +26,7 @@ import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 
 class AssignmentsViewModel(
+    assignmentId: String?,
     private val repository: TaskAssignmentsRepository,
     private val filterHelper: FilterHelper,
     private val prefManager: PrefManager,
@@ -34,7 +35,7 @@ class AssignmentsViewModel(
 
     private var collectJob: Job? = null
 
-    private val _state = MutableStateFlow(AssignmentsViewState())
+    private val _state = MutableStateFlow(AssignmentsViewState(expandedAssignmentId = assignmentId))
     val state: StateFlow<AssignmentsViewState> = _state
 
     init {
