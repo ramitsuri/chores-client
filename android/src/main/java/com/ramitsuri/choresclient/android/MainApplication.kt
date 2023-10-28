@@ -171,8 +171,9 @@ class MainApplication : Application(), KoinComponent {
                     )
                 }
 
-                viewModel {
+                viewModel { parameters ->
                     EditTaskViewModel(
+                        taskId = parameters.get(),
                         get<TasksRepository>(),
                         get<ContentDownloader>(),
                         get<DispatcherProvider>(),

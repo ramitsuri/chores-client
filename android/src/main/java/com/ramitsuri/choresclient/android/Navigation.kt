@@ -158,13 +158,8 @@ fun NavGraph(
             "${Destinations.EDIT_TASK}/{${Args.TASK_ID}}",
             arguments = listOf(navArgument(Args.TASK_ID) { type = NavType.StringType })
         ) { backStackEntry ->
-            val viewModel = koinViewModel<EditTaskViewModel>()
-            val taskId = backStackEntry.arguments?.getString(Args.TASK_ID)
-            LaunchedEffect(taskId) {
-                if (taskId != null) {
-                    viewModel.setTaskId(taskId)
-                }
-            }
+            val taskId = backStackEntry.arguments?.getString(Args.TASK_ID) ?: ""
+            val viewModel = koinViewModel<EditTaskViewModel>(parameters = { parametersOf(taskId) })
 
             val taskEdited by viewModel.taskEdited.collectAsStateWithLifecycle()
             LaunchedEffect(taskEdited) {

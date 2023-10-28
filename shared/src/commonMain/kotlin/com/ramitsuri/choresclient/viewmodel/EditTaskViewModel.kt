@@ -26,6 +26,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 class EditTaskViewModel(
+    taskId: String,
     private val tasksRepository: TasksRepository,
     private val contentDownloader: ContentDownloader,
     private val dispatchers: DispatcherProvider,
@@ -40,7 +41,7 @@ class EditTaskViewModel(
     private val _taskEdited: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val taskEdited: StateFlow<Boolean> = _taskEdited
 
-    fun setTaskId(taskId: String) {
+    init {
         viewModelScope.launch {
             task = tasksRepository.getTask(taskId)
             val task = task
