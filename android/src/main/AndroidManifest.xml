@@ -32,6 +32,7 @@
                     android:scheme="chores" />
             </intent-filter>
         </activity>
+
         <receiver
             android:name=".notification.AssignmentActionReceiver"
             android:enabled="true"
@@ -48,6 +49,15 @@
                 <action android:name="android.intent.action.QUICKBOOT_POWERON" />
                 <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".broadcast.TimeZoneChangeReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
             </intent-filter>
         </receiver>
 

@@ -21,6 +21,7 @@ class ContentDownloader(
         now: Instant,
         forceDownload: Boolean = false,
         forceRemindPastDue: Boolean = false,
+        forceRemindFuture: Boolean = false,
     ) {
         try {
             val shouldDownloadSyncStuff = isDebug
@@ -31,7 +32,8 @@ class ContentDownloader(
             }
 
             taskAssignmentsRepository.refresh(
-                forceRemindPastDue = forceRemindPastDue
+                forceRemindPastDue = forceRemindPastDue,
+                forceRemindFuture = forceRemindFuture,
             )
             prefManager.setLastSyncTime()
         } catch (e: Exception) {

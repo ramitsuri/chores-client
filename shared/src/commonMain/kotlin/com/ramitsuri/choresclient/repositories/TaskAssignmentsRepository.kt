@@ -37,7 +37,7 @@ class DefaultTaskAssignmentsRepository(
 ) : TaskAssignmentsRepository, KoinComponent {
 
     private val logger: LogHelper by inject()
-    override suspend fun refresh(forceRemindPastDue: Boolean) {
+    override suspend fun refresh(forceRemindPastDue: Boolean, forceRemindFuture: Boolean) {
         // Upload completed local assignments
         val uploadedIds = uploadLocal()
 
@@ -52,7 +52,8 @@ class DefaultTaskAssignmentsRepository(
             toTaskAssignments(taskAssignmentDao.getAll()
                 .filter { it.progressStatus == ProgressStatus.TODO }
             ),
-            forceRemindPastDue = forceRemindPastDue
+            forceRemindPastDue = forceRemindPastDue,
+            forceRemindFuture = forceRemindFuture,
         )
     }
 
@@ -194,7 +195,7 @@ class DefaultTaskAssignmentsRepository(
 }
 
 interface TaskAssignmentsRepository {
-    suspend fun refresh(forceRemindPastDue: Boolean = false)
+    suspend fun refresh(forceRemindPastDue: Boolean = false, forceRemindFuture: Boolean = false)
 
     suspend fun getLocalFlow(loggedInMemberId: String): Flow<List<TaskAssignmentDetails>>
 

@@ -22,6 +22,7 @@ class ReminderScheduler(
     suspend fun scheduleReminders(
         assignments: List<TaskAssignment>,
         forceRemindPastDue: Boolean = false,
+        forceRemindFuture: Boolean = false,
         now: LocalDateTime = LocalDateTime.now()
     ) {
         val memberId = prefManager.getLoggedInMemberId() ?: return
@@ -44,6 +45,7 @@ class ReminderScheduler(
             now = now,
             remindPastDue = remindPastDue,
             forceRemindPastDue = forceRemindPastDue,
+            forceRemindFuture = forceRemindFuture,
         )
         alarmHandler.schedule(alarmsToSchedule)
 
@@ -67,11 +69,13 @@ class ReminderScheduler(
         now: LocalDateTime,
         remindPastDue: Boolean,
         forceRemindPastDue: Boolean,
+        forceRemindFuture: Boolean,
     ): List<AssignmentAlarm> {
         val assignmentAlarms = mutableListOf<AssignmentAlarm>()
 
         inFuture.forEach { assignment ->
-            if (existingAlarms.find { assignment.id == it.assignmentId } != null) {
+            val existsAlready = existingAlarms.find { assignment.id == it.assignmentId } != null
+            if (existsAlready && !forceRemindFuture) {
                 return@forEach
             }
             assignmentAlarms.add(

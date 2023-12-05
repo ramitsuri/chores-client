@@ -43,10 +43,12 @@ class ContentDownloadWorker(
                 return Result.retry()
             }
             val forceRemindPastDue = inputData.getBoolean(FORCE_REMIND_PAST_DUE_ARG, false)
+            val forceRemindFuture = inputData.getBoolean(FORCE_REMIND_FUTURE_ARG, false)
             setProgress(workDataOf(RUNNING_STATUS to true))
             contentDownloader.download(
                 now = Clock.System.now(),
-                forceRemindPastDue = forceRemindPastDue
+                forceRemindPastDue = forceRemindPastDue,
+                forceRemindFuture = forceRemindFuture,
             )
             logger.v(TAG, "Run complete")
         } finally {
@@ -77,6 +79,7 @@ class ContentDownloadWorker(
         private const val NOTIFICATION_ID = NotificationId.CONTENT_DOWNLOAD_FOREGROUND_WORKER
         private const val RUNNING_STATUS = "running_status"
         private const val FORCE_REMIND_PAST_DUE_ARG = "force_remind_past_due"
+        private const val FORCE_REMIND_FUTURE_ARG = "force_remind_future"
 
         private val isRunning = AtomicBoolean(false)
 
@@ -97,23 +100,41 @@ class ContentDownloadWorker(
                 )
         }
 
-        override fun requestImmediateDownload(forceRemindPastDue: Boolean): Flow<Boolean> {
+        override fun requestImmediateDownload(
+            forceRemindPastDue: Boolean,
+            forceRemindFuture: Boolean
+        ): Flow<Boolean> {
             logger.v(TAG, "Immediate download scheduled")
-            return enqueue(get<Context>(), forceRemindPastDue = forceRemindPastDue, expedite = true)
+            return enqueue(
+                get<Context>(),
+                forceRemindPastDue = forceRemindPastDue,
+                forceRemindFuture = forceRemindFuture,
+                expedite = true
+            )
         }
 
-        override fun requestDelayedDownload(forceRemindPastDue: Boolean) {
+        override fun requestDelayedDownload(
+            forceRemindPastDue: Boolean,
+            forceRemindFuture: Boolean
+        ) {
             logger.v(TAG, "Delayed download scheduled")
-            enqueue(get<Context>(), forceRemindPastDue = forceRemindPastDue, expedite = false)
+            enqueue(
+                get<Context>(),
+                forceRemindPastDue = forceRemindPastDue,
+                forceRemindFuture = forceRemindFuture,
+                expedite = false
+            )
         }
 
         private fun enqueue(
             context: Context,
             forceRemindPastDue: Boolean,
+            forceRemindFuture: Boolean,
             expedite: Boolean = false,
         ): Flow<Boolean> {
             val inputData = workDataOf(
                 FORCE_REMIND_PAST_DUE_ARG to forceRemindPastDue,
+                FORCE_REMIND_FUTURE_ARG to forceRemindFuture,
             )
             val builder = OneTimeWorkRequest
                 .Builder(ContentDownloadWorker::class.java)

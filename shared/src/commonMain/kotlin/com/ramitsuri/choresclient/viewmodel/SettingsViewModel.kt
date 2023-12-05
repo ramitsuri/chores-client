@@ -53,7 +53,12 @@ class SettingsViewModel(
             it.copy(syncViewState = it.syncViewState.copy(loading = true))
         }
         viewModelScope.launch(dispatchers.io) {
-            contentDownloadRequestHandler.requestImmediateDownload().collect { running ->
+            // ForceRemind if download requested manually because the user is probably wanting a
+            // full refresh
+            contentDownloadRequestHandler.requestImmediateDownload(
+                forceRemindPastDue = true,
+                forceRemindFuture = true,
+            ).collect { running ->
                 _state.update {
                     it.copy(
                         syncViewState = it.syncViewState.copy(

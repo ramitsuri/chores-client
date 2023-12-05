@@ -22,11 +22,7 @@ class PushMessageProcessor(
     private fun performAction(action: PushMessageAction) {
         when (action) {
             PushMessageAction.REFRESH_TASK_ASSIGNMENTS -> {
-                if (appLifecycleObserver.isAppInForeground) {
-                    contentDownloadRequestHandler.requestImmediateDownload()
-                } else {
-                    contentDownloadRequestHandler.requestDelayedDownload()
-                }
+                contentDownloadRequestHandler.requestImmediateDownload()
             }
         }
     }
