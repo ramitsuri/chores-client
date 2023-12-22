@@ -74,7 +74,10 @@ class ReminderScheduler(
         val assignmentAlarms = mutableListOf<AssignmentAlarm>()
 
         inFuture.forEach { assignment ->
-            val existsAlready = existingAlarms.find { assignment.id == it.assignmentId } != null
+            val existingNotification = existingAlarms.find { notificationEntity ->
+                assignment.id == notificationEntity.assignmentId
+            }
+            val existsAlready = existingNotification != null
             if (existsAlready && !forceRemindFuture) {
                 return@forEach
             }
@@ -82,6 +85,7 @@ class ReminderScheduler(
                 AssignmentAlarm(
                     assignment.id,
                     assignment.dueDateTime,
+                    existingNotification?.systemNotificationId?.toInt() ?: -1,
                 )
             )
         }

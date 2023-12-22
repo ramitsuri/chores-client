@@ -36,6 +36,8 @@ class DefaultAlarmHandler(
     }
 
     override suspend fun schedule(assignmentAlarms: List<AssignmentAlarm>) {
+        // Cancel existing notification
+        cancel(assignmentAlarms.map { it.assignmentId })
         alarmDao.insert(assignmentAlarms.map {
             AlarmEntity(
                 systemNotificationId = it.systemNotificationId.toLong(),
@@ -51,8 +53,6 @@ class DefaultAlarmHandler(
         showAtTime: LocalDateTime,
     ) {
         val existing = alarmDao.get(assignmentId) ?: return
-        // Cancel existing notification
-        cancel(listOf(assignmentId))
         schedule(
             listOf(
                 AssignmentAlarm(
