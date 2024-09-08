@@ -56,6 +56,7 @@ class SettingsViewModel(
             // ForceRemind if download requested manually because the user is probably wanting a
             // full refresh
             contentDownloadRequestHandler.requestImmediateDownload(
+                forceDownload = true,
                 forceRemindPastDue = true,
                 forceRemindFuture = true,
             ).collect { running ->
