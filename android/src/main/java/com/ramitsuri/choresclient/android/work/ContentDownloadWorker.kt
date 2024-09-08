@@ -42,11 +42,13 @@ class ContentDownloadWorker(
                 logger.v(TAG, "Already running, will retry")
                 return Result.retry()
             }
+            val forceDownload = inputData.getBoolean(FORCE_DOWNLOAD_ARG, false)
             val forceRemindPastDue = inputData.getBoolean(FORCE_REMIND_PAST_DUE_ARG, false)
             val forceRemindFuture = inputData.getBoolean(FORCE_REMIND_FUTURE_ARG, false)
             setProgress(workDataOf(RUNNING_STATUS to true))
             contentDownloader.download(
                 now = Clock.System.now(),
+                forceDownload = forceDownload,
                 forceRemindPastDue = forceRemindPastDue,
                 forceRemindFuture = forceRemindFuture,
             )
@@ -78,6 +80,7 @@ class ContentDownloadWorker(
         private const val TAG = "AssignmentsDownloader"
         private const val NOTIFICATION_ID = NotificationId.CONTENT_DOWNLOAD_FOREGROUND_WORKER
         private const val RUNNING_STATUS = "running_status"
+        private const val FORCE_DOWNLOAD_ARG = "force_download"
         private const val FORCE_REMIND_PAST_DUE_ARG = "force_remind_past_due"
         private const val FORCE_REMIND_FUTURE_ARG = "force_remind_future"
 
@@ -101,12 +104,14 @@ class ContentDownloadWorker(
         }
 
         override fun requestImmediateDownload(
+            forceDownload: Boolean,
             forceRemindPastDue: Boolean,
             forceRemindFuture: Boolean
         ): Flow<Boolean> {
             logger.v(TAG, "Immediate download scheduled")
             return enqueue(
                 get<Context>(),
+                forceDownload = forceDownload,
                 forceRemindPastDue = forceRemindPastDue,
                 forceRemindFuture = forceRemindFuture,
                 expedite = true
@@ -120,6 +125,7 @@ class ContentDownloadWorker(
             logger.v(TAG, "Delayed download scheduled")
             enqueue(
                 get<Context>(),
+                forceDownload = false,
                 forceRemindPastDue = forceRemindPastDue,
                 forceRemindFuture = forceRemindFuture,
                 expedite = false
@@ -128,11 +134,13 @@ class ContentDownloadWorker(
 
         private fun enqueue(
             context: Context,
+            forceDownload: Boolean,
             forceRemindPastDue: Boolean,
             forceRemindFuture: Boolean,
             expedite: Boolean = false,
         ): Flow<Boolean> {
             val inputData = workDataOf(
+                FORCE_DOWNLOAD_ARG to forceDownload,
                 FORCE_REMIND_PAST_DUE_ARG to forceRemindPastDue,
                 FORCE_REMIND_FUTURE_ARG to forceRemindFuture,
             )
