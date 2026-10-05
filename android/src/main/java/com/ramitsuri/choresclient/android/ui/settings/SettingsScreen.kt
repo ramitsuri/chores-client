@@ -66,8 +66,8 @@ import com.ramitsuri.choresclient.model.view.SettingsViewState
 import com.ramitsuri.choresclient.model.view.SyncViewState
 import com.ramitsuri.choresclient.utils.formatSyncTime
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
+import kotlin.time.Clock
+import kotlin.time.Instant
 import kotlinx.datetime.TimeZone
 
 @Composable

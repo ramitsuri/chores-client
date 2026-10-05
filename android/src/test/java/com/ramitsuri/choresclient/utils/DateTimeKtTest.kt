@@ -3,7 +3,7 @@ package com.ramitsuri.choresclient.utils
 import com.ramitsuri.choresclient.model.enums.SnoozeType
 import com.ramitsuri.choresclient.model.view.TextValue
 import com.ramitsuri.choresclient.resources.LocalizedString
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime

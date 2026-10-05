@@ -21,7 +21,7 @@ import com.ramitsuri.choresclient.utils.LogHelper
 import com.ramitsuri.choresclient.utils.getNewReminderTimeSnoozeType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 

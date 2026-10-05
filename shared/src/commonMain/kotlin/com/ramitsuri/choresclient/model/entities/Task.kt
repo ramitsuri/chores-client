@@ -3,7 +3,7 @@ package com.ramitsuri.choresclient.model.entities
 import com.ramitsuri.choresclient.db.TaskEntity
 import com.ramitsuri.choresclient.model.enums.ActiveStatus
 import com.ramitsuri.choresclient.model.enums.RepeatUnit
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlinx.datetime.LocalDateTime
 
 data class Task(

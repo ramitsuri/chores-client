@@ -2,7 +2,7 @@ package com.ramitsuri.choresclient.model.entities
 
 import com.ramitsuri.choresclient.db.HouseEntity
 import com.ramitsuri.choresclient.model.enums.ActiveStatus
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 
 data class House(
     val id: String,

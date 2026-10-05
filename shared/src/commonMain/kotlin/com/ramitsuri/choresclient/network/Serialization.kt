@@ -4,7 +4,7 @@ import com.ramitsuri.choresclient.model.enums.ActiveStatus
 import com.ramitsuri.choresclient.model.enums.CreateType
 import com.ramitsuri.choresclient.model.enums.ProgressStatus
 import com.ramitsuri.choresclient.model.enums.RepeatUnit
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.descriptors.PrimitiveKind

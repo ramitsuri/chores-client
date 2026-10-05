@@ -21,7 +21,7 @@ import com.ramitsuri.choresclient.utils.ContentDownloader
 import com.ramitsuri.choresclient.utils.LogHelper
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import org.koin.core.component.inject

@@ -19,7 +19,7 @@ import com.ramitsuri.choresclient.utils.DispatcherProvider
 import app.cash.sqldelight.ColumnAdapter
 import app.cash.sqldelight.db.SqlDriver
 import com.ramitsuri.choresclient.data.db.dao.MemberHouseAssociationDao
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlinx.datetime.LocalDateTime
 
 class Database(

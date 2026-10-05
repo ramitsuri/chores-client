@@ -1,10 +1,9 @@
 package com.ramitsuri.choresclient.utils
 
 import co.touchlab.kermit.Logger
+import com.google.firebase.Firebase
 import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.ktx.database
-import com.google.firebase.ktx.Firebase
-import com.ramitsuri.choresclient.BuildConfig
+import com.google.firebase.database.database
 
 actual class LogHelper(
     private val enableLocal: Boolean,
@@ -34,9 +33,6 @@ actual class LogHelper(
     }
 
     private fun remoteLog(tag: String, message: String) {
-        if (BuildConfig.DEBUG) {
-            return
-        }
         if (enableRemote) {
             val remoteLog = "${formatLogTime()} $tag: $message"
             getDb().push().setValue(remoteLog)

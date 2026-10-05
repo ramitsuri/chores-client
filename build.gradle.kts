@@ -1,25 +1,16 @@
-buildscript {
-    repositories {
-        gradlePluginPortal()
-        google()
-        mavenCentral()
-    }
-    dependencies {
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${findProperty("version.kotlin")}")
-        classpath("org.jetbrains.kotlin:kotlin-serialization:${findProperty("version.kotlin")}")
-        classpath("com.android.tools.build:gradle:8.1.1")
-        classpath("androidx.navigation:navigation-safe-args-gradle-plugin:2.7.1")
-        classpath("app.cash.sqldelight:gradle-plugin:2.0.0")
-        classpath("com.google.gms:google-services:4.3.15")
-        classpath("com.google.firebase:firebase-crashlytics-gradle:2.9.9")
-    }
-}
-
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-    }
+plugins {
+    alias(libs.plugins.android.application) apply false
+    alias(libs.plugins.android.library) apply false
+    alias(libs.plugins.android.kotlin.multiplatform.library) apply false
+    alias(libs.plugins.compose.compiler) apply false
+    alias(libs.plugins.kotlin.android) apply false
+    alias(libs.plugins.kotlin.multiplatform) apply false
+    alias(libs.plugins.kotlin.native.cocoapods) apply false
+    alias(libs.plugins.kotlin.serialization) apply false
+    alias(libs.plugins.sqldelight) apply false
+    alias(libs.plugins.navigation.safeargs) apply false
+    alias(libs.plugins.google.services) apply false
+    alias(libs.plugins.firebase.crashlytics) apply false
 }
 
 tasks.register("clean", Delete::class) {

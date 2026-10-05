@@ -29,7 +29,7 @@ import com.ramitsuri.choresclient.utils.PushMessageProcessor
 import io.ktor.client.engine.HttpClientEngine
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import org.koin.core.KoinApplication
 import org.koin.core.context.startKoin
 import org.koin.core.module.Module

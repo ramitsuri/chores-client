@@ -1,8 +1,8 @@
 package com.ramitsuri.choresclient.utils
 
 import com.ramitsuri.choresclient.model.enums.SnoozeType
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
+import kotlin.time.Clock
+import kotlin.time.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone

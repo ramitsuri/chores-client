@@ -8,7 +8,7 @@ import com.ramitsuri.choresclient.network.ActiveStatusSerializer
 import com.ramitsuri.choresclient.network.InstantSerializer
 import com.ramitsuri.choresclient.network.LocalDateTimeSerializer
 import com.ramitsuri.choresclient.network.RepeatUnitSerializer
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
 

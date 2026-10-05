@@ -3,7 +3,7 @@ package com.ramitsuri.choresclient.utils
 import com.ramitsuri.choresclient.data.settings.PrefManager
 import com.ramitsuri.choresclient.repositories.SyncRepository
 import com.ramitsuri.choresclient.repositories.TaskAssignmentsRepository
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import kotlin.time.Duration

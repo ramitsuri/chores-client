@@ -1,8 +1,8 @@
 package com.ramitsuri.choresclient.data.settings
 
 import com.ramitsuri.choresclient.model.filter.Filter
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 class PrefManager(
     private val keyValueStore: KeyValueStore,

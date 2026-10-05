@@ -63,7 +63,7 @@ import com.ramitsuri.choresclient.model.enums.RepeatUnit
 import com.ramitsuri.choresclient.model.view.RepeatUnitSelectionItem
 import com.ramitsuri.choresclient.model.view.SelectionItem
 import com.ramitsuri.choresclient.utils.formatDate
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone

@@ -1,130 +1,86 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
-    kotlin("multiplatform")
-    kotlin("native.cocoapods")
-    kotlin("plugin.serialization")
-    id("com.android.library")
-    id("app.cash.sqldelight")
-    id("kotlin-parcelize")
+    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.android.kotlin.multiplatform.library)
+    alias(libs.plugins.sqldelight)
+    alias(libs.plugins.kotlin.parcelize)
 }
 
 version = "1.0"
 
 kotlin {
-    jvmToolchain(8)
-    androidTarget()
-    listOf(
-        iosX64(),
-        iosArm64(),
-        iosSimulatorArm64()
-    ).forEach {
-        it.binaries.framework {
-            baseName = "Chores"
+    jvmToolchain(11)
+    android {
+        namespace = "com.ramitsuri.choresclient"
+        compileSdk = 37
+        minSdk = 26
+
+        withJava()
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_11)
         }
     }
 
     sourceSets {
-        val ktor = findProperty("version.ktor")
-        val sqlDelight = findProperty("version.sqldelight")
-        val commonMain by getting {
-            dependencies {
-                // Network
-                implementation("io.ktor:ktor-client-core:$ktor")
-                implementation("io.ktor:ktor-serialization-kotlinx-json:$ktor")
-                implementation("io.ktor:ktor-client-logging:$ktor")
-                implementation("io.ktor:ktor-client-content-negotiation:$ktor")
-                implementation("io.ktor:ktor-client-auth:$ktor")
+        commonMain.dependencies {
+            // Network
+            implementation(libs.ktor.client.core)
+            implementation(libs.ktor.serialization.kotlinx.json)
+            implementation(libs.ktor.client.logging)
+            implementation(libs.ktor.client.content.negotiation)
+            implementation(libs.ktor.client.auth)
 
-                // Coroutines
-                val coroutines = findProperty("version.kotlinx.coroutines")
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines")
+            // Coroutines
+            implementation(libs.kotlinx.coroutines.core)
 
-                // Date Time
-                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
+            // Date Time
+            implementation(libs.kotlinx.datetime)
 
-                // Koin
-                val koin = findProperty("version.koin")
-                implementation("io.insert-koin:koin-core:$koin")
+            // Koin
+            implementation(libs.koin.core)
 
-                // Logging
-                val kermitLog = findProperty("version.kermit")
-                implementation("co.touchlab:kermit:$kermitLog")
+            // Logging
+            implementation(libs.kermit)
 
-                // Serialization
-                val serialization = findProperty("version.kotlinx.serialization")
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:$serialization")
+            // Serialization
+            implementation(libs.kotlinx.serialization.core)
 
-                // Settings
-                val settings = findProperty("version.multiplatformSettings")
-                api("com.russhwolf:multiplatform-settings:$settings")
+            // Settings
+            api(libs.multiplatform.settings)
 
-                // SQL
-                implementation("app.cash.sqldelight:coroutines-extensions:$sqlDelight")
-            }
+            // SQL
+            implementation(libs.sqldelight.coroutines.extensions)
         }
-        val commonTest by getting {
-            dependencies {
-                implementation(kotlin("test-common"))
-                implementation(kotlin("test-annotations-common"))
-            }
+        commonTest.dependencies {
+            implementation(libs.kotlin.test.common)
+            implementation(libs.kotlin.test.annotations.common)
         }
-        val androidMain by getting {
-            dependencies {
-                // Encrypted SharedPrefs
-                implementation("androidx.security:security-crypto:1.1.0-alpha03")
+        androidMain.dependencies {
+            // Encrypted SharedPrefs
+            implementation(libs.androidx.security.crypto)
 
-                // SQL
-                implementation("app.cash.sqldelight:android-driver:$sqlDelight")
+            // SQL
+            implementation(libs.sqldelight.android.driver)
 
-                // Network
-                implementation("io.ktor:ktor-client-okhttp:$ktor")
-                implementation("io.ktor:ktor-client-core:$ktor")
-                implementation("io.ktor:ktor-client-android:$ktor")
+            // Network
+            implementation(libs.ktor.client.okhttp)
+            implementation(libs.ktor.client.core)
+            implementation(libs.ktor.client.android)
 
-                // ViewModel
-                implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1")
+            // ViewModel
+            implementation(libs.androidx.lifecycle.viewmodel.ktx)
 
-                // Firebase
-                implementation(project.dependencies.platform("com.google.firebase:firebase-bom:30.1.0"))
-                implementation("com.google.firebase:firebase-database-ktx")
-                implementation("com.google.firebase:firebase-messaging-ktx")
-            }
+            // Firebase
+            implementation(project.dependencies.enforcedPlatform(libs.firebase.bom.get()))
+            implementation(libs.firebase.database.ktx)
+            implementation(libs.firebase.messaging.ktx)
         }
-        val androidUnitTest by getting {
-            dependencies {
-                implementation(kotlin("test-junit"))
-                implementation("junit:junit:4.13.2")
-            }
+        androidUnitTest.dependencies {
+            implementation(libs.kotlin.test.junit)
+            implementation(libs.junit)
         }
-
-        val iosX64Main by getting
-        val iosArm64Main by getting
-        val iosSimulatorArm64Main by getting
-        val iosMain by creating {
-            dependsOn(commonMain)
-            iosX64Main.dependsOn(this)
-            iosArm64Main.dependsOn(this)
-            iosSimulatorArm64Main.dependsOn(this)
-            dependencies {
-                // SQL
-                implementation("app.cash.sqldelight:native-driver:$sqlDelight")
-
-                // Network
-                implementation("io.ktor:ktor-client-ios:$ktor")
-            }
-        }
-    }
-}
-
-android {
-    namespace = "com.ramitsuri.choresclient"
-    compileSdk = (findProperty("android.compileSdk") as String).toInt()
-    defaultConfig {
-        minSdk = (findProperty("android.minSdk") as String).toInt()
-        targetSdk = (findProperty("android.targetSdk") as String).toInt()
-    }
-    sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
-    buildFeatures {
-        buildConfig = true
     }
 }
 

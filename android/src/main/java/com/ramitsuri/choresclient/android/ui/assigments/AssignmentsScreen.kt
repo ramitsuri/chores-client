@@ -123,7 +123,7 @@ import com.ramitsuri.choresclient.model.view.TextValue
 import com.ramitsuri.choresclient.utils.getDay
 import com.ramitsuri.choresclient.utils.now
 import kotlinx.coroutines.delay
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import kotlinx.datetime.LocalDateTime
 
 @Composable

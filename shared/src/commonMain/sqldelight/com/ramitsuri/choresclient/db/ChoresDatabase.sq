@@ -3,7 +3,7 @@ import com.ramitsuri.choresclient.model.enums.CreateType;
 import com.ramitsuri.choresclient.model.enums.ProgressStatus;
 import com.ramitsuri.choresclient.model.enums.RepeatUnit;
 import kotlin.Boolean;
-import kotlinx.datetime.Instant;
+import kotlin.time.Instant;
 import kotlinx.datetime.LocalDateTime;
 
 /**

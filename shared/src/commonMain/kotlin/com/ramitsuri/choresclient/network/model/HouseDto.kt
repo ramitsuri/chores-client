@@ -4,7 +4,7 @@ import com.ramitsuri.choresclient.db.HouseEntity
 import com.ramitsuri.choresclient.model.enums.ActiveStatus
 import com.ramitsuri.choresclient.network.ActiveStatusSerializer
 import com.ramitsuri.choresclient.network.InstantSerializer
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlinx.serialization.Serializable
 
 @Serializable

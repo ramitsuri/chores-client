@@ -36,7 +36,7 @@ import com.ramitsuri.choresclient.viewmodel.EditTaskViewModel
 import com.ramitsuri.choresclient.viewmodel.LoginViewModel
 import com.ramitsuri.choresclient.viewmodel.SettingsViewModel
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject

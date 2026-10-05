@@ -11,7 +11,7 @@ import com.ramitsuri.choresclient.data.settings.SettingsKeyValueStore
 import com.ramitsuri.choresclient.db.ChoresDatabase
 import com.ramitsuri.choresclient.utils.DispatcherProvider
 import com.ramitsuri.choresclient.utils.LogHelper
-import com.russhwolf.settings.AndroidSettings
+import com.russhwolf.settings.SharedPreferencesSettings
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.engine.android.Android
 import org.koin.dsl.module
@@ -42,7 +42,7 @@ actual val platformModule = module {
 
         val sharedPrefs =
             context.applicationContext.getSharedPreferences(fileName, Context.MODE_PRIVATE)
-        val keyValueStore = SettingsKeyValueStore(AndroidSettings(sharedPrefs))
+        val keyValueStore = SettingsKeyValueStore(SharedPreferencesSettings(sharedPrefs))
 
         val mainKey = MasterKey.Builder(context.applicationContext)
             .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
@@ -54,16 +54,16 @@ actual val platformModule = module {
             EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
             EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
         )
-        val secureKeyValueStore = SettingsKeyValueStore(AndroidSettings(secureSharedPrefs))
+        val secureKeyValueStore = SettingsKeyValueStore(SharedPreferencesSettings(secureSharedPrefs))
 
         PrefManager(keyValueStore, secureKeyValueStore)
     }
 
     single<LogHelper> {
         LogHelper(
-            get<AppInfo>().isDebug,
-            get<PrefManager>().getEnableRemoteLogging(),
-            get<AppInfo>().deviceDetails
+            enableLocal = get<AppInfo>().isDebug,
+            enableRemote = get<AppInfo>().isDebug && get<PrefManager>().getEnableRemoteLogging(),
+            deviceDetails = get<AppInfo>().deviceDetails
         )
     }
 }

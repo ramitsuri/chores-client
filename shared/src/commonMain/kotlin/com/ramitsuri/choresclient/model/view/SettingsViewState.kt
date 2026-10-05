@@ -2,7 +2,7 @@ package com.ramitsuri.choresclient.model.view
 
 import com.ramitsuri.choresclient.model.error.Error
 import com.ramitsuri.choresclient.model.filter.Filter
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlinx.datetime.TimeZone
 
 data class SettingsViewState(

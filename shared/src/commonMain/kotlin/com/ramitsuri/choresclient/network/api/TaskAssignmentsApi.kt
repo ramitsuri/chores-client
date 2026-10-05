@@ -12,7 +12,7 @@ import io.ktor.client.request.get
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlinx.serialization.Serializable
 
 class TaskAssignmentsApi(

@@ -57,7 +57,7 @@ import com.ramitsuri.choresclient.model.view.SelectionItem
 import com.ramitsuri.choresclient.utils.formatDate
 import com.ramitsuri.choresclient.utils.formatTime
 import kotlinx.coroutines.delay
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 
