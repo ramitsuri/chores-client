@@ -41,14 +41,33 @@ UPDATE TaskAssignmentEntity
 SET progressStatus = ?, progressStatusDate = ?, shouldUpload = ?
 WHERE id = ?;
 
+markUploaded:
+UPDATE TaskAssignmentEntity
+SET shouldUpload = 0
+WHERE id = ?;
+
 insertAssignment:
-INSERT OR IGNORE INTO
+INSERT OR REPLACE INTO
 TaskAssignmentEntity (id, progressStatus, progressStatusDate, taskId, memberId, dueDateTime, createDate, createType, shouldUpload)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+selectTodoAssignments:
+SELECT * FROM TaskAssignmentEntity
+WHERE progressStatus = 1;
+
+selectCompletedAssignments:
+SELECT * FROM TaskAssignmentEntity
+WHERE progressStatus = 3 OR progressStatus = 4;
 
 deleteTodo:
 DELETE FROM TaskAssignmentEntity
 WHERE progressStatus = 1;
+
+deleteOldCompleted:
+DELETE FROM TaskAssignmentEntity
+WHERE (progressStatus = 3 OR progressStatus = 4)
+AND progressStatusDate < ?
+AND shouldUpload = 0;
 
 deleteAssignment:
 DELETE FROM TaskAssignmentEntity

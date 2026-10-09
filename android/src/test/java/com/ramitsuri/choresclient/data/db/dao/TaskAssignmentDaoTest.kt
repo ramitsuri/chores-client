@@ -11,6 +11,7 @@ import com.ramitsuri.choresclient.utils.DispatcherProvider
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -117,15 +118,37 @@ class TaskAssignmentDaoTest {
         assertEquals("id2", all.first().id)
     }
 
+    @Test
+    fun testDeleteOldCompleted() = runTest {
+        val oldUploadedCompleted = createEntity("id1", ProgressStatus.DONE, shouldUpload = false, date = 1000L)
+        val oldUnuploadedCompleted = createEntity("id2", ProgressStatus.DONE, shouldUpload = true, date = 1000L)
+        val recentCompleted = createEntity("id3", ProgressStatus.DONE, shouldUpload = false, date = 3000L)
+        val oldTodo = createEntity("id4", ProgressStatus.TODO, shouldUpload = false, date = 1000L)
+
+        dao.insert(listOf(oldUploadedCompleted, oldUnuploadedCompleted, recentCompleted, oldTodo))
+
+        val cutoff = Instant.fromEpochMilliseconds(2000L)
+        dao.deleteOldCompleted(cutoff)
+
+        val all = dao.getAll()
+        assertEquals(3, all.size)
+        val ids = all.map { it.id }.toSet()
+        assertTrue(ids.contains("id2")) // kept because shouldUpload = true
+        assertTrue(ids.contains("id3")) // kept because recent
+        assertTrue(ids.contains("id4")) // kept because TODO
+        assertFalse(ids.contains("id1")) // deleted because old & uploaded
+    }
+
     private fun createEntity(
         id: String,
         progressStatus: ProgressStatus,
-        shouldUpload: Boolean
+        shouldUpload: Boolean,
+        date: Long = 1000L
     ): TaskAssignmentEntity {
         return TaskAssignmentEntity(
             id = id,
             progressStatus = progressStatus,
-            progressStatusDate = Instant.fromEpochMilliseconds(1000L),
+            progressStatusDate = Instant.fromEpochMilliseconds(date),
             taskId = "taskId1",
             memberId = "memberId1",
             dueDateTime = LocalDateTime.parse("2023-10-01T10:00:00"),

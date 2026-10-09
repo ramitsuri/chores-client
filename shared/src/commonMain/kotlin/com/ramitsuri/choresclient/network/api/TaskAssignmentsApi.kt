@@ -20,9 +20,18 @@ class TaskAssignmentsApi(
     private val baseUrl: String,
     private val ioDispatcher: CoroutineDispatcher
 ) {
-    suspend fun getTaskAssignments(): Result<List<TaskAssignmentDto>> {
+    suspend fun getTaskAssignments(
+        progressStatus: List<ProgressStatus> = listOf(ProgressStatus.TODO)
+    ): Result<List<TaskAssignmentDto>> {
         return apiRequest(ioDispatcher) {
-            client.get("$baseUrl/task-assignments/filter?progress=1")
+            client.get("$baseUrl/task-assignments/filter") {
+                url {
+                    parameters.append(
+                        name = "progress",
+                        value = progressStatus.joinToString(separator = ",") { it.key.toString() },
+                    )
+                }
+            }
         }
     }
 

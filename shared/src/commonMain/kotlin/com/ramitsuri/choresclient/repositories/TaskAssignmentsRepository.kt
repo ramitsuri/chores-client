@@ -3,6 +3,7 @@ package com.ramitsuri.choresclient.repositories
 import com.ramitsuri.choresclient.data.db.dao.MemberDao
 import com.ramitsuri.choresclient.data.db.dao.TaskAssignmentDao
 import com.ramitsuri.choresclient.data.db.dao.TaskDao
+import com.ramitsuri.choresclient.data.settings.PrefManager
 import com.ramitsuri.choresclient.db.TaskAssignmentEntity
 import com.ramitsuri.choresclient.model.Result
 import com.ramitsuri.choresclient.model.entities.TaskAssignment
@@ -21,6 +22,9 @@ import com.ramitsuri.choresclient.utils.LogHelper
 import com.ramitsuri.choresclient.utils.getNewReminderTimeSnoozeType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
+import kotlin.time.Clock
+import kotlin.time.Duration.Companion.days
 import kotlin.time.Instant
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -37,12 +41,13 @@ class DefaultTaskAssignmentsRepository(
 ) : TaskAssignmentsRepository, KoinComponent {
 
     private val logger: LogHelper by inject()
+    private val prefManager: PrefManager by inject()
     override suspend fun refresh(forceRemindPastDue: Boolean, forceRemindFuture: Boolean) {
         // Upload completed local assignments
         val uploadedIds = uploadLocal()
 
-        // Delete assignments that have been confirmed to be uploaded
-        taskAssignmentDao.delete(uploadedIds)
+        // Mark assignments that have been confirmed to be uploaded
+        taskAssignmentDao.markUploaded(uploadedIds)
 
         // Fetch from server and save locally
         fetchAndSave()
@@ -58,7 +63,7 @@ class DefaultTaskAssignmentsRepository(
     }
 
     override suspend fun getLocalFlow(loggedInMemberId: String): Flow<List<TaskAssignmentDetails>> {
-        return taskAssignmentDao.getAllFlow()
+        return taskAssignmentDao.getTodoFlow()
             .combine(alarmHandler.getExistingFlow()) { assignmentEntities, alarmEntities ->
                 val assignmentDetails = mutableListOf<TaskAssignmentDetails>()
                 assignmentEntities.forEach { assignmentEntity ->
@@ -76,6 +81,26 @@ class DefaultTaskAssignmentsRepository(
                                 assignment.repeatInfo.repeatUnit != RepeatUnit.ON_COMPLETE &&
                                         assignment.memberId == loggedInMemberId
                             },
+                            assignedToLoggedInUser = assignment.memberId == loggedInMemberId
+                        )
+                    )
+                }
+                assignmentDetails
+            }
+    }
+
+    override suspend fun getCompletedLocalFlow(loggedInMemberId: String): Flow<List<TaskAssignmentDetails>> {
+        return taskAssignmentDao.getCompletedFlow()
+            .map { assignmentEntities ->
+                val assignmentDetails = mutableListOf<TaskAssignmentDetails>()
+                assignmentEntities.forEach { assignmentEntity ->
+                    val assignment = toTaskAssignment(assignmentEntity) ?: return@forEach
+                    assignmentDetails.add(
+                        TaskAssignmentDetails(
+                            taskAssignment = assignment,
+                            reminderTime = null,
+                            enableSnooze = false,
+                            willReminderBeSet = false,
                             assignedToLoggedInUser = assignment.memberId == loggedInMemberId
                         )
                     )
@@ -120,6 +145,34 @@ class DefaultTaskAssignmentsRepository(
         alarmHandler.reschedule(assignmentId, showAtTime)
     }
 
+    override suspend fun fetchAndSaveCompleted() {
+        val result = api.getTaskAssignments(
+            progressStatus = listOf(ProgressStatus.DONE, ProgressStatus.WONT_DO)
+        )
+
+        if (result is Result.Success) {
+            result.data
+                .map {
+                    it.task.toTaskEntity()
+                }.also { tasks ->
+                    taskDao.insert(tasks)
+                }
+
+            val taskAssignmentEntities = result.data
+                .map {
+                    it.toTaskAssignmentEntity(shouldUpload = false)
+                }
+            taskAssignmentDao.insert(taskAssignmentEntities)
+
+            logger.v(TAG, "Fetched completed: ${result.data.joinToString { it.id }}")
+        }
+    }
+
+    override suspend fun deleteOldCompleted(now: Instant) {
+        val hundredDaysAgo = now.minus(100.days)
+        taskAssignmentDao.deleteOldCompleted(hundredDaysAgo)
+    }
+
     private suspend fun uploadLocal(): List<String> {
         val readyForUpload = toTaskAssignments(taskAssignmentDao.getForUpload())
         logger.v(TAG, "Ready for upload: ${readyForUpload.joinToString()}")
@@ -149,7 +202,7 @@ class DefaultTaskAssignmentsRepository(
                 .map {
                     it.task.toTaskEntity()
                 }.also { tasks ->
-                    taskDao.clearAndInsert(tasks)
+                    taskDao.insert(tasks)
                 }
 
             val taskAssignmentEntities = result.data
@@ -197,7 +250,13 @@ class DefaultTaskAssignmentsRepository(
 interface TaskAssignmentsRepository {
     suspend fun refresh(forceRemindPastDue: Boolean = false, forceRemindFuture: Boolean = false)
 
+    suspend fun fetchAndSaveCompleted()
+
+    suspend fun deleteOldCompleted(now: Instant = Clock.System.now())
+
     suspend fun getLocalFlow(loggedInMemberId: String): Flow<List<TaskAssignmentDetails>>
+
+    suspend fun getCompletedLocalFlow(loggedInMemberId: String): Flow<List<TaskAssignmentDetails>>
 
     suspend fun getLocal(id: String): TaskAssignment?
 

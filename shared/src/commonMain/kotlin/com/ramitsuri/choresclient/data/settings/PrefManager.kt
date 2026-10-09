@@ -75,6 +75,18 @@ class PrefManager(
         putLong(key, millis)
     }
 
+    fun getLastCompletedFetchTime(): Instant {
+        val key = Key.LAST_COMPLETED_FETCH_TIME
+        val lastTimeMillis = getLong(key, 0L)
+        return Instant.fromEpochMilliseconds(lastTimeMillis)
+    }
+
+    fun setLastCompletedFetchTime(time: Instant = Clock.System.now()) {
+        val key = Key.LAST_COMPLETED_FETCH_TIME
+        val millis = time.toEpochMilliseconds()
+        putLong(key, millis)
+    }
+
     fun getSavedPersonFilterIds(): List<String> {
         val key = Key.SAVED_PERSON_FILTER_IDS
         return getStringList(key, listOf(Filter.ALL_ID))
@@ -244,6 +256,11 @@ class PrefManager(
 
             LAST_SYNC_TIME(
                 key = "last_sync_time",
+                isSecure = false
+            ),
+
+            LAST_COMPLETED_FETCH_TIME(
+                key = "last_completed_fetch_time",
                 isSecure = false
             ),
 

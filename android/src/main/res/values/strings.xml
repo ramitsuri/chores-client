@@ -13,6 +13,8 @@
     <string name="tomorrow">Tomorrow</string>
     <string name="yesterday">Yesterday</string>
     <string name="edit">Edit</string>
+    <string name="completed">Completed</string>
+    <string name="completed_empty">No completed tasks</string>
 
     <!-- Assignments -->
     <string name="assignment_due">Due %1$s</string>

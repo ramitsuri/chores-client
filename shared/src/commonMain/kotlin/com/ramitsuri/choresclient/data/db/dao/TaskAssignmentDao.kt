@@ -8,6 +8,7 @@ import com.ramitsuri.choresclient.model.entities.TaskAssignmentUpdate
 import com.ramitsuri.choresclient.utils.DispatcherProvider
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
+import kotlin.time.Instant
 
 class TaskAssignmentDao(
     private val dbQueries: ChoresDatabaseQueries,
@@ -16,6 +17,20 @@ class TaskAssignmentDao(
     fun getAllFlow(): Flow<List<TaskAssignmentEntity>> {
         return dbQueries
             .selectAssignments()
+            .asFlow()
+            .mapToList(dispatcherProvider.io)
+    }
+
+    fun getTodoFlow(): Flow<List<TaskAssignmentEntity>> {
+        return dbQueries
+            .selectTodoAssignments()
+            .asFlow()
+            .mapToList(dispatcherProvider.io)
+    }
+
+    fun getCompletedFlow(): Flow<List<TaskAssignmentEntity>> {
+        return dbQueries
+            .selectCompletedAssignments()
             .asFlow()
             .mapToList(dispatcherProvider.io)
     }
@@ -59,6 +74,32 @@ class TaskAssignmentDao(
                     insert(it)
                 }
             }
+        }
+    }
+
+    suspend fun insert(taskAssignmentEntities: List<TaskAssignmentEntity>) {
+        withContext(dispatcherProvider.io) {
+            dbQueries.transaction {
+                taskAssignmentEntities.forEach {
+                    insert(it)
+                }
+            }
+        }
+    }
+
+    suspend fun markUploaded(ids: List<String>) {
+        withContext(dispatcherProvider.io) {
+            dbQueries.transaction {
+                ids.forEach {
+                    dbQueries.markUploaded(it)
+                }
+            }
+        }
+    }
+
+    suspend fun deleteOldCompleted(before: Instant) {
+        withContext(dispatcherProvider.io) {
+            dbQueries.deleteOldCompleted(before)
         }
     }
 

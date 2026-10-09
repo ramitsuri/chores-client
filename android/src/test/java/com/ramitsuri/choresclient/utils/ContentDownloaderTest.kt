@@ -34,6 +34,7 @@ import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 import kotlin.time.Clock
+import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Instant
 
@@ -112,7 +113,7 @@ class ContentDownloaderTest {
     @Test
     fun testDownloadWhenSyncThresholdReached() = runTest {
         val now = Clock.System.now()
-        prefManager.setLastSyncTime(now.minus(25.hours))
+        prefManager.setLastSyncTime(now.minus(7.days).minus(1.hours))
 
         val downloader = ContentDownloader(
             taskAssignmentsRepository = fakeTaskAssignmentsRepository,
@@ -162,8 +163,46 @@ class ContentDownloaderTest {
         assertTrue(fakeTaskAssignmentsRepository.refreshCalled)
     }
 
+    @Test
+    fun testDownloadWhenCompletedFetchThresholdReached() = runTest {
+        val now = Clock.System.now()
+        prefManager.setLastCompletedFetchTime(now.minus(25.hours))
+
+        val downloader = ContentDownloader(
+            taskAssignmentsRepository = fakeTaskAssignmentsRepository,
+            syncRepository = syncRepository,
+            prefManager = prefManager,
+            isDebug = false
+        )
+
+        downloader.download(now)
+
+        assertTrue(fakeTaskAssignmentsRepository.fetchAndSaveCompletedCalled)
+        assertTrue(fakeTaskAssignmentsRepository.deleteOldCompletedCalled)
+    }
+
+    @Test
+    fun testDownloadWhenCompletedFetchThresholdNotReached() = runTest {
+        val now = Clock.System.now()
+        prefManager.setLastCompletedFetchTime(now.minus(12.hours))
+
+        val downloader = ContentDownloader(
+            taskAssignmentsRepository = fakeTaskAssignmentsRepository,
+            syncRepository = syncRepository,
+            prefManager = prefManager,
+            isDebug = false
+        )
+
+        downloader.download(now)
+
+        assertFalse(fakeTaskAssignmentsRepository.fetchAndSaveCompletedCalled)
+        assertFalse(fakeTaskAssignmentsRepository.deleteOldCompletedCalled)
+    }
+
     private class FakeTaskAssignmentsRepo : TaskAssignmentsRepository {
         var refreshCalled = false
+        var fetchAndSaveCompletedCalled = false
+        var deleteOldCompletedCalled = false
         var shouldThrowException = false
 
         override suspend fun refresh(forceRemindPastDue: Boolean, forceRemindFuture: Boolean) {
@@ -184,5 +223,17 @@ class ContentDownloaderTest {
         override suspend fun markTaskAssignmentWontDo(taskAssignmentId: String, wontDoTime: Instant) {}
 
         override suspend fun onSnoozeRequested(assignmentId: String, snoozeType: SnoozeType) {}
+
+        override suspend fun fetchAndSaveCompleted() {
+            fetchAndSaveCompletedCalled = true
+        }
+
+        override suspend fun deleteOldCompleted(now: Instant) {
+            deleteOldCompletedCalled = true
+        }
+
+        override suspend fun getCompletedLocalFlow(loggedInMemberId: String): Flow<List<TaskAssignmentDetails>> {
+            return flowOf()
+        }
     }
 }

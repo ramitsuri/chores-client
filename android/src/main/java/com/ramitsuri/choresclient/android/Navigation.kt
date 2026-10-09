@@ -17,12 +17,14 @@ import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import com.ramitsuri.choresclient.android.model.DeepLink
 import com.ramitsuri.choresclient.android.ui.assigments.AssignmentsScreen
+import com.ramitsuri.choresclient.android.ui.assigments.CompletedAssignmentsScreen
 import com.ramitsuri.choresclient.android.ui.login.LoginScreen
 import com.ramitsuri.choresclient.android.ui.settings.SettingsScreen
 import com.ramitsuri.choresclient.android.ui.task.AddTaskScreen
 import com.ramitsuri.choresclient.android.ui.task.EditTaskScreen
 import com.ramitsuri.choresclient.viewmodel.AddTaskViewModel
 import com.ramitsuri.choresclient.viewmodel.AssignmentsViewModel
+import com.ramitsuri.choresclient.viewmodel.CompletedAssignmentsViewModel
 import com.ramitsuri.choresclient.viewmodel.EditTaskViewModel
 import com.ramitsuri.choresclient.viewmodel.LoginViewModel
 import com.ramitsuri.choresclient.viewmodel.SettingsViewModel
@@ -40,6 +42,7 @@ object Destinations {
     const val SETTINGS = "settings"
     const val ADD_TASK = "add_task"
     const val EDIT_TASK = "edit_task"
+    const val COMPLETED = "completed"
 }
 
 @Composable
@@ -116,6 +119,7 @@ fun NavGraph(
             val state by viewModel.state.collectAsStateWithLifecycle()
             AssignmentsScreen(
                 onSettingsClicked = { navController.navigate(Destinations.SETTINGS) },
+                onCompletedClicked = { navController.navigate(Destinations.COMPLETED) },
                 onAddTaskClicked = { navController.navigate(Destinations.ADD_TASK) },
                 onEditTaskClicked = {
                     navController.navigate("${Destinations.EDIT_TASK}/$it")
@@ -130,6 +134,16 @@ fun NavGraph(
                 onCustomTimeSet = viewModel::onCustomSnoozeSet,
                 onCustomTimeCanceled = viewModel::onCustomSnoozeCanceled,
                 onItemClicked = viewModel::onItemClicked,
+            )
+        }
+
+        composable(Destinations.COMPLETED) {
+            val viewModel = koinViewModel<CompletedAssignmentsViewModel>()
+            val state by viewModel.state.collectAsStateWithLifecycle()
+            CompletedAssignmentsScreen(
+                viewState = state,
+                onBack = { navController.navigateUp() },
+                onFilterItemClicked = viewModel::onFilterItemClicked
             )
         }
 

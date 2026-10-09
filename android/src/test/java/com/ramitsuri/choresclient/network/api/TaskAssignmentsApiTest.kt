@@ -82,6 +82,26 @@ class TaskAssignmentsApiTest {
     }
 
     @Test
+    fun testGetTaskAssignmentsWithMultipleProgressStatuses() = runTest {
+        val mockEngine = MockEngine { request ->
+            val url = request.url.toString()
+            assertTrue(url.contains("progress=3"))
+            assertTrue(url.contains("progress=4"))
+            respond(
+                content = "[]",
+                status = HttpStatusCode.OK,
+                headers = headersOf(HttpHeaders.ContentType, "application/json")
+            )
+        }
+
+        val client = createMockHttpClient(mockEngine)
+        val api = TaskAssignmentsApi(client, "http://localhost", Dispatchers.Unconfined)
+
+        val result = api.getTaskAssignments(listOf(ProgressStatus.DONE, ProgressStatus.WONT_DO))
+        assertTrue(result is Result.Success)
+    }
+
+    @Test
     fun testGetTaskAssignmentsFailure() = runTest {
         val mockEngine = MockEngine { _ ->
             respond(

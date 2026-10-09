@@ -138,13 +138,14 @@ fun AssignmentsScreen(
     onAddTaskClicked: () -> Unit,
     onEditTaskClicked: (String) -> Unit,
     onSettingsClicked: () -> Unit,
+    onCompletedClicked: () -> Unit = {},
     onCustomHoursEntered: (String) -> Unit,
     onCustomMinutesEntered: (String) -> Unit,
     onCustomTimeSet: (String) -> Unit,
     onCustomTimeCanceled: () -> Unit,
     onItemClicked: (String) -> Unit,
 ) {
-    val menu = listOf(AssignmentsMenuItem.SETTINGS)
+    val menu = listOf(AssignmentsMenuItem.COMPLETED, AssignmentsMenuItem.SETTINGS)
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -189,8 +190,9 @@ fun AssignmentsScreen(
             onCustomTimeSet = onCustomTimeSet,
             onCustomTimeCanceled = onCustomTimeCanceled,
             onMenuSelected = { menuItem ->
-                if (menuItem.id == AssignmentsMenuItem.SETTINGS.id) {
-                    onSettingsClicked()
+                when (menuItem.id) {
+                    AssignmentsMenuItem.SETTINGS.id -> onSettingsClicked()
+                    AssignmentsMenuItem.COMPLETED.id -> onCompletedClicked()
                 }
             },
             onItemClicked = onItemClicked,
@@ -844,7 +846,7 @@ private fun CustomSnoozeDialog(
 }
 
 @Composable
-private fun LabelWithIcon(text: String, icon: ImageVector) {
+fun LabelWithIcon(text: String, icon: ImageVector) {
     Row(
         modifier = Modifier
             .background(

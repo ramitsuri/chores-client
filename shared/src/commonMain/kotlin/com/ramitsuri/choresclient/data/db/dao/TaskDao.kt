@@ -15,6 +15,16 @@ class TaskDao(
         }
     }
 
+    suspend fun insert(taskEntities: List<TaskEntity>) {
+        withContext(dispatcherProvider.io) {
+            dbQueries.transaction {
+                taskEntities.forEach {
+                    insert(it)
+                }
+            }
+        }
+    }
+
     suspend fun clearAndInsert(taskEntities: List<TaskEntity>) {
         withContext(dispatcherProvider.io) {
             dbQueries.transaction {

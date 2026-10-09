@@ -32,6 +32,7 @@ import com.ramitsuri.choresclient.utils.FilterHelper
 import com.ramitsuri.choresclient.utils.LogHelper
 import com.ramitsuri.choresclient.viewmodel.AddTaskViewModel
 import com.ramitsuri.choresclient.viewmodel.AssignmentsViewModel
+import com.ramitsuri.choresclient.viewmodel.CompletedAssignmentsViewModel
 import com.ramitsuri.choresclient.viewmodel.EditTaskViewModel
 import com.ramitsuri.choresclient.viewmodel.LoginViewModel
 import com.ramitsuri.choresclient.viewmodel.SettingsViewModel
@@ -141,6 +142,14 @@ class MainApplication : Application(), KoinComponent {
                         get<FilterHelper>(),
                         get<PrefManager>(),
                         get<CoroutineScope>()
+                    )
+                }
+
+                viewModel {
+                    CompletedAssignmentsViewModel(
+                        get<TaskAssignmentsRepository>(),
+                        get<FilterHelper>(),
+                        get<PrefManager>()
                     )
                 }
 
