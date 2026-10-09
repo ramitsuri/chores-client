@@ -34,6 +34,7 @@ import com.ramitsuri.choresclient.viewmodel.AddTaskViewModel
 import com.ramitsuri.choresclient.viewmodel.AssignmentsViewModel
 import com.ramitsuri.choresclient.viewmodel.CompletedAssignmentsViewModel
 import com.ramitsuri.choresclient.viewmodel.EditTaskViewModel
+import com.ramitsuri.choresclient.viewmodel.TasksViewModel
 import com.ramitsuri.choresclient.viewmodel.LoginViewModel
 import com.ramitsuri.choresclient.viewmodel.SettingsViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -150,6 +151,13 @@ class MainApplication : Application(), KoinComponent {
                         get<TaskAssignmentsRepository>(),
                         get<FilterHelper>(),
                         get<PrefManager>()
+                    )
+                }
+
+                viewModel {
+                    TasksViewModel(
+                        get<TasksRepository>(),
+                        get<FilterHelper>()
                     )
                 }
 

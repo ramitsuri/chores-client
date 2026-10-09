@@ -70,6 +70,7 @@ private val coreModule = module {
     single<ContentDownloader> {
         ContentDownloader(
             get<TaskAssignmentsRepository>(),
+            get<TasksRepository>(),
             get<SyncRepository>(),
             get<PrefManager>(),
             get<AppInfo>().isDebug,
@@ -138,6 +139,8 @@ private val coreModule = module {
         DefaultTasksRepository(
             get<NetworkProvider>().provideTasksApi(),
             get<TaskDao>(),
+            get<MemberDao>(),
+            get<HouseDao>()
         )
     }
 

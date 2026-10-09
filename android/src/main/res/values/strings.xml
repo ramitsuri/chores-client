@@ -15,6 +15,8 @@
     <string name="edit">Edit</string>
     <string name="completed">Completed</string>
     <string name="completed_empty">No completed tasks</string>
+    <string name="tasks">Tasks</string>
+    <string name="tasks_empty">No tasks found</string>
 
     <!-- Assignments -->
     <string name="assignment_due">Due %1$s</string>

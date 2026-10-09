@@ -22,10 +22,12 @@ import com.ramitsuri.choresclient.android.ui.login.LoginScreen
 import com.ramitsuri.choresclient.android.ui.settings.SettingsScreen
 import com.ramitsuri.choresclient.android.ui.task.AddTaskScreen
 import com.ramitsuri.choresclient.android.ui.task.EditTaskScreen
+import com.ramitsuri.choresclient.android.ui.task.TasksScreen
 import com.ramitsuri.choresclient.viewmodel.AddTaskViewModel
 import com.ramitsuri.choresclient.viewmodel.AssignmentsViewModel
 import com.ramitsuri.choresclient.viewmodel.CompletedAssignmentsViewModel
 import com.ramitsuri.choresclient.viewmodel.EditTaskViewModel
+import com.ramitsuri.choresclient.viewmodel.TasksViewModel
 import com.ramitsuri.choresclient.viewmodel.LoginViewModel
 import com.ramitsuri.choresclient.viewmodel.SettingsViewModel
 import org.koin.androidx.compose.koinViewModel
@@ -43,6 +45,7 @@ object Destinations {
     const val ADD_TASK = "add_task"
     const val EDIT_TASK = "edit_task"
     const val COMPLETED = "completed"
+    const val TASKS = "tasks"
 }
 
 @Composable
@@ -120,6 +123,7 @@ fun NavGraph(
             AssignmentsScreen(
                 onSettingsClicked = { navController.navigate(Destinations.SETTINGS) },
                 onCompletedClicked = { navController.navigate(Destinations.COMPLETED) },
+                onTasksClicked = { navController.navigate(Destinations.TASKS) },
                 onAddTaskClicked = { navController.navigate(Destinations.ADD_TASK) },
                 onEditTaskClicked = {
                     navController.navigate("${Destinations.EDIT_TASK}/$it")
@@ -143,6 +147,18 @@ fun NavGraph(
             CompletedAssignmentsScreen(
                 viewState = state,
                 onBack = { navController.navigateUp() },
+                onFilterItemClicked = viewModel::onFilterItemClicked
+            )
+        }
+
+        composable(Destinations.TASKS) {
+            val viewModel = koinViewModel<TasksViewModel>()
+            val state by viewModel.state.collectAsStateWithLifecycle()
+            TasksScreen(
+                viewState = state,
+                onBack = { navController.navigateUp() },
+                onAddTaskClicked = { navController.navigate(Destinations.ADD_TASK) },
+                onEditTaskClicked = { navController.navigate("${Destinations.EDIT_TASK}/$it") },
                 onFilterItemClicked = viewModel::onFilterItemClicked
             )
         }

@@ -118,6 +118,9 @@ selectTask:
 SELECT * FROM TaskEntity
 WHERE id = ?;
 
+selectTasks:
+SELECT * FROM TaskEntity;
+
 insertTask:
 INSERT OR REPLACE INTO
 TaskEntity (id, name, description, dueDateTime, repeatValue, repeatUnit, repeatEndDateTime, houseId, memberId, rotateMember, createdDate, status)

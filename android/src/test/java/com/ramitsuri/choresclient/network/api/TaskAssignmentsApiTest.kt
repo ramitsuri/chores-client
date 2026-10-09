@@ -84,9 +84,8 @@ class TaskAssignmentsApiTest {
     @Test
     fun testGetTaskAssignmentsWithMultipleProgressStatuses() = runTest {
         val mockEngine = MockEngine { request ->
-            val url = request.url.toString()
-            assertTrue(url.contains("progress=3"))
-            assertTrue(url.contains("progress=4"))
+            val progressValues = request.url.parameters.getAll("progress")
+            assertTrue(progressValues!!.contains("3,4"))
             respond(
                 content = "[]",
                 status = HttpStatusCode.OK,

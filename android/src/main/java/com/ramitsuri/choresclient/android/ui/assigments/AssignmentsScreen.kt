@@ -139,13 +139,18 @@ fun AssignmentsScreen(
     onEditTaskClicked: (String) -> Unit,
     onSettingsClicked: () -> Unit,
     onCompletedClicked: () -> Unit = {},
+    onTasksClicked: () -> Unit = {},
     onCustomHoursEntered: (String) -> Unit,
     onCustomMinutesEntered: (String) -> Unit,
     onCustomTimeSet: (String) -> Unit,
     onCustomTimeCanceled: () -> Unit,
     onItemClicked: (String) -> Unit,
 ) {
-    val menu = listOf(AssignmentsMenuItem.COMPLETED, AssignmentsMenuItem.SETTINGS)
+    val menu = listOf(
+        AssignmentsMenuItem.COMPLETED,
+        AssignmentsMenuItem.TASKS,
+        AssignmentsMenuItem.SETTINGS,
+    )
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -193,6 +198,7 @@ fun AssignmentsScreen(
                 when (menuItem.id) {
                     AssignmentsMenuItem.SETTINGS.id -> onSettingsClicked()
                     AssignmentsMenuItem.COMPLETED.id -> onCompletedClicked()
+                    AssignmentsMenuItem.TASKS.id -> onTasksClicked()
                 }
             },
             onItemClicked = onItemClicked,

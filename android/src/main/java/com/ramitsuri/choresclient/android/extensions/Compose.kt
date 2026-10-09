@@ -42,6 +42,7 @@ private fun getResId(key: LocalizedString): Int {
         LocalizedString.NOTIFICATION_ACTION_COMPLETE -> R.string.settings_notification_action_complete
         LocalizedString.NOTIFICATION_ACTION_WONT_DO -> R.string.settings_notification_action_wont_do
         LocalizedString.COMPLETED -> R.string.completed
+        LocalizedString.TASKS -> R.string.tasks
     }
 }
 

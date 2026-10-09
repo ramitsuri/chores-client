@@ -5,12 +5,18 @@ import com.ramitsuri.choresclient.android.testutils.FakeKeyValueStore
 import com.ramitsuri.choresclient.data.db.Database
 import com.ramitsuri.choresclient.data.settings.PrefManager
 import com.ramitsuri.choresclient.db.ChoresDatabase
+import com.ramitsuri.choresclient.model.Result
+import com.ramitsuri.choresclient.model.entities.Task
 import com.ramitsuri.choresclient.model.entities.TaskAssignment
+import com.ramitsuri.choresclient.model.enums.ActiveStatus
+import com.ramitsuri.choresclient.model.enums.RepeatUnit
 import com.ramitsuri.choresclient.model.enums.SnoozeType
 import com.ramitsuri.choresclient.model.view.TaskAssignmentDetails
+import com.ramitsuri.choresclient.model.view.TaskDetails
 import com.ramitsuri.choresclient.network.api.SyncApi
 import com.ramitsuri.choresclient.repositories.SyncRepository
 import com.ramitsuri.choresclient.repositories.TaskAssignmentsRepository
+import com.ramitsuri.choresclient.repositories.TasksRepository
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
@@ -24,6 +30,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.json.Json
 import org.junit.After
 import org.junit.Assert.assertFalse
@@ -43,6 +50,7 @@ class ContentDownloaderTest {
     private lateinit var prefManager: PrefManager
     private lateinit var syncRepository: SyncRepository
     private lateinit var fakeTaskAssignmentsRepository: FakeTaskAssignmentsRepo
+    private lateinit var fakeTasksRepository: FakeTasksRepo
     private var syncApiCalled = false
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -85,6 +93,7 @@ class ContentDownloaderTest {
         val keyValueStore = FakeKeyValueStore()
         prefManager = PrefManager(keyValueStore, keyValueStore)
         fakeTaskAssignmentsRepository = FakeTaskAssignmentsRepo()
+        fakeTasksRepository = FakeTasksRepo()
     }
 
     @After
@@ -99,6 +108,7 @@ class ContentDownloaderTest {
 
         val downloader = ContentDownloader(
             taskAssignmentsRepository = fakeTaskAssignmentsRepository,
+            tasksRepository = fakeTasksRepository,
             syncRepository = syncRepository,
             prefManager = prefManager,
             isDebug = false
@@ -107,6 +117,7 @@ class ContentDownloaderTest {
         downloader.download(now)
 
         assertFalse(syncApiCalled)
+        assertFalse(fakeTasksRepository.fetchTasksCalled)
         assertTrue(fakeTaskAssignmentsRepository.refreshCalled)
     }
 
@@ -117,6 +128,7 @@ class ContentDownloaderTest {
 
         val downloader = ContentDownloader(
             taskAssignmentsRepository = fakeTaskAssignmentsRepository,
+            tasksRepository = fakeTasksRepository,
             syncRepository = syncRepository,
             prefManager = prefManager,
             isDebug = false
@@ -125,6 +137,7 @@ class ContentDownloaderTest {
         downloader.download(now)
 
         assertTrue(syncApiCalled)
+        assertTrue(fakeTasksRepository.fetchTasksCalled)
         assertTrue(fakeTaskAssignmentsRepository.refreshCalled)
     }
 
@@ -135,6 +148,7 @@ class ContentDownloaderTest {
 
         val downloader = ContentDownloader(
             taskAssignmentsRepository = fakeTaskAssignmentsRepository,
+            tasksRepository = fakeTasksRepository,
             syncRepository = syncRepository,
             prefManager = prefManager,
             isDebug = false
@@ -143,6 +157,7 @@ class ContentDownloaderTest {
         downloader.download(now, forceDownload = true)
 
         assertTrue(syncApiCalled)
+        assertTrue(fakeTasksRepository.fetchTasksCalled)
         assertTrue(fakeTaskAssignmentsRepository.refreshCalled)
     }
 
@@ -153,6 +168,7 @@ class ContentDownloaderTest {
 
         val downloader = ContentDownloader(
             taskAssignmentsRepository = fakeTaskAssignmentsRepository,
+            tasksRepository = fakeTasksRepository,
             syncRepository = syncRepository,
             prefManager = prefManager,
             isDebug = false
@@ -170,6 +186,7 @@ class ContentDownloaderTest {
 
         val downloader = ContentDownloader(
             taskAssignmentsRepository = fakeTaskAssignmentsRepository,
+            tasksRepository = fakeTasksRepository,
             syncRepository = syncRepository,
             prefManager = prefManager,
             isDebug = false
@@ -188,6 +205,7 @@ class ContentDownloaderTest {
 
         val downloader = ContentDownloader(
             taskAssignmentsRepository = fakeTaskAssignmentsRepository,
+            tasksRepository = fakeTasksRepository,
             syncRepository = syncRepository,
             prefManager = prefManager,
             isDebug = false
@@ -235,5 +253,40 @@ class ContentDownloaderTest {
         override suspend fun getCompletedLocalFlow(loggedInMemberId: String): Flow<List<TaskAssignmentDetails>> {
             return flowOf()
         }
+    }
+
+    private class FakeTasksRepo : TasksRepository {
+        var fetchTasksCalled = false
+
+        override suspend fun fetchTasks(): Result<Unit> {
+            fetchTasksCalled = true
+            return Result.Success(Unit)
+        }
+
+        override fun getTasksFlow(): Flow<List<TaskDetails>> = flowOf(emptyList())
+        override suspend fun getTask(id: String): Task? = null
+        override suspend fun addTask(
+            name: String,
+            description: String,
+            dueDateTime: LocalDateTime,
+            repeatValue: Long,
+            repeatUnit: RepeatUnit,
+            repeatEndDateTime: LocalDateTime?,
+            houseId: String,
+            memberId: String,
+            rotateMember: Boolean
+        ): Result<Unit> = Result.Success(Unit)
+
+        override suspend fun editTask(
+            taskId: String,
+            name: String?,
+            description: String?,
+            dueDateTime: LocalDateTime?,
+            repeatValue: Long?,
+            repeatUnit: RepeatUnit?,
+            repeatEndDateTime: LocalDateTime?,
+            rotateMember: Boolean?,
+            status: ActiveStatus?
+        ): Result<Unit> = Result.Success(Unit)
     }
 }

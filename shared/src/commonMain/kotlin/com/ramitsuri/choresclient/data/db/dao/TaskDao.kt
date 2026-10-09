@@ -1,14 +1,24 @@
 package com.ramitsuri.choresclient.data.db.dao
 
+import app.cash.sqldelight.coroutines.asFlow
+import app.cash.sqldelight.coroutines.mapToList
 import com.ramitsuri.choresclient.db.ChoresDatabaseQueries
 import com.ramitsuri.choresclient.db.TaskEntity
 import com.ramitsuri.choresclient.utils.DispatcherProvider
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 
 class TaskDao(
     private val dbQueries: ChoresDatabaseQueries,
     private val dispatcherProvider: DispatcherProvider
 ) {
+    fun getAllFlow(): Flow<List<TaskEntity>> {
+        return dbQueries
+            .selectTasks()
+            .asFlow()
+            .mapToList(dispatcherProvider.io)
+    }
+
     suspend fun get(id: String): TaskEntity? {
         return withContext(dispatcherProvider.io) {
             return@withContext dbQueries.selectTask(id).executeAsOneOrNull()

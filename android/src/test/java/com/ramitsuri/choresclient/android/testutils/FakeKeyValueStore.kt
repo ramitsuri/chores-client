@@ -20,11 +20,16 @@ class FakeKeyValueStore : KeyValueStore {
     }
 
     override fun getStringList(key: String, fallback: List<String>): List<String> {
-        TODO("Not yet implemented")
+        val value = store[key]
+        return if (value is List<*>) {
+            value.filterIsInstance<String>()
+        } else {
+            fallback
+        }
     }
 
     override fun putStringList(key: String, value: List<String>) {
-        TODO("Not yet implemented")
+        store[key] = value
     }
 
     override fun getLong(key: String, fallback: Long): Long {
