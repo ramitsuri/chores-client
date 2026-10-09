@@ -111,7 +111,6 @@
     <string name="add_task_end_repetition_never">Never</string>
 
     <!-- Edit Task -->
-    <string name="edit_task_edit">Edit</string>
     <string name="edit_task_active_status_title">Active status</string>
     <string name="edit_task_active_status_active">Active</string>
     <string name="edit_task_active_status_active_hint">New occurrences will be created.</string>

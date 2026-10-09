@@ -299,7 +299,7 @@ private fun EditTaskContent(
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            Text(stringResource(id = R.string.edit_task_edit))
+            Text(stringResource(id = R.string.save))
         }
     }
 }
