@@ -3,7 +3,6 @@ package com.ramitsuri.choresclient.repositories
 import com.ramitsuri.choresclient.data.db.dao.MemberDao
 import com.ramitsuri.choresclient.data.db.dao.TaskAssignmentDao
 import com.ramitsuri.choresclient.data.db.dao.TaskDao
-import com.ramitsuri.choresclient.data.settings.PrefManager
 import com.ramitsuri.choresclient.db.TaskAssignmentEntity
 import com.ramitsuri.choresclient.model.Result
 import com.ramitsuri.choresclient.model.entities.TaskAssignment
@@ -23,11 +22,11 @@ import com.ramitsuri.choresclient.utils.getNewReminderTimeSnoozeType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Instant
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 
 @Suppress("MoveVariableDeclarationIntoWhen")
 class DefaultTaskAssignmentsRepository(
@@ -41,7 +40,6 @@ class DefaultTaskAssignmentsRepository(
 ) : TaskAssignmentsRepository, KoinComponent {
 
     private val logger: LogHelper by inject()
-    private val prefManager: PrefManager by inject()
     override suspend fun refresh(forceRemindPastDue: Boolean, forceRemindFuture: Boolean) {
         // Upload completed local assignments
         val uploadedIds = uploadLocal()
@@ -147,7 +145,8 @@ class DefaultTaskAssignmentsRepository(
 
     override suspend fun fetchAndSaveCompleted() {
         val result = api.getTaskAssignments(
-            progressStatus = listOf(ProgressStatus.DONE, ProgressStatus.WONT_DO)
+            progressStatus = listOf(ProgressStatus.DONE, ProgressStatus.WONT_DO),
+            dueDateWithinDays = COMPLETED_WITHIN_DAYS_COUNT,
         )
 
         if (result is Result.Success) {
@@ -169,8 +168,8 @@ class DefaultTaskAssignmentsRepository(
     }
 
     override suspend fun deleteOldCompleted(now: Instant) {
-        val hundredDaysAgo = now.minus(100.days)
-        taskAssignmentDao.deleteOldCompleted(hundredDaysAgo)
+        val daysAgo = now.minus(COMPLETED_WITHIN_DAYS_COUNT.days)
+        taskAssignmentDao.deleteOldCompleted(daysAgo)
     }
 
     private suspend fun uploadLocal(): List<String> {
@@ -244,6 +243,7 @@ class DefaultTaskAssignmentsRepository(
 
     companion object {
         private const val TAG = "TaskAssignmentsRepository"
+        private const val COMPLETED_WITHIN_DAYS_COUNT = 100
     }
 }
 

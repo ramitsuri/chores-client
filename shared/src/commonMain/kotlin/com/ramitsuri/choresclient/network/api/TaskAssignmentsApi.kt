@@ -21,7 +21,8 @@ class TaskAssignmentsApi(
     private val ioDispatcher: CoroutineDispatcher
 ) {
     suspend fun getTaskAssignments(
-        progressStatus: List<ProgressStatus> = listOf(ProgressStatus.TODO)
+        progressStatus: List<ProgressStatus> = listOf(ProgressStatus.TODO),
+        dueDateWithinDays: Int? = null,
     ): Result<List<TaskAssignmentDto>> {
         return apiRequest(ioDispatcher) {
             client.get("$baseUrl/task-assignments/filter") {
@@ -30,6 +31,12 @@ class TaskAssignmentsApi(
                         name = "progress",
                         value = progressStatus.joinToString(separator = ",") { it.key.toString() },
                     )
+                    if (dueDateWithinDays != null) {
+                        parameters.append(
+                            name = "duedatewithindays",
+                            value = dueDateWithinDays.toString(),
+                        )
+                    }
                 }
             }
         }
