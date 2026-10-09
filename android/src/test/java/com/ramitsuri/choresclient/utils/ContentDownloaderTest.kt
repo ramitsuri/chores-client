@@ -1,0 +1,188 @@
+package com.ramitsuri.choresclient.utils
+
+import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
+import com.ramitsuri.choresclient.android.testutils.FakeKeyValueStore
+import com.ramitsuri.choresclient.data.db.Database
+import com.ramitsuri.choresclient.data.settings.PrefManager
+import com.ramitsuri.choresclient.db.ChoresDatabase
+import com.ramitsuri.choresclient.model.entities.TaskAssignment
+import com.ramitsuri.choresclient.model.enums.SnoozeType
+import com.ramitsuri.choresclient.model.view.TaskAssignmentDetails
+import com.ramitsuri.choresclient.network.api.SyncApi
+import com.ramitsuri.choresclient.repositories.SyncRepository
+import com.ramitsuri.choresclient.repositories.TaskAssignmentsRepository
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.mock.MockEngine
+import io.ktor.client.engine.mock.respond
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.headersOf
+import io.ktor.serialization.kotlinx.json.json
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.json.Json
+import org.junit.After
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
+import org.junit.Before
+import org.junit.Test
+import org.koin.core.context.startKoin
+import org.koin.core.context.stopKoin
+import org.koin.dsl.module
+import kotlin.time.Clock
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Instant
+
+class ContentDownloaderTest {
+
+    private lateinit var prefManager: PrefManager
+    private lateinit var syncRepository: SyncRepository
+    private lateinit var fakeTaskAssignmentsRepository: FakeTaskAssignmentsRepo
+    private var syncApiCalled = false
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val testDispatcher = UnconfinedTestDispatcher()
+
+    @Before
+    fun setUp() {
+        startKoin {
+            modules(module {
+                single { LogHelper(enableLocal = false, enableRemote = false, deviceDetails = "test") }
+            })
+        }
+
+        val driver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
+        ChoresDatabase.Schema.create(driver)
+        val dispatcherProvider = DispatcherProvider(testDispatcher, testDispatcher, testDispatcher)
+        val database = Database(driver, dispatcherProvider)
+
+        val mockEngine = MockEngine { _ ->
+            syncApiCalled = true
+            respond(
+                content = """{"associatedLists":[],"memberListAssociations":[]}""",
+                status = HttpStatusCode.OK,
+                headers = headersOf(HttpHeaders.ContentType, "application/json")
+            )
+        }
+        val client = HttpClient(mockEngine) {
+            install(ContentNegotiation) {
+                json(Json { ignoreUnknownKeys = true })
+            }
+        }
+        val syncApi = SyncApi(client, "http://localhost", testDispatcher)
+        syncRepository = SyncRepository(
+            database.houseDao,
+            database.memberHouseAssociationDao,
+            database.memberDao,
+            syncApi
+        )
+
+        val keyValueStore = FakeKeyValueStore()
+        prefManager = PrefManager(keyValueStore, keyValueStore)
+        fakeTaskAssignmentsRepository = FakeTaskAssignmentsRepo()
+    }
+
+    @After
+    fun tearDown() {
+        stopKoin()
+    }
+
+    @Test
+    fun testDownloadWhenSyncThresholdNotReached() = runTest {
+        val now = Clock.System.now()
+        prefManager.setLastSyncTime(now.minus(12.hours))
+
+        val downloader = ContentDownloader(
+            taskAssignmentsRepository = fakeTaskAssignmentsRepository,
+            syncRepository = syncRepository,
+            prefManager = prefManager,
+            isDebug = false
+        )
+
+        downloader.download(now)
+
+        assertFalse(syncApiCalled)
+        assertTrue(fakeTaskAssignmentsRepository.refreshCalled)
+    }
+
+    @Test
+    fun testDownloadWhenSyncThresholdReached() = runTest {
+        val now = Clock.System.now()
+        prefManager.setLastSyncTime(now.minus(25.hours))
+
+        val downloader = ContentDownloader(
+            taskAssignmentsRepository = fakeTaskAssignmentsRepository,
+            syncRepository = syncRepository,
+            prefManager = prefManager,
+            isDebug = false
+        )
+
+        downloader.download(now)
+
+        assertTrue(syncApiCalled)
+        assertTrue(fakeTaskAssignmentsRepository.refreshCalled)
+    }
+
+    @Test
+    fun testDownloadWhenForceDownloadTrue() = runTest {
+        val now = Clock.System.now()
+        prefManager.setLastSyncTime(now.minus(1.hours))
+
+        val downloader = ContentDownloader(
+            taskAssignmentsRepository = fakeTaskAssignmentsRepository,
+            syncRepository = syncRepository,
+            prefManager = prefManager,
+            isDebug = false
+        )
+
+        downloader.download(now, forceDownload = true)
+
+        assertTrue(syncApiCalled)
+        assertTrue(fakeTaskAssignmentsRepository.refreshCalled)
+    }
+
+    @Test
+    fun testDownloadHandlesExceptionGracefully() = runTest {
+        val now = Clock.System.now()
+        fakeTaskAssignmentsRepository.shouldThrowException = true
+
+        val downloader = ContentDownloader(
+            taskAssignmentsRepository = fakeTaskAssignmentsRepository,
+            syncRepository = syncRepository,
+            prefManager = prefManager,
+            isDebug = false
+        )
+
+        // Should not throw exception
+        downloader.download(now)
+        assertTrue(fakeTaskAssignmentsRepository.refreshCalled)
+    }
+
+    private class FakeTaskAssignmentsRepo : TaskAssignmentsRepository {
+        var refreshCalled = false
+        var shouldThrowException = false
+
+        override suspend fun refresh(forceRemindPastDue: Boolean, forceRemindFuture: Boolean) {
+            refreshCalled = true
+            if (shouldThrowException) {
+                throw RuntimeException("Network error")
+            }
+        }
+
+        override suspend fun getLocalFlow(loggedInMemberId: String): Flow<List<TaskAssignmentDetails>> {
+            return flowOf(emptyList())
+        }
+
+        override suspend fun getLocal(id: String): TaskAssignment? = null
+
+        override suspend fun markTaskAssignmentDone(taskAssignmentId: String, doneTime: Instant) {}
+
+        override suspend fun markTaskAssignmentWontDo(taskAssignmentId: String, wontDoTime: Instant) {}
+
+        override suspend fun onSnoozeRequested(assignmentId: String, snoozeType: SnoozeType) {}
+    }
+}

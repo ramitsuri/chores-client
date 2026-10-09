@@ -56,6 +56,9 @@ kotlin {
         commonTest.dependencies {
             implementation(libs.kotlin.test.common)
             implementation(libs.kotlin.test.annotations.common)
+            implementation(libs.ktor.client.mock)
+            implementation(libs.sqldelight.sqlite.driver)
+            implementation(libs.kotlinx.coroutines.test)
         }
         androidMain.dependencies {
             // Encrypted SharedPrefs

@@ -4,6 +4,7 @@ import com.ramitsuri.choresclient.model.entities.AssignmentAlarm
 import com.ramitsuri.choresclient.db.AlarmEntity
 import com.ramitsuri.choresclient.reminder.AlarmHandler
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.datetime.LocalDateTime
 
 class FakeAlarmHandler : AlarmHandler {
@@ -32,9 +33,16 @@ class FakeAlarmHandler : AlarmHandler {
     }
 
     override fun getExistingFlow(): Flow<List<AlarmEntity>> {
-        TODO("Not yet implemented")
+        return flowOf(
+            alarms.values.map {
+                AlarmEntity(
+                    assignmentId = it.assignmentId,
+                    showAtTime = it.showAtTime,
+                    systemNotificationId = it.systemNotificationId.toLong()
+                )
+            }
+        )
     }
-
 
     override suspend fun schedule(assignmentAlarms: List<AssignmentAlarm>) {
         assignmentAlarms.forEach { assignmentAlarm ->
@@ -49,7 +57,9 @@ class FakeAlarmHandler : AlarmHandler {
     }
 
     override suspend fun reschedule(assignmentId: String, showAtTime: LocalDateTime) {
-        TODO("Not yet implemented")
+        val existing = alarms[assignmentId]
+        val id = existing?.systemNotificationId ?: -1
+        alarms[assignmentId] = AssignmentAlarm(assignmentId, showAtTime, id)
     }
 
     override suspend fun cancel(assignmentIds: List<String>) {
