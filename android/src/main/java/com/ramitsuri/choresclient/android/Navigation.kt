@@ -152,6 +152,7 @@ fun NavGraph(
                 onBack = { navController.navigateUp() },
                 onAddTaskClicked = { navController.navigate(Destinations.ADD_TASK) },
                 onEditTaskClicked = { navController.navigate("${Destinations.EDIT_TASK}/$it") },
+                onSearchQueryChanged = viewModel::onSearchQueryChanged,
             )
         }
 

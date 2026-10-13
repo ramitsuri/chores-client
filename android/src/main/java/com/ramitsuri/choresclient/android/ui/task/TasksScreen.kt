@@ -24,13 +24,18 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.House
 import androidx.compose.material.icons.filled.Repeat
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -70,6 +75,7 @@ fun TasksScreen(
     onBack: () -> Unit,
     onAddTaskClicked: () -> Unit,
     onEditTaskClicked: (String) -> Unit,
+    onSearchQueryChanged: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var selectedListType by remember { mutableStateOf(ListTypeSelection.PERSONAL) }
@@ -79,6 +85,7 @@ fun TasksScreen(
     Scaffold(
         topBar = {
             AppTopAppBar(
+                title = stringResource(id = R.string.tasks),
                 onBack = onBack
             )
         },
@@ -103,6 +110,33 @@ fun TasksScreen(
             PersonalSharedToggle(
                 selectedType = selectedListType,
                 onTypeSelected = { selectedListType = it }
+            )
+
+            Spacer(modifier = Modifier.height(MaterialTheme.dimens.medium))
+
+            OutlinedTextField(
+                value = viewState.searchQuery,
+                onValueChange = onSearchQueryChanged,
+                placeholder = { Text(stringResource(id = R.string.search_hint)) },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = null
+                    )
+                },
+                trailingIcon = {
+                    if (viewState.searchQuery.isNotBlank()) {
+                        IconButton(onClick = { onSearchQueryChanged("") }) {
+                            Icon(
+                                imageVector = Icons.Default.Clear,
+                                contentDescription = null
+                            )
+                        }
+                    }
+                },
+                singleLine = true,
+                shape = RoundedCornerShape(MaterialTheme.dimens.cardCornerRadius),
+                modifier = Modifier.fillMaxWidth()
             )
 
             Spacer(modifier = Modifier.height(MaterialTheme.dimens.medium))
@@ -313,6 +347,7 @@ private fun PreviewTasksScreen() {
                 onBack = {},
                 onAddTaskClicked = {},
                 onEditTaskClicked = {},
+                onSearchQueryChanged = {},
             )
         }
     }
