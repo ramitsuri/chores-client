@@ -6,13 +6,17 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.displayCutoutPadding
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
@@ -28,12 +32,15 @@ import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AlertDialogDefaults
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -60,7 +67,10 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.ramitsuri.choresclient.android.R
+import com.ramitsuri.choresclient.android.ui.common.AppTopAppBar
+import com.ramitsuri.choresclient.android.ui.theme.ChoresClientTheme
 import com.ramitsuri.choresclient.android.ui.theme.dimens
 import com.ramitsuri.choresclient.android.utils.formatRepeatUnitCompact
 import com.ramitsuri.choresclient.model.enums.ActiveStatus
@@ -73,7 +83,6 @@ import com.ramitsuri.choresclient.utils.formatTime
 import kotlinx.coroutines.delay
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
-
 
 @Composable
 fun EditTaskScreen(
@@ -106,15 +115,62 @@ fun EditTaskScreen(
             keyboard?.show()
         }
     }
-    Surface {
-        Column(
-            modifier = modifier
-                .fillMaxSize()
-                .systemBarsPadding()
-                .displayCutoutPadding()
-                .padding(horizontal = MaterialTheme.dimens.medium),
-        ) {
 
+    Scaffold(
+        topBar = {
+            AppTopAppBar(
+                title = stringResource(id = R.string.edit),
+                onBack = onBack
+            )
+        },
+        bottomBar = {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(MaterialTheme.dimens.large),
+                horizontalArrangement = Arrangement.spacedBy(MaterialTheme.dimens.medium)
+            ) {
+                OutlinedButton(
+                    onClick = onBack,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(stringResource(id = R.string.cancel))
+                }
+                Button(
+                    onClick = {
+                        keyboard?.hide()
+                        onEditTaskRequested()
+                    },
+                    enabled = viewState.enableEditTask,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    ),
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(
+                        text = stringResource(id = R.string.save),
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+        },
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        modifier = modifier.fillMaxSize()
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .consumeWindowInsets(paddingValues)
+                .windowInsetsPadding(
+                    WindowInsets.safeDrawing.only(
+                        WindowInsetsSides.Horizontal
+                    )
+                )
+                .padding(horizontal = MaterialTheme.dimens.large)
+                .verticalScroll(rememberScrollState())
+        ) {
             if (viewState.loading) {
                 Column(
                     modifier = Modifier.fillMaxSize(),
@@ -134,13 +190,8 @@ fun EditTaskScreen(
                     onRotateMemberClicked = onRotateMemberClicked,
                     onRepeatEndDatePicked = onRepeatEndDatePicked,
                     onResetRepeatInfo = onResetRepeatInfo,
-                    onEditTaskRequested = {
-                        keyboard?.hide()
-                        onEditTaskRequested()
-                    },
                     onActiveStatusSelected = onActiveStatusSelected,
                     onResetActiveStatus = onResetActiveStatus,
-                    onBack = onBack,
                     focusManager = focusManager,
                     focusRequester = focusRequester
                 )
@@ -161,17 +212,15 @@ private fun EditTaskContent(
     onRotateMemberClicked: () -> Unit,
     onRepeatEndDatePicked: (Long) -> Unit,
     onResetRepeatInfo: () -> Unit,
-    onEditTaskRequested: () -> Unit,
     onActiveStatusSelected: (ActiveStatus) -> Unit,
     onResetActiveStatus: () -> Unit,
-    onBack: () -> Unit,
     focusManager: FocusManager,
     focusRequester: FocusRequester,
 ) {
-    var taskNameSelection by remember{ mutableStateOf(TextRange(state.taskName.length)) }
+    var taskNameSelection by remember { mutableStateOf(TextRange(state.taskName.length)) }
     Column(modifier = modifier) {
-        BackButton(onBack = onBack)
-        Spacer(modifier = Modifier.height(MaterialTheme.dimens.large))
+        Spacer(modifier = Modifier.height(MaterialTheme.dimens.medium))
+
         OutlinedTextField(
             value = TextFieldValue(
                 text = state.taskName,
@@ -195,8 +244,13 @@ private fun EditTaskContent(
                 .fillMaxWidth()
                 .focusRequester(focusRequester = focusRequester)
         )
+
         Spacer(modifier = Modifier.height(MaterialTheme.dimens.large))
-        Row(modifier = Modifier.fillMaxWidth()) {
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.dimens.small)
+        ) {
             var showDatePickerState by remember { mutableStateOf(false) }
             var showTimePickerState by remember { mutableStateOf(false) }
 
@@ -205,18 +259,14 @@ private fun EditTaskContent(
                 startIcon = Icons.Filled.CalendarToday,
                 onClick = { showDatePickerState = true },
                 smallerSize = true,
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(MaterialTheme.dimens.small)
+                modifier = Modifier.weight(1f)
             )
             PickerItemButton(
                 text = formatTime(state.time),
                 startIcon = Icons.Filled.AccessTime,
                 onClick = { showTimePickerState = true },
                 smallerSize = true,
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(MaterialTheme.dimens.small)
+                modifier = Modifier.weight(1f)
             )
 
             if (showDatePickerState) {
@@ -237,8 +287,13 @@ private fun EditTaskContent(
                 )
             }
         }
+
         Spacer(modifier = Modifier.height(MaterialTheme.dimens.medium))
-        Row(modifier = Modifier.fillMaxWidth()) {
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.dimens.small)
+        ) {
             var showRepeatInfoState by remember { mutableStateOf(false) }
             var showActiveStatusState by remember { mutableStateOf(false) }
 
@@ -250,9 +305,7 @@ private fun EditTaskContent(
                 startIcon = Icons.Filled.Repeat,
                 onClick = { showRepeatInfoState = true },
                 smallerSize = true,
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(MaterialTheme.dimens.small)
+                modifier = Modifier.weight(1f)
             )
 
             PickerItemButton(
@@ -260,9 +313,7 @@ private fun EditTaskContent(
                 startIcon = state.status.icon,
                 onClick = { showActiveStatusState = true },
                 smallerSize = true,
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(MaterialTheme.dimens.small)
+                modifier = Modifier.weight(1f)
             )
 
             if (showRepeatInfoState) {
@@ -291,15 +342,6 @@ private fun EditTaskContent(
                     onDismissRequested = { showActiveStatusState = false }
                 )
             }
-        }
-        Spacer(modifier = Modifier.height(MaterialTheme.dimens.large))
-        FilledTonalButton(
-            onClick = onEditTaskRequested,
-            enabled = state.enableEditTask,
-            modifier = Modifier
-                .fillMaxWidth()
-        ) {
-            Text(stringResource(id = R.string.save))
         }
     }
 }
@@ -331,8 +373,7 @@ private fun ActiveStatusDialog(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    modifier = Modifier
-                        .fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth(),
                     text = stringResource(id = R.string.edit_task_active_status_title),
                     style = MaterialTheme.typography.labelMedium
                 )
@@ -358,8 +399,7 @@ private fun ActiveStatusDialog(
 
                 Spacer(modifier = Modifier.height(MaterialTheme.dimens.medium))
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     Spacer(modifier = Modifier.weight(1f))
                     TextButton(
@@ -411,8 +451,6 @@ fun RadioButtonItem(
             )
         }
     }
-
-
 }
 
 private val ActiveStatus.label: String
@@ -491,51 +529,23 @@ fun EditTasksPreview() {
         error = null,
         enableEditTask = false,
     )
-    EditTaskScreen(
-        viewState = viewState,
-        onBack = { },
-        onTaskNameUpdate = { },
-        onDatePicked = { _ -> },
-        onTimePicked = { _, _ -> },
-        onRepeatValueUpdated = {},
-        onRepeatUnitSelected = {},
-        onRotateMemberClicked = {},
-        onRepeatEndDatePicked = {},
-        onResetRepeatInfo = {},
-        onEditTaskRequested = {},
-        onActiveStatusSelected = {},
-        onResetActiveStatus = {},
-    )
-}
-
-@Preview
-@Composable
-fun EditTasksLoadingPreview() {
-    val viewState = EditTaskViewState(
-        loading = true,
-        taskName = "",
-        repeatValue = 0,
-        repeatUnits = listOf(),
-        repeatEndDate = null,
-        date = LocalDate.parse("2023-09-13"),
-        time = LocalTime.parse("13:00:00"),
-        rotateMember = false,
-        error = null,
-        enableEditTask = false,
-    )
-    EditTaskScreen(
-        viewState = viewState,
-        onBack = { },
-        onTaskNameUpdate = { },
-        onDatePicked = { _ -> },
-        onTimePicked = { _, _ -> },
-        onRepeatValueUpdated = {},
-        onRepeatUnitSelected = {},
-        onRotateMemberClicked = {},
-        onRepeatEndDatePicked = {},
-        onResetRepeatInfo = {},
-        onEditTaskRequested = {},
-        onActiveStatusSelected = {},
-        onResetActiveStatus = {},
-    )
+    ChoresClientTheme {
+        Surface {
+            EditTaskScreen(
+                viewState = viewState,
+                onBack = { },
+                onTaskNameUpdate = { },
+                onDatePicked = { _ -> },
+                onTimePicked = { _, _ -> },
+                onRepeatValueUpdated = {},
+                onRepeatUnitSelected = {},
+                onRotateMemberClicked = {},
+                onRepeatEndDatePicked = {},
+                onResetRepeatInfo = {},
+                onEditTaskRequested = {},
+                onActiveStatusSelected = {},
+                onResetActiveStatus = {},
+            )
+        }
+    }
 }

@@ -1,9 +1,6 @@
 package com.ramitsuri.choresclient.viewmodel
 
 import com.ramitsuri.choresclient.data.settings.PrefManager
-import com.ramitsuri.choresclient.model.filter.Filter
-import com.ramitsuri.choresclient.model.filter.FilterItem
-import com.ramitsuri.choresclient.model.filter.FilterType
 import com.ramitsuri.choresclient.model.view.NotificationActionWrapper
 import com.ramitsuri.choresclient.model.view.NotificationActionsViewState
 import com.ramitsuri.choresclient.model.view.SettingsViewState
@@ -12,7 +9,6 @@ import com.ramitsuri.choresclient.model.view.TextValue
 import com.ramitsuri.choresclient.resources.LocalizedString
 import com.ramitsuri.choresclient.utils.ContentDownloadRequestHandler
 import com.ramitsuri.choresclient.utils.DispatcherProvider
-import com.ramitsuri.choresclient.utils.FilterHelper
 import com.ramitsuri.choresclient.utils.LogHelper
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -23,7 +19,6 @@ import org.koin.core.component.KoinComponent
 
 class SettingsViewModel(
     private val contentDownloadRequestHandler: ContentDownloadRequestHandler,
-    private val filterHelper: FilterHelper,
     private val prefManager: PrefManager,
     private val dispatchers: DispatcherProvider,
     private val logger: LogHelper
@@ -43,10 +38,6 @@ class SettingsViewModel(
             )
         )
     val state: StateFlow<SettingsViewState> = _state
-
-    init {
-        resetFilters()
-    }
 
     fun syncRequested() {
         _state.update {
@@ -68,43 +59,6 @@ class SettingsViewModel(
                         )
                     )
                 }
-            }
-        }
-    }
-
-    fun filter(filter: Filter, filterItem: FilterItem) {
-        val newFilter = filterHelper.onFilterItemClicked(filter, filterItem)
-        val filters = _state.value.filterViewState.filters.toMutableList()
-        filters.removeAll { it.getType() == filter.getType() }
-        filters.add(newFilter)
-        filters.sortBy { it.getType().index }
-        _state.update {
-            it.copy(filterViewState = it.filterViewState.copy(filters = filters))
-        }
-    }
-
-    fun saveFilters() {
-        val filters = _state.value.filterViewState.filters
-        filters.forEach { filter ->
-            val selectedIds = filter.getItems().filter { it.getIsSelected() }.map { it.getId() }
-            when (filter.getType()) {
-                FilterType.PERSON -> {
-                    prefManager.setSavedPersonFilterIds(selectedIds)
-
-                }
-
-                FilterType.HOUSE -> {
-                    prefManager.setSavedHouseFilterIds(selectedIds)
-                }
-            }
-        }
-    }
-
-    fun resetFilters() {
-        viewModelScope.launch {
-            val filters = filterHelper.getBaseFilters()
-            _state.update {
-                it.copy(filterViewState = it.filterViewState.copy(filters = filters))
             }
         }
     }

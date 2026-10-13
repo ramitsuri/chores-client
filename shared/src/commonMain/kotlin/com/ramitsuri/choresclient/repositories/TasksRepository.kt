@@ -2,6 +2,7 @@ package com.ramitsuri.choresclient.repositories
 
 import com.ramitsuri.choresclient.data.db.dao.HouseDao
 import com.ramitsuri.choresclient.data.db.dao.MemberDao
+import com.ramitsuri.choresclient.data.db.dao.MemberHouseAssociationDao
 import com.ramitsuri.choresclient.data.db.dao.TaskDao
 import com.ramitsuri.choresclient.model.Result
 import com.ramitsuri.choresclient.model.entities.Task
@@ -23,7 +24,8 @@ class DefaultTasksRepository(
     private val api: TasksApi,
     private val taskDao: TaskDao,
     private val memberDao: MemberDao,
-    private val houseDao: HouseDao
+    private val houseDao: HouseDao,
+    private val memberHouseAssociationDao: MemberHouseAssociationDao,
 ) : TasksRepository, KoinComponent {
 
     private val logger: LogHelper by inject()
@@ -48,10 +50,12 @@ class DefaultTasksRepository(
                 val task = Task(entity)
                 val memberName = members[task.memberId]?.name ?: ""
                 val houseName = houses[task.houseId]?.name ?: ""
+                val isSharedList = memberHouseAssociationDao.getForHouse(task.houseId).size > 1
                 TaskDetails(
                     task = task,
                     memberName = memberName,
-                    houseName = houseName
+                    houseName = houseName,
+                    isSharedList = isSharedList
                 )
             }
         }

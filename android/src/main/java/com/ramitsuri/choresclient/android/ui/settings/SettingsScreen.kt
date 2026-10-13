@@ -45,30 +45,23 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import com.ramitsuri.choresclient.android.R
 import com.ramitsuri.choresclient.android.extensions.string
-import com.ramitsuri.choresclient.android.ui.preview.FilterPreview
 import com.ramitsuri.choresclient.android.ui.theme.ChoresClientTheme
 import com.ramitsuri.choresclient.android.ui.theme.dimens
 import com.ramitsuri.choresclient.model.error.EditTaskError
 import com.ramitsuri.choresclient.model.error.Error
 import com.ramitsuri.choresclient.model.error.PushTokenError
-import com.ramitsuri.choresclient.model.filter.Filter
-import com.ramitsuri.choresclient.model.filter.FilterItem
-import com.ramitsuri.choresclient.model.filter.FilterType
-import com.ramitsuri.choresclient.model.view.FilterViewState
 import com.ramitsuri.choresclient.model.view.NotificationActionWrapper
 import com.ramitsuri.choresclient.model.view.NotificationActionsViewState
 import com.ramitsuri.choresclient.model.view.SettingsViewState
 import com.ramitsuri.choresclient.model.view.SyncViewState
 import com.ramitsuri.choresclient.utils.formatSyncTime
 import kotlinx.coroutines.launch
+import kotlinx.datetime.TimeZone
 import kotlin.time.Clock
 import kotlin.time.Instant
-import kotlinx.datetime.TimeZone
 
 @Composable
 fun SettingsScreen(
@@ -76,9 +69,6 @@ fun SettingsScreen(
     state: SettingsViewState,
     onBack: () -> Unit,
     onSyncClicked: () -> Unit,
-    onFilterSelected: (Filter, FilterItem) -> Unit,
-    onFilterSaveRequested: () -> Unit,
-    onFilterResetRequested: () -> Unit,
     onNotificationActionSelected: (NotificationActionWrapper) -> Unit,
     onNotificationActionsSaveRequested: () -> Unit,
     onNotificationActionsResetRequested: () -> Unit,
@@ -124,14 +114,6 @@ fun SettingsScreen(
                         },
                         checked = state.remindPastDueEnabled,
                         onClick = onEnableRemindPastDueClicked
-                    )
-                }
-                item {
-                    FilterItem(
-                        filterViewState = state.filterViewState,
-                        onFilterSelected = onFilterSelected,
-                        onFilterSaveRequested = onFilterSaveRequested,
-                        onFilterResetRequested = onFilterResetRequested,
                     )
                 }
                 item {
@@ -215,182 +197,6 @@ private fun SyncItem(
         modifier = modifier
     )
 }
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun FilterItem(
-    filterViewState: FilterViewState,
-    onFilterSelected: (Filter, FilterItem) -> Unit,
-    onFilterSaveRequested: () -> Unit,
-    onFilterResetRequested: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val noneString = stringResource(id = R.string.settings_item_filter_none)
-    val personFilter = filterViewState.filters.firstOrNull { it.getType() == FilterType.PERSON }
-    val personFilterText = personFilter?.getDisplayText()?.string() ?: "" // Should not be null
-    val personFilterSelected = personFilter?.getItems()?.any { it.getIsSelected() } ?: false
-
-    val houseFilter = filterViewState.filters.firstOrNull { it.getType() == FilterType.HOUSE }
-    val houseFilterText = houseFilter?.getDisplayText()?.string() ?: "" // Should not be null
-    val houseFilterSelected = houseFilter?.getItems()?.any { it.getIsSelected() } ?: false
-
-    val coroutineScope = rememberCoroutineScope()
-    var openBottomSheet by remember { mutableStateOf(false) }
-    val bottomSheetState = rememberModalBottomSheetState()
-
-    SettingsItem(
-        title = stringResource(id = R.string.settings_item_default_filter_title),
-        subtitle = stringResource(
-            id = R.string.settings_item_default_filter,
-            if (personFilterSelected) personFilterText else noneString,
-            if (houseFilterSelected) houseFilterText else noneString
-        ),
-        onClick = {
-            openBottomSheet = true
-        },
-        showProgress = false,
-        modifier = modifier
-    )
-
-    fun hideBottomSheet() {
-        coroutineScope.launch {
-            bottomSheetState.hide()
-        }.invokeOnCompletion {
-            if (!bottomSheetState.isVisible) {
-                openBottomSheet = false
-            }
-        }
-    }
-
-    if (openBottomSheet) {
-        ModalBottomSheet(
-            onDismissRequest = {
-                onFilterResetRequested()
-                openBottomSheet = false
-            },
-        ) {
-            FilterContent(
-                filters = filterViewState.filters,
-                onItemClick = onFilterSelected,
-                onSaveFiltersRequested = {
-                    onFilterSaveRequested()
-                    hideBottomSheet()
-                },
-                onResetFiltersRequested = {
-                    onFilterResetRequested()
-                    hideBottomSheet()
-                }
-            )
-        }
-    }
-}
-
-@Composable
-private fun FilterContent(
-    filters: List<Filter>,
-    onItemClick: (Filter, FilterItem) -> Unit,
-    onSaveFiltersRequested: () -> Unit,
-    onResetFiltersRequested: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .systemBarsPadding()
-    ) {
-        LazyColumn(modifier = Modifier.fillMaxWidth()) {
-            items(items = filters, key = { it.getKey() }) { filter ->
-                FilterOption(filter = filter, onItemClick = onItemClick, modifier = Modifier)
-            }
-        }
-        Spacer(modifier = Modifier.height(MaterialTheme.dimens.medium))
-        Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
-            TextButton(onClick = onResetFiltersRequested) {
-                Text(text = stringResource(id = R.string.cancel))
-            }
-            Spacer(modifier = Modifier.width(MaterialTheme.dimens.medium))
-            TextButton(onClick = onSaveFiltersRequested) {
-                Text(text = stringResource(id = R.string.ok))
-            }
-        }
-    }
-}
-
-@Composable
-private fun FilterOption(
-    filter: Filter,
-    onItemClick: (Filter, FilterItem) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val title = when (filter.getType()) {
-        FilterType.PERSON ->
-            R.string.assignment_filter_person
-
-        FilterType.HOUSE ->
-            R.string.assignment_filter_house
-    }
-    Column(modifier = modifier.padding(MaterialTheme.dimens.medium)) {
-        Text(
-            text = stringResource(id = title).uppercase(),
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(horizontal = MaterialTheme.dimens.medium),
-            color = MaterialTheme.colorScheme.onBackground
-        )
-        Row {
-            filter.getItems().forEach { item ->
-                FilterOptionItem(
-                    filterType = filter.getType(),
-                    item = item,
-                    onItemClick = { clickedItem -> onItemClick(filter, clickedItem) },
-                )
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun FilterOptionItem(
-    filterType: FilterType,
-    item: FilterItem,
-    onItemClick: (FilterItem) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val contentDescription = when (filterType) {
-        FilterType.PERSON ->
-            R.string.assignment_filter_person_content_description
-
-        FilterType.HOUSE ->
-            R.string.assignment_filter_house_content_description
-    }
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier
-            .clickable {
-                onItemClick(item)
-            }
-            .defaultMinSize(minHeight = MaterialTheme.dimens.minAssignmentItemHeight)
-            .padding(MaterialTheme.dimens.medium)) {
-        Icon(
-            imageVector = if (item.getIsSelected()) {
-                Icons.Filled.CheckBox
-            } else {
-                Icons.Filled.CheckBoxOutlineBlank
-            },
-            contentDescription = stringResource(id = contentDescription),
-            modifier = Modifier.size(FilterChipDefaults.IconSize),
-            tint = MaterialTheme.colorScheme.onBackground
-        )
-        Spacer(modifier = Modifier.width(MaterialTheme.dimens.small))
-        Text(
-            text = item.getDisplayName().string(),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onBackground
-        )
-    }
-}
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -612,18 +418,13 @@ private fun SettingsItemWithSwitch(
 
 @Preview
 @Composable
-private fun SettingsScreenPreview(
-    @PreviewParameter(FilterPreview::class) filters: List<Filter>
-) {
+private fun SettingsScreenPreview() {
     ChoresClientTheme {
         Surface {
             val state = SettingsViewState(
                 syncViewState = SyncViewState(
                     loading = false,
                     lastSyncTime = Clock.System.now()
-                ),
-                filterViewState = FilterViewState(
-                    filters = filters
                 ),
                 notificationActionsViewState = NotificationActionsViewState(
                     actions = listOf()
@@ -638,9 +439,6 @@ private fun SettingsScreenPreview(
                 state = state,
                 onBack = {},
                 onSyncClicked = {},
-                onFilterSelected = { _, _ -> },
-                onFilterSaveRequested = {},
-                onFilterResetRequested = {},
                 onNotificationActionSelected = {},
                 onNotificationActionsSaveRequested = {},
                 onNotificationActionsResetRequested = {},

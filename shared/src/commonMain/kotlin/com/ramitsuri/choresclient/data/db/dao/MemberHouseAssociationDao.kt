@@ -9,11 +9,8 @@ class MemberHouseAssociationDao(
     private val dbQueries: ChoresDatabaseQueries,
     private val dispatcherProvider: DispatcherProvider
 ) {
-    suspend fun getForHouse(houseId: String): List<MemberHouseEntity> {
-        return withContext(dispatcherProvider.io) {
-            return@withContext dbQueries.selectMemberHouseAssociationsForHouse(houseId)
-                .executeAsList()
-        }
+    fun getForHouse(houseId: String): List<MemberHouseEntity> {
+        return dbQueries.selectMemberHouseAssociationsForHouse(houseId).executeAsList()
     }
 
     suspend fun clearAndInsert(memberHouseEntities: List<MemberHouseEntity>) {

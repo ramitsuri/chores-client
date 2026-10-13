@@ -17,6 +17,12 @@
     <string name="completed_empty">No completed tasks</string>
     <string name="tasks">Tasks</string>
     <string name="tasks_empty">No tasks found</string>
+    <string name="wont_do">Skipped</string>
+    <string name="completed_today">Completed</string>
+
+    <!-- Navigation Chrome Titles -->
+    <string name="active_todos_title">Chores</string>
+    <string name="new_todo_title">New</string>
 
     <!-- Assignments -->
     <string name="assignment_due">Due %1$s</string>
@@ -31,6 +37,8 @@
     <string name="assignment_refresh">Refresh</string>
     <string name="assignment_filter_mine">Mine</string>
     <string name="assignment_filter_other">Others\'</string>
+    <string name="assignment_filter_personal">Personal</string>
+    <string name="assignment_filter_shared">Shared</string>
     <string name="assignment_filter_person_content_description">Filter person</string>
     <string name="assignment_filter_house_content_description">Filter list</string>
     <string name="assignment_menu_content_description">Menu</string>
@@ -39,11 +47,11 @@
     <string name="assignment_filter_person">Person</string>
     <string name="assignment_filter_house">List</string>
     <string name="assignment_header_on_completion">On Completion</string>
-    <string name="assignment_header_past_due">Past</string>
+    <string name="assignment_header_past_due">Past Due</string>
     <string name="assignment_header_due_today">Today</string>
     <string name="assignment_header_due_tomorrow">Tomorrow</string>
     <string name="assignment_header_due_in_future">Future</string>
-    <string name="assignment_add_task_content_description">Add task</string>
+    <string name="assignment_add_task_content_description">New</string>
 
     <!-- Notifications -->
     <string name="notification_reminders_id">Reminders</string>
@@ -92,8 +100,8 @@
     <string name="assignment_details_snooze_max_time_message">Maximum snooze time allowed is 23 hours and 59 minutes</string>
 
     <!-- Add Task -->
-    <string name="add_task_hint_name">Task name</string>
-    <string name="add_task_hint_description">Task description</string>
+    <string name="add_task_hint_name">What needs to be done?</string>
+    <string name="add_task_hint_description">Add details, notes, or checklist items...</string>
     <string name="add_task_hint_repeat_value">Repeat</string>
     <string name="add_task_pick_date">Pick date</string>
     <string name="add_task_pick_time">Pick time</string>
@@ -103,10 +111,11 @@
     <string name="add_task_select_repeat_unit">Select repeat unit</string>
     <string name="add_task_select_member">Select member</string>
     <string name="add_task_select_house">Select house</string>
-    <string name="add_task_add">Add</string>
-    <string name="add_task_rotate_member">Round Robin occurrences</string>
+    <string name="add_task_add">Save Todo</string>
+    <string name="add_task_rotate_member">Round Robin</string>
     <string name="add_task_select_time">Select time</string>
-    <string name="add_task_repeat">Set repetition</string>
+    <string name="add_task_repeat">Repeats</string>
+    <string name="add_task_repeat_disabled_hint">One-time todo (does not repeat)</string>
     <string name="add_task_end_repetition">End repetition</string>
     <string name="add_task_end_repetition_never">Never</string>
 

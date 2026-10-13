@@ -230,7 +230,7 @@ class ContentDownloaderTest {
             }
         }
 
-        override suspend fun getLocalFlow(loggedInMemberId: String): Flow<List<TaskAssignmentDetails>> {
+        override fun getLocalFlow(loggedInMemberId: String): Flow<List<TaskAssignmentDetails>> {
             return flowOf(emptyList())
         }
 
@@ -250,7 +250,7 @@ class ContentDownloaderTest {
             deleteOldCompletedCalled = true
         }
 
-        override suspend fun getCompletedLocalFlow(loggedInMemberId: String): Flow<List<TaskAssignmentDetails>> {
+        override fun getCompletedLocalFlow(loggedInMemberId: String): Flow<List<TaskAssignmentDetails>> {
             return flowOf()
         }
     }

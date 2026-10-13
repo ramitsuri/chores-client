@@ -1,13 +1,11 @@
 package com.ramitsuri.choresclient.model.view
 
 import com.ramitsuri.choresclient.model.error.Error
-import com.ramitsuri.choresclient.model.filter.Filter
-import kotlin.time.Instant
 import kotlinx.datetime.TimeZone
+import kotlin.time.Instant
 
 data class SettingsViewState(
     val syncViewState: SyncViewState,
-    val filterViewState: FilterViewState = FilterViewState(),
     val notificationActionsViewState: NotificationActionsViewState = NotificationActionsViewState(),
     val deviceId: String?,
     val remoteLoggingEnabled: Boolean,
@@ -19,10 +17,6 @@ data class SettingsViewState(
 data class SyncViewState(
     val loading: Boolean = false,
     val lastSyncTime: Instant
-)
-
-data class FilterViewState(
-    val filters: List<Filter> = listOf()
 )
 
 data class NotificationActionsViewState(

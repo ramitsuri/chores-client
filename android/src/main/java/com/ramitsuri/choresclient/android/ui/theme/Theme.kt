@@ -12,22 +12,58 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.platform.LocalContext
 
-private val darkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+private val LightBotanicalColorScheme = lightColorScheme(
+    primary = BotanicalGreen,
+    onPrimary = OnBotanicalGreen,
+    primaryContainer = BotanicalGreenContainer,
+    onPrimaryContainer = OnBotanicalGreenContainer,
+    secondary = SageSecondary,
+    onSecondary = OnSageSecondary,
+    secondaryContainer = SageSecondaryContainer,
+    onSecondaryContainer = OnSageSecondaryContainer,
+    background = FreshSurface,
+    onBackground = OnFreshSurface,
+    surface = FreshSurface,
+    onSurface = OnFreshSurface,
+    surfaceVariant = SurfaceContainer,
+    onSurfaceVariant = OnFreshSurface,
+    surfaceContainerLow = SurfaceContainerLow,
+    surfaceContainer = SurfaceContainer,
+    surfaceContainerHigh = SurfaceContainerHigh,
+    surfaceContainerHighest = SurfaceContainerHighest,
+    error = PastDueCoral,
+    errorContainer = PastDueCoralContainer,
+    onErrorContainer = OnPastDueCoralContainer
 )
 
-private val lightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
+private val DarkBotanicalColorScheme = darkColorScheme(
+    primary = BotanicalGreenLightDarkTheme,
+    onPrimary = OnBotanicalGreenDarkTheme,
+    primaryContainer = BotanicalGreenContainerDarkTheme,
+    onPrimaryContainer = OnBotanicalGreenContainerDarkTheme,
+    secondary = SageSecondaryDarkTheme,
+    onSecondary = OnSageSecondaryDarkTheme,
+    secondaryContainer = SageSecondaryContainerDarkTheme,
+    onSecondaryContainer = OnSageSecondaryContainerDarkTheme,
+    background = FreshSurfaceDarkTheme,
+    onBackground = OnFreshSurfaceDarkTheme,
+    surface = FreshSurfaceDarkTheme,
+    onSurface = OnFreshSurfaceDarkTheme,
+    surfaceVariant = SurfaceContainerDarkTheme,
+    onSurfaceVariant = OnFreshSurfaceDarkTheme,
+    surfaceContainerLow = SurfaceContainerLowDarkTheme,
+    surfaceContainer = SurfaceContainerDarkTheme,
+    surfaceContainerHigh = SurfaceContainerHighDarkTheme,
+    surfaceContainerHighest = SurfaceContainerHighestDarkTheme,
+    error = PastDueCoral,
+    errorContainer = PastDueCoralContainer,
+    onErrorContainer = OnPastDueCoralContainer
 )
 
 @Composable
 fun ChoresClientTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false,
     dimens: Dimens = Dimens(),
     content: @Composable () -> Unit
 ) {
@@ -37,8 +73,8 @@ fun ChoresClientTheme(
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
 
-        darkTheme -> darkColorScheme
-        else -> lightColorScheme
+        darkTheme -> DarkBotanicalColorScheme
+        else -> LightBotanicalColorScheme
     }
 
     CompositionLocalProvider(LocalDimensions provides dimens) {

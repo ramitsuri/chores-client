@@ -27,9 +27,9 @@ import com.ramitsuri.choresclient.viewmodel.AddTaskViewModel
 import com.ramitsuri.choresclient.viewmodel.AssignmentsViewModel
 import com.ramitsuri.choresclient.viewmodel.CompletedAssignmentsViewModel
 import com.ramitsuri.choresclient.viewmodel.EditTaskViewModel
-import com.ramitsuri.choresclient.viewmodel.TasksViewModel
 import com.ramitsuri.choresclient.viewmodel.LoginViewModel
 import com.ramitsuri.choresclient.viewmodel.SettingsViewModel
+import com.ramitsuri.choresclient.viewmodel.TasksViewModel
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -60,25 +60,25 @@ fun NavGraph(
         modifier = modifier,
         enterTransition = {
             slideIntoContainer(
-                towards = AnimatedContentTransitionScope.SlideDirection.Companion.Left,
+                towards = AnimatedContentTransitionScope.SlideDirection.Left,
                 animationSpec = tween(700)
             )
         },
         exitTransition = {
             slideOutOfContainer(
-                towards = AnimatedContentTransitionScope.SlideDirection.Companion.Left,
+                towards = AnimatedContentTransitionScope.SlideDirection.Left,
                 animationSpec = tween(700)
             )
         },
         popEnterTransition = {
             slideIntoContainer(
-                towards = AnimatedContentTransitionScope.SlideDirection.Companion.Right,
+                towards = AnimatedContentTransitionScope.SlideDirection.Right,
                 animationSpec = tween(700)
             )
         },
         popExitTransition = {
             slideOutOfContainer(
-                towards = AnimatedContentTransitionScope.SlideDirection.Companion.Right,
+                towards = AnimatedContentTransitionScope.SlideDirection.Right,
                 animationSpec = tween(700)
             )
         }
@@ -132,12 +132,6 @@ fun NavGraph(
                 onMarkAsDone = viewModel::markAsDone,
                 onMarkAsWontDo = viewModel::markAsWontDo,
                 onSnooze = viewModel::onSnooze,
-                onFilterItemClicked = viewModel::onFilterItemClicked,
-                onCustomHoursEntered = viewModel::onCustomSnoozeHoursEntered,
-                onCustomMinutesEntered = viewModel::onCustomSnoozeMinutesEntered,
-                onCustomTimeSet = viewModel::onCustomSnoozeSet,
-                onCustomTimeCanceled = viewModel::onCustomSnoozeCanceled,
-                onItemClicked = viewModel::onItemClicked,
             )
         }
 
@@ -147,7 +141,6 @@ fun NavGraph(
             CompletedAssignmentsScreen(
                 viewState = state,
                 onBack = { navController.navigateUp() },
-                onFilterItemClicked = viewModel::onFilterItemClicked
             )
         }
 
@@ -159,7 +152,6 @@ fun NavGraph(
                 onBack = { navController.navigateUp() },
                 onAddTaskClicked = { navController.navigate(Destinations.ADD_TASK) },
                 onEditTaskClicked = { navController.navigate("${Destinations.EDIT_TASK}/$it") },
-                onFilterItemClicked = viewModel::onFilterItemClicked
             )
         }
 
@@ -170,9 +162,6 @@ fun NavGraph(
                 onBack = { navController.navigateUp() },
                 state = state,
                 onSyncClicked = viewModel::syncRequested,
-                onFilterSelected = viewModel::filter,
-                onFilterSaveRequested = viewModel::saveFilters,
-                onFilterResetRequested = viewModel::resetFilters,
                 onNotificationActionSelected = viewModel::onNotificationActionClicked,
                 onNotificationActionsSaveRequested = viewModel::saveNotificationActions,
                 onNotificationActionsResetRequested = viewModel::resetNotificationActions,
@@ -197,6 +186,7 @@ fun NavGraph(
                 onBack = { navController.navigateUp() },
                 viewState = state,
                 onTaskNameUpdate = viewModel::onTaskNameUpdated,
+                onTaskDescriptionUpdate = viewModel::onTaskDescriptionUpdated,
                 onHouseItemSelected = { viewModel.onHouseSelected(it.getId()) },
                 onMemberItemSelected = { viewModel.onMemberSelected(it.getId()) },
                 onDatePicked = viewModel::onDatePicked,

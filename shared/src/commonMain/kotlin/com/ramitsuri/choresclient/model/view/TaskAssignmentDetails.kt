@@ -9,4 +9,5 @@ data class TaskAssignmentDetails(
     val enableSnooze: Boolean,
     val willReminderBeSet: Boolean,
     val assignedToLoggedInUser: Boolean,
+    val isSharedList: Boolean = false,
 )

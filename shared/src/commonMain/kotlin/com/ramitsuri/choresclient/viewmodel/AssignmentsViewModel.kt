@@ -4,63 +4,34 @@ import com.ramitsuri.choresclient.data.settings.PrefManager
 import com.ramitsuri.choresclient.model.enums.ProgressStatus
 import com.ramitsuri.choresclient.model.enums.RepeatUnit
 import com.ramitsuri.choresclient.model.enums.SnoozeType
-import com.ramitsuri.choresclient.model.filter.Filter
-import com.ramitsuri.choresclient.model.filter.FilterItem
-import com.ramitsuri.choresclient.model.filter.FilterType
 import com.ramitsuri.choresclient.model.view.Assignments
 import com.ramitsuri.choresclient.model.view.AssignmentsViewState
 import com.ramitsuri.choresclient.model.view.TaskAssignmentDetails
 import com.ramitsuri.choresclient.repositories.TaskAssignmentsRepository
-import com.ramitsuri.choresclient.utils.FilterHelper
 import com.ramitsuri.choresclient.utils.differenceInDays
 import com.ramitsuri.choresclient.utils.now
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlin.time.Clock
 import kotlinx.datetime.LocalDateTime
-import kotlin.time.Duration.Companion.hours
-import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Clock
 
 class AssignmentsViewModel(
     assignmentId: String?,
     private val repository: TaskAssignmentsRepository,
-    private val filterHelper: FilterHelper,
     private val prefManager: PrefManager,
     private val longLivingCoroutineScope: CoroutineScope
 ) : ViewModel() {
 
-    private var collectJob: Job? = null
-
-    private val _state = MutableStateFlow(AssignmentsViewState(expandedAssignmentId = assignmentId))
-    val state: StateFlow<AssignmentsViewState> = _state
-
-    init {
-        viewModelScope.launch {
-            _state.update {
-                it.copy(filters = filterHelper.getBaseFilters())
-            }
-            onFilterUpdated()
-        }
-    }
-
-    fun onFilterItemClicked(filter: Filter, clickedFilterItem: FilterItem) {
-        val existingFilters = _state.value.filters
-        val newClickedFilter = filterHelper.onFilterItemClicked(filter, clickedFilterItem)
-        val newFilters = existingFilters
-            .filter {
-                it.getType() != filter.getType()
-            }
-            .plus(newClickedFilter)
-            .sortedBy { it.getType().index }
-        _state.update {
-            it.copy(filters = newFilters)
-        }
-        onFilterUpdated()
-    }
+    val state = getAssignments().stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = AssignmentsViewState(),
+    )
 
     fun markAsDone(id: String) {
         longLivingCoroutineScope.launch {
@@ -80,104 +51,16 @@ class AssignmentsViewModel(
         }
     }
 
-    fun onCustomSnoozeHoursEntered(hours: String) {
-        if (hours.any { !it.isDigit() }) {
-            return
-        }
-        if ((hours.toIntOrNull() ?: 0) > 23) {
-            return
-        }
-        _state.update {
-            it.copy(customSnoozeHours = hours)
-        }
-    }
-
-    fun onCustomSnoozeMinutesEntered(minutes: String) {
-        if (minutes.any { !it.isDigit() }) {
-            return
-        }
-        if ((minutes.toIntOrNull() ?: 0) > 59) {
-            return
-        }
-        _state.update {
-            it.copy(customSnoozeMinutes = minutes)
-        }
-    }
-
-    fun onCustomSnoozeSet(id: String) {
-        val currentState = _state.value
-        val hours = currentState.customSnoozeHours.toIntOrNull() ?: 0
-        val minutes = currentState.customSnoozeMinutes.toIntOrNull() ?: 0
-        onSnooze(id, SnoozeType.Custom(hours.hours + minutes.minutes))
-        // To reset the state values for next invocation of custom snooze view
-        onCustomSnoozeCanceled()
-    }
-
-    fun onCustomSnoozeCanceled() {
-        _state.update {
-            it.copy(customSnoozeHours = "", customSnoozeMinutes = "")
-        }
-    }
-
-    fun onItemClicked(assignmentId: String) {
-        val currentState = _state.value
-        if (currentState.expandedAssignmentId == assignmentId) { // Collapse if already expanded
-            _state.update {
-                it.copy(expandedAssignmentId = null)
-            }
+    private fun getAssignments(): Flow<AssignmentsViewState> {
+        val loggedInMemberId = prefManager.getLoggedInMemberId()
+        return if (loggedInMemberId == null) {
+            flowOf(AssignmentsViewState(loading = false))
         } else {
-            _state.update {
-                it.copy(expandedAssignmentId = assignmentId)
-            }
-        }
-    }
-
-    private fun onFilterUpdated() {
-        collectJob?.cancel()
-
-        val loggedInMemberId = prefManager.getLoggedInMemberId() ?: ""
-
-        val filters = _state.value.filters
-        collectJob = viewModelScope.launch {
-            repository.getLocalFlow(loggedInMemberId).collect { taskAssignmentDetails ->
+            repository.getLocalFlow(loggedInMemberId).map { taskAssignmentDetails ->
                 val filtered = taskAssignmentDetails
                     .filter { it.taskAssignment.progressStatus == ProgressStatus.TODO }
                     .toMutableList()
-                filters.forEach { filter ->
-                    when (filter.getType()) {
-                        FilterType.PERSON -> {
-                            if (filter.getItems()
-                                    .any { it.getIsSelected() && it.getId() == Filter.ALL_ID }
-                            ) {
-                                // All selected, remove nothing
-                            } else {
-                                val selectedMemberIds =
-                                    filter.getItems().filter { it.getIsSelected() }
-                                        .map { it.getId() }
-                                filtered
-                                    .removeAll {
-                                        !selectedMemberIds.contains(it.taskAssignment.memberId)
-                                    }
-                            }
-                        }
 
-                        FilterType.HOUSE -> {
-                            if (filter.getItems()
-                                    .any { it.getIsSelected() && it.getId() == Filter.ALL_ID }
-                            ) {
-                                // All selected, remove nothing
-                            } else {
-                                val selectedHouseIds =
-                                    filter.getItems().filter { it.getIsSelected() }
-                                        .map { it.getId() }
-                                filtered
-                                    .removeAll {
-                                        !selectedHouseIds.contains(it.taskAssignment.houseId)
-                                    }
-                            }
-                        }
-                    }
-                }
                 // Apply sorting
                 val (onCompletion, notOnCompletion) = filtered
                     .partition {
@@ -185,19 +68,18 @@ class AssignmentsViewModel(
                     }
 
                 val assignments = onCompletion
-                    .plus(notOnCompletion
-                        .sortedBy {
-                            it.taskAssignment.dueDateTime
-                        }
+                    .plus(
+                        notOnCompletion
+                            .sortedBy {
+                                it.taskAssignment.dueDateTime
+                            }
                     )
                     .toAssignments(prefManager.getLoggedInMemberId())
 
-                _state.update {
-                    it.copy(
-                        loading = false,
-                        assignments = assignments
-                    )
-                }
+                AssignmentsViewState(
+                    loading = false,
+                    assignments = assignments
+                )
             }
         }
     }

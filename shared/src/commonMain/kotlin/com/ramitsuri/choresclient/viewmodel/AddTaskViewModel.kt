@@ -64,7 +64,7 @@ class AddTaskViewModel(
         viewModelScope.launch(dispatchers.main) {
             val result = tasksRepository.addTask(
                 name = value.taskName,
-                description = value.taskName,
+                description = value.taskDescription.ifEmpty { value.taskName },
                 dueDateTime = LocalDateTime(date = value.date, time = value.time),
                 repeatValue = value.repeatValue.toLong(),
                 repeatUnit = repeatUnit,
@@ -99,6 +99,12 @@ class AddTaskViewModel(
             it.copy(taskName = newName)
         }
         updateCanAddTask()
+    }
+
+    fun onTaskDescriptionUpdated(newDescription: String) {
+        _state.update {
+            it.copy(taskDescription = newDescription)
+        }
     }
 
     fun onRepeatValueUpdated(newRepeatValue: String) {

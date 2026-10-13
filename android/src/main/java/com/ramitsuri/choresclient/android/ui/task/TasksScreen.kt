@@ -1,73 +1,68 @@
 package com.ramitsuri.choresclient.android.ui.task
 
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.consumeWindowInsets
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.GroupWork
+import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.House
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.ramitsuri.choresclient.android.R
-import com.ramitsuri.choresclient.android.ui.assigments.FilterRow
-import com.ramitsuri.choresclient.android.ui.assigments.LabelWithIcon
+import com.ramitsuri.choresclient.android.ui.common.AppFAB
+import com.ramitsuri.choresclient.android.ui.common.AppTopAppBar
+import com.ramitsuri.choresclient.android.ui.common.ListTypeSelection
+import com.ramitsuri.choresclient.android.ui.common.PersonalSharedToggle
+import com.ramitsuri.choresclient.android.ui.common.PillChip
 import com.ramitsuri.choresclient.android.ui.theme.ChoresClientTheme
 import com.ramitsuri.choresclient.android.ui.theme.dimens
 import com.ramitsuri.choresclient.android.utils.formatRepeatUnitCompact
 import com.ramitsuri.choresclient.model.entities.Task
 import com.ramitsuri.choresclient.model.enums.ActiveStatus
 import com.ramitsuri.choresclient.model.enums.RepeatUnit
-import com.ramitsuri.choresclient.model.filter.Filter
-import com.ramitsuri.choresclient.model.filter.FilterItem
 import com.ramitsuri.choresclient.model.view.TaskDetails
 import com.ramitsuri.choresclient.model.view.TasksViewState
 import com.ramitsuri.choresclient.utils.now
-import kotlin.time.Clock
 import kotlinx.datetime.LocalDateTime
+import kotlin.time.Clock
 
 @Composable
 fun TasksScreen(
@@ -75,19 +70,22 @@ fun TasksScreen(
     onBack: () -> Unit,
     onAddTaskClicked: () -> Unit,
     onEditTaskClicked: (String) -> Unit,
-    onFilterItemClicked: (Filter, FilterItem) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var selectedListType by remember { mutableStateOf(ListTypeSelection.PERSONAL) }
+    val isShared = selectedListType == ListTypeSelection.SHARED
+    val displayTasks = viewState.tasks.filter { it.isSharedList == isShared }
+
     Scaffold(
+        topBar = {
+            AppTopAppBar(
+                onBack = onBack
+            )
+        },
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         modifier = modifier.fillMaxSize(),
         floatingActionButton = {
-            FloatingActionButton(onClick = onAddTaskClicked) {
-                Icon(
-                    imageVector = Icons.Filled.Add,
-                    contentDescription = stringResource(id = R.string.add_task_add)
-                )
-            }
+            AppFAB(onClick = onAddTaskClicked)
         }
     ) { paddingValues ->
         Column(
@@ -100,36 +98,15 @@ fun TasksScreen(
                         WindowInsetsSides.Horizontal
                     )
                 )
-                .padding(horizontal = MaterialTheme.dimens.medium)
+                .padding(horizontal = MaterialTheme.dimens.large)
         ) {
-            Spacer(
-                modifier = Modifier.height(
-                    WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
-                )
+            PersonalSharedToggle(
+                selectedType = selectedListType,
+                onTypeSelected = { selectedListType = it }
             )
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = MaterialTheme.dimens.small),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = onBack) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = stringResource(id = R.string.back)
-                    )
-                }
-            }
+
             Spacer(modifier = Modifier.height(MaterialTheme.dimens.medium))
-            if (viewState.filters.isNotEmpty()) {
-                FilterRow(
-                    filters = viewState.filters,
-                    onFilterSelected = onFilterItemClicked,
-                    menu = emptyList(),
-                    onMenuSelected = {}
-                )
-                Spacer(modifier = Modifier.height(MaterialTheme.dimens.medium))
-            }
+
             if (viewState.loading) {
                 Column(
                     modifier = Modifier.fillMaxSize(),
@@ -138,7 +115,7 @@ fun TasksScreen(
                 ) {
                     LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
                 }
-            } else if (viewState.tasks.isEmpty()) {
+            } else if (displayTasks.isEmpty()) {
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -146,7 +123,8 @@ fun TasksScreen(
                 ) {
                     Text(
                         text = stringResource(id = R.string.tasks_empty),
-                        style = MaterialTheme.typography.headlineSmall
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onBackground
                     )
                 }
             } else {
@@ -155,16 +133,16 @@ fun TasksScreen(
                     verticalArrangement = Arrangement.spacedBy(MaterialTheme.dimens.medium)
                 ) {
                     items(
-                        items = viewState.tasks,
+                        items = displayTasks,
                         key = { it.task.id }
                     ) { details ->
-                        TaskItem(
+                        TemplateCardItem(
                             details = details,
                             onEditTaskClicked = onEditTaskClicked
                         )
                     }
                     item {
-                        Spacer(modifier = Modifier.height(MaterialTheme.dimens.extraLarge))
+                        Spacer(modifier = Modifier.height(80.dp))
                     }
                 }
             }
@@ -173,107 +151,92 @@ fun TasksScreen(
 }
 
 @Composable
-private fun TaskItem(
+private fun TemplateCardItem(
     details: TaskDetails,
     onEditTaskClicked: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val task = details.task
+    val roundedCornerShape = RoundedCornerShape(MaterialTheme.dimens.cardCornerRadius)
     Card(
-        onClick = { onEditTaskClicked(task.id) },
-        border = BorderStroke(
-            0.1.dp,
-            MaterialTheme.colorScheme.outline.copy(alpha = 0.38f)
+        shape = roundedCornerShape,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
         ),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
         modifier = modifier
             .fillMaxWidth()
+            .clip(roundedCornerShape)
+            .clickable { onEditTaskClicked(task.id) }
             .animateContentSize()
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .defaultMinSize(minHeight = MaterialTheme.dimens.minAssignmentItemHeight)
+                .padding(MaterialTheme.dimens.large)
         ) {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = MaterialTheme.dimens.medium),
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.Top
             ) {
                 Text(
                     text = task.name,
-                    style = MaterialTheme.typography.headlineSmall,
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(
-                            horizontal = MaterialTheme.dimens.small,
-                            vertical = MaterialTheme.dimens.medium
-                        )
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.weight(1f)
                 )
                 StatusBadge(status = task.status)
             }
+
             if (task.description.isNotBlank()) {
+                Spacer(modifier = Modifier.height(MaterialTheme.dimens.small))
                 Text(
                     text = task.description,
                     style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(horizontal = MaterialTheme.dimens.medium)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                Spacer(modifier = Modifier.height(MaterialTheme.dimens.small))
             }
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = MaterialTheme.dimens.medium),
-                horizontalArrangement = Arrangement.Start,
-                verticalAlignment = Alignment.CenterVertically
+
+            Spacer(modifier = Modifier.height(MaterialTheme.dimens.medium))
+
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(MaterialTheme.dimens.small),
+                verticalArrangement = Arrangement.spacedBy(MaterialTheme.dimens.medium),
             ) {
-                if (details.memberName.isNotBlank()) {
-                    LabelWithIcon(text = details.memberName, icon = Icons.Filled.Person)
-                }
                 if (details.houseName.isNotBlank()) {
-                    if (details.memberName.isNotBlank()) {
-                        Spacer(modifier = Modifier.width(MaterialTheme.dimens.small))
-                    }
-                    LabelWithIcon(text = details.houseName, icon = Icons.Filled.House)
+                    PillChip(
+                        text = details.houseName,
+                        icon = Icons.Default.House,
+                        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
+
                 if (task.repeatUnit != RepeatUnit.NONE && task.repeatValue != 0) {
-                    Spacer(modifier = Modifier.width(MaterialTheme.dimens.small))
                     val repeatTextValue = formatRepeatUnitCompact(
                         repeatValue = task.repeatValue,
                         repeatUnit = task.repeatUnit
                     )
-                    LabelWithIcon(text = repeatTextValue, icon = Icons.Filled.Repeat)
+                    PillChip(
+                        text = repeatTextValue,
+                        icon = Icons.Default.Repeat,
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                    )
                 }
+
                 if (task.rotateMember) {
-                    Spacer(modifier = Modifier.width(MaterialTheme.dimens.small))
-                    LabelWithIcon(
+                    PillChip(
                         text = stringResource(id = R.string.add_task_rotate_member),
-                        icon = Icons.Filled.GroupWork
+                        icon = Icons.Default.Groups,
+                        containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onTertiaryContainer
                     )
                 }
             }
-            Spacer(modifier = Modifier.height(MaterialTheme.dimens.small))
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = MaterialTheme.dimens.medium),
-                horizontalArrangement = Arrangement.End
-            ) {
-                FilledTonalButton(
-                    onClick = { onEditTaskClicked(task.id) }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Edit,
-                        contentDescription = stringResource(id = R.string.edit),
-                        modifier = Modifier.size(MaterialTheme.dimens.iconWidthSmall)
-                    )
-                    Spacer(modifier = Modifier.width(MaterialTheme.dimens.small))
-                    Text(text = stringResource(id = R.string.edit))
-                }
-            }
-            Spacer(modifier = Modifier.height(MaterialTheme.dimens.medium))
         }
     }
 }
@@ -298,22 +261,21 @@ private fun StatusBadge(
 
         ActiveStatus.INACTIVE, ActiveStatus.UNKNOWN -> Triple(
             R.string.edit_task_active_status_inactive,
-            MaterialTheme.colorScheme.surfaceVariant,
+            MaterialTheme.colorScheme.surfaceContainerHigh,
             MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 
     Box(
         modifier = modifier
-            .background(
-                color = containerColor,
-                shape = RoundedCornerShape(bottomStart = 8.dp, bottomEnd = 8.dp)
-            )
-            .padding(MaterialTheme.dimens.small)
+            .clip(CircleShape)
+            .background(color = containerColor)
+            .padding(horizontal = 10.dp, vertical = 2.dp)
     ) {
         Text(
             text = stringResource(id = statusTextRes),
             style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.Bold,
             color = contentColor
         )
     }
@@ -343,7 +305,7 @@ private fun PreviewTasksScreen() {
                                 createdDate = Clock.System.now(),
                                 status = ActiveStatus.ACTIVE
                             ),
-                            memberName = "Ramit",
+                            memberName = "Alex",
                             houseName = "Home"
                         )
                     )
@@ -351,7 +313,6 @@ private fun PreviewTasksScreen() {
                 onBack = {},
                 onAddTaskClicked = {},
                 onEditTaskClicked = {},
-                onFilterItemClicked = { _, _ -> }
             )
         }
     }

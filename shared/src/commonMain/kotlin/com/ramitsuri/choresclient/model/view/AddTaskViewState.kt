@@ -13,6 +13,7 @@ import kotlinx.datetime.toLocalDateTime
 data class AddTaskViewState(
     val loading: Boolean = false,
     val taskName: String = "",
+    val taskDescription: String = "",
     val repeatValue: Int = 1,
     val repeatUnits: List<RepeatUnitSelectionItem> = RepeatUnit.values()
         .map { repeatUnit ->

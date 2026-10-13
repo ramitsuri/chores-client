@@ -28,22 +28,21 @@ import com.ramitsuri.choresclient.utils.AppLifecycleObserver
 import com.ramitsuri.choresclient.utils.ContentDownloadRequestHandler
 import com.ramitsuri.choresclient.utils.ContentDownloader
 import com.ramitsuri.choresclient.utils.DispatcherProvider
-import com.ramitsuri.choresclient.utils.FilterHelper
 import com.ramitsuri.choresclient.utils.LogHelper
 import com.ramitsuri.choresclient.viewmodel.AddTaskViewModel
 import com.ramitsuri.choresclient.viewmodel.AssignmentsViewModel
 import com.ramitsuri.choresclient.viewmodel.CompletedAssignmentsViewModel
 import com.ramitsuri.choresclient.viewmodel.EditTaskViewModel
-import com.ramitsuri.choresclient.viewmodel.TasksViewModel
 import com.ramitsuri.choresclient.viewmodel.LoginViewModel
 import com.ramitsuri.choresclient.viewmodel.SettingsViewModel
+import com.ramitsuri.choresclient.viewmodel.TasksViewModel
 import kotlinx.coroutines.CoroutineScope
-import kotlin.time.Clock
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.dsl.module
 import java.util.UUID
+import kotlin.time.Clock
 
 class MainApplication : Application(), KoinComponent {
 
@@ -140,7 +139,6 @@ class MainApplication : Application(), KoinComponent {
                     AssignmentsViewModel(
                         assignmentId = parameters.getOrNull(),
                         get<TaskAssignmentsRepository>(),
-                        get<FilterHelper>(),
                         get<PrefManager>(),
                         get<CoroutineScope>()
                     )
@@ -149,7 +147,6 @@ class MainApplication : Application(), KoinComponent {
                 viewModel {
                     CompletedAssignmentsViewModel(
                         get<TaskAssignmentsRepository>(),
-                        get<FilterHelper>(),
                         get<PrefManager>()
                     )
                 }
@@ -157,7 +154,6 @@ class MainApplication : Application(), KoinComponent {
                 viewModel {
                     TasksViewModel(
                         get<TasksRepository>(),
-                        get<FilterHelper>()
                     )
                 }
 
@@ -173,7 +169,6 @@ class MainApplication : Application(), KoinComponent {
                 viewModel {
                     SettingsViewModel(
                         get<ContentDownloadRequestHandler>(),
-                        get<FilterHelper>(),
                         get<PrefManager>(),
                         get<DispatcherProvider>(),
                         get<LogHelper>()

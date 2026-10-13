@@ -1,6 +1,5 @@
 package com.ramitsuri.choresclient.data.settings
 
-import com.ramitsuri.choresclient.model.filter.Filter
 import kotlin.time.Clock
 import kotlin.time.Instant
 
@@ -85,26 +84,6 @@ class PrefManager(
         val key = Key.LAST_COMPLETED_FETCH_TIME
         val millis = time.toEpochMilliseconds()
         putLong(key, millis)
-    }
-
-    fun getSavedPersonFilterIds(): List<String> {
-        val key = Key.SAVED_PERSON_FILTER_IDS
-        return getStringList(key, listOf(Filter.ALL_ID))
-    }
-
-    fun setSavedPersonFilterIds(ids: List<String>) {
-        val key = Key.SAVED_PERSON_FILTER_IDS
-        putStringList(key, ids)
-    }
-
-    fun getSavedHouseFilterIds(): List<String> {
-        val key = Key.SAVED_HOUSE_FILTER_IDS
-        return getStringList(key, listOf(Filter.ALL_ID))
-    }
-
-    fun setSavedHouseFilterIds(ids: List<String>) {
-        val key = Key.SAVED_HOUSE_FILTER_IDS
-        putStringList(key, ids)
     }
 
     fun getEnabledNotificationActions(): List<String> {
@@ -261,16 +240,6 @@ class PrefManager(
 
             LAST_COMPLETED_FETCH_TIME(
                 key = "last_completed_fetch_time",
-                isSecure = false
-            ),
-
-            SAVED_PERSON_FILTER_IDS(
-                key = "saved_person_filter_ids",
-                isSecure = false
-            ),
-
-            SAVED_HOUSE_FILTER_IDS(
-                key = "saved_house_filter_ids",
                 isSecure = false
             ),
 

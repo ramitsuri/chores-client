@@ -23,7 +23,6 @@ import com.ramitsuri.choresclient.utils.AppLifecycleObserver
 import com.ramitsuri.choresclient.utils.ContentDownloadRequestHandler
 import com.ramitsuri.choresclient.utils.ContentDownloader
 import com.ramitsuri.choresclient.utils.DispatcherProvider
-import com.ramitsuri.choresclient.utils.FilterHelper
 import com.ramitsuri.choresclient.utils.LogHelper
 import com.ramitsuri.choresclient.utils.PushMessageProcessor
 import io.ktor.client.engine.HttpClientEngine
@@ -107,6 +106,7 @@ private val coreModule = module {
             get<TaskAssignmentDao>(),
             get<MemberDao>(),
             get<TaskDao>(),
+            get<MemberHouseAssociationDao>(),
             get<ReminderScheduler>(),
             get<AlarmHandler>(),
             get<ContentDownloadRequestHandler>(),
@@ -128,19 +128,13 @@ private val coreModule = module {
         )
     }
 
-    factory<FilterHelper> {
-        FilterHelper(
-            get<SyncRepository>(),
-            get<PrefManager>()
-        )
-    }
-
     factory<TasksRepository> {
         DefaultTasksRepository(
             get<NetworkProvider>().provideTasksApi(),
             get<TaskDao>(),
             get<MemberDao>(),
-            get<HouseDao>()
+            get<HouseDao>(),
+            get<MemberHouseAssociationDao>(),
         )
     }
 

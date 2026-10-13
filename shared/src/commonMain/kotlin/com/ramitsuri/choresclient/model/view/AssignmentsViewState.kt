@@ -1,12 +1,8 @@
 package com.ramitsuri.choresclient.model.view
 
-import com.ramitsuri.choresclient.model.filter.Filter
-
 data class AssignmentsViewState(
     val loading: Boolean = true,
     val assignments: Assignments = Assignments.default(),
-    val filters: List<Filter> = listOf(),
-    val expandedAssignmentId: String? = null,
     val customSnoozeHours: String = "",
     val customSnoozeMinutes: String = "",
 )
@@ -26,6 +22,17 @@ data class Assignments(
                 dueTomorrow.isEmpty() &&
                 dueInFuture.isEmpty()
 
+    }
+
+    fun filterByListType(isShared: Boolean): Assignments {
+        return Assignments(
+            onCompletion = onCompletion.filter { it.isSharedList == isShared },
+            pastDue = pastDue.filter { it.isSharedList == isShared },
+            dueToday = dueToday.filter { it.isSharedList == isShared },
+            dueTomorrow = dueTomorrow.filter { it.isSharedList == isShared },
+            dueInFuture = dueInFuture.filter { it.isSharedList == isShared },
+            otherAssignmentsCount = otherAssignmentsCount
+        )
     }
 
     companion object {

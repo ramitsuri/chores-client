@@ -1,6 +1,7 @@
 package com.ramitsuri.choresclient.repositories
 
 import com.ramitsuri.choresclient.data.db.dao.MemberDao
+import com.ramitsuri.choresclient.data.db.dao.MemberHouseAssociationDao
 import com.ramitsuri.choresclient.data.db.dao.TaskAssignmentDao
 import com.ramitsuri.choresclient.data.db.dao.TaskDao
 import com.ramitsuri.choresclient.db.TaskAssignmentEntity
@@ -34,6 +35,7 @@ class DefaultTaskAssignmentsRepository(
     private val taskAssignmentDao: TaskAssignmentDao,
     private val memberDao: MemberDao,
     private val taskDao: TaskDao,
+    private val memberHouseAssociationDao: MemberHouseAssociationDao,
     private val reminderScheduler: ReminderScheduler,
     private val alarmHandler: AlarmHandler,
     private val contentDownloadRequestHandler: ContentDownloadRequestHandler,
@@ -60,7 +62,7 @@ class DefaultTaskAssignmentsRepository(
         )
     }
 
-    override suspend fun getLocalFlow(loggedInMemberId: String): Flow<List<TaskAssignmentDetails>> {
+    override fun getLocalFlow(loggedInMemberId: String): Flow<List<TaskAssignmentDetails>> {
         return taskAssignmentDao.getTodoFlow()
             .combine(alarmHandler.getExistingFlow()) { assignmentEntities, alarmEntities ->
                 val assignmentDetails = mutableListOf<TaskAssignmentDetails>()
@@ -68,6 +70,8 @@ class DefaultTaskAssignmentsRepository(
                     val assignment = toTaskAssignment(assignmentEntity) ?: return@forEach
                     val alarmEntity = alarmEntities
                         .find { it.assignmentId == assignment.id }
+                    val isSharedList =
+                        memberHouseAssociationDao.getForHouse(assignment.houseId).size > 1
                     assignmentDetails.add(
                         TaskAssignmentDetails(
                             taskAssignment = assignment,
@@ -79,7 +83,8 @@ class DefaultTaskAssignmentsRepository(
                                 assignment.repeatInfo.repeatUnit != RepeatUnit.ON_COMPLETE &&
                                         assignment.memberId == loggedInMemberId
                             },
-                            assignedToLoggedInUser = assignment.memberId == loggedInMemberId
+                            assignedToLoggedInUser = assignment.memberId == loggedInMemberId,
+                            isSharedList = isSharedList
                         )
                     )
                 }
@@ -87,19 +92,22 @@ class DefaultTaskAssignmentsRepository(
             }
     }
 
-    override suspend fun getCompletedLocalFlow(loggedInMemberId: String): Flow<List<TaskAssignmentDetails>> {
+    override fun getCompletedLocalFlow(loggedInMemberId: String): Flow<List<TaskAssignmentDetails>> {
         return taskAssignmentDao.getCompletedFlow()
             .map { assignmentEntities ->
                 val assignmentDetails = mutableListOf<TaskAssignmentDetails>()
                 assignmentEntities.forEach { assignmentEntity ->
                     val assignment = toTaskAssignment(assignmentEntity) ?: return@forEach
+                    val isSharedList =
+                        memberHouseAssociationDao.getForHouse(assignment.houseId).size > 1
                     assignmentDetails.add(
                         TaskAssignmentDetails(
                             taskAssignment = assignment,
                             reminderTime = null,
                             enableSnooze = false,
                             willReminderBeSet = false,
-                            assignedToLoggedInUser = assignment.memberId == loggedInMemberId
+                            assignedToLoggedInUser = assignment.memberId == loggedInMemberId,
+                            isSharedList = isSharedList
                         )
                     )
                 }
@@ -254,9 +262,9 @@ interface TaskAssignmentsRepository {
 
     suspend fun deleteOldCompleted(now: Instant = Clock.System.now())
 
-    suspend fun getLocalFlow(loggedInMemberId: String): Flow<List<TaskAssignmentDetails>>
+    fun getLocalFlow(loggedInMemberId: String): Flow<List<TaskAssignmentDetails>>
 
-    suspend fun getCompletedLocalFlow(loggedInMemberId: String): Flow<List<TaskAssignmentDetails>>
+    fun getCompletedLocalFlow(loggedInMemberId: String): Flow<List<TaskAssignmentDetails>>
 
     suspend fun getLocal(id: String): TaskAssignment?
 
