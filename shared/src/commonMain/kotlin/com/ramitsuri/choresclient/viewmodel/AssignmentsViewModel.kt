@@ -88,53 +88,69 @@ class AssignmentsViewModel(
         loggedInMemberId: String?,
         now: LocalDateTime = LocalDateTime.now()
     ): Assignments {
-
-        val assignments = mutableListOf<TaskAssignmentDetails>()
+        val todoAssignments = filter { it.taskAssignment.progressStatus == ProgressStatus.TODO }
         val counts = mutableMapOf<String, Int>()
-        val grouped = filter { it.taskAssignment.progressStatus == ProgressStatus.TODO }
-            .groupBy { it.taskAssignment.taskId }
-        grouped.forEach { (_, assignmentsForTask) ->
+
+        // 1. On Completion
+        val (onCompletionAssignments, timedAssignments) = todoAssignments.partition {
+            it.taskAssignment.repeatInfo.repeatUnit == RepeatUnit.ON_COMPLETE
+        }
+
+        val onCompletion = mutableListOf<TaskAssignmentDetails>()
+        onCompletionAssignments.groupBy { it.taskAssignment.taskId }.forEach { (_, assignmentsForTask) ->
             val (ownAssignments, othersAssignments) = assignmentsForTask
                 .partition { it.taskAssignment.memberId == loggedInMemberId }
 
-            val ownAssignmentToShow =
-                ownAssignments.minByOrNull { it.taskAssignment.dueDateTime }
-            if (ownAssignmentToShow != null) {
-                assignments.add(ownAssignmentToShow)
-                counts[ownAssignmentToShow.taskAssignment.id] = ownAssignments.size - 1
+            ownAssignments.minByOrNull { it.taskAssignment.dueDateTime }?.let {
+                onCompletion.add(it)
+                counts[it.taskAssignment.id] = ownAssignments.size - 1
             }
-
-            val othersAssignmentToShow =
-                othersAssignments.minByOrNull { it.taskAssignment.dueDateTime }
-            if (othersAssignmentToShow != null) {
-                assignments.add(othersAssignmentToShow)
-                counts[othersAssignmentToShow.taskAssignment.id] = othersAssignments.size - 1
+            othersAssignments.minByOrNull { it.taskAssignment.dueDateTime }?.let {
+                onCompletion.add(it)
+                counts[it.taskAssignment.id] = othersAssignments.size - 1
             }
         }
 
-        // Move "On Completion" to top
-        val (onCompletion, others) = assignments
-            .partition { it.taskAssignment.repeatInfo.repeatUnit == RepeatUnit.ON_COMPLETE }
-
+        // 2. Timed assignments bucket classification
         val pastDue = mutableListOf<TaskAssignmentDetails>()
         val dueToday = mutableListOf<TaskAssignmentDetails>()
         val dueTomorrow = mutableListOf<TaskAssignmentDetails>()
-        val dueInFuture = mutableListOf<TaskAssignmentDetails>()
-        others
-            .sortedBy { it.taskAssignment.dueDateTime }
-            .forEach { taskAssignment ->
-                val difference =
-                    differenceInDays(taskAssignment.taskAssignment.dueDateTime, now)
-                if (difference < 0) {
-                    pastDue.add(taskAssignment)
-                } else if (difference == 0) {
-                    dueToday.add(taskAssignment)
-                } else if (difference == 1) {
-                    dueTomorrow.add(taskAssignment)
-                } else {
-                    dueInFuture.add(taskAssignment)
-                }
+        val futureAssignments = mutableListOf<TaskAssignmentDetails>()
+
+        timedAssignments.forEach { taskAssignment ->
+            val difference = differenceInDays(taskAssignment.taskAssignment.dueDateTime, now)
+            if (difference < 0) {
+                pastDue.add(taskAssignment)
+            } else if (difference == 0) {
+                dueToday.add(taskAssignment)
+            } else if (difference == 1) {
+                dueTomorrow.add(taskAssignment)
+            } else {
+                futureAssignments.add(taskAssignment)
             }
+        }
+
+        pastDue.sortBy { it.taskAssignment.dueDateTime }
+        dueToday.sortBy { it.taskAssignment.dueDateTime }
+        dueTomorrow.sortBy { it.taskAssignment.dueDateTime }
+
+        // 3. Future assignments combining (only for future)
+        val dueInFuture = mutableListOf<TaskAssignmentDetails>()
+        futureAssignments.groupBy { it.taskAssignment.taskId }.forEach { (_, assignmentsForTask) ->
+            val (ownAssignments, othersAssignments) = assignmentsForTask
+                .partition { it.taskAssignment.memberId == loggedInMemberId }
+
+            ownAssignments.minByOrNull { it.taskAssignment.dueDateTime }?.let {
+                dueInFuture.add(it)
+                counts[it.taskAssignment.id] = ownAssignments.size - 1
+            }
+            othersAssignments.minByOrNull { it.taskAssignment.dueDateTime }?.let {
+                dueInFuture.add(it)
+                counts[it.taskAssignment.id] = othersAssignments.size - 1
+            }
+        }
+        dueInFuture.sortBy { it.taskAssignment.dueDateTime }
+
         return Assignments(
             onCompletion = onCompletion,
             pastDue = pastDue,
