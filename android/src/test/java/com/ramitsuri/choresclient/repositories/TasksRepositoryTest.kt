@@ -41,7 +41,13 @@ class TasksRepositoryTest {
     fun setUp() {
         startKoin {
             modules(module {
-                single { LogHelper(enableLocal = false, enableRemote = false, deviceDetails = "test") }
+                single {
+                    LogHelper(
+                        enableLocal = false,
+                        enableRemote = false,
+                        deviceDetails = "test"
+                    )
+                }
             })
         }
 
@@ -95,7 +101,8 @@ class TasksRepositoryTest {
             api = api,
             taskDao = database.taskDao,
             memberDao = database.memberDao,
-            houseDao = database.houseDao
+            houseDao = database.houseDao,
+            memberHouseAssociationDao = database.memberHouseAssociationDao,
         )
 
         val result = repository.fetchTasks()
@@ -129,7 +136,8 @@ class TasksRepositoryTest {
             api = api,
             taskDao = database.taskDao,
             memberDao = database.memberDao,
-            houseDao = database.houseDao
+            houseDao = database.houseDao,
+            memberHouseAssociationDao = database.memberHouseAssociationDao,
         )
 
         // Insert task directly via DAO
@@ -154,12 +162,22 @@ class TasksRepositoryTest {
 
         val fetchApi = TasksApi(
             HttpClient(MockEngine {
-                respond(responseJson, HttpStatusCode.OK, headersOf(HttpHeaders.ContentType, "application/json"))
+                respond(
+                    responseJson,
+                    HttpStatusCode.OK,
+                    headersOf(HttpHeaders.ContentType, "application/json")
+                )
             }) { install(ContentNegotiation) { json(Json { ignoreUnknownKeys = true }) } },
             "http://localhost",
             Dispatchers.Unconfined
         )
-        val fetchRepo = DefaultTasksRepository(fetchApi, database.taskDao, database.memberDao, database.houseDao)
+        val fetchRepo = DefaultTasksRepository(
+            fetchApi,
+            database.taskDao,
+            database.memberDao,
+            database.houseDao,
+            memberHouseAssociationDao = database.memberHouseAssociationDao,
+        )
         fetchRepo.fetchTasks()
 
         val taskDetailsList = repository.getTasksFlow().first()

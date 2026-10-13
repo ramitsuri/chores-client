@@ -63,7 +63,13 @@ class TaskAssignmentsRepositoryTest {
     fun setUp() {
         startKoin {
             modules(module {
-                single { LogHelper(enableLocal = false, enableRemote = false, deviceDetails = "test") }
+                single {
+                    LogHelper(
+                        enableLocal = false,
+                        enableRemote = false,
+                        deviceDetails = "test"
+                    )
+                }
             })
         }
 
@@ -90,7 +96,8 @@ class TaskAssignmentsRepositoryTest {
     fun testMarkTaskAssignmentDone() = runTest {
         val repository = createRepository(MockEngine { respond("", HttpStatusCode.OK) })
         setupTaskAndMember()
-        val entity = createAssignmentEntity("assignment1", ProgressStatus.TODO, shouldUpload = false)
+        val entity =
+            createAssignmentEntity("assignment1", ProgressStatus.TODO, shouldUpload = false)
         database.taskAssignmentDao.clearTodoAndInsert(listOf(entity))
 
         val doneTime = Instant.fromEpochMilliseconds(2000L)
@@ -108,7 +115,8 @@ class TaskAssignmentsRepositoryTest {
     fun testMarkTaskAssignmentWontDo() = runTest {
         val repository = createRepository(MockEngine { respond("", HttpStatusCode.OK) })
         setupTaskAndMember()
-        val entity = createAssignmentEntity("assignment1", ProgressStatus.TODO, shouldUpload = false)
+        val entity =
+            createAssignmentEntity("assignment1", ProgressStatus.TODO, shouldUpload = false)
         database.taskAssignmentDao.clearTodoAndInsert(listOf(entity))
 
         val wontDoTime = Instant.fromEpochMilliseconds(3000L)
@@ -126,7 +134,8 @@ class TaskAssignmentsRepositoryTest {
     fun testGetLocal() = runTest {
         val repository = createRepository(MockEngine { respond("", HttpStatusCode.OK) })
         setupTaskAndMember()
-        val entity = createAssignmentEntity("assignment1", ProgressStatus.TODO, shouldUpload = false)
+        val entity =
+            createAssignmentEntity("assignment1", ProgressStatus.TODO, shouldUpload = false)
         database.taskAssignmentDao.clearTodoAndInsert(listOf(entity))
 
         val assignment = repository.getLocal("assignment1")
@@ -140,7 +149,8 @@ class TaskAssignmentsRepositoryTest {
     fun testGetLocalFlow() = runTest {
         val repository = createRepository(MockEngine { respond("", HttpStatusCode.OK) })
         setupTaskAndMember()
-        val entity = createAssignmentEntity("assignment1", ProgressStatus.TODO, shouldUpload = false)
+        val entity =
+            createAssignmentEntity("assignment1", ProgressStatus.TODO, shouldUpload = false)
         database.taskAssignmentDao.clearTodoAndInsert(listOf(entity))
 
         val detailsList = repository.getLocalFlow("member1").first()
@@ -154,9 +164,12 @@ class TaskAssignmentsRepositoryTest {
     fun testGetCompletedLocalFlow() = runTest {
         val repository = createRepository(MockEngine { respond("", HttpStatusCode.OK) })
         setupTaskAndMember()
-        val todoEntity = createAssignmentEntity("assignment1", ProgressStatus.TODO, shouldUpload = false)
-        val doneEntity = createAssignmentEntity("assignment2", ProgressStatus.DONE, shouldUpload = false)
-        val wontDoEntity = createAssignmentEntity("assignment3", ProgressStatus.WONT_DO, shouldUpload = false)
+        val todoEntity =
+            createAssignmentEntity("assignment1", ProgressStatus.TODO, shouldUpload = false)
+        val doneEntity =
+            createAssignmentEntity("assignment2", ProgressStatus.DONE, shouldUpload = false)
+        val wontDoEntity =
+            createAssignmentEntity("assignment3", ProgressStatus.WONT_DO, shouldUpload = false)
         database.taskAssignmentDao.insert(listOf(todoEntity, doneEntity, wontDoEntity))
 
         val completedDetails = repository.getCompletedLocalFlow("member1").first()
@@ -275,7 +288,8 @@ class TaskAssignmentsRepositoryTest {
         setupTaskAndMember()
 
         // Entity ready for upload
-        val localUpload = createAssignmentEntity("upload1", ProgressStatus.DONE, shouldUpload = true)
+        val localUpload =
+            createAssignmentEntity("upload1", ProgressStatus.DONE, shouldUpload = true)
         database.taskAssignmentDao.clearTodoAndInsert(listOf(localUpload))
 
         repository.refresh()
@@ -311,7 +325,8 @@ class TaskAssignmentsRepositoryTest {
             taskDao = database.taskDao,
             reminderScheduler = reminderScheduler,
             alarmHandler = alarmHandler,
-            contentDownloadRequestHandler = contentDownloadRequestHandler
+            contentDownloadRequestHandler = contentDownloadRequestHandler,
+            memberHouseAssociationDao = database.memberHouseAssociationDao,
         )
     }
 
