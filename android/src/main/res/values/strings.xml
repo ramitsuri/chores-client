@@ -20,6 +20,7 @@
     <string name="search_hint">Search tasks</string>
     <string name="wont_do">Skipped</string>
     <string name="completed_today">Completed</string>
+    <string name="undo">Undo</string>
 
     <!-- Navigation Chrome Titles -->
     <string name="active_todos_title">Chores</string>
