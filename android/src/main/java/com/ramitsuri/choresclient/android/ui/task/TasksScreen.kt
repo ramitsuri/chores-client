@@ -100,13 +100,6 @@ fun TasksScreen(
                 )
                 .padding(horizontal = MaterialTheme.dimens.large)
         ) {
-            PersonalSharedToggle(
-                selectedTypes = viewState.selectedListTypes,
-                onListTypeClicked = onListTypeClicked,
-            )
-
-            Spacer(modifier = Modifier.height(MaterialTheme.dimens.medium))
-
             OutlinedTextField(
                 value = viewState.searchQuery,
                 onValueChange = onSearchQueryChanged,
@@ -130,6 +123,13 @@ fun TasksScreen(
                 singleLine = true,
                 shape = RoundedCornerShape(MaterialTheme.dimens.cardCornerRadius),
                 modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(MaterialTheme.dimens.medium))
+
+            PersonalSharedToggle(
+                selectedTypes = viewState.selectedListTypes,
+                onListTypeClicked = onListTypeClicked,
             )
 
             Spacer(modifier = Modifier.height(MaterialTheme.dimens.medium))
