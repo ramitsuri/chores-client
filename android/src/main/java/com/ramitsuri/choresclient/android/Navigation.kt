@@ -220,6 +220,7 @@ fun NavGraph(
                 onBack = { navController.navigateUp() },
                 viewState = state,
                 onTaskNameUpdate = viewModel::onTaskNameUpdated,
+                onTaskDescriptionUpdate = viewModel::onTaskDescriptionUpdated,
                 onDatePicked = viewModel::onDatePicked,
                 onTimePicked = viewModel::onTimePicked,
                 onRepeatValueUpdated = viewModel::onRepeatValueUpdated,

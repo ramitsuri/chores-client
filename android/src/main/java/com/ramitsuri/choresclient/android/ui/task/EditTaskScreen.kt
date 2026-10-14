@@ -88,6 +88,7 @@ import kotlinx.datetime.LocalTime
 fun EditTaskScreen(
     viewState: EditTaskViewState,
     onTaskNameUpdate: (String) -> Unit,
+    onTaskDescriptionUpdate: (String) -> Unit,
     onDatePicked: (Long) -> Unit,
     onTimePicked: (Int, Int) -> Unit,
     onRepeatValueUpdated: (String) -> Unit,
@@ -183,6 +184,7 @@ fun EditTaskScreen(
                 EditTaskContent(
                     state = viewState,
                     onTaskNameUpdate = onTaskNameUpdate,
+                    onTaskDescriptionUpdate = onTaskDescriptionUpdate,
                     onDatePicked = onDatePicked,
                     onTimePicked = onTimePicked,
                     onRepeatValueUpdated = onRepeatValueUpdated,
@@ -205,6 +207,7 @@ private fun EditTaskContent(
     modifier: Modifier = Modifier,
     state: EditTaskViewState,
     onTaskNameUpdate: (String) -> Unit,
+    onTaskDescriptionUpdate: (String) -> Unit,
     onDatePicked: (Long) -> Unit,
     onTimePicked: (Int, Int) -> Unit,
     onRepeatValueUpdated: (String) -> Unit,
@@ -243,6 +246,22 @@ private fun EditTaskContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .focusRequester(focusRequester = focusRequester)
+        )
+
+        Spacer(modifier = Modifier.height(MaterialTheme.dimens.medium))
+
+        OutlinedTextField(
+            value = state.taskDescription,
+            minLines = 3,
+            maxLines = 5,
+            onValueChange = onTaskDescriptionUpdate,
+            label = { Text(stringResource(id = R.string.add_task_hint_description)) },
+            keyboardOptions = KeyboardOptions(
+                capitalization = KeyboardCapitalization.Sentences,
+                keyboardType = KeyboardType.Text,
+                imeAction = ImeAction.Done
+            ),
+            modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(MaterialTheme.dimens.large))
@@ -535,6 +554,7 @@ fun EditTasksPreview() {
                 viewState = viewState,
                 onBack = { },
                 onTaskNameUpdate = { },
+                onTaskDescriptionUpdate = { },
                 onDatePicked = { _ -> },
                 onTimePicked = { _, _ -> },
                 onRepeatValueUpdated = {},

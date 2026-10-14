@@ -55,7 +55,7 @@ class EditTaskViewModel(
                 previousState.copy(
                     taskName = task.name,
                     repeatValue = task.repeatValue,
-                    repeatUnits = RepeatUnit.values()
+                    repeatUnits = RepeatUnit.entries
                         .map { repeatUnit ->
                             RepeatUnitSelectionItem(
                                 repeatUnit,
@@ -132,17 +132,17 @@ class EditTaskViewModel(
         }
     }
 
-    fun onErrorShown() {
-        _state.update {
-            it.copy(error = null)
-        }
-    }
-
     fun onTaskNameUpdated(newName: String) {
         _state.update {
             it.copy(taskName = newName)
         }
         updateCanEditTask()
+    }
+
+    fun onTaskDescriptionUpdated(newDescription: String) {
+        _state.update {
+            it.copy(taskDescription = newDescription)
+        }
     }
 
     fun onRepeatValueUpdated(newRepeatValue: String) {
@@ -187,7 +187,7 @@ class EditTaskViewModel(
         _state.update {
             it.copy(
                 repeatValue = task.repeatValue,
-                repeatUnits = RepeatUnit.values()
+                repeatUnits = RepeatUnit.entries
                     .map { repeatUnit ->
                         RepeatUnitSelectionItem(
                             repeatUnit = repeatUnit,

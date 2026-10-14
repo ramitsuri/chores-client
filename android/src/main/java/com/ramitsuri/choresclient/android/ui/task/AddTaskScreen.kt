@@ -78,7 +78,7 @@ import kotlinx.datetime.LocalTime
 fun AddTaskScreen(
     viewState: AddTaskViewState,
     onTaskNameUpdate: (String) -> Unit,
-    onTaskDescriptionUpdate: (String) -> Unit = {},
+    onTaskDescriptionUpdate: (String) -> Unit,
     onHouseItemSelected: (SelectionItem) -> Unit,
     onMemberItemSelected: (SelectionItem) -> Unit,
     onDatePicked: (Long) -> Unit,
