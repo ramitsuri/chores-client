@@ -21,17 +21,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.ramitsuri.choresclient.android.R
 import com.ramitsuri.choresclient.android.ui.common.AppTopAppBar
-import com.ramitsuri.choresclient.android.ui.common.ListTypeSelection
 import com.ramitsuri.choresclient.android.ui.common.PersonalSharedToggle
 import com.ramitsuri.choresclient.android.ui.common.TaskCard
 import com.ramitsuri.choresclient.android.ui.theme.ChoresClientTheme
@@ -41,6 +36,7 @@ import com.ramitsuri.choresclient.model.entities.TaskAssignment
 import com.ramitsuri.choresclient.model.enums.ProgressStatus
 import com.ramitsuri.choresclient.model.enums.RepeatUnit
 import com.ramitsuri.choresclient.model.view.CompletedAssignmentsViewState
+import com.ramitsuri.choresclient.model.view.ListTypeSelection
 import com.ramitsuri.choresclient.model.view.TaskAssignmentDetails
 import com.ramitsuri.choresclient.utils.now
 import kotlinx.datetime.LocalDateTime
@@ -50,12 +46,9 @@ import kotlin.time.Clock
 fun CompletedAssignmentsScreen(
     viewState: CompletedAssignmentsViewState,
     onBack: () -> Unit,
+    onListTypeClicked: (ListTypeSelection) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var selectedListType by remember { mutableStateOf(ListTypeSelection.PERSONAL) }
-    val isShared = selectedListType == ListTypeSelection.SHARED
-    val displayAssignments = viewState.assignments.filter { it.isSharedList == isShared }
-
     Scaffold(
         topBar = {
             AppTopAppBar(
@@ -78,8 +71,8 @@ fun CompletedAssignmentsScreen(
                 .padding(horizontal = MaterialTheme.dimens.large)
         ) {
             PersonalSharedToggle(
-                selectedType = selectedListType,
-                onTypeSelected = { selectedListType = it }
+                selectedTypes = viewState.selectedListTypes,
+                onListTypeClicked = onListTypeClicked,
             )
 
             Spacer(modifier = Modifier.height(MaterialTheme.dimens.medium))
@@ -92,7 +85,7 @@ fun CompletedAssignmentsScreen(
                 ) {
                     LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
                 }
-            } else if (displayAssignments.isEmpty()) {
+            } else if (viewState.assignments.isEmpty()) {
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -110,7 +103,7 @@ fun CompletedAssignmentsScreen(
                     verticalArrangement = Arrangement.spacedBy(MaterialTheme.dimens.medium)
                 ) {
                     items(
-                        items = displayAssignments,
+                        items = viewState.assignments,
                         key = { it.taskAssignment.id }
                     ) { details ->
                         TaskCard(
@@ -161,6 +154,7 @@ private fun PreviewCompletedAssignmentsScreen() {
                     ),
                 ),
                 onBack = {},
+                onListTypeClicked = {},
             )
         }
     }

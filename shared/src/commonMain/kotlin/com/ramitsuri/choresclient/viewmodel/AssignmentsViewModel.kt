@@ -6,16 +6,20 @@ import com.ramitsuri.choresclient.model.enums.RepeatUnit
 import com.ramitsuri.choresclient.model.enums.SnoozeType
 import com.ramitsuri.choresclient.model.view.Assignments
 import com.ramitsuri.choresclient.model.view.AssignmentsViewState
+import com.ramitsuri.choresclient.model.view.ListTypeSelection
 import com.ramitsuri.choresclient.model.view.TaskAssignmentDetails
+import com.ramitsuri.choresclient.model.view.filterByListTypes
 import com.ramitsuri.choresclient.repositories.TaskAssignmentsRepository
 import com.ramitsuri.choresclient.utils.differenceInDays
 import com.ramitsuri.choresclient.utils.now
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDateTime
 import kotlin.time.Clock
@@ -26,6 +30,8 @@ class AssignmentsViewModel(
     private val prefManager: PrefManager,
     private val longLivingCoroutineScope: CoroutineScope
 ) : ViewModel() {
+
+    private val selectedListTypes = MutableStateFlow(ListTypeSelection.entries.toSet())
 
     val state = getAssignments().stateIn(
         scope = viewModelScope,
@@ -51,13 +57,32 @@ class AssignmentsViewModel(
         }
     }
 
+    fun onListTypeClicked(listTypeSelection: ListTypeSelection) {
+        selectedListTypes.update { currentSelection ->
+            if (listTypeSelection in currentSelection) {
+                if (currentSelection.size == 1) {
+                    // Final selected type is clicked, unselect it + select everything else
+                    ListTypeSelection.entries.toSet() - listTypeSelection
+                } else {
+                    currentSelection - listTypeSelection
+                }
+            } else {
+                currentSelection + listTypeSelection
+            }
+        }
+    }
+
     private fun getAssignments(): Flow<AssignmentsViewState> {
         val loggedInMemberId = prefManager.getLoggedInMemberId()
         return if (loggedInMemberId == null) {
             flowOf(AssignmentsViewState(loading = false))
         } else {
-            repository.getLocalFlow(loggedInMemberId).map { taskAssignmentDetails ->
+            combine(
+                repository.getLocalFlow(loggedInMemberId),
+                selectedListTypes,
+            ) { taskAssignmentDetails, selectedListTypes ->
                 val filtered = taskAssignmentDetails
+                    .filterByListTypes(selectedListTypes)
                     .filter { it.taskAssignment.progressStatus == ProgressStatus.TODO }
                     .toMutableList()
 
@@ -78,7 +103,8 @@ class AssignmentsViewModel(
 
                 AssignmentsViewState(
                     loading = false,
-                    assignments = assignments
+                    assignments = assignments,
+                    selectedListTypes = selectedListTypes,
                 )
             }
         }

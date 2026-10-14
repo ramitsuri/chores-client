@@ -40,10 +40,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -54,7 +50,6 @@ import androidx.compose.ui.unit.dp
 import com.ramitsuri.choresclient.android.R
 import com.ramitsuri.choresclient.android.ui.common.AppFAB
 import com.ramitsuri.choresclient.android.ui.common.AppTopAppBar
-import com.ramitsuri.choresclient.android.ui.common.ListTypeSelection
 import com.ramitsuri.choresclient.android.ui.common.PersonalSharedToggle
 import com.ramitsuri.choresclient.android.ui.common.PillChip
 import com.ramitsuri.choresclient.android.ui.theme.ChoresClientTheme
@@ -63,6 +58,7 @@ import com.ramitsuri.choresclient.android.utils.formatRepeatUnitCompact
 import com.ramitsuri.choresclient.model.entities.Task
 import com.ramitsuri.choresclient.model.enums.ActiveStatus
 import com.ramitsuri.choresclient.model.enums.RepeatUnit
+import com.ramitsuri.choresclient.model.view.ListTypeSelection
 import com.ramitsuri.choresclient.model.view.TaskDetails
 import com.ramitsuri.choresclient.model.view.TasksViewState
 import com.ramitsuri.choresclient.utils.now
@@ -76,12 +72,9 @@ fun TasksScreen(
     onAddTaskClicked: () -> Unit,
     onEditTaskClicked: (String) -> Unit,
     onSearchQueryChanged: (String) -> Unit,
+    onListTypeClicked: (ListTypeSelection) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var selectedListType by remember { mutableStateOf(ListTypeSelection.PERSONAL) }
-    val isShared = selectedListType == ListTypeSelection.SHARED
-    val displayTasks = viewState.tasks.filter { it.isSharedList == isShared }
-
     Scaffold(
         topBar = {
             AppTopAppBar(
@@ -108,8 +101,8 @@ fun TasksScreen(
                 .padding(horizontal = MaterialTheme.dimens.large)
         ) {
             PersonalSharedToggle(
-                selectedType = selectedListType,
-                onTypeSelected = { selectedListType = it }
+                selectedTypes = viewState.selectedListTypes,
+                onListTypeClicked = onListTypeClicked,
             )
 
             Spacer(modifier = Modifier.height(MaterialTheme.dimens.medium))
@@ -149,7 +142,7 @@ fun TasksScreen(
                 ) {
                     LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
                 }
-            } else if (displayTasks.isEmpty()) {
+            } else if (viewState.tasks.isEmpty()) {
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -167,7 +160,7 @@ fun TasksScreen(
                     verticalArrangement = Arrangement.spacedBy(MaterialTheme.dimens.medium)
                 ) {
                     items(
-                        items = displayTasks,
+                        items = viewState.tasks,
                         key = { it.task.id }
                     ) { details ->
                         TemplateCardItem(
@@ -342,12 +335,14 @@ private fun PreviewTasksScreen() {
                             memberName = "Alex",
                             houseName = "Home"
                         )
-                    )
+                    ),
+                    selectedListTypes = setOf(ListTypeSelection.PERSONAL),
                 ),
                 onBack = {},
                 onAddTaskClicked = {},
                 onEditTaskClicked = {},
                 onSearchQueryChanged = {},
+                onListTypeClicked = {},
             )
         }
     }

@@ -50,9 +50,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MultiChoiceSegmentedButtonRow
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -88,6 +88,7 @@ import com.ramitsuri.choresclient.android.utils.formatRepeatUnitCompact
 import com.ramitsuri.choresclient.model.enums.ProgressStatus
 import com.ramitsuri.choresclient.model.enums.RepeatUnit
 import com.ramitsuri.choresclient.model.view.AssignmentsMenuItem
+import com.ramitsuri.choresclient.model.view.ListTypeSelection
 import com.ramitsuri.choresclient.model.view.TaskAssignmentDetails
 import com.ramitsuri.choresclient.utils.getDay
 import kotlinx.coroutines.delay
@@ -95,11 +96,6 @@ import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.milliseconds
-
-enum class ListTypeSelection {
-    PERSONAL,
-    SHARED
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -169,51 +165,47 @@ fun AppTopAppBar(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PersonalSharedToggle(
-    selectedType: ListTypeSelection,
-    onTypeSelected: (ListTypeSelection) -> Unit,
+    selectedTypes: Set<ListTypeSelection>,
+    onListTypeClicked: (ListTypeSelection) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    SingleChoiceSegmentedButtonRow(
+    MultiChoiceSegmentedButtonRow(
         modifier = modifier
-            .fillMaxWidth()
             .padding(vertical = MaterialTheme.dimens.small)
     ) {
-        SegmentedButton(
-            selected = selectedType == ListTypeSelection.PERSONAL,
-            onClick = { onTypeSelected(ListTypeSelection.PERSONAL) },
-            shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
-            icon = {
-                Icon(
-                    imageVector = Icons.Default.Person,
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp)
+        ListTypeSelection.entries.forEachIndexed { index,  type ->
+            SegmentedButton(
+                checked = type in selectedTypes,
+                onCheckedChange = { onListTypeClicked(type) },
+                shape = SegmentedButtonDefaults.itemShape(index = index, count = ListTypeSelection.entries.size),
+                icon = {
+                    Icon(
+                        imageVector = type.icon,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+            ) {
+                Text(
+                    text = stringResource(id = type.textResId),
+                    style = MaterialTheme.typography.labelLarge
                 )
             }
-        ) {
-            Text(
-                text = stringResource(id = R.string.assignment_filter_personal),
-                style = MaterialTheme.typography.labelLarge
-            )
-        }
-        SegmentedButton(
-            selected = selectedType == ListTypeSelection.SHARED,
-            onClick = { onTypeSelected(ListTypeSelection.SHARED) },
-            shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
-            icon = {
-                Icon(
-                    imageVector = Icons.Default.Groups,
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp)
-                )
-            }
-        ) {
-            Text(
-                text = stringResource(id = R.string.assignment_filter_shared),
-                style = MaterialTheme.typography.labelLarge
-            )
         }
     }
 }
+
+private val ListTypeSelection.icon: ImageVector
+    get() = when(this) {
+        ListTypeSelection.PERSONAL -> Icons.Default.Person
+        ListTypeSelection.SHARED -> Icons.Default.Groups
+    }
+
+private val ListTypeSelection.textResId: Int
+    get() = when(this) {
+        ListTypeSelection.PERSONAL -> R.string.assignment_filter_personal
+        ListTypeSelection.SHARED -> R.string.assignment_filter_shared
+    }
 
 enum class DragValue {
     Normal,

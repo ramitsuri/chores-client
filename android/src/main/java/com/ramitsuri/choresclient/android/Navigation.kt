@@ -132,6 +132,7 @@ fun NavGraph(
                 onMarkAsDone = viewModel::markAsDone,
                 onMarkAsWontDo = viewModel::markAsWontDo,
                 onSnooze = viewModel::onSnooze,
+                onListTypeClicked = viewModel::onListTypeClicked,
             )
         }
 
@@ -141,6 +142,7 @@ fun NavGraph(
             CompletedAssignmentsScreen(
                 viewState = state,
                 onBack = { navController.navigateUp() },
+                onListTypeClicked = viewModel::onListTypeClicked,
             )
         }
 
@@ -153,6 +155,7 @@ fun NavGraph(
                 onAddTaskClicked = { navController.navigate(Destinations.ADD_TASK) },
                 onEditTaskClicked = { navController.navigate("${Destinations.EDIT_TASK}/$it") },
                 onSearchQueryChanged = viewModel::onSearchQueryChanged,
+                onListTypeClicked = viewModel::onListTypeClicked,
             )
         }
 

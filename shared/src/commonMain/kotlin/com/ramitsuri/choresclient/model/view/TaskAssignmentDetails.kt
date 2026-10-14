@@ -11,3 +11,11 @@ data class TaskAssignmentDetails(
     val assignedToLoggedInUser: Boolean,
     val isSharedList: Boolean = false,
 )
+
+fun List<TaskAssignmentDetails>.filterByListTypes(selectedListTypes: Set<ListTypeSelection>): List<TaskAssignmentDetails> {
+    if (selectedListTypes.size == ListTypeSelection.entries.size) {
+        return this
+    }
+    val isShared = selectedListTypes.contains(ListTypeSelection.SHARED)
+    return filter { it.isSharedList == isShared }
+}

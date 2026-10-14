@@ -30,10 +30,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,7 +41,6 @@ import androidx.compose.ui.unit.dp
 import com.ramitsuri.choresclient.android.R
 import com.ramitsuri.choresclient.android.ui.common.AppFAB
 import com.ramitsuri.choresclient.android.ui.common.AppTopAppBar
-import com.ramitsuri.choresclient.android.ui.common.ListTypeSelection
 import com.ramitsuri.choresclient.android.ui.common.PersonalSharedToggle
 import com.ramitsuri.choresclient.android.ui.common.TaskCard
 import com.ramitsuri.choresclient.android.ui.theme.ChoresClientTheme
@@ -57,6 +53,7 @@ import com.ramitsuri.choresclient.model.enums.SnoozeType
 import com.ramitsuri.choresclient.model.view.Assignments
 import com.ramitsuri.choresclient.model.view.AssignmentsMenuItem
 import com.ramitsuri.choresclient.model.view.AssignmentsViewState
+import com.ramitsuri.choresclient.model.view.ListTypeSelection
 import com.ramitsuri.choresclient.model.view.TaskAssignmentDetails
 import com.ramitsuri.choresclient.utils.now
 import kotlinx.datetime.LocalDateTime
@@ -75,15 +72,13 @@ fun AssignmentsScreen(
     onSettingsClicked: () -> Unit,
     onCompletedClicked: () -> Unit = {},
     onTasksClicked: () -> Unit = {},
+    onListTypeClicked: (ListTypeSelection) -> Unit,
 ) {
     val menu = listOf(
         AssignmentsMenuItem.COMPLETED,
         AssignmentsMenuItem.TASKS,
         AssignmentsMenuItem.SETTINGS,
     )
-
-    var selectedListType by remember { mutableStateOf(ListTypeSelection.PERSONAL) }
-    val displayAssignments = viewState.assignments.filterByListType(selectedListType == ListTypeSelection.SHARED)
 
     Scaffold(
         topBar = {
@@ -108,7 +103,7 @@ fun AssignmentsScreen(
     ) { paddingValues ->
         AssignmentsContent(
             isLoading = viewState.loading,
-            assignments = displayAssignments,
+            assignments = viewState.assignments,
             onMarkAsDone = onMarkAsDone,
             onMarkAsWontDo = onMarkAsWontDo,
             onSnooze = onSnooze,
@@ -122,8 +117,8 @@ fun AssignmentsScreen(
                         WindowInsetsSides.Horizontal,
                     ),
                 ),
-            selectedListType = selectedListType,
-            onListTypeSelected = { selectedListType = it },
+            selectedListTypes = viewState.selectedListTypes,
+            onListTypeClicked = onListTypeClicked,
         )
     }
 }
@@ -136,8 +131,8 @@ private fun AssignmentsContent(
     onMarkAsWontDo: (String) -> Unit,
     onSnooze: (String, SnoozeType) -> Unit,
     onEditTaskClicked: (String) -> Unit,
-    selectedListType: ListTypeSelection,
-    onListTypeSelected: (ListTypeSelection) -> Unit,
+    selectedListTypes: Set<ListTypeSelection>,
+    onListTypeClicked: (ListTypeSelection) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -146,8 +141,8 @@ private fun AssignmentsContent(
             .padding(horizontal = MaterialTheme.dimens.large)
     ) {
         PersonalSharedToggle(
-            selectedType = selectedListType,
-            onTypeSelected = onListTypeSelected
+            selectedTypes = selectedListTypes,
+            onListTypeClicked = onListTypeClicked
         )
 
         Spacer(modifier = Modifier.height(MaterialTheme.dimens.medium))
@@ -404,6 +399,7 @@ private fun PreviewAssignmentContent() {
                 onAddTaskClicked = { },
                 onEditTaskClicked = { },
                 onSettingsClicked = { },
+                onListTypeClicked = { },
             )
         }
     }
