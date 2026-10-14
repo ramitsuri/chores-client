@@ -292,7 +292,7 @@ private fun AssignmentHeader(
             color = if (isPastDue) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onBackground
         )
 
-        if (count > 0) {
+        if (count > 1) {
             val badgeContainer = if (isPastDue) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.secondaryContainer
             val badgeContent = if (isPastDue) MaterialTheme.colorScheme.onErrorContainer else MaterialTheme.colorScheme.onSecondaryContainer
             Box(
