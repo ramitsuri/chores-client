@@ -249,7 +249,7 @@ private fun LazyListScope.assignmentsGroup(
     onEditTaskClicked: (String) -> Unit,
 ) {
     if (assignments.isNotEmpty()) {
-        stickyHeader {
+        stickyHeader(key = headerRes) {
             AssignmentHeader(
                 title = stringResource(id = headerRes),
                 count = assignments.size,

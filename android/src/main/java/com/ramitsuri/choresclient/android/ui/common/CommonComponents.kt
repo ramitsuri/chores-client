@@ -1,18 +1,17 @@
 package com.ramitsuri.choresclient.android.ui.common
 
-import android.view.HapticFeedbackConstants
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.exponentialDecay
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.gestures.AnchoredDraggableState
-import androidx.compose.foundation.gestures.DraggableAnchors
 import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.anchoredDraggable
-import androidx.compose.foundation.gestures.animateTo
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,8 +21,8 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
@@ -59,26 +58,33 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.ramitsuri.choresclient.android.R
 import com.ramitsuri.choresclient.android.extensions.string
@@ -95,7 +101,11 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import kotlin.math.abs
+import kotlin.math.exp
+import kotlin.math.ln
 import kotlin.math.roundToInt
+import kotlin.math.sign
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -209,13 +219,34 @@ private val ListTypeSelection.textResId: Int
         ListTypeSelection.SHARED -> R.string.assignment_filter_shared
     }
 
-enum class DragValue {
-    Normal,
-    DismissedStart,
-    DismissedEnd
-}
+/** Finger travel (fraction of card width) needed before the card "unsticks" and the swipe is armed. */
+private const val SwipeUnstickFraction = 0.5f
 
-@OptIn(ExperimentalFoundationApi::class)
+/** Once unstuck, the card re-sticks if the finger travels back below this fraction (hysteresis). */
+private const val SwipeRestickFraction = 0.4f
+
+/**
+ * Max distance (as a fraction of the unstick distance) the card can visually travel while stuck.
+ * Lower = more resistance.
+ */
+private const val SwipeStuckScaleFraction = 0.6f
+
+/** Releasing while flinging back towards center faster than this (px/s) cancels an armed swipe. */
+private const val SwipeCancelVelocity = 1000f
+
+/** Visual distance between haptic ticks while the card is stuck. */
+private val SwipeTickStep = 12.dp
+
+/**
+ * Swipe-to-act card modeled after the Android 16 notification swipe:
+ * - While "stuck", the card follows the finger with progressively increasing resistance and
+ *   ticks haptically, ticks spreading out as tension builds.
+ * - Once the finger has travelled half the card width the card "unsticks": it springs to the finger,
+ *   following 1:1, with a threshold haptic. Dragging back re-sticks it.
+ * - Releasing only commits the action when unstuck. Otherwise the card springs back.
+ *
+ * Swipe right -> [onMarkAsDone], swipe left -> [onMarkAsWontDo].
+ */
 @Composable
 private fun ResistiveSwipeCard(
     onMarkAsDone: () -> Unit,
@@ -223,102 +254,188 @@ private fun ResistiveSwipeCard(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
-    val view = LocalView.current
+    val haptics = LocalHapticFeedback.current
     val density = LocalDensity.current
-    val maxSwipeDistance = with(density) { 260.dp.toPx() }
     val scope = rememberCoroutineScope()
+    val currentOnMarkAsDone by rememberUpdatedState(onMarkAsDone)
+    val currentOnMarkAsWontDo by rememberUpdatedState(onMarkAsWontDo)
 
-    val draggableState = remember {
-        AnchoredDraggableState(
-            initialValue = DragValue.Normal,
-            anchors = DraggableAnchors {
-                DragValue.Normal at 0f
-                DragValue.DismissedStart at -maxSwipeDistance
-                DragValue.DismissedEnd at maxSwipeDistance
-            },
-            positionalThreshold = { distance: Float -> distance * 0.8f },
-            velocityThreshold = { with(density) { 150.dp.toPx() } },
-            snapAnimationSpec = tween(durationMillis = 300),
-            decayAnimationSpec = exponentialDecay()
-        )
+    val tickStepPx = with(density) { SwipeTickStep.toPx() }
+    val iconSizePx = with(density) { MaterialTheme.dimens.iconWidthMedium.toPx() }
+
+    val offset = remember { Animatable(0f) }
+    var widthPx by remember { mutableIntStateOf(0) }
+    var rawDrag by remember { mutableFloatStateOf(0f) }
+    var isUnstuck by remember { mutableStateOf(false) }
+    var lastTick by remember { mutableIntStateOf(0) }
+    var isDismissing by remember { mutableStateOf(false) }
+
+    val unstickDistance = widthPx * SwipeUnstickFraction
+    val restickDistance = widthPx * SwipeRestickFraction
+    val stuckScale = unstickDistance * SwipeStuckScaleFraction
+
+    // Rubber band: slope 1 at the start (immediate response), saturating towards stuckScale.
+    fun stuckOffset(raw: Float): Float {
+        if (stuckScale <= 0f) return 0f
+        return sign(raw) * stuckScale * (1f - exp(-abs(raw) / stuckScale))
     }
 
-    LaunchedEffect(draggableState.currentValue) {
-        when (draggableState.currentValue) {
-            DragValue.DismissedStart -> {
-                view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
-                onMarkAsDone()
-                scope.launch {
-                    draggableState.animateTo(DragValue.Normal)
+    fun rawFromStuckOffset(visual: Float): Float {
+        if (stuckScale <= 0f) return 0f
+        val ratio = (abs(visual) / stuckScale).coerceAtMost(0.99f)
+        return sign(visual) * -stuckScale * ln(1f - ratio)
+    }
+
+    val followSpec = remember { spring<Float>(dampingRatio = 0.8f, stiffness = Spring.StiffnessMedium) }
+
+    val draggableState = rememberDraggableState { delta ->
+        if (isDismissing || widthPx == 0) return@rememberDraggableState
+        rawDrag += delta
+        val distance = abs(rawDrag)
+        val wasUnstuck = isUnstuck
+        isUnstuck = if (wasUnstuck) distance > restickDistance else distance >= unstickDistance
+        if (isUnstuck != wasUnstuck) {
+            haptics.performHapticFeedback(
+                if (isUnstuck) {
+                    HapticFeedbackType.GestureThresholdActivate
+                } else {
+                    HapticFeedbackType.SegmentTick
                 }
-            }
-
-            DragValue.DismissedEnd -> {
-                view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
-                onMarkAsWontDo()
-                scope.launch {
-                    draggableState.animateTo(DragValue.Normal)
-                }
-            }
-
-            DragValue.Normal -> {}
+            )
         }
-    }
 
-    val currentOffset = try {
-        draggableState.requireOffset()
-    } catch (_: Exception) {
-        0f
-    }
-
-    val finalOffset = if (currentOffset.isNaN()) 0f else {
-        if (currentOffset > maxSwipeDistance) {
-            maxSwipeDistance + (currentOffset - maxSwipeDistance) * 0.3f
-        } else if (currentOffset < -maxSwipeDistance) {
-            -maxSwipeDistance + (currentOffset + maxSwipeDistance) * 0.3f
-        } else {
-            currentOffset
+        val stuckTarget = stuckOffset(rawDrag)
+        val tick = (abs(stuckTarget) / tickStepPx).toInt()
+        if (!isUnstuck && !wasUnstuck && tick != lastTick) {
+            haptics.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
         }
+        lastTick = tick
+
+        val target = if (isUnstuck) rawDrag else stuckTarget
+        scope.launch { offset.animateTo(target, followSpec) }
     }
 
-    val backgroundContainerColor = when {
-        finalOffset > 20f -> MaterialTheme.colorScheme.primaryContainer
-        finalOffset < -20f -> MaterialTheme.colorScheme.errorContainer
-        else -> Color.Transparent
-    }
-    val backgroundAlignment = if (finalOffset > 0f) Alignment.CenterStart else Alignment.CenterEnd
-    val backgroundIcon = if (finalOffset > 0f) Icons.Default.Check else Icons.Default.Clear
+    // Only recompose when the swipe direction flips, not on every frame.
+    val direction by remember { derivedStateOf { sign(offset.value) } }
+    val isDoneDirection = direction > 0f
+
+    val revealColor by animateColorAsState(
+        targetValue = when {
+            isDoneDirection && isUnstuck -> MaterialTheme.colorScheme.primary
+            isDoneDirection -> MaterialTheme.colorScheme.primaryContainer
+            isUnstuck -> MaterialTheme.colorScheme.error
+            else -> MaterialTheme.colorScheme.errorContainer
+        },
+        label = "swipeRevealColor"
+    )
+    val iconColor by animateColorAsState(
+        targetValue = when {
+            isDoneDirection && isUnstuck -> MaterialTheme.colorScheme.onPrimary
+            isDoneDirection -> MaterialTheme.colorScheme.onPrimaryContainer
+            isUnstuck -> MaterialTheme.colorScheme.onError
+            else -> MaterialTheme.colorScheme.onErrorContainer
+        },
+        label = "swipeIconColor"
+    )
+    val armedScale by animateFloatAsState(
+        targetValue = if (isUnstuck) 1.2f else 1f,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
+        label = "swipeArmedScale"
+    )
 
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(MaterialTheme.dimens.cardCornerRadius))
-            .background(backgroundContainerColor),
-        contentAlignment = backgroundAlignment
+            .onSizeChanged { widthPx = it.width }
+            .draggable(
+                state = draggableState,
+                orientation = Orientation.Horizontal,
+                onDragStarted = {
+                    if (!isDismissing) {
+                        // Pick up from wherever the card currently is (e.g. mid spring-back).
+                        rawDrag = rawFromStuckOffset(offset.value)
+                        lastTick = (abs(offset.value) / tickStepPx).toInt()
+                    }
+                },
+                onDragStopped = { velocity ->
+                    if (isDismissing) return@draggable
+                    val swipeDirection = sign(offset.value)
+                    val isFlingingBack = velocity * swipeDirection < -SwipeCancelVelocity
+                    if (isUnstuck && !isFlingingBack && swipeDirection != 0f) {
+                        isDismissing = true
+                        haptics.performHapticFeedback(HapticFeedbackType.Confirm)
+                        scope.launch {
+                            offset.animateTo(
+                                targetValue = swipeDirection * widthPx,
+                                animationSpec = spring(stiffness = Spring.StiffnessMedium),
+                                initialVelocity = velocity
+                            )
+                            if (swipeDirection > 0f) currentOnMarkAsDone() else currentOnMarkAsWontDo()
+                        }
+                    } else {
+                        if (isUnstuck) {
+                            haptics.performHapticFeedback(HapticFeedbackType.SegmentTick)
+                        }
+                        isUnstuck = false
+                        rawDrag = 0f
+                        scope.launch {
+                            offset.animateTo(
+                                targetValue = 0f,
+                                animationSpec = spring(
+                                    dampingRatio = Spring.DampingRatioMediumBouncy,
+                                    stiffness = Spring.StiffnessMediumLow
+                                ),
+                                initialVelocity = velocity
+                            )
+                        }
+                    }
+                }
+            )
     ) {
-        if (backgroundContainerColor != Color.Transparent) {
-            Box(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .padding(horizontal = MaterialTheme.dimens.large),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = backgroundIcon,
-                    contentDescription = null,
-                    modifier = Modifier.size(MaterialTheme.dimens.iconWidthMedium)
-                )
+        // Reveal area: grows with the swipe from the very first pixel.
+        Box(
+            modifier = Modifier.matchParentSize(),
+            contentAlignment = if (isDoneDirection) Alignment.CenterStart else Alignment.CenterEnd
+        ) {
+            if (direction != 0f) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .layout { measurable, constraints ->
+                            val revealWidth = abs(offset.value).roundToInt()
+                                .coerceIn(0, constraints.maxWidth)
+                            val placeable = measurable.measure(
+                                constraints.copy(minWidth = revealWidth, maxWidth = revealWidth)
+                            )
+                            layout(revealWidth, placeable.height) { placeable.place(0, 0) }
+                        }
+                        .clip(RoundedCornerShape(MaterialTheme.dimens.cardCornerRadius))
+                        .background(revealColor),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = if (isDoneDirection) Icons.Default.Check else Icons.Default.Clear,
+                        contentDescription = null,
+                        tint = iconColor,
+                        modifier = Modifier
+                            .requiredSize(MaterialTheme.dimens.iconWidthMedium)
+                            .graphicsLayer {
+                                // Scale in with the revealed width so the icon is visible immediately.
+                                val growth = (abs(offset.value) / (iconSizePx * 2f)).coerceIn(0f, 1f)
+                                val scale = growth * armedScale
+                                scaleX = scale
+                                scaleY = scale
+                                alpha = growth
+                            }
+                    )
+                }
             }
         }
 
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .offset { IntOffset(x = finalOffset.roundToInt(), y = 0) }
-                .anchoredDraggable(
-                    state = draggableState,
-                    orientation = Orientation.Horizontal
-                )
+                .graphicsLayer { translationX = offset.value }
         ) {
             content()
         }
