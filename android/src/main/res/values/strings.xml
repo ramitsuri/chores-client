@@ -18,8 +18,8 @@
     <string name="tasks">Tasks</string>
     <string name="tasks_empty">No tasks found</string>
     <string name="search_hint">Search tasks</string>
-    <string name="wont_do">Skipped</string>
-    <string name="completed_today">Completed</string>
+    <string name="wont_do">Skipped %1$s</string>
+    <string name="completed_today">Completed %1$s</string>
     <string name="undo">Undo</string>
 
     <!-- Navigation Chrome Titles -->

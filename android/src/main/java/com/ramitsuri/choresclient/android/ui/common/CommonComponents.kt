@@ -93,6 +93,8 @@ import com.ramitsuri.choresclient.model.view.TaskAssignmentDetails
 import com.ramitsuri.choresclient.utils.getDay
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import kotlin.math.roundToInt
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.milliseconds
@@ -329,6 +331,7 @@ fun TaskCard(
     details: TaskAssignmentDetails,
     modifier: Modifier = Modifier,
     otherAssignmentsCount: Int = 0,
+    timeZone: TimeZone = TimeZone.currentSystemDefault(),
     isCompleted: Boolean = false,
     onMarkAsDone: ((String) -> Unit)? = null,
     onMarkAsWontDo: ((String) -> Unit)? = null,
@@ -447,6 +450,7 @@ fun TaskCard(
                         otherAssignmentsCount = otherAssignmentsCount,
                         isCompleted = isCompleted,
                         showMenu = showMenu,
+                        timeZone = timeZone,
                         onShowMenuChange = { showMenu = it },
                         onEditTaskClicked = onEditTaskClicked,
                         onSnoozeHour = onSnoozeHour,
@@ -461,6 +465,7 @@ fun TaskCard(
                         otherAssignmentsCount = otherAssignmentsCount,
                         isCompleted = isCompleted,
                         showMenu = showMenu,
+                        timeZone = timeZone,
                         onShowMenuChange = { showMenu = it },
                         onEditTaskClicked = onEditTaskClicked,
                         onSnoozeHour = onSnoozeHour,
@@ -485,6 +490,7 @@ private fun TaskCardContent(
     otherAssignmentsCount: Int,
     isCompleted: Boolean,
     showMenu: Boolean,
+    timeZone: TimeZone,
     onShowMenuChange: (Boolean) -> Unit,
     onEditTaskClicked: ((String) -> Unit)?,
     onSnoozeHour: ((String) -> Unit)?,
@@ -659,9 +665,15 @@ private fun TaskCardContent(
             ) {
                 // Due Date / Time or Completion Status Date
                 if (isCompleted) {
+                    val completedText = getDay(
+                        toFormat = details.taskAssignment.progressStatusDate.toLocalDateTime(timeZone),
+                        simplifyToday = true,
+                        simplifyTomorrow = true
+                    ).string()
                     Text(
                         text = stringResource(
-                            id = if (isDone) R.string.completed_today else R.string.wont_do
+                            id = if (isDone) R.string.completed_today else R.string.wont_do,
+                            completedText,
                         ),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
