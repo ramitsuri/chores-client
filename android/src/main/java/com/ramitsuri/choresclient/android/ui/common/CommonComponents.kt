@@ -450,36 +450,40 @@ fun TaskCard(
     otherAssignmentsCount: Int = 0,
     timeZone: TimeZone = TimeZone.currentSystemDefault(),
     isCompleted: Boolean = false,
+    isPendingRemoval: Boolean = false,
+    pendingStartTimeEpochMillis: Long = 0L,
+    onUndoPendingAction: ((String) -> Unit)? = null,
     onMarkAsDone: ((String) -> Unit)? = null,
     onMarkAsWontDo: ((String) -> Unit)? = null,
     onSnoozeHour: ((String) -> Unit)? = null,
     onEditTaskClicked: ((String) -> Unit)? = null,
 ) {
     var showMenu by remember { mutableStateOf(false) }
-    var isPendingRemoval by remember { mutableStateOf(false) }
-    var pendingAction by remember { mutableStateOf<(() -> Unit)?>(null) }
     var cardHeight by remember { mutableStateOf<Dp?>(null) }
     val density = LocalDensity.current
 
-    var timerProgress by remember { mutableStateOf(1f) }
+    var timerProgress by remember { mutableFloatStateOf(1f) }
 
-    LaunchedEffect(isPendingRemoval) {
+    LaunchedEffect(isPendingRemoval, pendingStartTimeEpochMillis) {
         if (isPendingRemoval) {
-            timerProgress = 1f
             val durationMillis = 5000L
-            val startTime = Clock.System.now().toEpochMilliseconds()
+            val startTime = if (pendingStartTimeEpochMillis > 0L) {
+                pendingStartTimeEpochMillis
+            } else {
+                Clock.System.now().toEpochMilliseconds()
+            }
             while (true) {
                 val currentTime = Clock.System.now().toEpochMilliseconds()
                 val elapsed = currentTime - startTime
                 if (elapsed >= durationMillis) {
+                    timerProgress = 0f
                     break
                 }
                 timerProgress = (1f - (elapsed.toFloat() / durationMillis)).coerceIn(0f, 1f)
                 delay(50.milliseconds)
             }
-            timerProgress = 0f
-            pendingAction?.invoke()
-            isPendingRemoval = false
+        } else {
+            timerProgress = 1f
         }
     }
 
@@ -532,8 +536,7 @@ fun TaskCard(
                             )
                             TextButton(
                                 onClick = {
-                                    isPendingRemoval = false
-                                    pendingAction = null
+                                    onUndoPendingAction?.invoke(details.taskAssignment.id)
                                 }
                             ) {
                                 Text(
@@ -553,12 +556,10 @@ fun TaskCard(
             TaskCardState.SWIPEABLE -> {
                 ResistiveSwipeCard(
                     onMarkAsDone = {
-                        pendingAction = { onMarkAsDone?.invoke(details.taskAssignment.id) }
-                        isPendingRemoval = true
+                        onMarkAsDone?.invoke(details.taskAssignment.id)
                     },
                     onMarkAsWontDo = {
-                        pendingAction = { onMarkAsWontDo?.invoke(details.taskAssignment.id) }
-                        isPendingRemoval = true
+                        onMarkAsWontDo?.invoke(details.taskAssignment.id)
                     },
                     modifier = containerModifier
                 ) {

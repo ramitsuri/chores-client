@@ -6,6 +6,7 @@ data class AssignmentsViewState(
     val selectedListTypes: Set<ListTypeSelection> = emptySet(),
     val customSnoozeHours: String = "",
     val customSnoozeMinutes: String = "",
+    val pendingRemovals: Map<String, Long> = emptyMap(),
 )
 
 data class Assignments(

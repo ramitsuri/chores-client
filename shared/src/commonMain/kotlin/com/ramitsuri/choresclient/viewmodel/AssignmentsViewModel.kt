@@ -13,6 +13,8 @@ import com.ramitsuri.choresclient.repositories.TaskAssignmentsRepository
 import com.ramitsuri.choresclient.utils.differenceInDays
 import com.ramitsuri.choresclient.utils.now
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -23,15 +25,19 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDateTime
 import kotlin.time.Clock
+import kotlin.time.Duration.Companion.seconds
 
 class AssignmentsViewModel(
     assignmentId: String?,
     private val repository: TaskAssignmentsRepository,
     private val prefManager: PrefManager,
-    private val longLivingCoroutineScope: CoroutineScope
+    private val longLivingCoroutineScope: CoroutineScope,
+    private val clock: Clock = Clock.System,
 ) : ViewModel() {
 
     private val selectedListTypes = MutableStateFlow(ListTypeSelection.entries.toSet())
+    private val pendingRemovals = MutableStateFlow<Map<String, Long>>(emptyMap())
+    private val pendingJobs = mutableMapOf<String, Job>()
 
     val state = getAssignments().stateIn(
         scope = viewModelScope,
@@ -40,15 +46,36 @@ class AssignmentsViewModel(
     )
 
     fun markAsDone(id: String) {
-        longLivingCoroutineScope.launch {
-            repository.markTaskAssignmentDone(id, Clock.System.now())
+        queuePendingAction(id) {
+            repository.markTaskAssignmentDone(id, clock.now())
         }
     }
 
     fun markAsWontDo(id: String) {
-        longLivingCoroutineScope.launch {
-            repository.markTaskAssignmentWontDo(id, Clock.System.now())
+        queuePendingAction(id) {
+            repository.markTaskAssignmentWontDo(id, clock.now())
         }
+    }
+
+    private fun queuePendingAction(id: String, action: suspend () -> Unit) {
+        val startTime = clock.now().toEpochMilliseconds()
+        pendingRemovals.update { it + (id to startTime) }
+
+        pendingJobs[id]?.cancel()
+
+        val job = longLivingCoroutineScope.launch {
+            delay(5.seconds)
+            action()
+            pendingRemovals.update { it - id }
+            pendingJobs.remove(id)
+        }
+        pendingJobs[id] = job
+    }
+
+    fun undoPendingAction(id: String) {
+        pendingJobs[id]?.cancel()
+        pendingJobs.remove(id)
+        pendingRemovals.update { it - id }
     }
 
     fun onSnooze(id: String, type: SnoozeType) {
@@ -80,7 +107,8 @@ class AssignmentsViewModel(
             combine(
                 repository.getLocalFlow(loggedInMemberId),
                 selectedListTypes,
-            ) { taskAssignmentDetails, selectedListTypes ->
+                pendingRemovals,
+            ) { taskAssignmentDetails, selectedListTypes, pendingRemovals ->
                 val filtered = taskAssignmentDetails
                     .filterByListTypes(selectedListTypes)
                     .filter { it.taskAssignment.progressStatus == ProgressStatus.TODO }
@@ -105,6 +133,7 @@ class AssignmentsViewModel(
                     loading = false,
                     assignments = assignments,
                     selectedListTypes = selectedListTypes,
+                    pendingRemovals = pendingRemovals,
                 )
             }
         }

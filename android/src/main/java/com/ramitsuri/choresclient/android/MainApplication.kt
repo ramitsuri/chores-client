@@ -140,7 +140,8 @@ class MainApplication : Application(), KoinComponent {
                         assignmentId = parameters.getOrNull(),
                         get<TaskAssignmentsRepository>(),
                         get<PrefManager>(),
-                        get<CoroutineScope>()
+                        get<CoroutineScope>(),
+                        get<Clock>(),
                     )
                 }
 

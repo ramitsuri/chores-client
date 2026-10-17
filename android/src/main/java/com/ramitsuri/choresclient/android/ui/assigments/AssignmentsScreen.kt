@@ -66,6 +66,7 @@ fun AssignmentsScreen(
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     onMarkAsDone: (String) -> Unit,
     onMarkAsWontDo: (String) -> Unit,
+    onUndoPendingAction: (String) -> Unit = {},
     onSnooze: (String, SnoozeType) -> Unit,
     onAddTaskClicked: () -> Unit,
     onEditTaskClicked: (String) -> Unit,
@@ -104,8 +105,10 @@ fun AssignmentsScreen(
         AssignmentsContent(
             isLoading = viewState.loading,
             assignments = viewState.assignments,
+            pendingRemovals = viewState.pendingRemovals,
             onMarkAsDone = onMarkAsDone,
             onMarkAsWontDo = onMarkAsWontDo,
+            onUndoPendingAction = onUndoPendingAction,
             onSnooze = onSnooze,
             onEditTaskClicked = onEditTaskClicked,
             modifier = Modifier
@@ -127,8 +130,10 @@ fun AssignmentsScreen(
 private fun AssignmentsContent(
     isLoading: Boolean,
     assignments: Assignments,
+    pendingRemovals: Map<String, Long>,
     onMarkAsDone: (String) -> Unit,
     onMarkAsWontDo: (String) -> Unit,
+    onUndoPendingAction: (String) -> Unit,
     onSnooze: (String, SnoozeType) -> Unit,
     onEditTaskClicked: (String) -> Unit,
     selectedListTypes: Set<ListTypeSelection>,
@@ -163,8 +168,10 @@ private fun AssignmentsContent(
             ) {
                 AssignmentsList(
                     assignments = assignments,
+                    pendingRemovals = pendingRemovals,
                     onMarkAsDone = onMarkAsDone,
                     onMarkAsWontDo = onMarkAsWontDo,
+                    onUndoPendingAction = onUndoPendingAction,
                     onSnooze = onSnooze,
                     onEditTaskClicked = onEditTaskClicked,
                 )
@@ -176,8 +183,10 @@ private fun AssignmentsContent(
 @Composable
 private fun AssignmentsList(
     assignments: Assignments,
+    pendingRemovals: Map<String, Long>,
     onMarkAsDone: (String) -> Unit,
     onMarkAsWontDo: (String) -> Unit,
+    onUndoPendingAction: (String) -> Unit,
     onSnooze: (String, SnoozeType) -> Unit,
     onEditTaskClicked: (String) -> Unit,
 ) {
@@ -189,9 +198,11 @@ private fun AssignmentsList(
             headerRes = R.string.assignment_header_past_due,
             assignments = assignments.pastDue,
             otherAssignmentsCount = assignments.otherAssignmentsCount,
+            pendingRemovals = pendingRemovals,
             isPastDue = true,
             onMarkAsDone = onMarkAsDone,
             onMarkAsWontDo = onMarkAsWontDo,
+            onUndoPendingAction = onUndoPendingAction,
             onSnooze = onSnooze,
             onEditTaskClicked = onEditTaskClicked,
         )
@@ -199,8 +210,10 @@ private fun AssignmentsList(
             headerRes = R.string.assignment_header_due_today,
             assignments = assignments.dueToday,
             otherAssignmentsCount = assignments.otherAssignmentsCount,
+            pendingRemovals = pendingRemovals,
             onMarkAsDone = onMarkAsDone,
             onMarkAsWontDo = onMarkAsWontDo,
+            onUndoPendingAction = onUndoPendingAction,
             onSnooze = onSnooze,
             onEditTaskClicked = onEditTaskClicked,
         )
@@ -208,8 +221,10 @@ private fun AssignmentsList(
             headerRes = R.string.assignment_header_due_tomorrow,
             assignments = assignments.dueTomorrow,
             otherAssignmentsCount = assignments.otherAssignmentsCount,
+            pendingRemovals = pendingRemovals,
             onMarkAsDone = onMarkAsDone,
             onMarkAsWontDo = onMarkAsWontDo,
+            onUndoPendingAction = onUndoPendingAction,
             onSnooze = onSnooze,
             onEditTaskClicked = onEditTaskClicked,
         )
@@ -217,8 +232,10 @@ private fun AssignmentsList(
             headerRes = R.string.assignment_header_due_in_future,
             assignments = assignments.dueInFuture,
             otherAssignmentsCount = assignments.otherAssignmentsCount,
+            pendingRemovals = pendingRemovals,
             onMarkAsDone = onMarkAsDone,
             onMarkAsWontDo = onMarkAsWontDo,
+            onUndoPendingAction = onUndoPendingAction,
             onSnooze = onSnooze,
             onEditTaskClicked = onEditTaskClicked,
         )
@@ -226,8 +243,10 @@ private fun AssignmentsList(
             headerRes = R.string.assignment_header_on_completion,
             assignments = assignments.onCompletion,
             otherAssignmentsCount = assignments.otherAssignmentsCount,
+            pendingRemovals = pendingRemovals,
             onMarkAsDone = onMarkAsDone,
             onMarkAsWontDo = onMarkAsWontDo,
+            onUndoPendingAction = onUndoPendingAction,
             onSnooze = onSnooze,
             onEditTaskClicked = onEditTaskClicked,
         )
@@ -242,9 +261,11 @@ private fun LazyListScope.assignmentsGroup(
     @StringRes headerRes: Int,
     assignments: List<TaskAssignmentDetails>,
     otherAssignmentsCount: Map<String, Int>,
+    pendingRemovals: Map<String, Long>,
     isPastDue: Boolean = false,
     onMarkAsDone: (String) -> Unit,
     onMarkAsWontDo: (String) -> Unit,
+    onUndoPendingAction: (String) -> Unit,
     onSnooze: (String, SnoozeType) -> Unit,
     onEditTaskClicked: (String) -> Unit,
 ) {
@@ -257,10 +278,14 @@ private fun LazyListScope.assignmentsGroup(
             )
         }
         items(assignments, key = { it.taskAssignment.id }) { item ->
+            val pendingStartTime = pendingRemovals[item.taskAssignment.id]
             TaskCard(
                 details = item,
                 otherAssignmentsCount = otherAssignmentsCount[item.taskAssignment.id] ?: 0,
                 isCompleted = false,
+                isPendingRemoval = pendingStartTime != null,
+                pendingStartTimeEpochMillis = pendingStartTime ?: 0L,
+                onUndoPendingAction = onUndoPendingAction,
                 onMarkAsDone = onMarkAsDone,
                 onMarkAsWontDo = onMarkAsWontDo,
                 onSnoozeHour = { id -> onSnooze(id, SnoozeType.SixHours) },
