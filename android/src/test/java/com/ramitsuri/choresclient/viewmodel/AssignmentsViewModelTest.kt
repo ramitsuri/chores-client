@@ -71,7 +71,7 @@ class AssignmentsViewModelTest {
         assertEquals(1_000_000L, stateAfterSwipe.pendingRemovals[taskId])
         assertTrue(repository.markedDoneIds.isEmpty())
 
-        testScheduler.advanceTimeBy(4000L)
+        testScheduler.advanceTimeBy(2000L)
         assertTrue(repository.markedDoneIds.isEmpty())
 
         testScheduler.advanceTimeBy(1100L)
@@ -102,7 +102,10 @@ class AssignmentsViewModelTest {
         assertTrue(stateAfterSwipe.pendingRemovals.containsKey(taskId))
         assertTrue(repository.markedWontDoIds.isEmpty())
 
-        testScheduler.advanceTimeBy(5100L)
+        testScheduler.advanceTimeBy(2000L)
+        assertTrue(repository.markedWontDoIds.isEmpty())
+
+        testScheduler.advanceTimeBy(1100L)
 
         assertEquals(1, repository.markedWontDoIds.size)
         assertEquals(taskId, repository.markedWontDoIds[0].first)
