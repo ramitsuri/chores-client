@@ -75,8 +75,8 @@ android {
         applicationId = "com.ramitsuri.choresclient.android"
         minSdk = 26
         targetSdk = 37
-        versionCode = 84
-        versionName = "8.4"
+        versionCode = 85
+        versionName = "8.5"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
