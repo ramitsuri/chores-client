@@ -52,6 +52,7 @@ dependencies {
     implementation(libs.firebase.messaging.ktx)
 
     implementation(libs.androidx.core.splashscreen)
+    implementation(libs.konfetti)
 
     // Testing
     testImplementation(libs.junit)

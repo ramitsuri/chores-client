@@ -1,7 +1,6 @@
 package com.ramitsuri.choresclient.android.ui.assigments
 
 import androidx.annotation.StringRes
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -57,6 +56,11 @@ import com.ramitsuri.choresclient.model.view.ListTypeSelection
 import com.ramitsuri.choresclient.model.view.TaskAssignmentDetails
 import com.ramitsuri.choresclient.utils.now
 import kotlinx.datetime.LocalDateTime
+import nl.dionsegijn.konfetti.compose.KonfettiView
+import nl.dionsegijn.konfetti.compose.rememberKonfettiState
+import nl.dionsegijn.konfetti.core.Party
+import nl.dionsegijn.konfetti.core.emitter.Emitter
+import java.util.concurrent.TimeUnit
 import kotlin.time.Clock
 
 @Composable
@@ -80,6 +84,23 @@ fun AssignmentsScreen(
         AssignmentsMenuItem.TASKS,
         AssignmentsMenuItem.SETTINGS,
     )
+    val konfetti = rememberKonfettiState()
+    val onMarkAsDoneCelebration: (String) -> Unit = { taskAssignmentId ->
+        konfetti.start(
+            Party(
+                emitter = Emitter(duration = 100, TimeUnit.MILLISECONDS).max(100)
+            )
+        )
+        onMarkAsDone(taskAssignmentId)
+    }
+    val onMarkAsWontDoCelebration: (String) -> Unit = { taskAssignmentId ->
+        konfetti.start(
+            Party(
+                emitter = Emitter(duration = 100, TimeUnit.MILLISECONDS).max(100)
+            )
+        )
+        onMarkAsWontDo(taskAssignmentId)
+    }
 
     Scaffold(
         topBar = {
@@ -102,15 +123,7 @@ fun AssignmentsScreen(
             AppFAB(onClick = onAddTaskClicked)
         }
     ) { paddingValues ->
-        AssignmentsContent(
-            isLoading = viewState.loading,
-            assignments = viewState.assignments,
-            pendingRemovals = viewState.pendingRemovals,
-            onMarkAsDone = onMarkAsDone,
-            onMarkAsWontDo = onMarkAsWontDo,
-            onUndoPendingAction = onUndoPendingAction,
-            onSnooze = onSnooze,
-            onEditTaskClicked = onEditTaskClicked,
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
@@ -120,10 +133,24 @@ fun AssignmentsScreen(
                         WindowInsetsSides.Horizontal,
                     ),
                 ),
-            selectedListTypes = viewState.selectedListTypes,
-            onListTypeClicked = onListTypeClicked,
-        )
+        ) {
+            AssignmentsContent(
+                isLoading = viewState.loading,
+                assignments = viewState.assignments,
+                pendingRemovals = viewState.pendingRemovals,
                 allowSwipeForCompletion = viewState.allowSwipeForCompletion,
+                onMarkAsDone = onMarkAsDoneCelebration,
+                onMarkAsWontDo = onMarkAsWontDoCelebration,
+                onUndoPendingAction = onUndoPendingAction,
+                onSnooze = onSnooze,
+                onEditTaskClicked = onEditTaskClicked,
+                modifier = Modifier
+                    .fillMaxSize(),
+                selectedListTypes = viewState.selectedListTypes,
+                onListTypeClicked = onListTypeClicked,
+            )
+            KonfettiView(state = konfetti, modifier = Modifier.fillMaxSize())
+        }
     }
 }
 
@@ -171,6 +198,7 @@ private fun AssignmentsContent(
                 AssignmentsList(
                     assignments = assignments,
                     pendingRemovals = pendingRemovals,
+                    allowSwipeForCompletion = allowSwipeForCompletion,
                     onMarkAsDone = onMarkAsDone,
                     onMarkAsWontDo = onMarkAsWontDo,
                     onUndoPendingAction = onUndoPendingAction,
@@ -264,7 +292,6 @@ private fun AssignmentsList(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 private fun LazyListScope.assignmentsGroup(
     @StringRes headerRes: Int,
     assignments: List<TaskAssignmentDetails>,

@@ -29,6 +29,7 @@ security-crypto = "1.1.0"
 splashscreen = "1.2.0"
 compose-material-dialogs = "0.9.0"
 sqldelight-plugin = "2.4.0"
+konfetti = "2.2.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "androidx-core" }
@@ -92,6 +93,7 @@ androidx-test-rules = { group = "androidx.test", name = "rules", version.ref = "
 kotlin-test-common = { group = "org.jetbrains.kotlin", name = "kotlin-test-common", version.ref = "kotlin" }
 kotlin-test-annotations-common = { group = "org.jetbrains.kotlin", name = "kotlin-test-annotations-common", version.ref = "kotlin" }
 kotlin-test-junit = { group = "org.jetbrains.kotlin", name = "kotlin-test-junit", version.ref = "kotlin" }
+konfetti = { group = "nl.dionsegijn", name = "konfetti-compose", version.ref = "konfetti" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
