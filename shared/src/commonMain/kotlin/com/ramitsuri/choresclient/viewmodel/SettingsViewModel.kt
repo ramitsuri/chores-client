@@ -35,6 +35,8 @@ class SettingsViewModel(
                 deviceId = prefManager.getDeviceId(),
                 remoteLoggingEnabled = prefManager.getEnableRemoteLogging(),
                 remindPastDueEnabled = prefManager.remindPastDue(),
+                allowTaskAssignmentUndo = prefManager.allowTaskAssignmentUndo(),
+                swipeForTaskAssignmentCompletion = prefManager.swipeForTaskAssignmentCompletion(),
             )
         )
     val state: StateFlow<SettingsViewState> = _state
@@ -115,6 +117,26 @@ class SettingsViewModel(
         prefManager.setRemindPastDue(enabled)
         _state.update {
             it.copy(remindPastDueEnabled = enabled)
+        }
+    }
+
+    fun toggleAllowTaskAssignmentUndo() {
+        val newValue = !prefManager.allowTaskAssignmentUndo()
+        prefManager.setAllowTaskAssignmentUndo(newValue)
+        _state.update {
+            it.copy(
+                allowTaskAssignmentUndo = newValue,
+            )
+        }
+    }
+
+    fun toggleSwipeForTaskAssignmentCompletion() {
+        val newValue = !prefManager.swipeForTaskAssignmentCompletion()
+        prefManager.setSwipeForTaskAssignmentCompletion(newValue)
+        _state.update {
+            it.copy(
+                swipeForTaskAssignmentCompletion = newValue,
+            )
         }
     }
 

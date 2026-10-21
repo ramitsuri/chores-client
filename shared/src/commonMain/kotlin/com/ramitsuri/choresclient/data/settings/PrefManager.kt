@@ -128,6 +128,26 @@ class PrefManager(
                 getToken().isNullOrEmpty()).not()
     }
 
+    fun allowTaskAssignmentUndo(): Boolean {
+        val key = Key.ALLOW_TASK_ASSIGNMENT_UNDO
+        return getBoolean(key, true)
+    }
+
+    fun setAllowTaskAssignmentUndo(value: Boolean) {
+        val key = Key.ALLOW_TASK_ASSIGNMENT_UNDO
+        putBoolean(key, value)
+    }
+
+    fun swipeForTaskAssignmentCompletion(): Boolean {
+        val key = Key.SWIPE_FOR_TASK_ASSIGNMENT_COMPLETION
+        return getBoolean(key, true)
+    }
+
+    fun setSwipeForTaskAssignmentCompletion(value: Boolean) {
+        val key = Key.SWIPE_FOR_TASK_ASSIGNMENT_COMPLETION
+        putBoolean(key, value)
+    }
+
     private fun deleteLegacyPrefs() {
         legacyPrefs.forEach { (key, store) ->
             if (store == KV) {
@@ -256,7 +276,17 @@ class PrefManager(
             REMIND_PAST_DUE(
                 key = "remind_past_due",
                 isSecure = false
-            )
+            ),
+
+            ALLOW_TASK_ASSIGNMENT_UNDO(
+                key = "allow_task_assignment_undo",
+                isSecure = false
+            ),
+
+            SWIPE_FOR_TASK_ASSIGNMENT_COMPLETION(
+                key = "swipe_for_task_assignment_completion",
+                isSecure = false
+            ),
         }
     }
 }

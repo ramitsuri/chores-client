@@ -7,6 +7,7 @@ data class AssignmentsViewState(
     val customSnoozeHours: String = "",
     val customSnoozeMinutes: String = "",
     val pendingRemovals: Map<String, Long> = emptyMap(),
+    val allowSwipeForCompletion: Boolean = false,
 )
 
 data class Assignments(

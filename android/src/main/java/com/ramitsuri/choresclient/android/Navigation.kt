@@ -171,6 +171,8 @@ fun NavGraph(
                 onNotificationActionsSaveRequested = viewModel::saveNotificationActions,
                 onNotificationActionsResetRequested = viewModel::resetNotificationActions,
                 onEnableRemoteLoggingClicked = viewModel::toggleLogging,
+                onAllowTaskAssignmentUndoClicked = viewModel::toggleAllowTaskAssignmentUndo,
+                onSwipeForTaskAssignmentCompletionClicked = viewModel::toggleSwipeForTaskAssignmentCompletion,
                 onErrorAcknowledged = viewModel::onErrorShown,
                 onEnableRemindPastDueClicked = viewModel::toggleRemindPastDue,
             )

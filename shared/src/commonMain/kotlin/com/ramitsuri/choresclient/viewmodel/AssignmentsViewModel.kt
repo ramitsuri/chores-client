@@ -59,14 +59,20 @@ class AssignmentsViewModel(
 
     private fun queuePendingAction(id: String, action: suspend () -> Unit) {
         val startTime = clock.now().toEpochMilliseconds()
-        pendingRemovals.update { it + (id to startTime) }
-
+        val allowUndo = prefManager.allowTaskAssignmentUndo()
+        if (allowUndo) {
+            pendingRemovals.update { it + (id to startTime) }
+        }
         pendingJobs[id]?.cancel()
 
         val job = longLivingCoroutineScope.launch {
-            delay(5.seconds)
+            if (allowUndo) {
+                delay(3.seconds)
+            }
             action()
-            pendingRemovals.update { it - id }
+            if (allowUndo) {
+                pendingRemovals.update { it - id }
+            }
             pendingJobs.remove(id)
         }
         pendingJobs[id] = job
@@ -134,6 +140,7 @@ class AssignmentsViewModel(
                     assignments = assignments,
                     selectedListTypes = selectedListTypes,
                     pendingRemovals = pendingRemovals,
+                    allowSwipeForCompletion = prefManager.swipeForTaskAssignmentCompletion(),
                 )
             }
         }

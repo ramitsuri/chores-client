@@ -73,6 +73,8 @@ fun SettingsScreen(
     onNotificationActionsSaveRequested: () -> Unit,
     onNotificationActionsResetRequested: () -> Unit,
     onEnableRemoteLoggingClicked: () -> Unit,
+    onAllowTaskAssignmentUndoClicked: () -> Unit,
+    onSwipeForTaskAssignmentCompletionClicked: () -> Unit,
     onEnableRemindPastDueClicked: () -> Unit,
     onErrorAcknowledged: () -> Unit,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
@@ -114,6 +116,22 @@ fun SettingsScreen(
                         },
                         checked = state.remindPastDueEnabled,
                         onClick = onEnableRemindPastDueClicked
+                    )
+                }
+                item {
+                    SettingsItemWithSwitch(
+                        title = stringResource(id = R.string.settings_allow_task_assignment_undo),
+                        subtitle = null,
+                        checked = state.allowTaskAssignmentUndo,
+                        onClick = onAllowTaskAssignmentUndoClicked,
+                    )
+                }
+                item {
+                    SettingsItemWithSwitch(
+                        title = stringResource(id = R.string.settings_swipe_for_task_assignment_completion),
+                        subtitle = null,
+                        checked = state.swipeForTaskAssignmentCompletion,
+                        onClick = onSwipeForTaskAssignmentCompletionClicked,
                     )
                 }
                 item {
@@ -368,7 +386,7 @@ private fun SettingsItem(
 @Composable
 private fun SettingsItemWithSwitch(
     title: String,
-    subtitle: String,
+    subtitle: String?,
     checked: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -379,7 +397,8 @@ private fun SettingsItemWithSwitch(
             .defaultMinSize(minHeight = MaterialTheme.dimens.minAssignmentItemHeight)
             .clickable(onClick = onClick)
             .padding(MaterialTheme.dimens.paddingCardView),
-        horizontalArrangement = Arrangement.SpaceBetween
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(
             modifier = Modifier.weight(1F),
@@ -390,11 +409,13 @@ private fun SettingsItemWithSwitch(
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(MaterialTheme.dimens.small)
             )
-            Text(
-                text = subtitle,
-                style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(horizontal = MaterialTheme.dimens.small)
-            )
+            subtitle?.let {
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(horizontal = MaterialTheme.dimens.small)
+                )
+            }
         }
 
         val icon: (@Composable () -> Unit)? = if (checked) {
@@ -432,6 +453,8 @@ private fun SettingsScreenPreview() {
                 deviceId = null,
                 remoteLoggingEnabled = false,
                 remindPastDueEnabled = false,
+                allowTaskAssignmentUndo = false,
+                swipeForTaskAssignmentCompletion = true,
                 timeZone = TimeZone.currentSystemDefault(),
                 error = null
             )
@@ -443,6 +466,8 @@ private fun SettingsScreenPreview() {
                 onNotificationActionsSaveRequested = {},
                 onNotificationActionsResetRequested = {},
                 onEnableRemoteLoggingClicked = {},
+                onAllowTaskAssignmentUndoClicked = {},
+                onSwipeForTaskAssignmentCompletionClicked = {},
                 onErrorAcknowledged = {},
                 onEnableRemindPastDueClicked = {},
             )

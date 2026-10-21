@@ -123,6 +123,7 @@ fun AssignmentsScreen(
             selectedListTypes = viewState.selectedListTypes,
             onListTypeClicked = onListTypeClicked,
         )
+                allowSwipeForCompletion = viewState.allowSwipeForCompletion,
     }
 }
 
@@ -131,6 +132,7 @@ private fun AssignmentsContent(
     isLoading: Boolean,
     assignments: Assignments,
     pendingRemovals: Map<String, Long>,
+    allowSwipeForCompletion: Boolean,
     onMarkAsDone: (String) -> Unit,
     onMarkAsWontDo: (String) -> Unit,
     onUndoPendingAction: (String) -> Unit,
@@ -184,6 +186,7 @@ private fun AssignmentsContent(
 private fun AssignmentsList(
     assignments: Assignments,
     pendingRemovals: Map<String, Long>,
+    allowSwipeForCompletion: Boolean,
     onMarkAsDone: (String) -> Unit,
     onMarkAsWontDo: (String) -> Unit,
     onUndoPendingAction: (String) -> Unit,
@@ -200,6 +203,7 @@ private fun AssignmentsList(
             otherAssignmentsCount = assignments.otherAssignmentsCount,
             pendingRemovals = pendingRemovals,
             isPastDue = true,
+            allowSwipeForCompletion = allowSwipeForCompletion,
             onMarkAsDone = onMarkAsDone,
             onMarkAsWontDo = onMarkAsWontDo,
             onUndoPendingAction = onUndoPendingAction,
@@ -211,6 +215,7 @@ private fun AssignmentsList(
             assignments = assignments.dueToday,
             otherAssignmentsCount = assignments.otherAssignmentsCount,
             pendingRemovals = pendingRemovals,
+            allowSwipeForCompletion = allowSwipeForCompletion,
             onMarkAsDone = onMarkAsDone,
             onMarkAsWontDo = onMarkAsWontDo,
             onUndoPendingAction = onUndoPendingAction,
@@ -222,6 +227,7 @@ private fun AssignmentsList(
             assignments = assignments.dueTomorrow,
             otherAssignmentsCount = assignments.otherAssignmentsCount,
             pendingRemovals = pendingRemovals,
+            allowSwipeForCompletion = allowSwipeForCompletion,
             onMarkAsDone = onMarkAsDone,
             onMarkAsWontDo = onMarkAsWontDo,
             onUndoPendingAction = onUndoPendingAction,
@@ -233,6 +239,7 @@ private fun AssignmentsList(
             assignments = assignments.dueInFuture,
             otherAssignmentsCount = assignments.otherAssignmentsCount,
             pendingRemovals = pendingRemovals,
+            allowSwipeForCompletion = allowSwipeForCompletion,
             onMarkAsDone = onMarkAsDone,
             onMarkAsWontDo = onMarkAsWontDo,
             onUndoPendingAction = onUndoPendingAction,
@@ -244,6 +251,7 @@ private fun AssignmentsList(
             assignments = assignments.onCompletion,
             otherAssignmentsCount = assignments.otherAssignmentsCount,
             pendingRemovals = pendingRemovals,
+            allowSwipeForCompletion = allowSwipeForCompletion,
             onMarkAsDone = onMarkAsDone,
             onMarkAsWontDo = onMarkAsWontDo,
             onUndoPendingAction = onUndoPendingAction,
@@ -263,6 +271,7 @@ private fun LazyListScope.assignmentsGroup(
     otherAssignmentsCount: Map<String, Int>,
     pendingRemovals: Map<String, Long>,
     isPastDue: Boolean = false,
+    allowSwipeForCompletion: Boolean,
     onMarkAsDone: (String) -> Unit,
     onMarkAsWontDo: (String) -> Unit,
     onUndoPendingAction: (String) -> Unit,
@@ -285,6 +294,7 @@ private fun LazyListScope.assignmentsGroup(
                 isCompleted = false,
                 isPendingRemoval = pendingStartTime != null,
                 pendingStartTimeEpochMillis = pendingStartTime ?: 0L,
+                isSwipeEnabled = allowSwipeForCompletion,
                 onUndoPendingAction = onUndoPendingAction,
                 onMarkAsDone = onMarkAsDone,
                 onMarkAsWontDo = onMarkAsWontDo,
@@ -411,8 +421,9 @@ private fun PreviewAssignmentContent() {
             ),
             dueTomorrow = listOf(),
             dueInFuture = listOf(),
-            otherAssignmentsCount = mapOf()
+            otherAssignmentsCount = mapOf(),
         ),
+        allowSwipeForCompletion = false
     )
     ChoresClientTheme {
         Surface {

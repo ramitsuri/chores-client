@@ -15,6 +15,7 @@ import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -45,6 +46,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -52,6 +54,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MultiChoiceSegmentedButtonRow
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -71,6 +74,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -84,21 +88,27 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.ramitsuri.choresclient.android.R
 import com.ramitsuri.choresclient.android.extensions.string
+import com.ramitsuri.choresclient.android.ui.theme.ChoresClientTheme
 import com.ramitsuri.choresclient.android.ui.theme.dimens
 import com.ramitsuri.choresclient.android.utils.formatReminderAt
 import com.ramitsuri.choresclient.android.utils.formatRepeatUnitCompact
+import com.ramitsuri.choresclient.model.entities.RepeatInfo
+import com.ramitsuri.choresclient.model.entities.TaskAssignment
 import com.ramitsuri.choresclient.model.enums.ProgressStatus
 import com.ramitsuri.choresclient.model.enums.RepeatUnit
 import com.ramitsuri.choresclient.model.view.AssignmentsMenuItem
 import com.ramitsuri.choresclient.model.view.ListTypeSelection
 import com.ramitsuri.choresclient.model.view.TaskAssignmentDetails
 import com.ramitsuri.choresclient.utils.getDay
+import com.ramitsuri.choresclient.utils.now
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlin.math.abs
@@ -179,13 +189,13 @@ fun AppTopAppBar(
 fun PersonalSharedToggle(
     selectedTypes: Set<ListTypeSelection>,
     onListTypeClicked: (ListTypeSelection) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     MultiChoiceSegmentedButtonRow(
         modifier = modifier
             .padding(vertical = MaterialTheme.dimens.small)
     ) {
-        ListTypeSelection.entries.forEachIndexed { index,  type ->
+        ListTypeSelection.entries.forEachIndexed { index, type ->
             SegmentedButton(
                 checked = type in selectedTypes,
                 onCheckedChange = { onListTypeClicked(type) },
@@ -208,13 +218,13 @@ fun PersonalSharedToggle(
 }
 
 private val ListTypeSelection.icon: ImageVector
-    get() = when(this) {
+    get() = when (this) {
         ListTypeSelection.PERSONAL -> Icons.Default.Person
         ListTypeSelection.SHARED -> Icons.Default.Groups
     }
 
 private val ListTypeSelection.textResId: Int
-    get() = when(this) {
+    get() = when (this) {
         ListTypeSelection.PERSONAL -> R.string.assignment_filter_personal
         ListTypeSelection.SHARED -> R.string.assignment_filter_shared
     }
@@ -252,7 +262,7 @@ private fun ResistiveSwipeCard(
     onMarkAsDone: () -> Unit,
     onMarkAsWontDo: () -> Unit,
     modifier: Modifier = Modifier,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     val haptics = LocalHapticFeedback.current
     val density = LocalDensity.current
@@ -409,7 +419,6 @@ private fun ResistiveSwipeCard(
                             )
                             layout(revealWidth, placeable.height) { placeable.place(0, 0) }
                         }
-                        .clip(RoundedCornerShape(MaterialTheme.dimens.cardCornerRadius))
                         .background(revealColor),
                     contentAlignment = Alignment.Center
                 ) {
@@ -442,7 +451,6 @@ private fun ResistiveSwipeCard(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskCard(
     details: TaskAssignmentDetails,
@@ -452,6 +460,7 @@ fun TaskCard(
     isCompleted: Boolean = false,
     isPendingRemoval: Boolean = false,
     pendingStartTimeEpochMillis: Long = 0L,
+    isSwipeEnabled: Boolean = true,
     onUndoPendingAction: ((String) -> Unit)? = null,
     onMarkAsDone: ((String) -> Unit)? = null,
     onMarkAsWontDo: ((String) -> Unit)? = null,
@@ -498,16 +507,30 @@ fun TaskCard(
                 }
             }
         )
+    val roundedCornerShape = RoundedCornerShape(MaterialTheme.dimens.cardCornerRadius)
+    val borderModifier = if (details.assignedToLoggedInUser) {
+        Modifier.border(
+            width = 1.dp,
+            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
+            shape = roundedCornerShape,
+        )
+    } else {
+        Modifier
+    }
 
     val state = if (isPendingRemoval) {
         TaskCardState.PENDING_REMOVAL
     } else if (!isCompleted && onMarkAsDone != null && onMarkAsWontDo != null) {
-        TaskCardState.SWIPEABLE
+        if (isSwipeEnabled) {
+            TaskCardState.SWIPEABLE
+        } else {
+            TaskCardState.SWIPE_DISABLED
+        }
     } else {
         TaskCardState.NOT_SWIPEABLE
     }
     AnimatedContent(state) { taskCardState ->
-        when(taskCardState ){
+        when (taskCardState) {
             TaskCardState.PENDING_REMOVAL -> {
                 Card(
                     shape = RoundedCornerShape(MaterialTheme.dimens.cardCornerRadius),
@@ -529,7 +552,7 @@ fun TaskCard(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = stringResource(id = R.string.completed),
+                                text = details.taskAssignment.taskName,
                                 style = MaterialTheme.typography.bodyLarge,
                                 fontWeight = FontWeight.Medium,
                                 color = MaterialTheme.colorScheme.onSurface
@@ -553,6 +576,7 @@ fun TaskCard(
                     }
                 }
             }
+
             TaskCardState.SWIPEABLE -> {
                 ResistiveSwipeCard(
                     onMarkAsDone = {
@@ -573,9 +597,29 @@ fun TaskCard(
                         onEditTaskClicked = onEditTaskClicked,
                         onSnoozeHour = onSnoozeHour,
                         onMarkAsWontDo = onMarkAsWontDo,
+                        shape = roundedCornerShape,
+                        borderModifier = borderModifier,
                     )
                 }
             }
+
+            TaskCardState.SWIPE_DISABLED -> {
+                SwipeDisabledTaskCard(
+                    details = details,
+                    otherAssignmentsCount = otherAssignmentsCount,
+                    isCompleted = isCompleted,
+                    showMenu = showMenu,
+                    timeZone = timeZone,
+                    onShowMenuChange = { showMenu = it },
+                    onEditTaskClicked = onEditTaskClicked,
+                    onSnoozeHour = onSnoozeHour,
+                    onMarkAsDone = onMarkAsDone,
+                    onMarkAsWontDo = onMarkAsWontDo,
+                    shape = roundedCornerShape,
+                    borderModifier = borderModifier,
+                )
+            }
+
             TaskCardState.NOT_SWIPEABLE -> {
                 Box(modifier = containerModifier) {
                     TaskCardContent(
@@ -588,6 +632,8 @@ fun TaskCard(
                         onEditTaskClicked = onEditTaskClicked,
                         onSnoozeHour = onSnoozeHour,
                         onMarkAsWontDo = onMarkAsWontDo,
+                        shape = roundedCornerShape,
+                        borderModifier = borderModifier,
                     )
                 }
 
@@ -599,7 +645,64 @@ fun TaskCard(
 private enum class TaskCardState {
     PENDING_REMOVAL,
     SWIPEABLE,
-    NOT_SWIPEABLE,
+    SWIPE_DISABLED, // Card is swipeable/actionable but not via swipe
+    NOT_SWIPEABLE, // Card is not swipeable
+}
+
+@Composable
+private fun SwipeDisabledTaskCard(
+    details: TaskAssignmentDetails,
+    otherAssignmentsCount: Int,
+    isCompleted: Boolean,
+    showMenu: Boolean,
+    timeZone: TimeZone,
+    onShowMenuChange: (Boolean) -> Unit,
+    onEditTaskClicked: ((String) -> Unit)?,
+    onSnoozeHour: ((String) -> Unit)?,
+    onMarkAsDone: ((String) -> Unit)?,
+    onMarkAsWontDo: ((String) -> Unit)?,
+    borderModifier: Modifier,
+    shape: Shape,
+    modifier: Modifier = Modifier,
+) {
+    Card(
+        shape = RoundedCornerShape(MaterialTheme.dimens.cardCornerRadius),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        modifier = modifier.then(borderModifier),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            FilledTonalIconButton(
+                modifier = Modifier.padding(horizontal = 8.dp),
+                onClick = { onMarkAsDone?.invoke(details.taskAssignment.id) },
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Check,
+                    contentDescription = stringResource(id = R.string.assignment_menu_content_description),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            TaskCardContent(
+                details = details,
+                otherAssignmentsCount = otherAssignmentsCount,
+                isCompleted = isCompleted,
+                showMenu = showMenu,
+                timeZone = timeZone,
+                onShowMenuChange = onShowMenuChange,
+                onEditTaskClicked = onEditTaskClicked,
+                onSnoozeHour = onSnoozeHour,
+                onMarkAsWontDo = onMarkAsWontDo,
+                borderModifier = Modifier,
+                shape = shape,
+                addStartPaddingToContent = false
+            )
+        }
+    }
 }
 
 @Composable
@@ -613,38 +716,35 @@ private fun TaskCardContent(
     onEditTaskClicked: ((String) -> Unit)?,
     onSnoozeHour: ((String) -> Unit)?,
     onMarkAsWontDo: ((String) -> Unit)?,
-    modifier: Modifier = Modifier
+    addStartPaddingToContent: Boolean = true,
+    borderModifier: Modifier,
+    shape: Shape,
+    modifier: Modifier = Modifier,
 ) {
     val isDone = details.taskAssignment.progressStatus == ProgressStatus.DONE
     val isRecurring = details.taskAssignment.repeatInfo.repeatUnit != RepeatUnit.NONE &&
             details.taskAssignment.repeatInfo.repeatValue != 0
 
-    val roundedCornerShape = RoundedCornerShape(MaterialTheme.dimens.cardCornerRadius)
-    val borderModifier = if (details.assignedToLoggedInUser) {
-        Modifier.border(
-            width = 1.dp,
-            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
-            shape = roundedCornerShape,
-        )
-    } else {
-        Modifier
-    }
     Card(
-        shape = roundedCornerShape,
+        shape = shape,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerLow
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
         modifier = modifier
             .fillMaxWidth()
-            .clip(roundedCornerShape)
+            .clip(shape)
             .then(borderModifier)
             .animateContentSize()
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(MaterialTheme.dimens.large)
+                .padding(vertical = MaterialTheme.dimens.large)
+                .padding(
+                    start = if (addStartPaddingToContent) MaterialTheme.dimens.large else 0.dp,
+                    end = MaterialTheme.dimens.large
+                )
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -733,10 +833,10 @@ private fun TaskCardContent(
 
             Spacer(modifier = Modifier.height(MaterialTheme.dimens.medium))
 
-            Row(
+            FlowRow(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(MaterialTheme.dimens.small),
-                verticalAlignment = Alignment.CenterVertically
+                verticalArrangement = Arrangement.spacedBy(MaterialTheme.dimens.small),
             ) {
                 // Cadence Pill Tag (Only if recurring)
                 if (isRecurring) {
@@ -830,7 +930,7 @@ fun PillChip(
     icon: ImageVector,
     containerColor: Color,
     contentColor: Color,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Row(
         modifier = modifier
@@ -859,7 +959,7 @@ fun PillChip(
 fun AppFAB(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    text: String = stringResource(id = R.string.assignment_add_task_content_description)
+    text: String = stringResource(id = R.string.assignment_add_task_content_description),
 ) {
     ExtendedFloatingActionButton(
         onClick = onClick,
@@ -881,4 +981,83 @@ fun AppFAB(
         },
         modifier = modifier
     )
+}
+
+@Preview
+@Composable
+private fun Preview() {
+    ChoresClientTheme {
+        Surface {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                TaskCard(
+                    details = TaskAssignmentDetails(
+                        taskAssignment = TaskAssignment(
+                            id = "1",
+                            progressStatus = ProgressStatus.TODO,
+                            progressStatusDate = Clock.System.now(),
+                            taskId = "taskId",
+                            taskName = "Pay Rent",
+                            houseId = "houseId",
+                            repeatInfo = RepeatInfo(
+                                repeatValue = 1,
+                                repeatUnit = RepeatUnit.MONTH,
+                                repeatEndDateTime = null
+                            ),
+                            memberId = "memberId",
+                            memberName = "Alex R.",
+                            dueDateTime = LocalDateTime.now()
+                        ),
+                        reminderTime = null,
+                        enableSnooze = true,
+                        willReminderBeSet = false,
+                        assignedToLoggedInUser = true,
+                    ),
+                    otherAssignmentsCount = 2,
+                    isCompleted = false,
+                    timeZone = TimeZone.currentSystemDefault(),
+                    onEditTaskClicked = { },
+                    onSnoozeHour = { },
+                    onMarkAsDone = { },
+                    onMarkAsWontDo = { },
+                )
+                TaskCard(
+                    details = TaskAssignmentDetails(
+                        taskAssignment = TaskAssignment(
+                            id = "1",
+                            progressStatus = ProgressStatus.TODO,
+                            progressStatusDate = Clock.System.now(),
+                            taskId = "taskId",
+                            taskName = "Pay Rent",
+                            houseId = "houseId",
+                            repeatInfo = RepeatInfo(
+                                repeatValue = 1,
+                                repeatUnit = RepeatUnit.MONTH,
+                                repeatEndDateTime = null
+                            ),
+                            memberId = "memberId",
+                            memberName = "Alex R.",
+                            dueDateTime = LocalDateTime.now()
+                        ),
+                        reminderTime = null,
+                        enableSnooze = true,
+                        willReminderBeSet = false,
+                        assignedToLoggedInUser = true,
+                    ),
+                    otherAssignmentsCount = 2,
+                    isCompleted = false,
+                    isSwipeEnabled = false,
+                    timeZone = TimeZone.currentSystemDefault(),
+                    onEditTaskClicked = { },
+                    onSnoozeHour = { },
+                    onMarkAsDone = { },
+                    onMarkAsWontDo = { },
+                )
+            }
+        }
+    }
 }

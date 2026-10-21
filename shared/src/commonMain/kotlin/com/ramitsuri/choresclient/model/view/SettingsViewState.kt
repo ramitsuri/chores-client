@@ -10,6 +10,8 @@ data class SettingsViewState(
     val deviceId: String?,
     val remoteLoggingEnabled: Boolean,
     val remindPastDueEnabled: Boolean,
+    val allowTaskAssignmentUndo: Boolean,
+    val swipeForTaskAssignmentCompletion: Boolean,
     val timeZone: TimeZone,
     val error: Error? = null
 )
