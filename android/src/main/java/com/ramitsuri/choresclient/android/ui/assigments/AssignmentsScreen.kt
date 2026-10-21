@@ -93,14 +93,6 @@ fun AssignmentsScreen(
         )
         onMarkAsDone(taskAssignmentId)
     }
-    val onMarkAsWontDoCelebration: (String) -> Unit = { taskAssignmentId ->
-        konfetti.start(
-            Party(
-                emitter = Emitter(duration = 100, TimeUnit.MILLISECONDS).max(100)
-            )
-        )
-        onMarkAsWontDo(taskAssignmentId)
-    }
 
     Scaffold(
         topBar = {
@@ -140,7 +132,7 @@ fun AssignmentsScreen(
                 pendingRemovals = viewState.pendingRemovals,
                 allowSwipeForCompletion = viewState.allowSwipeForCompletion,
                 onMarkAsDone = onMarkAsDoneCelebration,
-                onMarkAsWontDo = onMarkAsWontDoCelebration,
+                onMarkAsWontDo = onMarkAsWontDo,
                 onUndoPendingAction = onUndoPendingAction,
                 onSnooze = onSnooze,
                 onEditTaskClicked = onEditTaskClicked,

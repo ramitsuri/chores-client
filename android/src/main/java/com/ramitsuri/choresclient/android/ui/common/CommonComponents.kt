@@ -475,7 +475,7 @@ fun TaskCard(
 
     LaunchedEffect(isPendingRemoval, pendingStartTimeEpochMillis) {
         if (isPendingRemoval) {
-            val durationMillis = 5000L
+            val durationMillis = 3000L
             val startTime = if (pendingStartTimeEpochMillis > 0L) {
                 pendingStartTimeEpochMillis
             } else {
@@ -683,7 +683,7 @@ private fun SwipeDisabledTaskCard(
             ) {
                 Icon(
                     imageVector = Icons.Default.Check,
-                    contentDescription = stringResource(id = R.string.assignment_menu_content_description),
+                    contentDescription = stringResource(id = R.string.assignment_mark_completed),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
