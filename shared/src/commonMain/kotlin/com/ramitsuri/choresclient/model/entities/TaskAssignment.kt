@@ -15,6 +15,7 @@ data class TaskAssignment(
     val progressStatusDate: Instant,
     val taskId: String,
     val taskName: String,
+    val taskDescription: String = "",
     val houseId: String,
     val repeatInfo: RepeatInfo,
     val memberId: String,
@@ -33,6 +34,7 @@ data class TaskAssignment(
                 progressStatusDate = taskAssignmentEntity.progressStatusDate,
                 taskId = taskEntity.id,
                 taskName = taskEntity.name,
+                taskDescription = taskEntity.description,
                 houseId = taskEntity.houseId,
                 repeatInfo = RepeatInfo(
                     repeatValue = taskEntity.repeatValue.toInt(),
@@ -52,6 +54,7 @@ data class TaskAssignment(
                 progressStatusDate = dto.progressStatusDate,
                 taskId = dto.task.id,
                 taskName = dto.task.name,
+                taskDescription = dto.task.description,
                 houseId = dto.task.houseId,
                 repeatInfo = RepeatInfo(
                     repeatValue = dto.task.repeatValue,

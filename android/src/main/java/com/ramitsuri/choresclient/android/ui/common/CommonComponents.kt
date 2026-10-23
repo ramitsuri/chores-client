@@ -9,6 +9,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
@@ -419,6 +420,7 @@ private fun ResistiveSwipeCard(
                             )
                             layout(revealWidth, placeable.height) { placeable.place(0, 0) }
                         }
+                        .clip(RoundedCornerShape(MaterialTheme.dimens.cardCornerRadius))
                         .background(revealColor),
                     contentAlignment = Alignment.Center
                 ) {
@@ -469,6 +471,7 @@ fun TaskCard(
 ) {
     var showMenu by remember { mutableStateOf(false) }
     var cardHeight by remember { mutableStateOf<Dp?>(null) }
+    var cardExpanded by remember { mutableStateOf(false) }
     val density = LocalDensity.current
 
     var timerProgress by remember { mutableFloatStateOf(1f) }
@@ -496,17 +499,23 @@ fun TaskCard(
         }
     }
 
-    val containerModifier = modifier
-        .fillMaxWidth()
-        .then(
-            if (cardHeight != null) {
-                Modifier.height(cardHeight!!)
-            } else {
-                Modifier.onGloballyPositioned { coordinates ->
-                    cardHeight = with(density) { coordinates.size.height.toDp() }
+    val containerModifier = if (isPendingRemoval) {
+        modifier
+            .fillMaxWidth()
+            .then(
+                if (cardHeight != null) {
+                    Modifier.height(cardHeight!!)
+                } else {
+                    Modifier
                 }
+            )
+    } else {
+        modifier
+            .fillMaxWidth()
+            .onGloballyPositioned { coordinates ->
+                cardHeight = with(density) { coordinates.size.height.toDp() }
             }
-        )
+    }
     val roundedCornerShape = RoundedCornerShape(MaterialTheme.dimens.cardCornerRadius)
     val borderModifier = if (details.assignedToLoggedInUser) {
         Modifier.border(
@@ -517,6 +526,7 @@ fun TaskCard(
     } else {
         Modifier
     }
+    val clickModifier = Modifier.clickable(onClick = { cardExpanded = !cardExpanded })
 
     val state = if (isPendingRemoval) {
         TaskCardState.PENDING_REMOVAL
@@ -585,7 +595,7 @@ fun TaskCard(
                     onMarkAsWontDo = {
                         onMarkAsWontDo?.invoke(details.taskAssignment.id)
                     },
-                    modifier = containerModifier
+                    modifier = containerModifier.then(clickModifier)
                 ) {
                     TaskCardContent(
                         details = details,
@@ -593,6 +603,7 @@ fun TaskCard(
                         isCompleted = isCompleted,
                         showMenu = showMenu,
                         timeZone = timeZone,
+                        isCardExpanded = cardExpanded,
                         onShowMenuChange = { showMenu = it },
                         onEditTaskClicked = onEditTaskClicked,
                         onSnoozeHour = onSnoozeHour,
@@ -610,6 +621,7 @@ fun TaskCard(
                     isCompleted = isCompleted,
                     showMenu = showMenu,
                     timeZone = timeZone,
+                    isCardExpanded = cardExpanded,
                     onShowMenuChange = { showMenu = it },
                     onEditTaskClicked = onEditTaskClicked,
                     onSnoozeHour = onSnoozeHour,
@@ -617,6 +629,7 @@ fun TaskCard(
                     onMarkAsWontDo = onMarkAsWontDo,
                     shape = roundedCornerShape,
                     borderModifier = borderModifier,
+                    modifier = Modifier.then(clickModifier),
                 )
             }
 
@@ -627,6 +640,7 @@ fun TaskCard(
                         otherAssignmentsCount = otherAssignmentsCount,
                         isCompleted = isCompleted,
                         showMenu = showMenu,
+                        isCardExpanded = cardExpanded,
                         timeZone = timeZone,
                         onShowMenuChange = { showMenu = it },
                         onEditTaskClicked = onEditTaskClicked,
@@ -634,6 +648,7 @@ fun TaskCard(
                         onMarkAsWontDo = onMarkAsWontDo,
                         shape = roundedCornerShape,
                         borderModifier = borderModifier,
+                        modifier = Modifier.then(clickModifier),
                     )
                 }
 
@@ -656,6 +671,7 @@ private fun SwipeDisabledTaskCard(
     isCompleted: Boolean,
     showMenu: Boolean,
     timeZone: TimeZone,
+    isCardExpanded: Boolean,
     onShowMenuChange: (Boolean) -> Unit,
     onEditTaskClicked: ((String) -> Unit)?,
     onSnoozeHour: ((String) -> Unit)?,
@@ -693,6 +709,7 @@ private fun SwipeDisabledTaskCard(
                 isCompleted = isCompleted,
                 showMenu = showMenu,
                 timeZone = timeZone,
+                isCardExpanded = isCardExpanded,
                 onShowMenuChange = onShowMenuChange,
                 onEditTaskClicked = onEditTaskClicked,
                 onSnoozeHour = onSnoozeHour,
@@ -716,6 +733,7 @@ private fun TaskCardContent(
     onEditTaskClicked: ((String) -> Unit)?,
     onSnoozeHour: ((String) -> Unit)?,
     onMarkAsWontDo: ((String) -> Unit)?,
+    isCardExpanded: Boolean,
     addStartPaddingToContent: Boolean = true,
     borderModifier: Modifier,
     shape: Shape,
@@ -832,6 +850,18 @@ private fun TaskCardContent(
             }
 
             Spacer(modifier = Modifier.height(MaterialTheme.dimens.medium))
+
+            if (details.taskAssignment.taskDescription.isNotBlank()) {
+                Text(
+                    text = details.taskAssignment.taskDescription,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Normal,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = if (isCardExpanded) Int.MAX_VALUE else 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Spacer(modifier = Modifier.height(MaterialTheme.dimens.medium))
+            }
 
             FlowRow(
                 modifier = Modifier.fillMaxWidth(),
@@ -1002,6 +1032,7 @@ private fun Preview() {
                             progressStatusDate = Clock.System.now(),
                             taskId = "taskId",
                             taskName = "Pay Rent",
+                            taskDescription = "- step 1\n- step 2\n- step 2",
                             houseId = "houseId",
                             repeatInfo = RepeatInfo(
                                 repeatValue = 1,
@@ -1033,6 +1064,7 @@ private fun Preview() {
                             progressStatusDate = Clock.System.now(),
                             taskId = "taskId",
                             taskName = "Pay Rent",
+                            taskDescription = "- step 1\n- step 2\n- step 2",
                             houseId = "houseId",
                             repeatInfo = RepeatInfo(
                                 repeatValue = 1,

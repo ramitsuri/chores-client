@@ -136,6 +136,7 @@ private fun PreviewCompletedAssignmentsScreen() {
                                 progressStatusDate = Clock.System.now(),
                                 taskId = "taskId",
                                 taskName = "Clean Kitchen",
+                                taskDescription = "- step 1\n- step 2\n- step 2",
                                 houseId = "houseId",
                                 repeatInfo = RepeatInfo(
                                     repeatValue = 1,

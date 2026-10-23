@@ -21,6 +21,7 @@
     <string name="wont_do">Skipped %1$s</string>
     <string name="completed_today">Completed %1$s</string>
     <string name="undo">Undo</string>
+    <string name="ellipsis">…</string>
 
     <!-- Navigation Chrome Titles -->
     <string name="active_todos_title">Chores</string>
@@ -103,7 +104,7 @@
 
     <!-- Add Task -->
     <string name="add_task_hint_name">What needs to be done?</string>
-    <string name="add_task_hint_description">Add details, notes, or checklist items...</string>
+    <string name="add_task_hint_description">Add details, notes, or checklist items…</string>
     <string name="add_task_hint_repeat_value">Repeat</string>
     <string name="add_task_pick_date">Pick date</string>
     <string name="add_task_pick_time">Pick time</string>

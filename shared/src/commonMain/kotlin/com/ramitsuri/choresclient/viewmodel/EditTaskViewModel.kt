@@ -54,6 +54,7 @@ class EditTaskViewModel(
             _state.update { previousState ->
                 previousState.copy(
                     taskName = task.name,
+                    taskDescription = task.description,
                     repeatValue = task.repeatValue,
                     repeatUnits = RepeatUnit.entries
                         .map { repeatUnit ->
@@ -106,7 +107,7 @@ class EditTaskViewModel(
             val result = tasksRepository.editTask(
                 taskId = task.id,
                 name = value.taskName,
-                description = null,
+                description = value.taskDescription,
                 dueDateTime = LocalDateTime(date = value.date, time = value.time),
                 repeatValue = value.repeatValue.toLong(),
                 repeatUnit = repeatUnit,
@@ -247,6 +248,7 @@ class EditTaskViewModel(
 
     private fun areNewValuesSameAsOriginal(value: EditTaskViewState): Boolean {
         return task?.name == value.taskName &&
+                task?.description == value.taskDescription &&
                 task?.repeatValue == value.repeatValue &&
                 task?.repeatUnit == value.repeatUnits.first { it.getIsSelected() }.toRepeatUnit() &&
                 task?.repeatEndDateTime?.date == value.repeatEndDate &&

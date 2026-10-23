@@ -398,6 +398,7 @@ private fun PreviewAssignmentContent() {
                         progressStatusDate = Clock.System.now(),
                         taskId = "taskId",
                         taskName = "Pay Rent",
+                        taskDescription = "- step 1\n- step 2\n- step 2",
                         houseId = "houseId",
                         repeatInfo = RepeatInfo(
                             repeatValue = 1,
@@ -421,6 +422,7 @@ private fun PreviewAssignmentContent() {
                         progressStatus = ProgressStatus.TODO,
                         progressStatusDate = Clock.System.now(),
                         taskId = "taskId",
+                        taskDescription = "- step 1\n- step 2\n- step 2",
                         taskName = "Water Plants",
                         houseId = "houseId",
                         repeatInfo = RepeatInfo(
