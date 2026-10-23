@@ -152,7 +152,7 @@
     <string name="settings_notification_action_complete">Mark done</string>
     <string name="settings_notification_action_wont_do">Skip</string>
     <string name="settings_remote_logging_title">Remote logging</string>
-    <string name="settings_allow_task_assignment_undo">Allow undo completion</string>
+    <string name="settings_allow_task_assignment_undo">Allow completion undo</string>
     <string name="settings_swipe_for_task_assignment_completion">Swipe to complete</string>
     <string name="settings_remote_logging_subtitle_enabled">Currently enabled</string>
     <string name="settings_remote_logging_subtitle_disabled">Currently disabled</string>

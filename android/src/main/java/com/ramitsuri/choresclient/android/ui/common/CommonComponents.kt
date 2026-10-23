@@ -526,7 +526,9 @@ fun TaskCard(
     } else {
         Modifier
     }
-    val clickModifier = Modifier.clickable(onClick = { cardExpanded = !cardExpanded })
+    val clickModifier = Modifier
+        .clip(roundedCornerShape)
+        .clickable(onClick = { cardExpanded = !cardExpanded })
 
     val state = if (isPendingRemoval) {
         TaskCardState.PENDING_REMOVAL
@@ -595,7 +597,7 @@ fun TaskCard(
                     onMarkAsWontDo = {
                         onMarkAsWontDo?.invoke(details.taskAssignment.id)
                     },
-                    modifier = containerModifier.then(clickModifier)
+                    modifier = containerModifier
                 ) {
                     TaskCardContent(
                         details = details,
@@ -610,6 +612,7 @@ fun TaskCard(
                         onMarkAsWontDo = onMarkAsWontDo,
                         shape = roundedCornerShape,
                         borderModifier = borderModifier,
+                        modifier = clickModifier,
                     )
                 }
             }
@@ -629,7 +632,7 @@ fun TaskCard(
                     onMarkAsWontDo = onMarkAsWontDo,
                     shape = roundedCornerShape,
                     borderModifier = borderModifier,
-                    modifier = Modifier.then(clickModifier),
+                    modifier = clickModifier,
                 )
             }
 
@@ -648,7 +651,7 @@ fun TaskCard(
                         onMarkAsWontDo = onMarkAsWontDo,
                         shape = roundedCornerShape,
                         borderModifier = borderModifier,
-                        modifier = Modifier.then(clickModifier),
+                        modifier = clickModifier,
                     )
                 }
 
@@ -682,12 +685,15 @@ private fun SwipeDisabledTaskCard(
     modifier: Modifier = Modifier,
 ) {
     Card(
-        shape = RoundedCornerShape(MaterialTheme.dimens.cardCornerRadius),
+        shape = shape,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerLow
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
-        modifier = modifier.then(borderModifier),
+        modifier = Modifier
+            .clip(shape)
+            .then(borderModifier)
+            .then(modifier),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -749,10 +755,11 @@ private fun TaskCardContent(
             containerColor = MaterialTheme.colorScheme.surfaceContainerLow
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
             .clip(shape)
             .then(borderModifier)
+            .then(modifier)
             .animateContentSize()
     ) {
         Column(
@@ -851,13 +858,16 @@ private fun TaskCardContent(
 
             Spacer(modifier = Modifier.height(MaterialTheme.dimens.medium))
 
-            if (details.taskAssignment.taskDescription.isNotBlank()) {
+            val showDescription = details.taskAssignment.taskDescription.isNotBlank() &&
+                    !details.taskAssignment.taskDescription.trim().equals(details.taskAssignment.taskName.trim(), ignoreCase = true)
+
+            if (showDescription) {
                 Text(
                     text = details.taskAssignment.taskDescription,
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Normal,
                     color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = if (isCardExpanded) Int.MAX_VALUE else 2,
+                    maxLines = if (isCardExpanded) Int.MAX_VALUE else 1,
                     overflow = TextOverflow.Ellipsis,
                 )
                 Spacer(modifier = Modifier.height(MaterialTheme.dimens.medium))

@@ -217,7 +217,9 @@ private fun TemplateCardItem(
                 StatusBadge(status = task.status)
             }
 
-            if (task.description.isNotBlank()) {
+            val showDescription = task.description.isNotBlank() &&
+                    !task.description.trim().equals(task.name.trim(), ignoreCase = true)
+            if (showDescription) {
                 Spacer(modifier = Modifier.height(MaterialTheme.dimens.small))
                 Text(
                     text = task.description,
