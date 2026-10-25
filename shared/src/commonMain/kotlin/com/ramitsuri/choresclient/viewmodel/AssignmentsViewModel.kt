@@ -94,6 +94,12 @@ class AssignmentsViewModel(
         }
     }
 
+    fun transferAssignment(id: String) {
+        longLivingCoroutineScope.launch {
+            repository.transfer(id)
+        }
+    }
+
     fun onListTypeClicked(listTypeSelection: ListTypeSelection) {
         selectedListTypes.update { currentSelection ->
             if (listTypeSelection in currentSelection) {

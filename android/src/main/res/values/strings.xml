@@ -45,6 +45,7 @@
     <string name="assignment_filter_person_content_description">Filter person</string>
     <string name="assignment_filter_house_content_description">Filter list</string>
     <string name="assignment_menu_content_description">Menu</string>
+    <string name="assignment_details_button_transfer">Transfer</string>
     <string name="assignment_empty">Hurray! All Done</string>
     <string name="assignment_filter_all">All</string>
     <string name="assignment_filter_person">Person</string>

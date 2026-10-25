@@ -7,5 +7,6 @@ data class TaskAssignmentUpdate(
     val id: String,
     val progressStatus: ProgressStatus,
     val progressStatusDate: Instant,
-    val shouldUpload: Boolean
+    val shouldUpload: Boolean,
+    val shouldTransfer: Boolean = false
 )

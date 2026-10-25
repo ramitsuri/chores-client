@@ -133,6 +133,7 @@ fun NavGraph(
                 onMarkAsWontDo = viewModel::markAsWontDo,
                 onUndoPendingAction = viewModel::undoPendingAction,
                 onSnooze = viewModel::onSnooze,
+                onTransferAssignmentClicked = viewModel::transferAssignment,
                 onListTypeClicked = viewModel::onListTypeClicked,
             )
         }

@@ -143,6 +143,11 @@ class DefaultTaskAssignmentsRepository(
         contentDownloadRequestHandler.requestDelayedDownload()
     }
 
+    override suspend fun transfer(taskAssignmentId: String) {
+        taskAssignmentDao.markTransfer(taskAssignmentId)
+        contentDownloadRequestHandler.requestDelayedDownload()
+    }
+
     override suspend fun onSnoozeRequested(
         assignmentId: String,
         snoozeType: SnoozeType,
@@ -181,13 +186,23 @@ class DefaultTaskAssignmentsRepository(
     }
 
     private suspend fun uploadLocal(): List<String> {
-        val readyForUpload = toTaskAssignments(taskAssignmentDao.getForUpload())
-        logger.v(TAG, "Ready for upload: ${readyForUpload.joinToString()}")
-        if (readyForUpload.isEmpty()) {
+        val readyForUploadEntities = taskAssignmentDao.getForUpload()
+        logger.v(TAG, "Ready for upload: ${readyForUploadEntities.joinToString { it.id }}")
+        if (readyForUploadEntities.isEmpty()) {
             return listOf()
         }
 
-        val uploadResult = api.updateTaskAssignments(readyForUpload)
+        val updates = readyForUploadEntities.map { entity ->
+            TaskAssignmentUpdate(
+                id = entity.id,
+                progressStatus = entity.progressStatus,
+                progressStatusDate = entity.progressStatusDate,
+                shouldUpload = true,
+                shouldTransfer = entity.shouldTransfer
+            )
+        }
+
+        val uploadResult = api.updateTaskAssignments(updates)
         return when (uploadResult) {
             is Result.Failure -> {
                 listOf()
@@ -195,7 +210,7 @@ class DefaultTaskAssignmentsRepository(
 
             is Result.Success -> {
                 val uploadedTaskAssignmentIds: List<String> = uploadResult.data
-                logger.v(TAG, "Uploaded: ${uploadedTaskAssignmentIds.joinToString()}")
+                logger.v(TAG, "Uploaded task assignments: ${uploadedTaskAssignmentIds.joinToString()}")
                 uploadedTaskAssignmentIds
             }
         }
@@ -271,6 +286,8 @@ interface TaskAssignmentsRepository {
     suspend fun markTaskAssignmentDone(taskAssignmentId: String, doneTime: Instant)
 
     suspend fun markTaskAssignmentWontDo(taskAssignmentId: String, wontDoTime: Instant)
+
+    suspend fun transfer(taskAssignmentId: String)
 
     suspend fun onSnoozeRequested(assignmentId: String, snoozeType: SnoozeType)
 }

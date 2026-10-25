@@ -240,6 +240,8 @@ class ContentDownloaderTest {
 
         override suspend fun markTaskAssignmentWontDo(taskAssignmentId: String, wontDoTime: Instant) {}
 
+        override suspend fun transfer(taskAssignmentId: String) {}
+
         override suspend fun onSnoozeRequested(assignmentId: String, snoozeType: SnoozeType) {}
 
         override suspend fun fetchAndSaveCompleted() {

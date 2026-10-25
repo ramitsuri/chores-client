@@ -42,6 +42,7 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.Snooze
+import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
@@ -470,6 +471,7 @@ fun TaskCard(
     onMarkAsWontDo: ((String) -> Unit)? = null,
     onSnoozeHour: ((String) -> Unit)? = null,
     onEditTaskClicked: ((String) -> Unit)? = null,
+    onTransferClicked: ((String) -> Unit)? = null,
 ) {
     var showMenu by remember { mutableStateOf(false) }
     var cardHeight by remember { mutableStateOf<Dp?>(null) }
@@ -612,6 +614,7 @@ fun TaskCard(
                         onEditTaskClicked = onEditTaskClicked,
                         onSnoozeHour = onSnoozeHour,
                         onMarkAsWontDo = onMarkAsWontDo,
+                        onTransferClicked = onTransferClicked,
                         shape = roundedCornerShape,
                         borderModifier = borderModifier,
                         modifier = clickModifier,
@@ -632,6 +635,7 @@ fun TaskCard(
                     onSnoozeHour = onSnoozeHour,
                     onMarkAsDone = onMarkAsDone,
                     onMarkAsWontDo = onMarkAsWontDo,
+                    onTransferClicked = onTransferClicked,
                     shape = roundedCornerShape,
                     borderModifier = borderModifier,
                     modifier = clickModifier,
@@ -651,6 +655,7 @@ fun TaskCard(
                         onEditTaskClicked = onEditTaskClicked,
                         onSnoozeHour = onSnoozeHour,
                         onMarkAsWontDo = onMarkAsWontDo,
+                        onTransferClicked = onTransferClicked,
                         shape = roundedCornerShape,
                         borderModifier = borderModifier,
                         modifier = clickModifier,
@@ -682,6 +687,7 @@ private fun SwipeDisabledTaskCard(
     onSnoozeHour: ((String) -> Unit)?,
     onMarkAsDone: ((String) -> Unit)?,
     onMarkAsWontDo: ((String) -> Unit)?,
+    onTransferClicked: ((String) -> Unit)? = null,
     borderModifier: Modifier,
     shape: Shape,
     modifier: Modifier = Modifier,
@@ -722,6 +728,7 @@ private fun SwipeDisabledTaskCard(
                 onEditTaskClicked = onEditTaskClicked,
                 onSnoozeHour = onSnoozeHour,
                 onMarkAsWontDo = onMarkAsWontDo,
+                onTransferClicked = onTransferClicked,
                 borderModifier = Modifier,
                 shape = shape,
                 addStartPaddingToContent = false
@@ -741,6 +748,7 @@ private fun TaskCardContent(
     onEditTaskClicked: ((String) -> Unit)?,
     onSnoozeHour: ((String) -> Unit)?,
     onMarkAsWontDo: ((String) -> Unit)?,
+    onTransferClicked: ((String) -> Unit)? = null,
     isCardExpanded: Boolean,
     addStartPaddingToContent: Boolean = true,
     borderModifier: Modifier,
@@ -850,6 +858,22 @@ private fun TaskCardContent(
                                     onClick = {
                                         onShowMenuChange(false)
                                         onMarkAsWontDo(details.taskAssignment.id)
+                                    }
+                                )
+                            }
+                            if (onTransferClicked != null && details.isSharedList) {
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(id = R.string.assignment_details_button_transfer)) },
+                                    leadingIcon = {
+                                        Icon(
+                                            Icons.Default.SwapHoriz,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                    },
+                                    onClick = {
+                                        onShowMenuChange(false)
+                                        onTransferClicked(details.taskAssignment.id)
                                     }
                                 )
                             }

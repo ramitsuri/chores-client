@@ -61,8 +61,15 @@ class TaskAssignmentDao(
                 progressStatus = taskAssignmentUpdate.progressStatus,
                 progressStatusDate = taskAssignmentUpdate.progressStatusDate,
                 shouldUpload = taskAssignmentUpdate.shouldUpload,
+                shouldTransfer = taskAssignmentUpdate.shouldTransfer,
                 id = taskAssignmentUpdate.id
             )
+        }
+    }
+
+    suspend fun markTransfer(id: String) {
+        withContext(dispatcherProvider.io) {
+            dbQueries.markTransfer(id)
         }
     }
 
@@ -134,7 +141,8 @@ class TaskAssignmentDao(
             taskAssignmentEntity.dueDateTime,
             taskAssignmentEntity.createDate,
             taskAssignmentEntity.createType,
-            taskAssignmentEntity.shouldUpload
+            taskAssignmentEntity.shouldUpload,
+            taskAssignmentEntity.shouldTransfer
         )
     }
 }

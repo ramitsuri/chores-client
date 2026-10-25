@@ -224,6 +224,7 @@ class AssignmentsViewModelTest {
         override suspend fun markTaskAssignmentWontDo(taskAssignmentId: String, wontDoTime: Instant) {
             markedWontDoIds.add(Pair(taskAssignmentId, wontDoTime))
         }
+        override suspend fun transfer(taskAssignmentId: String) {}
         override suspend fun onSnoozeRequested(assignmentId: String, snoozeType: SnoozeType) {}
     }
 }

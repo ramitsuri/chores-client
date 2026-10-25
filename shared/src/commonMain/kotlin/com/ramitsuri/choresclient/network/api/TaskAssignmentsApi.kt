@@ -1,7 +1,7 @@
 package com.ramitsuri.choresclient.network.api
 
 import com.ramitsuri.choresclient.model.Result
-import com.ramitsuri.choresclient.model.entities.TaskAssignment
+import com.ramitsuri.choresclient.model.entities.TaskAssignmentUpdate
 import com.ramitsuri.choresclient.model.enums.ProgressStatus
 import com.ramitsuri.choresclient.network.InstantSerializer
 import com.ramitsuri.choresclient.network.ProgressStatusSerializer
@@ -11,6 +11,8 @@ import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
+import io.ktor.http.contentType
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlin.time.Instant
 import kotlinx.serialization.Serializable
@@ -42,26 +44,29 @@ class TaskAssignmentsApi(
         }
     }
 
-    suspend fun updateTaskAssignments(taskAssignments: List<TaskAssignment>): Result<List<String>> {
+    suspend fun updateTaskAssignments(taskAssignmentUpdates: List<TaskAssignmentUpdate>): Result<List<String>> {
         return apiRequest(ioDispatcher) {
             client.put("$baseUrl/task-assignments") {
-                setBody(taskAssignments.map { TaskAssignmentUpdate(it) })
+                contentType(ContentType.Application.Json)
+                setBody(taskAssignmentUpdates.map { TaskAssignmentUpdateDto(it) })
             }
         }
     }
 }
 
 @Serializable
-private data class TaskAssignmentUpdate(
+private data class TaskAssignmentUpdateDto(
     val id: String,
     @Serializable(with = ProgressStatusSerializer::class)
     val progressStatus: ProgressStatus,
     @Serializable(with = InstantSerializer::class)
-    val progressStatusDate: Instant
+    val progressStatusDate: Instant,
+    val shouldTransfer: Boolean = false
 ) {
-    constructor(taskAssignment: TaskAssignment) : this(
-        taskAssignment.id,
-        taskAssignment.progressStatus,
-        taskAssignment.progressStatusDate
+    constructor(update: TaskAssignmentUpdate) : this(
+        id = update.id,
+        progressStatus = update.progressStatus,
+        progressStatusDate = update.progressStatusDate,
+        shouldTransfer = update.shouldTransfer
     )
 }

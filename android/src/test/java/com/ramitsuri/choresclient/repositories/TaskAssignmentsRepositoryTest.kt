@@ -358,7 +358,8 @@ class TaskAssignmentsRepositoryTest {
     private fun createAssignmentEntity(
         id: String,
         progressStatus: ProgressStatus,
-        shouldUpload: Boolean
+        shouldUpload: Boolean,
+        shouldTransfer: Boolean = false
     ): TaskAssignmentEntity {
         return TaskAssignmentEntity(
             id = id,
@@ -369,7 +370,8 @@ class TaskAssignmentsRepositoryTest {
             dueDateTime = LocalDateTime.parse("2023-10-01T10:00:00"),
             createDate = Instant.fromEpochMilliseconds(500L),
             createType = CreateType.AUTO,
-            shouldUpload = shouldUpload
+            shouldUpload = shouldUpload,
+            shouldTransfer = shouldTransfer
         )
     }
 

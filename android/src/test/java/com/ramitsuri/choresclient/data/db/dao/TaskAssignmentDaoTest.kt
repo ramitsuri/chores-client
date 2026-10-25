@@ -143,6 +143,7 @@ class TaskAssignmentDaoTest {
         id: String,
         progressStatus: ProgressStatus,
         shouldUpload: Boolean,
+        shouldTransfer: Boolean = false,
         date: Long = 1000L
     ): TaskAssignmentEntity {
         return TaskAssignmentEntity(
@@ -154,7 +155,8 @@ class TaskAssignmentDaoTest {
             dueDateTime = LocalDateTime.parse("2023-10-01T10:00:00"),
             createDate = Instant.fromEpochMilliseconds(500L),
             createType = CreateType.AUTO,
-            shouldUpload = shouldUpload
+            shouldUpload = shouldUpload,
+            shouldTransfer = shouldTransfer
         )
     }
 }

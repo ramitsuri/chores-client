@@ -18,7 +18,8 @@ CREATE TABLE IF NOT EXISTS TaskAssignmentEntity (
     dueDateTime TEXT AS LocalDateTime NOT NULL,
     createDate INTEGER AS Instant NOT NULL,
     createType INTEGER AS CreateType NOT NULL,
-    shouldUpload INTEGER AS Boolean NOT NULL
+    shouldUpload INTEGER AS Boolean NOT NULL,
+    shouldTransfer INTEGER AS Boolean NOT NULL DEFAULT 0
 );
 
 selectAssignments:
@@ -38,18 +39,23 @@ WHERE shouldUpload = 1;
 
 updateAssignment:
 UPDATE TaskAssignmentEntity
-SET progressStatus = ?, progressStatusDate = ?, shouldUpload = ?
+SET progressStatus = ?, progressStatusDate = ?, shouldUpload = ?, shouldTransfer = ?
+WHERE id = ?;
+
+markTransfer:
+UPDATE TaskAssignmentEntity
+SET shouldUpload = 1, shouldTransfer = 1
 WHERE id = ?;
 
 markUploaded:
 UPDATE TaskAssignmentEntity
-SET shouldUpload = 0
+SET shouldUpload = 0, shouldTransfer = 0
 WHERE id = ?;
 
 insertAssignment:
 INSERT OR REPLACE INTO
-TaskAssignmentEntity (id, progressStatus, progressStatusDate, taskId, memberId, dueDateTime, createDate, createType, shouldUpload)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+TaskAssignmentEntity (id, progressStatus, progressStatusDate, taskId, memberId, dueDateTime, createDate, createType, shouldUpload, shouldTransfer)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 selectTodoAssignments:
 SELECT * FROM TaskAssignmentEntity

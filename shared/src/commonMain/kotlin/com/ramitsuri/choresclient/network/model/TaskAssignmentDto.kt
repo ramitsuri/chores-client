@@ -28,7 +28,10 @@ data class TaskAssignmentDto(
     val createType: CreateType
 )
 
-fun TaskAssignmentDto.toTaskAssignmentEntity(shouldUpload: Boolean): TaskAssignmentEntity {
+fun TaskAssignmentDto.toTaskAssignmentEntity(
+    shouldUpload: Boolean,
+    shouldTransfer: Boolean = false,
+): TaskAssignmentEntity {
     return TaskAssignmentEntity(
         id = id,
         progressStatusDate = progressStatusDate,
@@ -38,6 +41,7 @@ fun TaskAssignmentDto.toTaskAssignmentEntity(shouldUpload: Boolean): TaskAssignm
         dueDateTime = dueDateTime,
         createDate = createdDate,
         createType = createType,
-        shouldUpload = shouldUpload
+        shouldUpload = shouldUpload,
+        shouldTransfer = shouldTransfer
     )
 }
