@@ -35,6 +35,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.CloudSync
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.MoreVert
@@ -432,7 +433,8 @@ private fun ResistiveSwipeCard(
                             .requiredSize(MaterialTheme.dimens.iconWidthMedium)
                             .graphicsLayer {
                                 // Scale in with the revealed width so the icon is visible immediately.
-                                val growth = (abs(offset.value) / (iconSizePx * 2f)).coerceIn(0f, 1f)
+                                val growth =
+                                    (abs(offset.value) / (iconSizePx * 2f)).coerceIn(0f, 1f)
                                 val scale = growth * armedScale
                                 scaleX = scale
                                 scaleY = scale
@@ -912,6 +914,15 @@ private fun TaskCardContent(
                         contentColor = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
+
+                if (details.isTaskChangeSyncPending) {
+                    PillChip(
+                        text = stringResource(id = R.string.sync_status_unsynced_badge),
+                        icon = Icons.Default.CloudSync,
+                        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(MaterialTheme.dimens.medium))
@@ -1021,6 +1032,101 @@ fun AppFAB(
         },
         modifier = modifier
     )
+}
+
+@Composable
+fun SyncStatusCard(
+    unsyncedTaskCount: Int,
+    unsyncedAddCount: Int = 0,
+    unsyncedEditCount: Int = 0,
+    isUploading: Boolean = false,
+    isSyncScheduled: Boolean = false,
+    modifier: Modifier = Modifier,
+) {
+    val roundedCornerShape = RoundedCornerShape(MaterialTheme.dimens.cardCornerRadius)
+    Card(
+        shape = roundedCornerShape,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(roundedCornerShape)
+            .animateContentSize()
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(MaterialTheme.dimens.large)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(MaterialTheme.dimens.medium)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.CloudSync,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSecondaryContainer
+                )
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = stringResource(id = R.string.sync_card_title),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer
+                    )
+
+                    val summaryText = when {
+                        (unsyncedAddCount > 0) && (unsyncedEditCount > 0) -> {
+                            stringResource(
+                                id = R.string.sync_card_summary_add_edit,
+                                unsyncedAddCount,
+                                unsyncedEditCount
+                            )
+                        }
+                        unsyncedAddCount > 0 -> {
+                            stringResource(id = R.string.sync_card_summary_add, unsyncedAddCount)
+                        }
+                        unsyncedEditCount > 0 -> {
+                            stringResource(id = R.string.sync_card_summary_edit, unsyncedEditCount)
+                        }
+                        unsyncedTaskCount == 1 -> {
+                            stringResource(id = R.string.sync_status_pending_tasks_one)
+                        }
+                        unsyncedTaskCount > 1 -> {
+                            stringResource(id = R.string.sync_status_pending_tasks_format, unsyncedTaskCount)
+                        }
+                        else -> ""
+                    }
+
+                    if (summaryText.isNotEmpty()) {
+                        Text(
+                            text = summaryText,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                    }
+                }
+            }
+
+            if (isUploading) {
+                Spacer(modifier = Modifier.height(MaterialTheme.dimens.small))
+                Text(
+                    text = stringResource(id = R.string.sync_status_uploading),
+                    style = MaterialTheme.typography.bodySmall,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                )
+                Spacer(modifier = Modifier.height(MaterialTheme.dimens.small))
+                LinearProgressIndicator(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                    trackColor = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.2f)
+                )
+            }
+        }
+    }
 }
 
 @Preview

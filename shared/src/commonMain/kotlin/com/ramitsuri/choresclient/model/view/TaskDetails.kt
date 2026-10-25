@@ -6,5 +6,6 @@ data class TaskDetails(
     val task: Task,
     val memberName: String,
     val houseName: String,
-    val isSharedList: Boolean = false
+    val isSharedList: Boolean = false,
+    val isSyncPending: Boolean = false
 )

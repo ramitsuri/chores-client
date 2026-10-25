@@ -5,6 +5,7 @@ import com.ramitsuri.choresclient.model.view.ListTypeSelection
 import com.ramitsuri.choresclient.model.view.TaskDetails
 import com.ramitsuri.choresclient.model.view.TasksViewState
 import com.ramitsuri.choresclient.repositories.TasksRepository
+import com.ramitsuri.choresclient.utils.TaskUploadRequestHandler
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
@@ -13,6 +14,7 @@ import kotlinx.coroutines.flow.update
 
 class TasksViewModel(
     tasksRepository: TasksRepository,
+    taskUploadRequestHandler: TaskUploadRequestHandler,
 ) : ViewModel() {
 
     private val searchQuery = MutableStateFlow("")
@@ -20,9 +22,11 @@ class TasksViewModel(
 
     val state = combine(
         tasksRepository.getTasksFlow(),
+        tasksRepository.getUnsyncedTasksFlow(),
+        taskUploadRequestHandler.getUploadStatusFlow(),
         searchQuery,
         selectedListTypes,
-    ) { taskDetailsList, query, selectedListTypes ->
+    ) { taskDetailsList, unsyncedTaskDetailsList, uploadStatus, query, selectedListTypes ->
         val filteredTasks = taskDetailsList
             .filterByListTypes(selectedListTypes)
             .sortedBy { it.task.name }
@@ -39,6 +43,9 @@ class TasksViewModel(
             tasks = filteredTasks,
             searchQuery = query,
             selectedListTypes = selectedListTypes,
+            unsyncedTaskCount = unsyncedTaskDetailsList.size,
+            isUploading = uploadStatus.isUploading,
+            isSyncScheduled = uploadStatus.isScheduled || unsyncedTaskDetailsList.isNotEmpty(),
         )
     }.stateIn(
         scope = viewModelScope,

@@ -25,13 +25,25 @@ class TaskDao(
         }
     }
 
+    suspend fun get(): List<TaskEntity> {
+        return withContext(dispatcherProvider.io) {
+            dbQueries.selectTasks().executeAsList()
+        }
+    }
+
     suspend fun insert(taskEntities: List<TaskEntity>) {
         withContext(dispatcherProvider.io) {
             dbQueries.transaction {
                 taskEntities.forEach {
-                    insert(it)
+                    insertEntity(it)
                 }
             }
+        }
+    }
+
+    suspend fun insert(taskEntity: TaskEntity) {
+        withContext(dispatcherProvider.io) {
+            insertEntity(taskEntity)
         }
     }
 
@@ -40,7 +52,7 @@ class TaskDao(
             dbQueries.transaction {
                 deleteAll()
                 taskEntities.forEach {
-                    insert(it)
+                    insertEntity(it)
                 }
             }
         }
@@ -50,7 +62,7 @@ class TaskDao(
         dbQueries.deleteTasks()
     }
 
-    private fun insert(taskEntity: TaskEntity) {
+    private fun insertEntity(taskEntity: TaskEntity) {
         dbQueries.insertTask(
             taskEntity.id,
             taskEntity.name,
@@ -66,5 +78,4 @@ class TaskDao(
             taskEntity.status
         )
     }
-
 }

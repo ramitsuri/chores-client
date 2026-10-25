@@ -257,6 +257,12 @@ class ContentDownloaderTest {
 
     private class FakeTasksRepo : TasksRepository {
         var fetchTasksCalled = false
+        var uploadLocalCalled = false
+
+        override suspend fun uploadLocal(): List<String> {
+            uploadLocalCalled = true
+            return emptyList()
+        }
 
         override suspend fun fetchTasks(): Result<Unit> {
             fetchTasksCalled = true
@@ -264,6 +270,7 @@ class ContentDownloaderTest {
         }
 
         override fun getTasksFlow(): Flow<List<TaskDetails>> = flowOf(emptyList())
+        override fun getUnsyncedTasksFlow(): Flow<List<TaskDetails>> = flowOf(emptyList())
         override suspend fun getTask(id: String): Task? = null
         override suspend fun addTask(
             name: String,

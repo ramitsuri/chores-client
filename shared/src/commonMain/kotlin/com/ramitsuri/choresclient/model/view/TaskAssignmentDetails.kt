@@ -10,6 +10,7 @@ data class TaskAssignmentDetails(
     val willReminderBeSet: Boolean,
     val assignedToLoggedInUser: Boolean,
     val isSharedList: Boolean = false,
+    val isTaskChangeSyncPending: Boolean = false,
 )
 
 fun List<TaskAssignmentDetails>.filterByListTypes(selectedListTypes: Set<ListTypeSelection>): List<TaskAssignmentDetails> {

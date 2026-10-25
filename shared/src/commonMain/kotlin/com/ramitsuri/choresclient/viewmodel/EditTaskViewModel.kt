@@ -8,7 +8,6 @@ import com.ramitsuri.choresclient.model.error.EditTaskError
 import com.ramitsuri.choresclient.model.view.EditTaskViewState
 import com.ramitsuri.choresclient.model.view.RepeatUnitSelectionItem
 import com.ramitsuri.choresclient.repositories.TasksRepository
-import com.ramitsuri.choresclient.utils.ContentDownloader
 import com.ramitsuri.choresclient.utils.DispatcherProvider
 import com.ramitsuri.choresclient.utils.LogHelper
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,9 +27,7 @@ import org.koin.core.component.inject
 class EditTaskViewModel(
     taskId: String,
     private val tasksRepository: TasksRepository,
-    private val contentDownloader: ContentDownloader,
     private val dispatchers: DispatcherProvider,
-    private val clock: Clock,
 ) : ViewModel(), KoinComponent {
     private val logger: LogHelper by inject()
 
@@ -117,9 +114,6 @@ class EditTaskViewModel(
             )
             when (result) {
                 is Result.Success -> {
-                    // So that any task assignments for the task that was edited, are removed until
-                    // new assignments are created
-                    contentDownloader.download(now = clock.now(), forceDownload = true)
                     setTaskEdited()
                 }
 

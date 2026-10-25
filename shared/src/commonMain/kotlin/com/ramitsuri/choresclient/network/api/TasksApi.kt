@@ -4,12 +4,16 @@ import com.ramitsuri.choresclient.model.Result
 import com.ramitsuri.choresclient.network.apiRequest
 import com.ramitsuri.choresclient.network.model.AddTaskRequest
 import com.ramitsuri.choresclient.network.model.EditTaskRequest
+import com.ramitsuri.choresclient.network.model.TaskBatchDto
+import com.ramitsuri.choresclient.network.model.TaskBatchResponseDto
 import com.ramitsuri.choresclient.network.model.TaskDto
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
+import io.ktor.http.contentType
 import kotlinx.coroutines.CoroutineDispatcher
 
 class TasksApi(
@@ -22,6 +26,7 @@ class TasksApi(
             client.get("$baseUrl/tasks")
         }
     }
+
     suspend fun addTask(task: AddTaskRequest): Result<Unit> {
         return apiRequest(ioDispatcher) {
             client.post("$baseUrl/tasks") {
@@ -34,6 +39,15 @@ class TasksApi(
         return apiRequest(ioDispatcher) {
             client.put("$baseUrl/tasks/$taskId") {
                 setBody(task)
+            }
+        }
+    }
+
+    suspend fun batchTasks(taskRequests: List<TaskBatchDto>): Result<TaskBatchResponseDto> {
+        return apiRequest(ioDispatcher) {
+            client.post("$baseUrl/tasks/batch") {
+                contentType(ContentType.Application.Json)
+                setBody(taskRequests)
             }
         }
     }

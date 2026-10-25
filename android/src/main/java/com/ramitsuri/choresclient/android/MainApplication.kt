@@ -24,11 +24,13 @@ import com.ramitsuri.choresclient.repositories.LoginRepository
 import com.ramitsuri.choresclient.repositories.SyncRepository
 import com.ramitsuri.choresclient.repositories.TaskAssignmentsRepository
 import com.ramitsuri.choresclient.repositories.TasksRepository
+import com.ramitsuri.choresclient.android.work.TaskUploadWorker
 import com.ramitsuri.choresclient.utils.AppLifecycleObserver
 import com.ramitsuri.choresclient.utils.ContentDownloadRequestHandler
-import com.ramitsuri.choresclient.utils.ContentDownloader
 import com.ramitsuri.choresclient.utils.DispatcherProvider
 import com.ramitsuri.choresclient.utils.LogHelper
+import com.ramitsuri.choresclient.utils.TaskUploadRequestHandler
+import kotlin.time.Clock
 import com.ramitsuri.choresclient.viewmodel.AddTaskViewModel
 import com.ramitsuri.choresclient.viewmodel.AssignmentsViewModel
 import com.ramitsuri.choresclient.viewmodel.CompletedAssignmentsViewModel
@@ -42,7 +44,6 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.dsl.module
 import java.util.UUID
-import kotlin.time.Clock
 
 class MainApplication : Application(), KoinComponent {
 
@@ -128,6 +129,10 @@ class MainApplication : Application(), KoinComponent {
                     ContentDownloadWorker
                 }
 
+                factory<TaskUploadRequestHandler> {
+                    TaskUploadWorker
+                }
+
                 factory<CompletedByOthersNotificationHandler> {
                     AndroidCompletedByOthersNotificationHandler(
                         get<Context>(),
@@ -139,6 +144,8 @@ class MainApplication : Application(), KoinComponent {
                     AssignmentsViewModel(
                         assignmentId = parameters.getOrNull(),
                         get<TaskAssignmentsRepository>(),
+                        get<TasksRepository>(),
+                        get<ContentDownloadRequestHandler>(),
                         get<PrefManager>(),
                         get<CoroutineScope>(),
                         get<Clock>(),
@@ -155,6 +162,7 @@ class MainApplication : Application(), KoinComponent {
                 viewModel {
                     TasksViewModel(
                         get<TasksRepository>(),
+                        get<TaskUploadRequestHandler>(),
                     )
                 }
 
@@ -188,9 +196,7 @@ class MainApplication : Application(), KoinComponent {
                     EditTaskViewModel(
                         taskId = parameters.get(),
                         get<TasksRepository>(),
-                        get<ContentDownloader>(),
                         get<DispatcherProvider>(),
-                        get<Clock>()
                     )
                 }
             }

@@ -7,6 +7,7 @@ import com.ramitsuri.choresclient.data.db.dao.MemberDao
 import com.ramitsuri.choresclient.data.db.dao.MemberHouseAssociationDao
 import com.ramitsuri.choresclient.data.db.dao.TaskAssignmentDao
 import com.ramitsuri.choresclient.data.db.dao.TaskDao
+import com.ramitsuri.choresclient.data.db.dao.TaskOutboxDao
 import com.ramitsuri.choresclient.data.settings.PrefManager
 import com.ramitsuri.choresclient.network.NetworkProvider
 import com.ramitsuri.choresclient.notification.CompletedByOthersNotificationHandler
@@ -25,6 +26,7 @@ import com.ramitsuri.choresclient.utils.ContentDownloader
 import com.ramitsuri.choresclient.utils.DispatcherProvider
 import com.ramitsuri.choresclient.utils.LogHelper
 import com.ramitsuri.choresclient.utils.PushMessageProcessor
+import com.ramitsuri.choresclient.utils.TaskUploadRequestHandler
 import io.ktor.client.engine.HttpClientEngine
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -84,6 +86,10 @@ private val coreModule = module {
         get<Database>().taskDao
     }
 
+    factory<TaskOutboxDao> {
+        get<Database>().taskOutboxDao
+    }
+
     factory<MemberDao> {
         get<Database>().memberDao
     }
@@ -132,9 +138,12 @@ private val coreModule = module {
         DefaultTasksRepository(
             get<NetworkProvider>().provideTasksApi(),
             get<TaskDao>(),
+            get<TaskOutboxDao>(),
+            get<TaskAssignmentDao>(),
             get<MemberDao>(),
             get<HouseDao>(),
             get<MemberHouseAssociationDao>(),
+            get<TaskUploadRequestHandler>(),
         )
     }
 

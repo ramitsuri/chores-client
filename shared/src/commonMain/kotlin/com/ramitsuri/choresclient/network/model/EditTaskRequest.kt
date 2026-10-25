@@ -19,9 +19,9 @@ data class EditTaskRequest(
     val repeatUnit: RepeatUnit?,
     @Serializable(with = LocalDateTimeSerializer::class)
     val repeatEndDateTime: LocalDateTime?,
+    val houseId: String?,
+    val memberId: String?,
     val rotateMember: Boolean?,
     @Serializable(with = ActiveStatusSerializer::class)
     val status: ActiveStatus?,
-    val houseId: String?,
-    val memberId: String?,
 )

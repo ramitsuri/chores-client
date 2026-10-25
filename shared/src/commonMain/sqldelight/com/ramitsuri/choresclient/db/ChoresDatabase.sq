@@ -73,6 +73,10 @@ deleteAssignment:
 DELETE FROM TaskAssignmentEntity
 WHERE id IN (?);
 
+deleteAssignmentsForTasks:
+DELETE FROM TaskAssignmentEntity
+WHERE taskId IN ?;
+
 /**
  * MEMBER
  */
@@ -124,10 +128,47 @@ SELECT * FROM TaskEntity;
 insertTask:
 INSERT OR REPLACE INTO
 TaskEntity (id, name, description, dueDateTime, repeatValue, repeatUnit, repeatEndDateTime, houseId, memberId, rotateMember, createdDate, status)
-VALUES (?, ?, ?, ?, ?, ?, ?,?, ?, ?, ?, ?);
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 deleteTasks:
 DELETE FROM TaskEntity;
+
+/**
+ * TASK OUTBOX
+ */
+CREATE TABLE IF NOT EXISTS TaskOutboxEntity (
+    id TEXT NOT NULL PRIMARY KEY,
+    type TEXT NOT NULL,
+    taskId TEXT,
+    name TEXT,
+    description TEXT,
+    dueDateTime TEXT AS LocalDateTime,
+    repeatValue INTEGER,
+    repeatUnit INTEGER AS RepeatUnit,
+    repeatEndDateTime TEXT AS LocalDateTime,
+    houseId TEXT,
+    memberId TEXT,
+    rotateMember INTEGER AS Boolean,
+    status INTEGER AS ActiveStatus,
+    createdDate INTEGER AS Instant NOT NULL
+);
+
+selectOutboxItems:
+SELECT * FROM TaskOutboxEntity
+ORDER BY createdDate ASC;
+
+insertOutboxItem:
+INSERT OR REPLACE INTO
+TaskOutboxEntity (id, type, taskId, name, description, dueDateTime, repeatValue, repeatUnit, repeatEndDateTime, houseId, memberId, rotateMember, status, createdDate)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+deleteOutboxItem:
+DELETE FROM TaskOutboxEntity
+WHERE id = ?;
+
+deleteOutboxItems:
+DELETE FROM TaskOutboxEntity
+WHERE id IN ?;
 
 /**
  * ALARM

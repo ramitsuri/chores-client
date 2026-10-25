@@ -25,6 +25,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.CloudSync
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.House
 import androidx.compose.material.icons.filled.Repeat
@@ -52,6 +53,7 @@ import com.ramitsuri.choresclient.android.ui.common.AppFAB
 import com.ramitsuri.choresclient.android.ui.common.AppTopAppBar
 import com.ramitsuri.choresclient.android.ui.common.PersonalSharedToggle
 import com.ramitsuri.choresclient.android.ui.common.PillChip
+import com.ramitsuri.choresclient.android.ui.common.SyncStatusCard
 import com.ramitsuri.choresclient.android.ui.theme.ChoresClientTheme
 import com.ramitsuri.choresclient.android.ui.theme.dimens
 import com.ramitsuri.choresclient.android.utils.formatRepeatUnitCompact
@@ -131,6 +133,15 @@ fun TasksScreen(
                 selectedTypes = viewState.selectedListTypes,
                 onListTypeClicked = onListTypeClicked,
             )
+
+            if (viewState.unsyncedTaskCount > 0 || viewState.isUploading) {
+                Spacer(modifier = Modifier.height(MaterialTheme.dimens.medium))
+                SyncStatusCard(
+                    unsyncedTaskCount = viewState.unsyncedTaskCount,
+                    isUploading = viewState.isUploading,
+                    isSyncScheduled = viewState.isSyncScheduled
+                )
+            }
 
             Spacer(modifier = Modifier.height(MaterialTheme.dimens.medium))
 
@@ -265,6 +276,15 @@ private fun TemplateCardItem(
                         contentColor = MaterialTheme.colorScheme.onTertiaryContainer
                     )
                 }
+
+                if (details.isSyncPending) {
+                    PillChip(
+                        text = stringResource(id = R.string.sync_status_unsynced_badge),
+                        icon = Icons.Default.CloudSync,
+                        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
         }
     }
@@ -339,6 +359,49 @@ private fun PreviewTasksScreen() {
                         )
                     ),
                     selectedListTypes = setOf(ListTypeSelection.PERSONAL),
+                ),
+                onBack = {},
+                onAddTaskClicked = {},
+                onEditTaskClicked = {},
+                onSearchQueryChanged = {},
+                onListTypeClicked = {},
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun PreviewTasksScreenUnsynced() {
+    ChoresClientTheme {
+        Surface {
+            TasksScreen(
+                viewState = TasksViewState(
+                    loading = false,
+                    tasks = listOf(
+                        TaskDetails(
+                            task = Task(
+                                id = "1",
+                                name = "Clean Kitchen",
+                                description = "Clean counters and sink",
+                                dueDateTime = LocalDateTime.now(),
+                                repeatValue = 1,
+                                repeatUnit = RepeatUnit.DAY,
+                                repeatEndDateTime = null,
+                                houseId = "house1",
+                                memberId = "member1",
+                                rotateMember = true,
+                                createdDate = Clock.System.now(),
+                                status = ActiveStatus.ACTIVE,
+                            ),
+                            memberName = "Alex",
+                            houseName = "Home",
+                            isSyncPending = true
+                        )
+                    ),
+                    selectedListTypes = setOf(ListTypeSelection.PERSONAL),
+                    unsyncedTaskCount = 1,
+                    isSyncScheduled = true,
                 ),
                 onBack = {},
                 onAddTaskClicked = {},

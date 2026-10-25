@@ -55,4 +55,5 @@ object NotificationActionExtra {
 object NotificationId {
     const val COMPLETED_BY_OTHERS = Int.MAX_VALUE
     const val CONTENT_DOWNLOAD_FOREGROUND_WORKER = Int.MAX_VALUE - 1
+    const val TASK_UPLOAD_FOREGROUND_WORKER = Int.MAX_VALUE - 2
 }

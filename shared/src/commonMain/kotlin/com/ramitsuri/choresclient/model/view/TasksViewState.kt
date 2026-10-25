@@ -5,4 +5,7 @@ data class TasksViewState(
     val tasks: List<TaskDetails> = emptyList(),
     val selectedListTypes: Set<ListTypeSelection> = emptySet(),
     val searchQuery: String = "",
+    val unsyncedTaskCount: Int = 0,
+    val isUploading: Boolean = false,
+    val isSyncScheduled: Boolean = false,
 )

@@ -41,6 +41,7 @@ import com.ramitsuri.choresclient.android.R
 import com.ramitsuri.choresclient.android.ui.common.AppFAB
 import com.ramitsuri.choresclient.android.ui.common.AppTopAppBar
 import com.ramitsuri.choresclient.android.ui.common.PersonalSharedToggle
+import com.ramitsuri.choresclient.android.ui.common.SyncStatusCard
 import com.ramitsuri.choresclient.android.ui.common.TaskCard
 import com.ramitsuri.choresclient.android.ui.theme.ChoresClientTheme
 import com.ramitsuri.choresclient.android.ui.theme.dimens
@@ -129,6 +130,11 @@ fun AssignmentsScreen(
             AssignmentsContent(
                 isLoading = viewState.loading,
                 assignments = viewState.assignments,
+                unsyncedTaskCount = viewState.unsyncedTaskCount,
+                unsyncedAddCount = viewState.unsyncedAddCount,
+                unsyncedEditCount = viewState.unsyncedEditCount,
+                isUploading = viewState.isUploading,
+                isSyncScheduled = viewState.isSyncScheduled,
                 pendingRemovals = viewState.pendingRemovals,
                 allowSwipeForCompletion = viewState.allowSwipeForCompletion,
                 onMarkAsDone = onMarkAsDoneCelebration,
@@ -150,6 +156,11 @@ fun AssignmentsScreen(
 private fun AssignmentsContent(
     isLoading: Boolean,
     assignments: Assignments,
+    unsyncedTaskCount: Int,
+    unsyncedAddCount: Int,
+    unsyncedEditCount: Int,
+    isUploading: Boolean,
+    isSyncScheduled: Boolean,
     pendingRemovals: Map<String, Long>,
     allowSwipeForCompletion: Boolean,
     onMarkAsDone: (String) -> Unit,
@@ -170,6 +181,17 @@ private fun AssignmentsContent(
             selectedTypes = selectedListTypes,
             onListTypeClicked = onListTypeClicked
         )
+
+        if ((unsyncedTaskCount > 0) || isUploading) {
+            Spacer(modifier = Modifier.height(MaterialTheme.dimens.medium))
+            SyncStatusCard(
+                unsyncedTaskCount = unsyncedTaskCount,
+                unsyncedAddCount = unsyncedAddCount,
+                unsyncedEditCount = unsyncedEditCount,
+                isUploading = isUploading,
+                isSyncScheduled = isSyncScheduled
+            )
+        }
 
         Spacer(modifier = Modifier.height(MaterialTheme.dimens.medium))
 
@@ -445,6 +467,33 @@ private fun PreviewAssignmentContent() {
             otherAssignmentsCount = mapOf(),
         ),
         allowSwipeForCompletion = false
+    )
+    ChoresClientTheme {
+        Surface {
+            AssignmentsScreen(
+                viewState = viewState,
+                onMarkAsDone = { },
+                onMarkAsWontDo = { },
+                onSnooze = { _, _ -> },
+                onAddTaskClicked = { },
+                onEditTaskClicked = { },
+                onSettingsClicked = { },
+                onListTypeClicked = { },
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun PreviewAssignmentContentWithPendingSync() {
+    val viewState = AssignmentsViewState(
+        loading = false,
+        assignments = Assignments.default(),
+        unsyncedTaskCount = 2,
+        unsyncedAddCount = 1,
+        unsyncedEditCount = 1,
+        isSyncScheduled = true,
     )
     ChoresClientTheme {
         Surface {

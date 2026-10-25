@@ -45,7 +45,6 @@ data class TaskDto(
         rotateMember = task.rotateMember,
         createdDate = task.createdDate,
         status = task.status
-
     )
 }
 

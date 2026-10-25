@@ -1,26 +1,27 @@
 package com.ramitsuri.choresclient.data.db
 
+import app.cash.sqldelight.ColumnAdapter
+import app.cash.sqldelight.db.SqlDriver
+import com.ramitsuri.choresclient.data.db.dao.AlarmDao
+import com.ramitsuri.choresclient.data.db.dao.HouseDao
+import com.ramitsuri.choresclient.data.db.dao.MemberDao
+import com.ramitsuri.choresclient.data.db.dao.MemberHouseAssociationDao
+import com.ramitsuri.choresclient.data.db.dao.TaskAssignmentDao
+import com.ramitsuri.choresclient.data.db.dao.TaskDao
+import com.ramitsuri.choresclient.data.db.dao.TaskOutboxDao
+import com.ramitsuri.choresclient.db.AlarmEntity
+import com.ramitsuri.choresclient.db.ChoresDatabase
+import com.ramitsuri.choresclient.db.HouseEntity
+import com.ramitsuri.choresclient.db.TaskAssignmentEntity
+import com.ramitsuri.choresclient.db.TaskEntity
+import com.ramitsuri.choresclient.db.TaskOutboxEntity
 import com.ramitsuri.choresclient.model.enums.ActiveStatus
 import com.ramitsuri.choresclient.model.enums.CreateType
 import com.ramitsuri.choresclient.model.enums.ProgressStatus
 import com.ramitsuri.choresclient.model.enums.RepeatUnit
-import com.ramitsuri.choresclient.data.db.dao.AlarmDao
-import com.ramitsuri.choresclient.data.db.dao.HouseDao
-import com.ramitsuri.choresclient.data.db.dao.MemberDao
-import com.ramitsuri.choresclient.data.db.dao.TaskAssignmentDao
-import com.ramitsuri.choresclient.data.db.dao.TaskDao
-import com.ramitsuri.choresclient.db.AlarmEntity
-import com.ramitsuri.choresclient.db.ChoresDatabase
-import com.ramitsuri.choresclient.db.HouseEntity
-import com.ramitsuri.choresclient.db.MemberEntity
-import com.ramitsuri.choresclient.db.TaskAssignmentEntity
-import com.ramitsuri.choresclient.db.TaskEntity
 import com.ramitsuri.choresclient.utils.DispatcherProvider
-import app.cash.sqldelight.ColumnAdapter
-import app.cash.sqldelight.db.SqlDriver
-import com.ramitsuri.choresclient.data.db.dao.MemberHouseAssociationDao
-import kotlin.time.Instant
 import kotlinx.datetime.LocalDateTime
+import kotlin.time.Instant
 
 class Database(
     driver: SqlDriver,
@@ -45,6 +46,13 @@ class Database(
             createdDateAdapter = instantConverter,
             statusAdapter = statusConverter
         ),
+        TaskOutboxEntityAdapter = TaskOutboxEntity.Adapter(
+            dueDateTimeAdapter = localDateTimeConverter,
+            repeatUnitAdapter = repeatUnitConverter,
+            repeatEndDateTimeAdapter = localDateTimeConverter,
+            statusAdapter = statusConverter,
+            createdDateAdapter = instantConverter
+        ),
         HouseEntityAdapter = HouseEntity.Adapter(
             createdDateAdapter = instantConverter,
             statusAdapter = statusConverter
@@ -53,6 +61,7 @@ class Database(
     private val dbQuery = database.choresDatabaseQueries
     val taskAssignmentDao = TaskAssignmentDao(dbQuery, dispatcherProvider)
     val taskDao = TaskDao(dbQuery, dispatcherProvider)
+    val taskOutboxDao = TaskOutboxDao(dbQuery, dispatcherProvider)
     val memberDao = MemberDao(dbQuery, dispatcherProvider)
     val alarmDao = AlarmDao(dbQuery, dispatcherProvider)
     val houseDao = HouseDao(dbQuery, dispatcherProvider)

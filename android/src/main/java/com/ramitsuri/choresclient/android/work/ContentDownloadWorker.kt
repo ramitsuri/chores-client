@@ -11,6 +11,7 @@ import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequest
 import androidx.work.OutOfQuotaPolicy
 import androidx.work.PeriodicWorkRequest
+import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
@@ -19,6 +20,7 @@ import com.ramitsuri.choresclient.android.utils.NotificationId
 import com.ramitsuri.choresclient.utils.ContentDownloadRequestHandler
 import com.ramitsuri.choresclient.utils.ContentDownloader
 import com.ramitsuri.choresclient.utils.LogHelper
+import com.ramitsuri.choresclient.utils.SyncStatus
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlin.time.Clock
@@ -132,6 +134,25 @@ class ContentDownloadWorker(
             )
         }
 
+        override fun getSyncStatusFlow(): Flow<SyncStatus> {
+            val context = get<Context>()
+            return WorkManager.getInstance(context)
+                .getWorkInfosByTagFlow(WORK_NAME_ONE_TIME)
+                .map { workInfos ->
+                    val isRunning = workInfos.any {
+                        it.state == WorkInfo.State.RUNNING ||
+                            it.progress.getBoolean(RUNNING_STATUS, false)
+                    }
+                    val isScheduled = workInfos.any {
+                        it.state == WorkInfo.State.ENQUEUED
+                    }
+                    SyncStatus(
+                        isUploading = isRunning,
+                        isScheduled = isScheduled,
+                    )
+                }
+        }
+
         private fun enqueue(
             context: Context,
             forceDownload: Boolean,
@@ -176,7 +197,7 @@ class ContentDownloadWorker(
         private fun getConstraints(): Constraints {
             return Constraints.Builder()
                 .setRequiresCharging(false)
-                //.setRequiredNetworkType(NetworkType.UNMETERED)
+                .setRequiredNetworkType(NetworkType.UNMETERED)
                 .build()
         }
     }

@@ -113,6 +113,13 @@ class TaskAssignmentDao(
         }
     }
 
+    suspend fun deleteForTasks(taskIds: List<String>) {
+        if (taskIds.isEmpty()) return
+        withContext(dispatcherProvider.io) {
+            dbQueries.deleteAssignmentsForTasks(taskIds)
+        }
+    }
+
     private fun delete(id: String) {
         dbQueries.deleteAssignment(id)
     }

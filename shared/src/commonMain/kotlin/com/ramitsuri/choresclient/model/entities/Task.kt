@@ -18,20 +18,20 @@ data class Task(
     val memberId: String,
     val rotateMember: Boolean,
     val createdDate: Instant,
-    val status: ActiveStatus
+    val status: ActiveStatus,
 ) {
     constructor(taskEntity: TaskEntity) : this(
-        taskEntity.id,
-        taskEntity.name,
-        taskEntity.description,
-        taskEntity.dueDateTime,
-        taskEntity.repeatValue.toInt(),
-        taskEntity.repeatUnit,
-        taskEntity.repeatEndDateTime,
-        taskEntity.houseId,
-        taskEntity.memberId,
-        taskEntity.rotateMember,
-        taskEntity.createdDate,
-        taskEntity.status
+        id = taskEntity.id,
+        name = taskEntity.name,
+        description = taskEntity.description,
+        dueDateTime = taskEntity.dueDateTime,
+        repeatValue = taskEntity.repeatValue.toInt(),
+        repeatUnit = taskEntity.repeatUnit,
+        repeatEndDateTime = taskEntity.repeatEndDateTime,
+        houseId = taskEntity.houseId,
+        memberId = taskEntity.memberId,
+        rotateMember = taskEntity.rotateMember,
+        createdDate = taskEntity.createdDate,
+        status = taskEntity.status,
     )
 }

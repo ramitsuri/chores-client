@@ -6,6 +6,11 @@ data class AssignmentsViewState(
     val selectedListTypes: Set<ListTypeSelection> = emptySet(),
     val customSnoozeHours: String = "",
     val customSnoozeMinutes: String = "",
+    val unsyncedTaskCount: Int = 0,
+    val unsyncedAddCount: Int = 0,
+    val unsyncedEditCount: Int = 0,
+    val isUploading: Boolean = false,
+    val isSyncScheduled: Boolean = false,
     val pendingRemovals: Map<String, Long> = emptyMap(),
     val allowSwipeForCompletion: Boolean = false,
 )

@@ -10,6 +10,7 @@ import com.ramitsuri.choresclient.model.view.ListTypeSelection
 import com.ramitsuri.choresclient.model.view.TaskAssignmentDetails
 import com.ramitsuri.choresclient.model.view.filterByListTypes
 import com.ramitsuri.choresclient.repositories.TaskAssignmentsRepository
+import com.ramitsuri.choresclient.repositories.TasksRepository
 import com.ramitsuri.choresclient.utils.differenceInDays
 import com.ramitsuri.choresclient.utils.now
 import kotlinx.coroutines.CoroutineScope
@@ -24,12 +25,15 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDateTime
+import com.ramitsuri.choresclient.utils.ContentDownloadRequestHandler
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.seconds
 
 class AssignmentsViewModel(
     assignmentId: String?,
     private val repository: TaskAssignmentsRepository,
+    private val tasksRepository: TasksRepository,
+    private val contentDownloadRequestHandler: ContentDownloadRequestHandler,
     private val prefManager: PrefManager,
     private val longLivingCoroutineScope: CoroutineScope,
     private val clock: Clock = Clock.System,
@@ -112,10 +116,20 @@ class AssignmentsViewModel(
         } else {
             combine(
                 repository.getLocalFlow(loggedInMemberId),
+                tasksRepository.getUnsyncedTasksFlow(),
+                contentDownloadRequestHandler.getSyncStatusFlow(),
                 selectedListTypes,
                 pendingRemovals,
-            ) { taskAssignmentDetails, selectedListTypes, pendingRemovals ->
+            ) { taskAssignmentDetails, unsyncedTasks, syncStatus, selectedListTypes, pendingRemovals ->
+                val pendingTaskIds = unsyncedTasks.mapTo(mutableSetOf()) { it.task.id }
                 val filtered = taskAssignmentDetails
+                    .map { details ->
+                        if (pendingTaskIds.contains(details.taskAssignment.taskId)) {
+                            details.copy(isTaskChangeSyncPending = true)
+                        } else {
+                            details
+                        }
+                    }
                     .filterByListTypes(selectedListTypes)
                     .filter { it.taskAssignment.progressStatus == ProgressStatus.TODO }
                     .toMutableList()
@@ -139,6 +153,11 @@ class AssignmentsViewModel(
                     loading = false,
                     assignments = assignments,
                     selectedListTypes = selectedListTypes,
+                    unsyncedTaskCount = unsyncedTasks.size,
+                    unsyncedAddCount = 0,
+                    unsyncedEditCount = 0,
+                    isUploading = syncStatus.isUploading,
+                    isSyncScheduled = syncStatus.isScheduled || unsyncedTasks.isNotEmpty(),
                     pendingRemovals = pendingRemovals,
                     allowSwipeForCompletion = prefManager.swipeForTaskAssignmentCompletion(),
                 )

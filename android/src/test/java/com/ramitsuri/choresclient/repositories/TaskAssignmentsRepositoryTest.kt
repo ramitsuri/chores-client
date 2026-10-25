@@ -18,6 +18,7 @@ import com.ramitsuri.choresclient.reminder.ReminderScheduler
 import com.ramitsuri.choresclient.utils.ContentDownloadRequestHandler
 import com.ramitsuri.choresclient.utils.DispatcherProvider
 import com.ramitsuri.choresclient.utils.LogHelper
+import com.ramitsuri.choresclient.utils.SyncStatus
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
@@ -388,6 +389,10 @@ class TaskAssignmentsRepositoryTest {
             forceRemindFuture: Boolean
         ) {
             delayedDownloadRequested = true
+        }
+
+        override fun getSyncStatusFlow(): Flow<SyncStatus> {
+            return flowOf(SyncStatus())
         }
     }
 }

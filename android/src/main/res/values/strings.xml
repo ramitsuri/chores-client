@@ -170,4 +170,15 @@
     <string name="repeat_unit_year">Year</string>
     <string name="repeat_unit_on_complete">On completion</string>
 
+    <!-- Sync Indicator -->
+    <string name="sync_status_pending_tasks_one">1 task waiting to sync</string>
+    <string name="sync_status_pending_tasks_format">%1$d tasks waiting to sync</string>
+    <string name="sync_status_scheduled">Scheduled to sync in ~1 min</string>
+    <string name="sync_status_uploading">Syncing task changes with server…</string>
+    <string name="sync_status_unsynced_badge">Pending sync</string>
+    <string name="sync_card_title">Pending Task Sync</string>
+    <string name="sync_card_summary_add_edit">%1$d added, %2$d edited</string>
+    <string name="sync_card_summary_add">%1$d added</string>
+    <string name="sync_card_summary_edit">%1$d edited</string>
+
 </resources>
