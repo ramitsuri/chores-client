@@ -7,7 +7,6 @@ import com.google.android.material.color.DynamicColors
 import com.ramitsuri.choresclient.AppInfo
 import com.ramitsuri.choresclient.android.notification.AndroidCompletedByOthersNotificationHandler
 import com.ramitsuri.choresclient.android.notification.DefaultNotificationManager
-import com.ramitsuri.choresclient.android.notification.ShowNotificationWorker
 import com.ramitsuri.choresclient.android.reminder.DefaultAlarmHandler
 import com.ramitsuri.choresclient.android.utils.DefaultAppLifecycleObserver
 import com.ramitsuri.choresclient.android.work.ContentDownloadWorker
@@ -110,7 +109,6 @@ class MainApplication : Application(), KoinComponent {
 
                 single<AlarmHandler> {
                     DefaultAlarmHandler(
-                        ShowNotificationWorker.Companion,
                         get<NotificationManager>(),
                         get<AlarmDao>(),
                         get<Context>()

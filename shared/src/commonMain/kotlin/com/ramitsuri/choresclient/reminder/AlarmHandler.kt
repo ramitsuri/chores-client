@@ -17,4 +17,6 @@ interface AlarmHandler {
     suspend fun reschedule(assignmentId: String, showAtTime: LocalDateTime)
 
     suspend fun cancel(assignmentIds: List<String>)
+
+    suspend fun onAlarmFired() {}
 }

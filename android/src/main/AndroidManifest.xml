@@ -39,6 +39,15 @@
             android:exported="true" />
 
         <receiver
+            android:name=".reminder.AlarmReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.ramitsuri.choresclient.ACTION_SHOW_NOTIFICATION" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
             android:name=".broadcast.RestartBroadcastReceiver"
             android:enabled="true"
             android:exported="false">

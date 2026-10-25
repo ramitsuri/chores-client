@@ -3,12 +3,17 @@ package com.ramitsuri.choresclient.android.broadcast
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import com.ramitsuri.choresclient.reminder.AlarmHandler
 import com.ramitsuri.choresclient.utils.ContentDownloadRequestHandler
 import com.ramitsuri.choresclient.utils.LogHelper
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 class RestartBroadcastReceiver : BroadcastReceiver(), KoinComponent {
+    private val coroutineScope: CoroutineScope by inject()
+    private val alarmHandler: AlarmHandler by inject()
     private val logger: LogHelper by inject()
     private val contentDownloadRequestHandler: ContentDownloadRequestHandler by inject()
 
@@ -22,7 +27,17 @@ class RestartBroadcastReceiver : BroadcastReceiver(), KoinComponent {
         ) {
             return
         }
-        logger.v(TAG, "Scheduling download after action: ${intent.action}")
+        logger.v(TAG, "Restoring alarm and scheduling download after action: ${intent.action}")
+        val pendingResult = goAsync()
+        coroutineScope.launch {
+            try {
+                alarmHandler.onAlarmFired()
+            } catch (e: Exception) {
+                logger.v(TAG, "Error restoring alarm on reboot: ${e.message}")
+            } finally {
+                pendingResult.finish()
+            }
+        }
         // App restarted or updated. ForceRemindPastDue so that notifications that were dismissed
         // from restart or update can be shown
         contentDownloadRequestHandler.requestDelayedDownload(forceRemindPastDue = true)
