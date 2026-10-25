@@ -12,7 +12,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class TaskBatchResponseDto(
     val successfulRequestIds: List<String> = emptyList(),
-    val deleteTaskAssignmentsTaskIds: List<String> = emptyList()
+    val deleteTaskAssignmentsTaskIds: List<String> = emptyList(),
+    val tasks: List<TaskDto> = emptyList()
 )
 
 @Serializable

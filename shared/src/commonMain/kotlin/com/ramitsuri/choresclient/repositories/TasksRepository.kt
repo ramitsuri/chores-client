@@ -97,10 +97,17 @@ class DefaultTasksRepository(
                 val succeededClientRequestIds = batchResponse.successfulRequestIds
                 logger.v(TAG, "Succeeded clientRequestIds: ${succeededClientRequestIds.joinToString()}")
                 logger.v(TAG, "Delete task assignment task IDs: ${batchResponse.deleteTaskAssignmentsTaskIds.joinToString()}")
+                logger.v(TAG, "Returned tasks: ${batchResponse.tasks.joinToString { it.id }}")
 
                 taskOutboxDao.delete(succeededClientRequestIds)
+
                 if (batchResponse.deleteTaskAssignmentsTaskIds.isNotEmpty()) {
                     taskAssignmentDao.deleteForTasks(batchResponse.deleteTaskAssignmentsTaskIds)
+                }
+
+                if (batchResponse.tasks.isNotEmpty()) {
+                    val taskEntities = batchResponse.tasks.map { it.toTaskEntity() }
+                    taskDao.insert(taskEntities)
                 }
 
                 succeededClientRequestIds

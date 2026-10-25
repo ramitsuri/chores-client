@@ -197,7 +197,7 @@ class ContentDownloadWorker(
         private fun getConstraints(): Constraints {
             return Constraints.Builder()
                 .setRequiresCharging(false)
-                .setRequiredNetworkType(NetworkType.UNMETERED)
+                //.setRequiredNetworkType(NetworkType.UNMETERED)
                 .build()
         }
     }
