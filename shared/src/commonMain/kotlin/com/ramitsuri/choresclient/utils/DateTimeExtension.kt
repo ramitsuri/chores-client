@@ -14,9 +14,13 @@ fun LocalDateTime.Companion.now(
 
 fun LocalDateTime.plus(
     seconds: Int = 0,
+    days: Int = 0,
     timeZone: TimeZone = TimeZone.currentSystemDefault()
 ): LocalDateTime {
-    return toInstant(timeZone).plus(seconds.seconds).toLocalDateTime(timeZone)
+    return toInstant(timeZone)
+        .plus(seconds.seconds)
+        .plus(days.days)
+        .toLocalDateTime(timeZone)
 }
 
 fun LocalDateTime.minus(

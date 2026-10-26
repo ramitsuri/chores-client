@@ -96,6 +96,13 @@ class ReminderScheduler(
                 val existingNotification = existingAlarms.find { notificationEntity ->
                     assignment.id == notificationEntity.assignmentId
                 }
+                if (existingNotification != null
+                    && existingNotification.showAtTime > now
+                    && !forceRemindPastDue
+                ) {
+                    // A future reminder is already scheduled for this past-due task
+                    return@forEach
+                }
                 val lastNotifiedTime = existingNotification?.showAtTime
                 if (lastNotifiedTime.lessThanOneDaySinceLastNotified(now) && !forceRemindPastDue) {
                     // It's been less than 1 day since the notification was last shown and

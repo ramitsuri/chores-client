@@ -1,9 +1,5 @@
 package com.ramitsuri.choresclient.android.reminder
 
-import android.app.AlarmManager
-import android.app.PendingIntent
-import android.content.Context
-import android.content.Intent
 import com.ramitsuri.choresclient.android.R
 import com.ramitsuri.choresclient.android.model.DeepLink
 import com.ramitsuri.choresclient.android.notification.AssignmentActionReceiver
@@ -23,24 +19,22 @@ import com.ramitsuri.choresclient.reminder.AlarmHandler
 import com.ramitsuri.choresclient.repositories.TaskAssignmentsRepository
 import com.ramitsuri.choresclient.utils.LogHelper
 import com.ramitsuri.choresclient.utils.now
+import com.ramitsuri.choresclient.utils.plus
 import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toInstant
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 class DefaultAlarmHandler(
     private val notificationManager: NotificationManager,
     private val alarmDao: AlarmDao,
-    context: Context
+    private val alarmScheduler: AlarmScheduler,
+    private val channelId: String
 ) : AlarmHandler, KoinComponent {
 
     private val logger: LogHelper by inject()
     private val assignmentRepo: TaskAssignmentsRepository by inject()
     private val prefManager: PrefManager by inject()
-    private val context = context.applicationContext
-    private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
     override suspend fun getExisting(): List<AlarmEntity> {
         return alarmDao.get()
@@ -94,11 +88,19 @@ class DefaultAlarmHandler(
     }
 
     override suspend fun onAlarmFired() {
+        val now = LocalDateTime.now()
+        val allAlarms = alarmDao.get()
+
+        val dueAlarms = allAlarms.filter { it.showAtTime <= now }
+        if (dueAlarms.isNotEmpty()) {
+            logger.v(TAG, "onAlarmFired: Processing ${dueAlarms.size} due alarms")
+            processDueAlarms(dueAlarms)
+        }
+
         scheduleNextAlarm()
     }
 
     private suspend fun processDueAlarms(dueAlarms: List<AlarmEntity>) {
-        logger.v(TAG, "Processing ${dueAlarms.size} due alarms")
         for (alarmEntity in dueAlarms) {
             val assignment = assignmentRepo.getLocal(alarmEntity.assignmentId)
             if (assignment == null) {
@@ -126,7 +128,7 @@ class DefaultAlarmHandler(
             notificationManager.showNotification(
                 NotificationInfo(
                     id = notificationId,
-                    channelId = context.getString(R.string.notification_reminders_id),
+                    channelId = channelId,
                     priority = Priority.HIGH,
                     title = assignment.taskName,
                     body = null,
@@ -139,6 +141,20 @@ class DefaultAlarmHandler(
                     clickDeepLinkUri = DeepLink.ASSIGNMENT.uriWithArgsValues(listOf(alarmEntity.assignmentId))
                 )
             )
+
+            // Advance showAtTime by 1 day in AlarmDao so that if the task remains TODO,
+            // the next reminder fires 24 hours later automatically
+            val nextRepeatTime = alarmEntity.showAtTime.plus(days = 1)
+            alarmDao.insert(
+                listOf(
+                    AlarmEntity(
+                        systemNotificationId = alarmEntity.systemNotificationId,
+                        assignmentId = alarmEntity.assignmentId,
+                        showAtTime = nextRepeatTime
+                    )
+                )
+            )
+            logger.v(TAG, "Advanced showAtTime for ${alarmEntity.assignmentId} to $nextRepeatTime")
         }
     }
 
@@ -146,52 +162,23 @@ class DefaultAlarmHandler(
         val now = LocalDateTime.now()
         val allAlarms = alarmDao.get()
 
-        val dueAlarms = allAlarms.filter { it.showAtTime <= now }
-        if (dueAlarms.isNotEmpty()) {
-            processDueAlarms(dueAlarms)
-        }
-
-        val remainingAlarms = alarmDao.get()
-        val nextAlarm = remainingAlarms
+        val nextAlarm = allAlarms
             .filter { it.showAtTime > now }
             .minByOrNull { it.showAtTime }
 
-        val pendingIntent = getAlarmPendingIntent()
-
         if (nextAlarm != null) {
-            val triggerAtMillis = nextAlarm.showAtTime
-                .toInstant(TimeZone.currentSystemDefault())
-                .toEpochMilliseconds()
-
             logger.v(
                 TAG,
-                "Scheduling next alarm for assignment ${nextAlarm.assignmentId} at ${nextAlarm.showAtTime} ($triggerAtMillis)"
+                "Scheduling next alarm for assignment ${nextAlarm.assignmentId} at ${nextAlarm.showAtTime}"
             )
-            alarmManager.setAndAllowWhileIdle(
-                AlarmManager.RTC_WAKEUP,
-                triggerAtMillis,
-                pendingIntent
-            )
+            alarmScheduler.scheduleAlarm(nextAlarm.showAtTime)
         } else {
             logger.v(TAG, "No upcoming alarms. Cancelling single AlarmManager alarm")
-            alarmManager.cancel(pendingIntent)
+            alarmScheduler.cancelAlarm()
         }
-    }
-
-    private fun getAlarmPendingIntent(): PendingIntent {
-        val intent = Intent(context, AlarmReceiver::class.java).apply {
-            action = AlarmReceiver.ACTION_SHOW_NOTIFICATION
-        }
-        return PendingIntent.getBroadcast(
-            context,
-            REQUEST_CODE_ALARM,
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
     }
 
     companion object {
         private const val TAG = "AlarmHandler"
-        private const val REQUEST_CODE_ALARM = 1001
     }
 }
