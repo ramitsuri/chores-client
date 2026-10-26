@@ -3,6 +3,7 @@ package com.ramitsuri.choresclient.model.view
 import com.ramitsuri.choresclient.model.enums.ActiveStatus
 import com.ramitsuri.choresclient.model.enums.RepeatUnit
 import com.ramitsuri.choresclient.model.error.Error
+import com.ramitsuri.choresclient.utils.Defaults
 import kotlin.time.Clock
 import kotlin.time.Instant
 import kotlinx.datetime.LocalDate
@@ -27,6 +28,8 @@ data class EditTaskViewState(
     val timeZone: TimeZone = TimeZone.currentSystemDefault(),
     val date: LocalDate = now.toLocalDateTime(timeZone).date,
     val time: LocalTime = now.toLocalDateTime(timeZone).time,
+    val morningTime: LocalTime = Defaults.MORNING_TIME,
+    val eveningTime: LocalTime = Defaults.EVENING_TIME,
     val rotateMember: Boolean = false,
     val status: ActiveStatus = ActiveStatus.ACTIVE,
     val error: Error? = null,

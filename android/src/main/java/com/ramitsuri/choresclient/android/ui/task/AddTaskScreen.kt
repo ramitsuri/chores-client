@@ -324,8 +324,10 @@ private fun AddTaskContent(
             }
 
             if (showTimePickerState) {
-                TimePicker(
-                    time = state.time,
+                TaskTimePickerDialog(
+                    currentTime = state.time,
+                    morningTime = state.morningTime,
+                    eveningTime = state.eveningTime,
                     onDismissRequested = { showTimePickerState = false },
                     onTimePicked = onTimePicked
                 )

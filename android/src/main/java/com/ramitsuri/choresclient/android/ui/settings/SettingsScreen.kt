@@ -48,6 +48,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.ramitsuri.choresclient.android.R
 import com.ramitsuri.choresclient.android.extensions.string
+import com.ramitsuri.choresclient.android.ui.task.TimePicker
 import com.ramitsuri.choresclient.android.ui.theme.ChoresClientTheme
 import com.ramitsuri.choresclient.android.ui.theme.dimens
 import com.ramitsuri.choresclient.model.error.EditTaskError
@@ -58,7 +59,9 @@ import com.ramitsuri.choresclient.model.view.NotificationActionsViewState
 import com.ramitsuri.choresclient.model.view.SettingsViewState
 import com.ramitsuri.choresclient.model.view.SyncViewState
 import com.ramitsuri.choresclient.utils.formatSyncTime
+import com.ramitsuri.choresclient.utils.formatTime
 import kotlinx.coroutines.launch
+import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlin.time.Clock
 import kotlin.time.Instant
@@ -76,6 +79,8 @@ fun SettingsScreen(
     onAllowTaskAssignmentUndoClicked: () -> Unit,
     onSwipeForTaskAssignmentCompletionClicked: () -> Unit,
     onEnableRemindPastDueClicked: () -> Unit,
+    onMorningTimePicked: (LocalTime) -> Unit = {},
+    onEveningTimePicked: (LocalTime) -> Unit = {},
     onErrorAcknowledged: () -> Unit,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
 ) {
@@ -133,6 +138,42 @@ fun SettingsScreen(
                         checked = state.swipeForTaskAssignmentCompletion,
                         onClick = onSwipeForTaskAssignmentCompletionClicked,
                     )
+                }
+                item {
+                    var showMorningTimePicker by remember { mutableStateOf(false) }
+                    SettingsItem(
+                        title = stringResource(id = R.string.settings_morning_time_title),
+                        subtitle = formatTime(state.morningTime),
+                        onClick = { showMorningTimePicker = true },
+                        showProgress = false
+                    )
+                    if (showMorningTimePicker) {
+                        TimePicker(
+                            time = state.morningTime,
+                            onDismissRequested = { showMorningTimePicker = false },
+                            onTimePicked = { hour, minute ->
+                                onMorningTimePicked(LocalTime(hour, minute))
+                            }
+                        )
+                    }
+                }
+                item {
+                    var showEveningTimePicker by remember { mutableStateOf(false) }
+                    SettingsItem(
+                        title = stringResource(id = R.string.settings_evening_time_title),
+                        subtitle = formatTime(state.eveningTime),
+                        onClick = { showEveningTimePicker = true },
+                        showProgress = false
+                    )
+                    if (showEveningTimePicker) {
+                        TimePicker(
+                            time = state.eveningTime,
+                            onDismissRequested = { showEveningTimePicker = false },
+                            onTimePicked = { hour, minute ->
+                                onEveningTimePicked(LocalTime(hour, minute))
+                            }
+                        )
+                    }
                 }
                 item {
                     NotificationActionItem(

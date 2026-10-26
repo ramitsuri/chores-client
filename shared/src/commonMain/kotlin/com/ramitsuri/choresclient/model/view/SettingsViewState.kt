@@ -1,6 +1,8 @@
 package com.ramitsuri.choresclient.model.view
 
 import com.ramitsuri.choresclient.model.error.Error
+import com.ramitsuri.choresclient.utils.Defaults
+import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlin.time.Instant
 
@@ -12,6 +14,8 @@ data class SettingsViewState(
     val remindPastDueEnabled: Boolean,
     val allowTaskAssignmentUndo: Boolean,
     val swipeForTaskAssignmentCompletion: Boolean,
+    val morningTime: LocalTime = Defaults.MORNING_TIME,
+    val eveningTime: LocalTime = Defaults.EVENING_TIME,
     val timeZone: TimeZone,
     val error: Error? = null
 )

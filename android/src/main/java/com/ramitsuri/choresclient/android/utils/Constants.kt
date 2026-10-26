@@ -4,15 +4,10 @@ import androidx.annotation.StringRes
 import com.ramitsuri.choresclient.android.R
 
 enum class NotificationAction(val action: String, val requestCode: Int, @StringRes val text: Int) {
-    SNOOZE_HOUR(
-        action = "SNOOZE_HOUR",
+    SNOOZE(
+        action = "SNOOZE",
         requestCode = 1,
-        text = R.string.notification_reminder_action_snooze_hours
-    ),
-    SNOOZE_DAY(
-        action = "SNOOZE_DAY",
-        requestCode = 2,
-        text = R.string.notification_reminder_action_snooze_day
+        text = R.string.notification_reminder_action_snooze
     ),
     COMPLETE(
         action = "COMPLETE",
@@ -28,10 +23,6 @@ enum class NotificationAction(val action: String, val requestCode: Int, @StringR
     companion object {
         fun fromAction(action: String): NotificationAction {
             return when (action) {
-                SNOOZE_DAY.action -> {
-                    SNOOZE_DAY
-                }
-
                 WONT_DO.action -> {
                     WONT_DO
                 }
@@ -41,7 +32,7 @@ enum class NotificationAction(val action: String, val requestCode: Int, @StringR
                 }
 
                 else -> {
-                    SNOOZE_HOUR
+                    SNOOZE
                 }
             }
         }

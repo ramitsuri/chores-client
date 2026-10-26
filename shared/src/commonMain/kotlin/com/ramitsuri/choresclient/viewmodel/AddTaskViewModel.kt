@@ -1,5 +1,6 @@
 package com.ramitsuri.choresclient.viewmodel
 
+import com.ramitsuri.choresclient.data.settings.PrefManager
 import com.ramitsuri.choresclient.model.Result
 import com.ramitsuri.choresclient.model.enums.RepeatUnit
 import com.ramitsuri.choresclient.model.view.AddTaskViewState
@@ -14,6 +15,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.time.Clock
 import kotlin.time.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
@@ -26,6 +28,7 @@ import org.koin.core.component.inject
 class AddTaskViewModel(
     private val tasksRepository: TasksRepository,
     private val syncRepository: SyncRepository,
+    private val prefManager: PrefManager,
     private val dispatchers: DispatcherProvider
 ) : ViewModel(), KoinComponent {
     private val logger: LogHelper by inject()
@@ -37,6 +40,28 @@ class AddTaskViewModel(
     val taskAdded: StateFlow<Boolean> = _taskAdded
 
     init {
+        val now = Clock.System.now()
+        val timeZone = TimeZone.currentSystemDefault()
+        val nowLocalDateTime = now.toLocalDateTime(timeZone)
+        val morningTime = prefManager.getMorningTime()
+        val eveningTime = prefManager.getEveningTime()
+
+        val initialTime = if (nowLocalDateTime.time < morningTime) {
+            morningTime
+        } else if (nowLocalDateTime.time < eveningTime) {
+            eveningTime
+        } else {
+            morningTime
+        }
+
+        _state.update {
+            it.copy(
+                morningTime = morningTime,
+                eveningTime = eveningTime,
+                time = initialTime,
+            )
+        }
+
         viewModelScope.launch {
             populateHouses()
             val selectedHouseId = _state.value.houses.firstOrNull { it.getIsSelected() }?.getId()

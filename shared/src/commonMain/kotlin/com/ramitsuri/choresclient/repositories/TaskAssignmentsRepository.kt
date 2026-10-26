@@ -4,6 +4,7 @@ import com.ramitsuri.choresclient.data.db.dao.MemberDao
 import com.ramitsuri.choresclient.data.db.dao.MemberHouseAssociationDao
 import com.ramitsuri.choresclient.data.db.dao.TaskAssignmentDao
 import com.ramitsuri.choresclient.data.db.dao.TaskDao
+import com.ramitsuri.choresclient.data.settings.PrefManager
 import com.ramitsuri.choresclient.db.TaskAssignmentEntity
 import com.ramitsuri.choresclient.model.Result
 import com.ramitsuri.choresclient.model.entities.TaskAssignment
@@ -39,6 +40,7 @@ class DefaultTaskAssignmentsRepository(
     private val reminderScheduler: ReminderScheduler,
     private val alarmHandler: AlarmHandler,
     private val contentDownloadRequestHandler: ContentDownloadRequestHandler,
+    private val prefManager: PrefManager,
 ) : TaskAssignmentsRepository, KoinComponent {
 
     private val logger: LogHelper by inject()
@@ -152,7 +154,11 @@ class DefaultTaskAssignmentsRepository(
         assignmentId: String,
         snoozeType: SnoozeType,
     ) {
-        val showAtTime = getNewReminderTimeSnoozeType(snoozeType)
+        val showAtTime = getNewReminderTimeSnoozeType(
+            snoozeType = snoozeType,
+            morningTime = prefManager.getMorningTime(),
+            eveningTime = prefManager.getEveningTime()
+        )
         alarmHandler.reschedule(assignmentId, showAtTime)
     }
 

@@ -329,7 +329,7 @@ private fun LazyListScope.assignmentSection(
                 onUndoPendingAction = onUndoPendingAction,
                 onMarkAsDone = onMarkAsDone,
                 onMarkAsWontDo = onMarkAsWontDo,
-                onSnoozeHour = { id -> onSnooze(id, SnoozeType.SixHours) },
+                onSnoozeHour = { id -> onSnooze(id, SnoozeType.NextBatch) },
                 onTransferClicked = onTransferAssignmentClicked,
                 onEditTaskClicked = onEditTaskClicked,
             )

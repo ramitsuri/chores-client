@@ -148,10 +148,17 @@
     <string name="settings_item_notification_action_title">Notification actions</string>
     <string name="settings_notification_action_select_3">Select up to 3 actions</string>
     <string name="settings_notification_action_content_description">Notification Action</string>
+    <string name="settings_notification_action_snooze">Snooze</string>
     <string name="settings_notification_action_snooze_hours">Snooze 6 hours</string>
     <string name="settings_notification_action_snooze_day">Snooze tomorrow</string>
     <string name="settings_notification_action_complete">Mark done</string>
     <string name="settings_notification_action_wont_do">Skip</string>
+    <string name="settings_morning_time_title">Morning time</string>
+    <string name="settings_evening_time_title">Evening time</string>
+    <string name="notification_reminder_action_snooze">Snooze</string>
+    <string name="time_picker_morning">Morning (%1$s)</string>
+    <string name="time_picker_evening">Evening (%1$s)</string>
+    <string name="time_picker_custom">Custom time…</string>
     <string name="settings_remote_logging_title">Remote logging</string>
     <string name="settings_allow_task_assignment_undo">Allow completion undo</string>
     <string name="settings_swipe_for_task_assignment_completion">Swipe to complete</string>

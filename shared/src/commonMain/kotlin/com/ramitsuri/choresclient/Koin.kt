@@ -116,6 +116,7 @@ private val coreModule = module {
             get<ReminderScheduler>(),
             get<AlarmHandler>(),
             get<ContentDownloadRequestHandler>(),
+            get<PrefManager>(),
         )
     }
 

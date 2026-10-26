@@ -1,5 +1,7 @@
 package com.ramitsuri.choresclient.data.settings
 
+import com.ramitsuri.choresclient.utils.Defaults
+import kotlinx.datetime.LocalTime
 import kotlin.time.Clock
 import kotlin.time.Instant
 
@@ -88,18 +90,52 @@ class PrefManager(
 
     fun getEnabledNotificationActions(): List<String> {
         val key = Key.ENABLED_NOTIFICATION_ACTIONS
-        return getStringList(
-            key, listOf(
-                "SNOOZE_HOUR",
-                "SNOOZE_DAY",
-                "COMPLETE"
-            )
-        )
+        val default = listOf("SNOOZE", "COMPLETE")
+        val saved = getStringList(key, default)
+        return saved.map {
+            if (it == "SNOOZE_HOUR" || it == "SNOOZE_DAY") {
+                "SNOOZE"
+            } else {
+                it
+            }
+        }.distinct()
     }
 
     fun setEnabledNotificationActions(value: List<String>) {
         val key = Key.ENABLED_NOTIFICATION_ACTIONS
         putStringList(key, value)
+    }
+
+    fun getMorningTime(): LocalTime {
+        val key = Key.MORNING_TIME
+        val value = getString(key, Defaults.MORNING_TIME_STRING)
+            ?: Defaults.MORNING_TIME_STRING
+        return try {
+            LocalTime.parse(value)
+        } catch (_: Exception) {
+            Defaults.MORNING_TIME
+        }
+    }
+
+    fun setMorningTime(time: LocalTime) {
+        val key = Key.MORNING_TIME
+        putString(key, time.toString())
+    }
+
+    fun getEveningTime(): LocalTime {
+        val key = Key.EVENING_TIME
+        val value = getString(key, Defaults.EVENING_TIME_STRING)
+            ?: Defaults.EVENING_TIME_STRING
+        return try {
+            LocalTime.parse(value)
+        } catch (_: Exception) {
+            Defaults.EVENING_TIME
+        }
+    }
+
+    fun setEveningTime(time: LocalTime) {
+        val key = Key.EVENING_TIME
+        putString(key, time.toString())
     }
 
     fun getDeviceId(): String? {
@@ -275,6 +311,16 @@ class PrefManager(
 
             REMIND_PAST_DUE(
                 key = "remind_past_due",
+                isSecure = false
+            ),
+
+            MORNING_TIME(
+                key = "morning_time",
+                isSecure = false
+            ),
+
+            EVENING_TIME(
+                key = "evening_time",
                 isSecure = false
             ),
 

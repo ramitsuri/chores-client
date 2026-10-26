@@ -23,20 +23,11 @@ class AssignmentActionReceiver : BroadcastReceiver(), KoinComponent {
         val action = intent?.action ?: return
         val assignmentId = intent.getStringExtra(NotificationActionExtra.KEY_ASSIGNMENT_ID) ?: ""
         when (action) {
-            NotificationAction.SNOOZE_HOUR.action -> {
+            NotificationAction.SNOOZE.action, "SNOOZE_HOUR", "SNOOZE_DAY" -> {
                 coroutineScope.launch {
                     repository.onSnoozeRequested(
                         assignmentId,
-                        snoozeType = SnoozeType.SixHours
-                    )
-                }
-            }
-
-            NotificationAction.SNOOZE_DAY.action -> {
-                coroutineScope.launch {
-                    repository.onSnoozeRequested(
-                        assignmentId,
-                        snoozeType = SnoozeType.TomorrowMorning
+                        snoozeType = SnoozeType.NextBatch
                     )
                 }
             }

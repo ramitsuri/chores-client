@@ -1,5 +1,6 @@
 package com.ramitsuri.choresclient.viewmodel
 
+import com.ramitsuri.choresclient.data.settings.PrefManager
 import com.ramitsuri.choresclient.model.Result
 import com.ramitsuri.choresclient.model.entities.Task
 import com.ramitsuri.choresclient.model.enums.ActiveStatus
@@ -27,6 +28,7 @@ import org.koin.core.component.inject
 class EditTaskViewModel(
     taskId: String,
     private val tasksRepository: TasksRepository,
+    private val prefManager: PrefManager,
     private val dispatchers: DispatcherProvider,
 ) : ViewModel(), KoinComponent {
     private val logger: LogHelper by inject()
@@ -62,6 +64,8 @@ class EditTaskViewModel(
                         },
                     date = task.dueDateTime.date,
                     time = task.dueDateTime.time,
+                    morningTime = prefManager.getMorningTime(),
+                    eveningTime = prefManager.getEveningTime(),
                     rotateMember = task.rotateMember,
                     loading = false,
                     repeatEndDate = task.repeatEndDateTime?.date,

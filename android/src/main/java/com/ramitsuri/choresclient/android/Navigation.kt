@@ -176,6 +176,8 @@ fun NavGraph(
                 onSwipeForTaskAssignmentCompletionClicked = viewModel::toggleSwipeForTaskAssignmentCompletion,
                 onErrorAcknowledged = viewModel::onErrorShown,
                 onEnableRemindPastDueClicked = viewModel::toggleRemindPastDue,
+                onMorningTimePicked = viewModel::onMorningTimeSelected,
+                onEveningTimePicked = viewModel::onEveningTimeSelected,
             )
         }
 

@@ -815,7 +815,7 @@ private fun TaskCardContent(
                         ) {
                             if (onSnoozeHour != null && details.enableSnooze) {
                                 DropdownMenuItem(
-                                    text = { Text(stringResource(id = R.string.assignment_details_button_snooze_six_hours)) },
+                                    text = { Text(stringResource(id = R.string.notification_reminder_action_snooze)) },
                                     leadingIcon = {
                                         Icon(
                                             Icons.Default.Snooze,

@@ -328,6 +328,7 @@ class TaskAssignmentsRepositoryTest {
             alarmHandler = alarmHandler,
             contentDownloadRequestHandler = contentDownloadRequestHandler,
             memberHouseAssociationDao = database.memberHouseAssociationDao,
+            prefManager = prefManager,
         )
     }
 

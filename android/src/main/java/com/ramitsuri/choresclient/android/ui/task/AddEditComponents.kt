@@ -31,6 +31,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Surface
@@ -63,6 +64,7 @@ import com.ramitsuri.choresclient.model.enums.RepeatUnit
 import com.ramitsuri.choresclient.model.view.RepeatUnitSelectionItem
 import com.ramitsuri.choresclient.model.view.SelectionItem
 import com.ramitsuri.choresclient.utils.formatDate
+import com.ramitsuri.choresclient.utils.formatTime
 import kotlin.time.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
@@ -172,6 +174,82 @@ fun TimePicker(
                 }
             }
         }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TaskTimePickerDialog(
+    currentTime: LocalTime,
+    morningTime: LocalTime,
+    eveningTime: LocalTime,
+    onDismissRequested: () -> Unit,
+    onTimePicked: (Int, Int) -> Unit
+) {
+    var showCustomClock by remember { mutableStateOf(false) }
+
+    if (showCustomClock) {
+        TimePicker(
+            time = currentTime,
+            onDismissRequested = onDismissRequested,
+            onTimePicked = onTimePicked
+        )
+    } else {
+        AlertDialog(
+            onDismissRequest = onDismissRequested,
+            title = {
+                Text(text = stringResource(id = R.string.add_task_select_time))
+            },
+            text = {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(MaterialTheme.dimens.medium),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    OutlinedButton(
+                        onClick = {
+                            onTimePicked(morningTime.hour, morningTime.minute)
+                            onDismissRequested()
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = stringResource(
+                                id = R.string.time_picker_morning,
+                                formatTime(morningTime)
+                            )
+                        )
+                    }
+
+                    OutlinedButton(
+                        onClick = {
+                            onTimePicked(eveningTime.hour, eveningTime.minute)
+                            onDismissRequested()
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = stringResource(
+                                id = R.string.time_picker_evening,
+                                formatTime(eveningTime)
+                            )
+                        )
+                    }
+
+                    OutlinedButton(
+                        onClick = { showCustomClock = true },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(text = stringResource(id = R.string.time_picker_custom))
+                    }
+                }
+            },
+            confirmButton = {},
+            dismissButton = {
+                TextButton(onClick = onDismissRequested) {
+                    Text(stringResource(id = R.string.cancel))
+                }
+            }
+        )
     }
 }
 

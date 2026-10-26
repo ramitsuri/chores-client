@@ -2,6 +2,7 @@ package com.ramitsuri.choresclient.model.view
 
 import com.ramitsuri.choresclient.model.enums.RepeatUnit
 import com.ramitsuri.choresclient.model.error.Error
+import com.ramitsuri.choresclient.utils.Defaults
 import com.ramitsuri.choresclient.utils.plus
 import kotlin.time.Clock
 import kotlin.time.Instant
@@ -28,7 +29,9 @@ data class AddTaskViewState(
     val now: Instant = Clock.System.now(),
     val timeZone: TimeZone = TimeZone.currentSystemDefault(),
     val date: LocalDate = now.toLocalDateTime(timeZone).plus(seconds = 5 * 60).date,
-    val time: LocalTime = now.toLocalDateTime(timeZone).plus(seconds = 5 * 60).time,
+    val time: LocalTime = Defaults.MORNING_TIME,
+    val morningTime: LocalTime = Defaults.MORNING_TIME,
+    val eveningTime: LocalTime = Defaults.EVENING_TIME,
     val rotateMember: Boolean = false,
     val error: Error? = null,
     val enableAddTask: Boolean = false,

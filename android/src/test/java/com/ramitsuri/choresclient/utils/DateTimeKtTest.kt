@@ -19,74 +19,30 @@ class DateTimeKtTest {
     private val timeZone = TimeZone.of("America/New_York")
 
     @Test
-    fun testSnoozeDay1() {
+    fun testSnoozeNextBatchMorningToEvening() {
         val now = Instant.fromEpochMilliseconds(1651406400000) // 2022-05-01 8AM UTC -4
         val actual = getNewReminderTimeSnoozeType(
-            snoozeType = SnoozeType.TomorrowMorning,
-            now,
-            timeZone
+            snoozeType = SnoozeType.NextBatch,
+            now = now,
+            timeZone = timeZone,
+            morningTime = LocalTime(8, 0),
+            eveningTime = LocalTime(17, 0)
+        ).toInstant(timeZone)
+        val expected = Instant.parse("2022-05-01T21:00:00Z") // 2022-05-01 5PM UTC -4
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun testSnoozeNextBatchEveningToNextMorning() {
+        val now = Instant.fromEpochMilliseconds(1651442400000) // 2022-05-01 6PM UTC -4
+        val actual = getNewReminderTimeSnoozeType(
+            snoozeType = SnoozeType.NextBatch,
+            now = now,
+            timeZone = timeZone,
+            morningTime = LocalTime(8, 0),
+            eveningTime = LocalTime(17, 0)
         ).toInstant(timeZone)
         val expected = Instant.parse("2022-05-02T12:00:00Z") // 2022-05-02 8AM UTC -4
-        assertEquals(expected, actual)
-    }
-
-    @Test
-    fun testSnoozeDay2() {
-        val now = Instant.fromEpochMilliseconds(1651377600000) // 2022-05-01 00:00:00 AM UTC -4
-        val actual = getNewReminderTimeSnoozeType(
-            snoozeType = SnoozeType.TomorrowMorning,
-            now,
-            timeZone
-        ).toInstant(timeZone)
-        val expected = Instant.parse("2022-05-02T12:00:00Z") // 2022-05-02 8AM UTC -4
-        assertEquals(expected, actual)
-    }
-
-    @Test
-    fun testSnoozeDay3() {
-        val now = Instant.fromEpochMilliseconds(1651463999000) // 2022-05-01 23:59:59 UTC -4
-        val actual = getNewReminderTimeSnoozeType(
-            snoozeType = SnoozeType.TomorrowMorning,
-            now,
-            timeZone
-        ).toInstant(timeZone)
-        val expected = Instant.parse("2022-05-02T12:00:00Z") // 2022-05-02 8AM UTC -4
-        assertEquals(expected, actual)
-    }
-
-    @Test
-    fun testSnoozeHour1() {
-        val now = Instant.fromEpochMilliseconds(1651406400000) // 2022-05-01 8AM UTC -4
-        val actual = getNewReminderTimeSnoozeType(
-            snoozeType = SnoozeType.SixHours,
-            now,
-            timeZone
-        ).toInstant(timeZone)
-        val expected = Instant.parse("2022-05-01T18:00:00Z") // 2022-05-02 2PM UTC -4
-        assertEquals(expected, actual)
-    }
-
-    @Test
-    fun testSnoozeHour2() {
-        val now = Instant.fromEpochMilliseconds(1651377600000) // 2022-05-01 00:00:00 AM UTC -4
-        val actual = getNewReminderTimeSnoozeType(
-            snoozeType = SnoozeType.SixHours,
-            now,
-            timeZone
-        ).toInstant(timeZone)
-        val expected = Instant.parse("2022-05-01T10:00:00Z") // 2022-05-02 6AM UTC -4
-        assertEquals(expected, actual)
-    }
-
-    @Test
-    fun testSnoozeHour3() {
-        val now = Instant.fromEpochMilliseconds(1651463999000) // 2022-05-01 23:59:59 UTC -4
-        val actual = getNewReminderTimeSnoozeType(
-            snoozeType = SnoozeType.SixHours,
-            now,
-            timeZone
-        ).toInstant(timeZone)
-        val expected = Instant.parse("2022-05-02T09:59:59Z") // 2022-05-02 5:59:59AM UTC -4
         assertEquals(expected, actual)
     }
 
@@ -95,8 +51,8 @@ class DateTimeKtTest {
         val now = Instant.fromEpochMilliseconds(1651463999000) // 2022-05-01 23:59:59 UTC -4
         val actual = getNewReminderTimeSnoozeType(
             snoozeType = SnoozeType.Custom(6.seconds),
-            now,
-            timeZone
+            now = now,
+            timeZone = timeZone
         ).toInstant(timeZone)
         val expected = Instant.parse("2022-05-02T04:00:05Z") // 2022-05-02 00:00:05AM UTC -4
         assertEquals(expected, actual)

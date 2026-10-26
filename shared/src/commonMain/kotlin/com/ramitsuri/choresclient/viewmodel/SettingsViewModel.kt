@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import org.koin.core.component.KoinComponent
 
@@ -37,6 +38,8 @@ class SettingsViewModel(
                 remindPastDueEnabled = prefManager.remindPastDue(),
                 allowTaskAssignmentUndo = prefManager.allowTaskAssignmentUndo(),
                 swipeForTaskAssignmentCompletion = prefManager.swipeForTaskAssignmentCompletion(),
+                morningTime = prefManager.getMorningTime(),
+                eveningTime = prefManager.getEveningTime(),
             )
         )
     val state: StateFlow<SettingsViewState> = _state
@@ -140,6 +143,20 @@ class SettingsViewModel(
         }
     }
 
+    fun onMorningTimeSelected(time: LocalTime) {
+        prefManager.setMorningTime(time)
+        _state.update {
+            it.copy(morningTime = time)
+        }
+    }
+
+    fun onEveningTimeSelected(time: LocalTime) {
+        prefManager.setEveningTime(time)
+        _state.update {
+            it.copy(eveningTime = time)
+        }
+    }
+
     fun onErrorShown() {
         _state.update {
             it.copy(error = null)
@@ -149,8 +166,7 @@ class SettingsViewModel(
     private fun getNotificationActionList(): List<NotificationActionWrapper> {
         val savedActions = prefManager.getEnabledNotificationActions()
         return listOf(
-            "SNOOZE_HOUR" to LocalizedString.NOTIFICATION_ACTION_SNOOZE_HOUR,
-            "SNOOZE_DAY" to LocalizedString.NOTIFICATION_ACTION_SNOOZE_DAY,
+            "SNOOZE" to LocalizedString.NOTIFICATION_ACTION_SNOOZE,
             "COMPLETE" to LocalizedString.NOTIFICATION_ACTION_COMPLETE,
             "WONT_DO" to LocalizedString.NOTIFICATION_ACTION_WONT_DO
         ).map {

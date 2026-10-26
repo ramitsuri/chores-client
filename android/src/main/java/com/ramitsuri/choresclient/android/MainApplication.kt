@@ -186,6 +186,7 @@ class MainApplication : Application(), KoinComponent {
                     AddTaskViewModel(
                         get<TasksRepository>(),
                         get<SyncRepository>(),
+                        get<PrefManager>(),
                         get<DispatcherProvider>()
                     )
                 }
@@ -194,7 +195,8 @@ class MainApplication : Application(), KoinComponent {
                     EditTaskViewModel(
                         taskId = parameters.get(),
                         get<TasksRepository>(),
-                        get<DispatcherProvider>(),
+                        get<PrefManager>(),
+                        get<DispatcherProvider>()
                     )
                 }
             }
