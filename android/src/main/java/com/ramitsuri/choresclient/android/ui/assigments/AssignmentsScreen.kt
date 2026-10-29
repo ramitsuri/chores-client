@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
@@ -291,6 +290,9 @@ private fun AssignmentsList(
             onTransferAssignmentClicked = onTransferAssignmentClicked,
             onEditTaskClicked = onEditTaskClicked,
         )
+        item {
+            Spacer(modifier = Modifier.height(80.dp))
+        }
     }
 }
 
@@ -341,14 +343,15 @@ private fun LazyListScope.assignmentSection(
 private fun AssignmentHeader(
     title: String,
     count: Int,
+    modifier: Modifier = Modifier,
     isPastDue: Boolean = false,
-    modifier: Modifier = Modifier
 ) {
     Row(
         modifier = modifier
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.background)
             .padding(vertical = MaterialTheme.dimens.medium),
+        horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
@@ -357,7 +360,6 @@ private fun AssignmentHeader(
             fontWeight = FontWeight.Bold,
             color = if (isPastDue) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onBackground
         )
-        Spacer(modifier = Modifier.width(MaterialTheme.dimens.small))
         Box(
             modifier = Modifier
                 .clip(CircleShape)
